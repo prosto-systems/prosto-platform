@@ -1,2 +1,2 @@
 # prosto-platform
-Modular headless platform
+Headless platform, expandable with plug-in modules
