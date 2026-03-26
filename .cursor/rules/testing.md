@@ -2,11 +2,11 @@
 
 ## Testing Strategy
 - Implement comprehensive test coverage for all components
-- Use unit tests for isolated component testing with Jest
+- Use unit tests for isolated component testing with the repository-configured test runner
 - Create integration tests for module interactions
 - Add end-to-end tests for critical user workflows
 - Maintain test suites that run quickly and reliably
-- Maintain high test coverage (minimum 80%) for core functionality
+- Maintain high test coverage for core functionality once test tooling and CI coverage gates are enabled
 - Use mocking appropriately for external dependencies
 - Implement performance benchmarks for critical paths
 

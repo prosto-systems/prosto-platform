@@ -1,93 +1,128 @@
-# Phase 07 - Internal MVP Validation and Operability Readiness
+# Phase 07 - Admin Contracts and UI Plugin Manifests
 
 ## Phase Objective
-Validate the platform in production-like staging with internal modules, prove KPI and SLO readiness, and close pre-MVP risks before ecosystem expansion.
+Implement `@prosto/platform-admin-contracts` as the contract authority for hybrid admin model integration, including UI plugin manifests, discovery payloads, permission contracts, and compatibility validation.
 
 ## Scope Boundaries
 ### In Scope
-- Staging pilot execution with internal modules.
-- KPI and SLO measurement against acceptance thresholds.
-- Incident and exception capture with corrective action loop.
-- Go or no-go decision package for next phase.
+- Contract package `@prosto/platform-admin-contracts`.
+- Versioned schema for UI plugin manifests.
+- Versioned schema for admin discovery payloads.
+- Permission and capability declaration contracts for admin extensions.
+- Compatibility rules between `admin-shell` and UI plugin packages.
 
 ### Out of Scope
-- Full external module onboarding at scale.
-- Public release marketing and partner rollout.
-- Long-term multi-team support model changes.
+- BFF route implementation and aggregation logic.
+- Admin shell runtime implementation details.
+- UI framework-specific rendering concerns.
 
 ## Prerequisites and Dependencies
-- Phases 01 through 06 completed and passing on protected branches.
-- Metric and gate definitions from `.context/03-work-plan/02-metrics-acceptance-and-risk-controls.md`.
-- Pre-MVP objective and acceptance references from `.context/03-work-plan/pre-mvp-audit-and-execution-plan.md`.
+- Phase 03 SDK contract baseline completed and versioned.
+- ADR references:
+  - `.context/02-architecture-design/adr/ADR-0001-micro-core-kernel-boundary.md`
+  - `.context/02-architecture-design/adr/ADR-0003-module-loading-security-allowlist-integrity.md`
+  - `.context/02-architecture-design/adr/ADR-0009-admin-ui-hybrid-shell-plugin-model.md`
+- Package boundary references:
+  - `.context/02-architecture-design/04-package-structure-blueprint.md`
 
 ## Detailed Ordered Implementation Steps
-1. Define internal pilot module set and lock tested versions.
-2. Run repeated staging deployments in both `strict` and `best-effort` startup modes.
-3. Collect KPI set:
-   - strict startup success rate
-   - startup duration p95 drift
-   - diagnostics completeness
-   - contract violation rate
-4. Capture all incidents and policy exceptions with owner and due action.
-5. Run root-cause analysis for each severity-high issue and patch controls.
-6. Re-run pilot cycles until stability trend is acceptable across consecutive runs.
-7. Produce pre-MVP gate report with explicit go or no-go decision.
+1. Create package scaffold `packages/platform-admin-contracts` with strict TypeScript configuration.
+2. Define UI plugin manifest types in `src/manifests`:
+   - plugin identity
+   - plugin version
+   - shell compatibility range
+   - required permissions and capabilities
+   - trust class and review status metadata
+3. Define manifest schema validators in `src/manifests` with runtime validation helpers.
+4. Define admin discovery payload contracts in `src/discovery`:
+   - navigation extension points
+   - page/widget/action registry descriptors
+   - rejection diagnostics structure
+5. Define permission and policy contracts in `src/permissions` for role mapping and action gating.
+6. Define compatibility rules in `src/compatibility`:
+   - shell version versus plugin manifest range
+   - contract version mismatch reason taxonomy
+7. Add package exports and stability labels for every public symbol.
+8. Add unit and contract-level tests for:
+   - schema pass and fail cases
+   - compatibility decisions
+   - diagnostics payload shape
 
 ## Code Examples
-### Example: KPI report record
-```yaml
-pilot_window: 2026-q2-internal-mvp
-kpi:
-  strict_startup_success_rate: 99.7
-  startup_p95_drift_percent: 11
-  diagnostics_completeness_percent: 100
-  contract_violation_rate_per_100_runs: 1.5
-decision: go
+### Example: UI plugin manifest contract
+```typescript
+export interface AdminUIPluginManifest {
+  id: string;
+  version: string;
+  shellCompatibility: string;
+  requiredPermissions: string[];
+  extensionPoints: Array<'nav' | 'page' | 'widget' | 'action'>;
+  trustClass: 'trusted' | 'internal' | 'third-party-reviewed';
+}
 ```
 
-### Example: exception register entry
-```yaml
-id: EX-014
-scope: performance-gate-temporary-threshold
-owner: core-runtime
-reason: benchmark-environment-noise
-expires_at: 2026-06-30
-status: approved-with-mitigation
+### Example: discovery payload contract
+```typescript
+export interface AdminDiscoveryPayload {
+  plugins: Array<{
+    id: string;
+    version: string;
+    extensions: string[];
+  }>;
+  rejected: Array<{
+    id: string;
+    reasonCode: string;
+    remediationHint: string;
+  }>;
+}
+```
+
+### Example: compatibility check result
+```typescript
+export interface AdminPluginCompatibilityResult {
+  allowed: boolean;
+  reasonCode?: 'SHELL_VERSION_MISMATCH' | 'CONTRACT_VERSION_MISMATCH';
+}
 ```
 
 ## Affected Modules or Files
 ### Existing files likely updated
-- `.context/03-work-plan/02-metrics-acceptance-and-risk-controls.md`
-- `.context/03-work-plan/pre-mvp-audit-and-execution-plan.md`
+- `.context/02-architecture-design/04-package-structure-blueprint.md`
+- `package.json`
 
 ### New files expected
-- `docs/operations/internal-mvp-gate-report.md`
-- `docs/operations/incident-register.md`
-- `docs/operations/policy-exception-register.md`
+- `packages/platform-admin-contracts/package.json`
+- `packages/platform-admin-contracts/tsconfig.json`
+- `packages/platform-admin-contracts/src/index.ts`
+- `packages/platform-admin-contracts/src/manifests/*.ts`
+- `packages/platform-admin-contracts/src/discovery/*.ts`
+- `packages/platform-admin-contracts/src/permissions/*.ts`
+- `packages/platform-admin-contracts/src/compatibility/*.ts`
+- `packages/platform-admin-contracts/test/*.test.ts`
 
 ## Validation and Testing Approach
-- Repeatability checks across consecutive staging cycles.
-- Statistical validation of KPI trend, not single-run snapshots.
-- Verification that all exceptions have TTL and mitigation plan.
-- Formal gate review with architecture, security, and runtime owners.
+- Unit tests for schema validators and compatibility rule outcomes.
+- Type-level checks for public contract compatibility.
+- API surface snapshot for stability and semver discipline.
+- CI gate requiring contract tests to pass before publishing package version.
 
 ## Data or Migration Impact
-- No schema migration requirement.
-- Operational data accumulation for diagnostics and reliability trend baselines.
+- No business data migration.
+- Contract migration path required for shell/plugin compatibility when schema changes.
 
 ## Risks and Mitigations
-- Risk: staged environment does not represent production behavior.
-  - Mitigation: production-like config parity checks and controlled load profile.
-- Risk: KPI pass hides unresolved medium-severity drift.
-  - Mitigation: require issue trend review even for go decision.
+- Risk: contract overgrowth introduces UI framework assumptions.
+  - Mitigation: keep contracts rendering-agnostic and framework-neutral.
+- Risk: unstable contract evolution causes plugin churn.
+  - Mitigation: stability labels, semver rules, and compatibility adapters.
 
 ## Rollback Approach
-- If gate fails, stay on hardening cycle and block ecosystem expansion.
-- Roll back to previous known-good module set for staging baseline.
-- Reopen unresolved risks in active backlog with explicit owners.
+- Revert to previous contract package version when compatibility regressions are detected.
+- Ship compatibility shim for non-breaking migration path where possible.
+- Log rejected plugin diagnostics for operator visibility during rollback window.
 
 ## Completion Criteria
-- Internal MVP gate criteria are met or formal exception is approved.
-- Reliability and diagnostics trend is stable over consecutive pilot cycles.
-- Incident and exception registers are complete and auditable.
-- Formal go or no-go decision is documented with evidence links.
+- `@prosto/platform-admin-contracts` package exists and is versioned.
+- UI plugin manifest and discovery payload schemas are implemented and test-validated.
+- Compatibility result taxonomy is stable and documented.
+- Public exports include stability labels and pass contract checks.

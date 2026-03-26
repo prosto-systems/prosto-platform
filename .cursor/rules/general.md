@@ -43,10 +43,10 @@
 - Maintain consistent code formatting using Prettier
 
 ## Testing
-- Write unit tests for all business logic using Jest
+- Do not assume a specific test runner until it is configured in repository artifacts
 - Use integration tests for module interactions
 - Follow test-driven development when possible
-- Maintain high test coverage (minimum 80%) for core functionality
+- Define coverage thresholds only after test tooling and CI gates are implemented
 - Use mocking appropriately for external dependencies
 - Implement performance benchmarks for critical paths
 - Ensure good test coverage for critical paths

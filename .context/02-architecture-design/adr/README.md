@@ -15,6 +15,7 @@ ADRs capture key architecture decisions for `prosto-platform`, including context
 - [ADR-0006 External Module Repository And Distribution Model](./ADR-0006-external-module-repository-and-distribution-model.md)
 - [ADR-0007 Observability And Operability Baseline](./ADR-0007-observability-and-operability-baseline.md)
 - [ADR-0008 Testing And Contract Quality Gates](./ADR-0008-test-strategy-contract-testing-and-quality-gates.md)
+- [ADR-0009 Hybrid Admin UI Model Shell And UI Plugins](./ADR-0009-admin-ui-hybrid-shell-plugin-model.md)
 
 ## Status Legend
 - `Draft`: proposed in architecture package, pending formal team acceptance.
@@ -23,4 +24,3 @@ ADRs capture key architecture decisions for `prosto-platform`, including context
 
 ## Related Package
 - Architecture index: [Design README](../README.md)
-

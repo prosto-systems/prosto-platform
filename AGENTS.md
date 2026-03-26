@@ -19,7 +19,7 @@ Documents in `.context/` describe **target state**, not current code:
 - `.context/01-research/` - Research and analysis
 - `.context/02-architecture-design/` - Target architecture (C4, DFD, ADRs)
 - `.context/03-work-plan/` - Work plan and recommendations
-- `.context/04-implementation-plan/` - 7-phase implementation roadmap
+- `.context/04-implementation-plan/` - 10-phase implementation roadmap with Admin Enablement stream
 
 ## Project Context
 
@@ -278,22 +278,27 @@ Closes #123
 
 ### Development Workflow (Target State)
 
-**Phase 01-02 (Current Priority)**:
+**Phase 01-03 (Current Priority)**:
 1. Set up governance gates (CI workflows, branch protection)
 2. Create monorepo package skeleton
 3. Configure ESLint + Prettier
 4. Set up Vitest test runner
 5. Create initial package structure
+6. Establish SDK contract baseline
 
-**Phase 03+ (Future)**:
-1. Create feature branch from develop branch
-2. Write tests (TDD) for new functionality
-3. Implement the feature
-4. Run tests and ensure they pass
-5. Run linting and type checking
-6. Create pull request
-7. Address review feedback
-8. Merge to develop branch (on request)
+**Phase 04-06 (Runtime and Hardening)**:
+1. Implement contract conformance test package
+2. Implement core runtime lifecycle foundation
+3. Activate security and performance regression gates
+
+**Phase 07-09 (Admin Enablement Stream)**:
+1. Implement `platform-admin-contracts`
+2. Implement `platform-adapter-admin-bff`
+3. Integrate separate `admin-shell` with UI plugins via contracts
+
+**Phase 10 (Validation Gate)**:
+1. Run internal MVP validation with runtime and admin plugin scenarios
+2. Review KPI/SLO evidence and produce go or no-go outcome
 
 ## ⚠️ Critical Rules for AI Agents
 
@@ -354,12 +359,15 @@ Every implementation recommendation should include:
 - Import directly between modules (coupling violation)
 - Add framework dependencies to core packages
 - Ignore ADR constraints when proposing changes
+- Add admin shell runtime, frontend framework, or UI rendering dependencies to `platform-core`
+- Bypass admin integration contracts with direct module-to-shell coupling
 
 **DO:**
 - Reference ADRs when proposing architecture changes
 - Validate dependencies against package boundaries
 - Use contract-first approach (types before implementation)
 - Follow micro-core boundary principles (ADR-0001)
+- Keep admin integration in hybrid model: separate `admin-shell`, contract package, and BFF adapter
 
 ### Security-First Rules
 **MANDATORY:**

@@ -64,6 +64,7 @@ This package defines a detailed architecture baseline for `prosto-platform` base
 - [ADR-0006 External Module Repository And Distribution Model](./adr/ADR-0006-external-module-repository-and-distribution-model.md)
 - [ADR-0007 Observability And Operability Baseline](./adr/ADR-0007-observability-and-operability-baseline.md)
 - [ADR-0008 Testing And Contract Quality Gates](./adr/ADR-0008-test-strategy-contract-testing-and-quality-gates.md)
+- [ADR-0009 Hybrid Admin UI Model Shell And UI Plugins](./adr/ADR-0009-admin-ui-hybrid-shell-plugin-model.md)
 
 ## Traceability Matrix
 

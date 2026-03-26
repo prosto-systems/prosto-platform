@@ -33,11 +33,13 @@ Status: Draft revised
 - Lifecycle and compatibility governance.
 - Module loading flow and security controls.
 - Observability baseline and quality gates.
+- Admin integration architecture for hybrid model: shell + UI plugins contracts, discovery flow, and policy boundaries.
 
 ## 5. Out Of Scope
 - Concrete domain modules implementation details.
-- UI and admin panel design.
+- Admin shell runtime implementation details and frontend technology choices.
 - Vendor-specific infra implementation scripts.
+- Direct UI rendering concerns inside `platform-core`.
 
 ## 6. System Context Summary
 - Platform operators run and configure the runtime.

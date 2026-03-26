@@ -442,4 +442,4 @@ interface IModuleMetrics {
 
 - [ADR-0007 Observability And Operability Baseline](../.context/02-architecture-design/adr/ADR-0007-observability-and-operability-baseline.md)
 - [SEQ-03 Graceful Shutdown](../.context/02-architecture-design/sequence/03-graceful-shutdown.md)
-- [07 Phase - Internal MVP Validation](../.context/04-implementation-plan/07-phase.md)
+- [10 Phase - Internal MVP Validation](../.context/04-implementation-plan/10-phase.md)

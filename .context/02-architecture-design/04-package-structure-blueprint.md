@@ -25,7 +25,9 @@ prosto-platform/
 │   ├── platform-adapter-http/           # HTTP adapter (Fastify/Express abstraction)
 │   ├── platform-adapter-persistence/    # Database abstraction layer
 │   ├── platform-adapter-queue/          # Message queue abstraction
-│   └── platform-adapter-auth/           # Authentication/authorization abstraction
+│   ├── platform-adapter-auth/           # Authentication/authorization abstraction
+│   ├── platform-admin-contracts/        # Admin shell and UI plugin contracts
+│   └── platform-adapter-admin-bff/      # Admin BFF adapter for policy-aware aggregation
 │
 ├── examples/
 │   ├── module-health/                   # Example module: health check endpoint
@@ -222,6 +224,63 @@ npx @prosto/platform-cli doctor
 
 ---
 
+### `@prosto/platform-admin-contracts`
+
+**Purpose**: contract authority for hybrid admin model, including admin shell discovery payloads and UI plugin extension manifests.
+
+**Directory**: `packages/platform-admin-contracts/`
+
+```text
+platform-admin-contracts/
+├── src/
+│   ├── index.ts
+│   ├── manifests/
+│   │   ├── ui-plugin-manifest.types.ts
+│   │   └── ui-plugin-manifest.schema.ts
+│   ├── discovery/
+│   │   ├── admin-discovery.types.ts
+│   │   └── admin-discovery.schema.ts
+│   ├── permissions/
+│   │   └── admin-permissions.types.ts
+│   └── compatibility/
+│       └── admin-shell-compatibility.rules.ts
+├── package.json
+└── README.md
+```
+
+**Boundary rules**:
+- Keep this package framework-neutral and transport-neutral.
+- Keep only contracts, schemas, and compatibility semantics.
+- Do not place rendering/runtime frontend code in this package.
+
+---
+
+### `@prosto/platform-adapter-admin-bff`
+
+**Purpose**: policy-aware admin aggregation adapter for shell discovery, permission-aware actions, and diagnostics.
+
+**Directory**: `packages/platform-adapter-admin-bff/`
+
+```text
+platform-adapter-admin-bff/
+├── src/
+│   ├── index.ts
+│   ├── discovery/
+│   ├── permissions/
+│   ├── routes/
+│   ├── diagnostics/
+│   └── compatibility/
+├── package.json
+└── README.md
+```
+
+**Boundary rules**:
+- May depend on `@prosto/platform-sdk` and `@prosto/platform-admin-contracts`.
+- Must not introduce compile-time coupling from `platform-core` to admin shell runtime.
+- Must expose diagnostics for rejected UI plugins and policy decisions.
+
+---
+
 ### Adapter Packages
 
 **Purpose**: integration boundaries for transport and infrastructure concerns.
@@ -253,7 +312,9 @@ Ownership map clarifies who can approve contract and boundary changes.
 |---|---|---|---|
 | `platform-sdk` contracts | Platform Core Team | Architecture Team | Public types, interfaces, tokens, schema primitives |
 | `platform-core` kernel policies | Core Runtime Team | Architecture Team | Lifecycle ordering, loading policy, diagnostics model |
+| `platform-admin-contracts` | Admin Platform Team | Architecture Team | Discovery contracts, UI plugin manifest schema, permission model |
 | `platform-contract-tests` | QA and Quality Team | Platform Core Team | Conformance suites, compatibility assertions |
+| `platform-adapter-admin-bff` | Admin Platform Team | Core Runtime Team | Admin discovery aggregation, policy and diagnostics mapping |
 | `platform-adapter-*` | Adapter Owners | Core Runtime Team | Transport and infrastructure integration boundaries |
 | `platform-cli` | DevEx Team | Platform Core Team | Generators, validators, governance automation |
 | External module templates | DevRel Team | Platform Core Team | Onboarding assets, module skeleton, best practices |
@@ -283,11 +344,14 @@ Labeling rules:
 | Package | Can Depend On | Cannot Depend On                                   |
 |---|---|----------------------------------------------------|
 | `platform-sdk` | Minimal vetted external libs | Other PROSTO runtime packages                      |
-| `platform-core` | `platform-sdk`, vetted runtime libs | Adapters implementations, feature modules          |
-| `platform-contract-tests` | `platform-sdk`, test framework | `platform-core`, adapters implementations          |
-| `platform-cli` | `platform-sdk`, CLI libs | `platform-core` runtime internals                  |
+| `platform-core` | `platform-sdk`, vetted runtime libs | Adapters implementations, feature modules, admin shell runtime |
+| `platform-admin-contracts` | `platform-sdk`, minimal validation libs | `platform-core` internals, frontend runtime frameworks |
+| `platform-contract-tests` | `platform-sdk`, `platform-admin-contracts`, test framework | `platform-core`, adapters implementations          |
+| `platform-cli` | `platform-sdk`, `platform-admin-contracts`, CLI libs | `platform-core` runtime internals                  |
+| `platform-adapter-admin-bff` | `platform-sdk`, `platform-admin-contracts`, framework libs | `platform-core` internals, admin shell runtime internals |
 | `platform-adapter-*` | `platform-sdk`, framework libs | Other adapters internals, feature modules          |
-| `modules` | `platform-sdk`, approved third-party libs | `platform-core` internals, other modules internals |
+| `admin-shell` | `platform-admin-contracts`, approved UI libs | `platform-core` internals                           |
+| `modules` | `platform-sdk`, `platform-admin-contracts`, approved third-party libs | `platform-core` internals, other modules internals |
 
 ### Module Runtime Compatibility Declaration
 

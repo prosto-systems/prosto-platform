@@ -31,7 +31,7 @@ Target-state details are documented in the architecture pack [`README.md`](.cont
 - Research and analysis: [`.context/01-research/`](.context/01-research/README.md)
 - Architecture design (C4/DFD/ADR): [`.context/02-architecture-design/`](.context/02-architecture-design/README.md)
 - Work plan and recommendations: [`.context/03-work-plan/`](.context/03-work-plan/README.md)
-- Phase-based roadmap (Phase 01–07): [`.context/04-implementation-plan/`](.context/04-implementation-plan/README.md)
+- Phase-based roadmap (Phase 01–10, including Admin Enablement stream): [`.context/04-implementation-plan/`](.context/04-implementation-plan/README.md)
 
 ## Contributor and AI Agent Onboarding
 

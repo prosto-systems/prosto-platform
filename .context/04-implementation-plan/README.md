@@ -4,7 +4,7 @@ This index consolidates the execution-ready implementation plan for `prosto-plat
 
 ## Planning Baseline
 - Repository currently has architecture and planning artifacts but no production runtime implementation.
-- Architecture intent emphasizes micro-core boundaries, contract-first delivery, deterministic lifecycle, and security-first module loading.
+- Architecture intent emphasizes micro-core boundaries, contract-first delivery, deterministic lifecycle, security-first module loading, and hybrid admin model with shell plus UI plugins.
 - This plan is sequenced to reduce early architecture drift and keep risk controls enforceable from the first implementation increment.
 
 ## Phase Order
@@ -14,7 +14,10 @@ This index consolidates the execution-ready implementation plan for `prosto-plat
 4. [Phase 04 - Contract Conformance Test Package and Reference Module Validation](./04-phase.md)
 5. [Phase 05 - Core Runtime Foundation and Deterministic Lifecycle](./05-phase.md)
 6. [Phase 06 - Security Controls and Performance Regression Gates](./06-phase.md)
-7. [Phase 07 - Internal MVP Validation and Operability Readiness](./07-phase.md)
+7. [Phase 07 - Admin Contracts and UI Plugin Manifests](./07-phase.md)
+8. [Phase 08 - Admin BFF Adapter and Discovery Pipeline](./08-phase.md)
+9. [Phase 09 - Admin Shell Integration and Plugin Runtime](./09-phase.md)
+10. [Phase 10 - Internal MVP Validation and Operability Readiness](./10-phase.md)
 
 ## Phase Summaries
 ### 01
@@ -36,16 +39,28 @@ Implements minimal runtime kernel with deterministic lifecycle, compatibility ch
 Adds module loading security controls and performance budgets so reliability and supply-chain posture are enforceable in CI and runtime.
 
 ### 07
+Implements `platform-admin-contracts` with versioned UI plugin manifest, discovery payload, and permission contracts.
+
+### 08
+Implements `platform-adapter-admin-bff` with policy-aware discovery aggregation, permission mapping, and admin diagnostics.
+
+### 09
+Delivers separate admin shell integration with plugin runtime, contract-driven rendering registry, and compatibility-gated extension loading.
+
+### 10
 Runs internal production-like MVP validation, proves KPI and SLO trends, and issues formal go or no-go outcome for external expansion.
 
 ## Cross-Phase Dependencies
 - Phase 01 is required before all implementation phases to prevent governance drift.
 - Phase 02 depends on Phase 01 and is required before SDK/core/package-level implementation.
-- Phase 03 depends on Phase 02 and is prerequisite for Phase 04 and Phase 05.
+- Phase 03 depends on Phase 02 and is prerequisite for Phase 04, Phase 05, and Phase 07.
 - Phase 04 depends on Phase 03 and provides conformance confidence for Phase 05.
 - Phase 05 depends on Phases 03 and 04.
 - Phase 06 depends on Phase 05 and risk-controls baseline from architecture/work-plan docs.
-- Phase 07 depends on successful outcomes from Phases 01 through 06.
+- Phase 07 depends on Phase 03 and provides admin contract baseline for Phase 08 and Phase 09.
+- Phase 08 depends on Phases 05, 06, and 07.
+- Phase 09 depends on Phases 07 and 08.
+- Phase 10 depends on successful outcomes from Phases 01 through 09.
 
 ## Milestones and Stage Gates
 ### M1 Governance Gate Active
@@ -64,7 +79,13 @@ Runs internal production-like MVP validation, proves KPI and SLO trends, and iss
 - Allowlist and integrity controls enforced.
 - Performance regression budgets enforced in protected branches.
 
-### M5 Internal MVP Go or No-Go Decision
+### M5 Admin Enablement Stream
+- Introduce `platform-admin-contracts` after contract baseline is available.
+- Introduce `platform-adapter-admin-bff` after runtime baseline is available.
+- Keep `admin-shell` in a separate repository and integrate only via versioned contracts and discovery payloads.
+- Enforce allowlist, trust class, integrity, and compatibility checks for UI plugins before internal MVP gate.
+
+### M6 Internal MVP Go or No-Go Decision
 - KPI and SLO evidence package complete.
 - Exception and incident registers reviewed.
 - Formal transition decision documented.
@@ -78,7 +99,16 @@ flowchart TD
   P03 --> P05[05 Core Runtime Foundation]
   P04 --> P05
   P05 --> P06[06 Security and Performance Gates]
-  P06 --> P07[07 Internal MVP Validation]
+
+  P03 --> P07[07 Admin Contracts]
+  P05 --> P08[08 Admin BFF Adapter]
+  P06 --> P08
+  P07 --> P08
+  P07 --> P09[09 Admin Shell Integration]
+  P08 --> P09
+
+  P06 --> P10[10 Internal MVP Validation]
+  P09 --> P10
 ```
 
 ## Execution Notes
