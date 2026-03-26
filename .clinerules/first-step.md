@@ -18,16 +18,46 @@ When analyzing the project, check for:
 - `tsconfig.json` - for TypeScript configuration
 - `eslint.config.js` - for linting rules
 - `prettier.config.js` - for formatting rules
-- `jest.config.js` - for testing configuration
+- `jest.config.js` or `vitest.config.ts` - for testing configuration
+- `.github/workflows/` - for CI/CD pipelines
+
+### Repository State Validation (CRITICAL)
+
+**BEFORE making any recommendations, verify:**
+
+- [ ] `tsconfig.json` exists
+- [ ] `packages/` directory exists (monorepo structure)
+- [ ] `src/` directory exists (implementation)
+- [ ] `.github/workflows/` exists (CI/CD)
+- [ ] Test runner configured (Vitest/Jest)
+- [ ] ESLint configured
+- [ ] Prettier configured
+
+### If Repository Is In Pre-Implementation Stage
+
+**If files are missing:**
+
+1. **State clearly** that project is in pre-implementation stage
+2. **Do NOT claim** lint/test commands are available
+3. **Reference** `.context/04-implementation-plan/` for roadmap
+4. **Recommend** Phase 01/02 tasks before feature implementation
+
+**Current Status (March 2026):**
+- ✅ Architecture documentation complete in `.context/`
+- ✅ 7-phase implementation plan ready
+- ✅ 8 ADRs drafted
+- ❌ No implementation yet (target: Phase 01-02)
 
 ### Existing Rules
 - `.cursorrules` - Cursor-specific rules
 - `.cursor/rules/` - Detailed Cursor rules by category
+- `.clinerules/` - Cline-specific rules
+- `.kilocode/rules/` - KiloCode rules
 - `.github/copilot-instructions.md` - Copilot-specific instructions
-- Other AI agent configuration files
+- `AGENTS.md` - Main guidelines for all AI agents
 
 ### Project Structure
-- Source code organization
+- Source code organization (when implemented)
 - Module structure and architecture
 - Test file organization
 - Documentation patterns
@@ -54,15 +84,27 @@ When analyzing the project, check for:
 - Error handling patterns
 - Security best practices
 
+**CRITICAL: Architecture Boundary Rules (ADR-0001)**
+- `platform-core` MUST NOT import from adapters or modules
+- Modules MUST NOT import from other modules
+- `platform-sdk` MUST have minimal dependencies
+- Always validate dependencies against package boundaries
+
 ### Development Workflow
 - Git workflow and branching strategy
 - Testing strategy and coverage requirements
 - Code review process
 - Deployment considerations
 
+**Current Phase Priority:**
+- Phase 01: Governance Activation (CI gates, branch protection)
+- Phase 02: Monorepo Package Skeleton
+- Phase 03: SDK Contract Baseline
+- (See `.context/04-implementation-plan/` for full roadmap)
+
 ### Performance & Security
 - Performance optimization guidelines
-- Security best practices
+- Security best practices (allowlist, integrity checks)
 - Common pitfalls to avoid
 - Monitoring and debugging practices
 

@@ -4,6 +4,23 @@
 
 **prosto-platform** is a headless platform, expandable with plug-in modules and written in TypeScript. This document provides comprehensive guidelines for AI programming assistants working on this project.
 
+## ⚠️ Current Project Status
+
+**IMPORTANT**: This project is in **pre-implementation stage**. Architecture documentation is complete, but runtime implementation has not started.
+
+### Not Yet Available
+- No linting commands (ESLint to be added in Phase 01)
+- No test commands (Vitest to be added in Phase 01)
+- No formatting commands (Prettier to be added in Phase 01)
+- No CI/CD pipelines (to be added in Phase 01)
+
+### Architecture Documents Reference
+Documents in `.context/` describe **target state**, not current code:
+- `.context/01-research/` - Research and analysis
+- `.context/02-architecture-design/` - Target architecture (C4, DFD, ADRs)
+- `.context/03-work-plan/` - Work plan and recommendations
+- `.context/04-implementation-plan/` - 7-phase implementation roadmap
+
 ## Project Context
 
 This is a TypeScript-based headless platform following modern development practices with a focus on maintainability, testability, and performance. The project uses a micro-core architecture with expansion through plug-in modules.
@@ -248,19 +265,27 @@ Closes #123
 ## Development Environment
 
 ### Required Tools
-- Node.js (version specified in package.json)
-- npm package manager
-- TypeScript compiler
-- Code formatter (Prettier)
-- Linter (ESLint)
+- Node.js >= 24 (see `package.json` engines)
+- npm >= 11
+- TypeScript compiler (dependency)
+- Git for version control
 
 ### IDE Configuration
-- Enable TypeScript strict mode
-- Configure code formatting rules
-- Set up linting rules
-- Use TypeScript path mapping
+- Enable TypeScript strict mode (when tsconfig.json is created)
+- Configure code formatting rules (Prettier - Phase 01)
+- Set up linting rules (ESLint - Phase 01)
+- Use TypeScript path mapping (when monorepo is created)
 
-### Development Workflow
+### Development Workflow (Target State)
+
+**Phase 01-02 (Current Priority)**:
+1. Set up governance gates (CI workflows, branch protection)
+2. Create monorepo package skeleton
+3. Configure ESLint + Prettier
+4. Set up Vitest test runner
+5. Create initial package structure
+
+**Phase 03+ (Future)**:
 1. Create feature branch from develop branch
 2. Write tests (TDD) for new functionality
 3. Implement the feature
@@ -269,6 +294,87 @@ Closes #123
 6. Create pull request
 7. Address review feedback
 8. Merge to develop branch (on request)
+
+## ⚠️ Critical Rules for AI Agents
+
+### Rule Precedence and Conflict Resolution
+When guidance conflicts, use this precedence order:
+1. **Repository reality (source of truth)**: concrete files and scripts in repo (for example `package.json`, existing directories, real configs).
+2. **`AGENTS.md`**: operational policy for all agents in this repository.
+3. **`.kilocode/rules/*.md`**: mode-specific enforcement rules.
+4. **`.cursor/rules/*.md` and `.clinerules/*`**: supplemental guidance.
+5. **Target-state architecture docs in `.context/`**: design intent and roadmap, not proof of implemented runtime.
+
+Conflict handling policy:
+- If a higher-priority source contradicts a lower-priority one, follow the higher-priority source.
+- If uncertain, explicitly label assumptions and reference concrete artifact evidence.
+
+### Repository Readiness Truth Table
+**BEFORE making recommendations about commands, tooling, or process maturity, verify these artifacts:**
+1. `tsconfig.json`
+2. `packages/`
+3. `.github/workflows/`
+4. test runner config (`vitest.config.*` / `jest.config.*`)
+5. lint config (`eslint.config.*`)
+6. formatting config (`prettier.config.*`)
+
+Interpretation rules:
+- If these artifacts are missing, the project is still **pre-implementation** for that capability.
+- Do not infer implemented capability from architecture docs alone.
+- Reference `.context/04-implementation-plan/` for planned rollout.
+
+### Command and Capability Claim Policy
+- Only list commands that are present in the current root `package.json` (or package-level `package.json` when monorepo exists).
+- Do not claim `lint`, `test`, `single-test`, or CI commands unless scripts/configs exist in repository artifacts.
+- For unavailable capabilities, state the gap and map it to the relevant phase in `.context/04-implementation-plan/`.
+
+### Repository State Awareness
+**BEFORE making any recommendations, verify:**
+1. Check if `tsconfig.json` exists
+2. Check if `packages/` directory exists
+3. Check if `.github/workflows/` exists
+4. Check if test runner is configured
+
+**If files are missing:**
+1. State clearly that project is in pre-implementation stage
+2. Recommend Phase 01/02 tasks before feature implementation
+3. Do NOT claim lint/test commands are available
+4. Reference `.context/04-implementation-plan/` for roadmap
+
+### Definition of Done for Phase Planning Recommendations
+Every implementation recommendation should include:
+1. **File-level target**: concrete file(s) to change/create.
+2. **Evidence linkage**: why this step is needed, with artifact reference (`package.json`, `.context/*`, ADRs).
+3. **Activation condition**: when a target-state rule becomes enforceable.
+4. **Acceptance signal**: what artifact/output proves completion (script, config, workflow, check result).
+
+### Architecture Boundary Rules
+**DO NOT:**
+- Import from `platform-core` into adapters (boundary violation)
+- Import directly between modules (coupling violation)
+- Add framework dependencies to core packages
+- Ignore ADR constraints when proposing changes
+
+**DO:**
+- Reference ADRs when proposing architecture changes
+- Validate dependencies against package boundaries
+- Use contract-first approach (types before implementation)
+- Follow micro-core boundary principles (ADR-0001)
+
+### Security-First Rules
+**MANDATORY:**
+- Validate all external inputs with Zod (when added)
+- Use allowlist-only module loading in production
+- Redact secrets from logs and diagnostics
+- Classify modules by security level (trusted/internal/third-party)
+- Never commit secrets or API keys
+
+### Documentation Requirements
+**ALWAYS:**
+- Update AGENTS.md if adding new commands or tools
+- Reference architecture docs from `.context/`
+- Document public APIs with JSDoc comments
+- Include stability level (@stable/@beta/@experimental/@internal)
 
 ## Code Review Guidelines
 
