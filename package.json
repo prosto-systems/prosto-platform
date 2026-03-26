@@ -1,0 +1,55 @@
+{
+  "name": "prosto-platform",
+  "version": "0.0.0",
+  "description": "Headless platform, expandable with plug-in modules and written in TypeScript",
+  "author": {
+    "name": "PROSTO SYSTEMS",
+    "url": "https://github.com/prosto-systems"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/prosto-systems/prosto-platform#readme",
+  "bugs": {
+    "url": "https://github.com/prosto-systems/prosto-platform/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prosto-systems/prosto-platform.git"
+  },
+  "keywords": [
+    "prosto",
+    "headless",
+    "platform",
+    "typescript",
+    "micro-core",
+    "cms",
+    "content management system",
+    "admin panel",
+    "backend"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "helmet": "^8.1.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "dotenv": "^16.5.0",
+    "nodemon": "^3.1.14",
+    "p-limit": "^7.3.0",
+    "tsconfig": "7.0.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=24.0.0",
+    "npm": ">=11.0.0"
+  }
+}
