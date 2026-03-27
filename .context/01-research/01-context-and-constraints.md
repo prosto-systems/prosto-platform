@@ -6,7 +6,7 @@ Date: 2026-03-23
 - `README.md`: platform intent is "headless + expandable plugins".
 - `AGENTS.md`: strict TypeScript, micro-core architecture, SOLID, testing, security, performance.
 - `.cursor/rules/*.md`: reinforces strict typing, modular boundaries, test strategy, and low coupling.
-- `package.json`: ESM project, `build/dev/typecheck` scripts, minimal dependencies, Node `>=24`.
+- `package.json`: ESM project, `build/dev/typecheck` scripts, minimal dependencies, Node `>=22`.
 - `.editorconfig`: 2-space indentation, LF, line-length policy.
 
 ## Non-Negotiable Constraints

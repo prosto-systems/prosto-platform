@@ -265,8 +265,8 @@ Closes #123
 ## Development Environment
 
 ### Required Tools
-- Node.js >= 24 (see `package.json` engines)
-- npm >= 11
+- Node.js >= 22 (see `package.json` engines)
+- npm >= 8
 - TypeScript compiler (dependency)
 - Git for version control
 

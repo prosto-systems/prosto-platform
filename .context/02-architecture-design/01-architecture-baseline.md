@@ -22,7 +22,7 @@ Status: Draft revised
 - Strong testability (unit, integration, contract tests).
 
 ## 3. Constraints
-- Node.js runtime (`>=24`) and ESM project mode.
+- Node.js runtime (`>=22`) and ESM project mode.
 - TypeScript strict mode for all packages.
 - Micro-core boundary: kernel must not own domain features.
 - External module repositories are a first-class model.
