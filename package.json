@@ -32,7 +32,12 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "typecheck": "tsc --noEmit",
-    "prepare": "npm run build"
+    "lint:architecture": "node -e \"console.log('TODO Phase 02: lint:architecture is not implemented yet')\"",
+    "validate:dependency-policy": "node -e \"console.log('TODO Phase 02: validate:dependency-policy is not implemented yet')\"",
+    "validate:runtime-policy": "node -e \"console.log('TODO Phase 04: validate:runtime-policy is not implemented yet')\"",
+    "test:contracts": "node -e \"console.log('TODO Phase 04: test:contracts is not implemented yet')\"",
+    "test:lifecycle-determinism": "node -e \"console.log('TODO Phase 04: test:lifecycle-determinism is not implemented yet')\"",
+    "release:evidence": "node ./scripts/generate-release-evidence.mjs"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

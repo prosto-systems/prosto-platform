@@ -1,0 +1,35 @@
+name: quality-gates
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contracts-and-determinism:
+    name: FF-03/FF-05 quality-gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: FF-03 lifecycle determinism (placeholder)
+        run: npm run test:lifecycle-determinism
+
+      - name: FF-05 contracts gate
+        run: npm run test:contracts

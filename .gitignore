@@ -82,6 +82,9 @@ out
 .nuxt
 dist
 
+# Local CI artifacts
+.temp/ci/
+
 # Gatsby files
 .cache/
 # Comment in the public line in if your project uses Gatsby and not Next.js
