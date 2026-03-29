@@ -16,44 +16,44 @@ const manifest = {
   commitSha,
   workflowRun: {
     id: runId,
-    url: runUrl
+    url: runUrl,
   },
   checks: [
     {
       id: 'FF-01',
       status: 'pending',
       owner: 'Architecture Owner',
-      evidence: 'policy-gates / FF-01 kernel boundary guard'
+      evidence: 'policy-gates / FF-01 kernel boundary guard',
     },
     {
       id: 'FF-02',
       status: 'pending',
       owner: 'Architecture Owner',
-      evidence: 'policy-gates / FF-02 dependency policy guard'
+      evidence: 'policy-gates / FF-02 dependency policy guard',
     },
     {
       id: 'FF-03',
       status: 'pending',
       owner: 'Core Runtime Owner',
-      evidence: 'quality-gates / FF-03 lifecycle determinism'
+      evidence: 'quality-gates / FF-03 lifecycle determinism',
     },
     {
       id: 'FF-04',
       status: 'pending',
       owner: 'Core Runtime Owner',
-      evidence: 'policy-gates / FF-04 runtime-policy'
+      evidence: 'policy-gates / FF-04 runtime-policy',
     },
     {
       id: 'FF-05',
       status: 'pending',
       owner: 'QA and Core',
-      evidence: 'quality-gates / FF-05 contracts gate'
-    }
+      evidence: 'quality-gates / FF-05 contracts gate',
+    },
   ],
   exceptions: [],
   notes: [
-    'Phase 01 artifact skeleton. Real check statuses are integrated in later phases.'
-  ]
+    'Phase 01 artifact skeleton. Real check statuses are integrated in later phases.',
+  ],
 };
 
 await mkdir('./.temp/ci', { recursive: true });

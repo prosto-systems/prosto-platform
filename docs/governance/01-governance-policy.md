@@ -55,8 +55,8 @@ Each PR to protected branches must contain evidence links in PR description:
 - Release evidence artifact link or run link where `release-evidence.json` is published
 
 ## 4) Enforcement Notes
-- Phase 01 introduces CI skeleton and contract scripts.
-- Some checks are placeholders and will become fully implemented in later phases.
+- Phase 01 governance workflows and check wiring are implemented.
+- Some checks remain placeholder implementations and will become fully functional in later phases.
 - Placeholder status does not remove branch protection requirement.
 
 ## 5) Audit Trail Requirements

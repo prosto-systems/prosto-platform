@@ -3,9 +3,16 @@
 This index consolidates the execution-ready implementation plan for `prosto-platform` based on the current repository state and architecture artifacts in `.context/02-architecture-design` and `.context/03-work-plan`.
 
 ## Planning Baseline
-- Repository currently has architecture and planning artifacts but no production runtime implementation.
+- Repository has completed Phase 01 governance activation and Phase 02 workspace/package baseline setup.
+- No production runtime implementation is present yet; runtime phases begin after SDK contracts are established.
 - Architecture intent emphasizes micro-core boundaries, contract-first delivery, deterministic lifecycle, security-first module loading, and hybrid admin model with shell plus UI plugins.
 - This plan is sequenced to reduce early architecture drift and keep risk controls enforceable from the first implementation increment.
+
+## Execution Status (As of 2026-03-29)
+- `Phase 01`: Completed (governance workflows, required checks documentation, PR template, release evidence script).
+- `Phase 02`: Completed (workspace packages, TypeScript baseline, dependency and public API boundary checks, dependency map).
+- `Current active phase`: Phase 03 (SDK contract baseline and manifest validation).
+- `Phases 04-10`: Planned.
 
 ## Phase Order
 1. [Phase 01 - Governance Activation and Delivery Guardrails](./01-phase.md)
@@ -61,6 +68,11 @@ Runs internal production-like MVP validation, proves KPI and SLO trends, and iss
 - Phase 08 depends on Phases 05, 06, and 07.
 - Phase 09 depends on Phases 07 and 08.
 - Phase 10 depends on successful outcomes from Phases 01 through 09.
+
+Current dependency fulfillment:
+- Phase 01 prerequisite: satisfied.
+- Phase 02 prerequisite: satisfied.
+- Phase 03 onward: pending implementation.
 
 ## Milestones and Stage Gates
 ### M1 Governance Gate Active

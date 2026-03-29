@@ -1,7 +1,8 @@
 {
   "name": "prosto-platform",
   "version": "0.0.0",
-  "description": "Headless platform, expandable with plug-in modules and written in TypeScript",
+  "description": "A TypeScript-based headless platform with a micro-core architecture and plug-in module extensibility",
+  "private": true,
   "author": {
     "name": "PROSTO SYSTEMS",
     "url": "https://github.com/prosto-systems"
@@ -27,32 +28,35 @@
     "backend"
   ],
   "type": "module",
-  "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "typecheck": "tsc --noEmit",
-    "lint:architecture": "node -e \"console.log('TODO Phase 02: lint:architecture is not implemented yet')\"",
-    "validate:dependency-policy": "node -e \"console.log('TODO Phase 02: validate:dependency-policy is not implemented yet')\"",
+    "build": "npm run --workspaces --if-present build",
+    "dev": "npm run --workspaces --if-present dev",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "npm run --workspaces --if-present typecheck",
+    "lint:architecture": "node ./scripts/lint-architecture.mjs",
+    "validate:dependency-policy": "node ./scripts/validate-dependency-policy.mjs",
+    "validate:module-graph": "node ./scripts/validate-module-graph.mjs",
+    "validate:public-api-boundary": "node ./scripts/validate-public-api-boundary.mjs",
     "validate:runtime-policy": "node -e \"console.log('TODO Phase 04: validate:runtime-policy is not implemented yet')\"",
     "test:contracts": "node -e \"console.log('TODO Phase 04: test:contracts is not implemented yet')\"",
     "test:lifecycle-determinism": "node -e \"console.log('TODO Phase 04: test:lifecycle-determinism is not implemented yet')\"",
     "release:evidence": "node ./scripts/generate-release-evidence.mjs"
   },
-  "dependencies": {
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "helmet": "^8.1.0",
-    "node-fetch": "^3.3.2"
-  },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@types/node": "^22.0.0",
     "dotenv": "^16.5.0",
+    "eslint": "^9.39.4",
+    "globals": "^16.5.0",
     "nodemon": "^3.1.14",
     "p-limit": "^7.3.0",
-    "tsconfig": "7.0.0",
+    "typescript-eslint": "^8.57.2",
     "typescript": "^5.9.3"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "engines": {
     "node": ">=22.0.0",
     "npm": ">=8.0.0"

@@ -6,19 +6,35 @@
 
 ## ⚠️ Current Project Status
 
-**IMPORTANT**: This project is in **pre-implementation stage**. Architecture documentation is complete, but runtime implementation has not started.
+**IMPORTANT**: Phase 01 and Phase 02 are complete. The repository is now in an early implementation stage with governance and workspace baselines active, while runtime features are still pending.
 
 ### Current Tooling Availability
-- CI workflow skeletons are present under `.github/workflows/` as Phase 01 governance gates.
-- Governance script contracts are present in root `package.json`:
+- Phase 01 governance workflows are active under `.github/workflows/`:
+  - `policy-gates.yml`
+  - `quality-gates.yml`
+  - `release-readiness.yml`
+- Phase 02 workspace baseline is present under `packages/`:
+  - `@prosto/platform-sdk`
+  - `@prosto/platform-core`
+  - `@prosto/platform-contract-tests`
+  - `@prosto/platform-cli`
+  - `@prosto/platform-adapter-http`
+- Root and package TypeScript baselines are present:
+  - `tsconfig.base.json`
+  - `packages/*/tsconfig.json`
+- Governance and architecture policy scripts are present in root `package.json`:
+  - `lint`
+  - `lint:fix`
   - `lint:architecture`
   - `validate:dependency-policy`
-  - `validate:runtime-policy`
-  - `test:contracts`
-  - `test:lifecycle-determinism`
+  - `validate:module-graph`
+  - `validate:public-api-boundary`
+  - `validate:runtime-policy` (placeholder for Phase 04+)
+  - `test:contracts` (placeholder for Phase 04+)
+  - `test:lifecycle-determinism` (placeholder for Phase 05+)
   - `release:evidence`
-- These scripts are currently Phase 01 placeholders for future phases and do not represent full lint/test framework setup yet.
-- No finalized ESLint, Prettier, or Vitest configuration is active yet.
+- `lint:architecture`, `validate:dependency-policy`, `validate:module-graph`, and `validate:public-api-boundary` are implemented and enforce Phase 02 boundary checks.
+- ESLint baseline config exists at `eslint.config.mjs`; finalized linting/test frameworks are still phased.
 
 ### Architecture Documents Reference
 Documents in `.context/` describe **target state**, not current code:
@@ -277,20 +293,20 @@ Closes #123
 - Git for version control
 
 ### IDE Configuration
-- Enable TypeScript strict mode (when tsconfig.json is created)
-- Configure code formatting rules (Prettier - Phase 01)
-- Set up linting rules (ESLint - Phase 01)
-- Use TypeScript path mapping (when monorepo is created)
+- Enable TypeScript strict mode from `tsconfig.base.json` and package-level `tsconfig.json`.
+- Configure code formatting rules (Prettier - pending future phase).
+- Use ESLint baseline config from `eslint.config.mjs`.
+- Use TypeScript path mapping when introduced in a future monorepo phase.
 
 ### Development Workflow (Target State)
 
-**Phase 01-03 (Current Priority)**:
-1. Set up governance gates (CI workflows, branch protection)
-2. Create monorepo package skeleton
-3. Configure ESLint + Prettier
-4. Set up Vitest test runner
-5. Create initial package structure
-6. Establish SDK contract baseline
+**Completed Baseline**:
+1. Phase 01 governance activation (CI workflows, required checks, release evidence flow)
+2. Phase 02 monorepo workspace and package boundary setup
+3. ESLint + TypeScript baseline configuration
+
+**Current Priority (Phase 03)**:
+1. Establish SDK contract baseline and manifest validation
 
 **Phase 04-06 (Runtime and Hardening)**:
 1. Implement contract conformance test package
@@ -322,7 +338,7 @@ Conflict handling policy:
 
 ### Repository Readiness Truth Table
 **BEFORE making recommendations about commands, tooling, or process maturity, verify these artifacts:**
-1. `tsconfig.json`
+1. `tsconfig.base.json` and `packages/*/tsconfig.json`
 2. `packages/`
 3. `.github/workflows/`
 4. test runner config (`vitest.config.*` / `jest.config.*`)
@@ -330,7 +346,7 @@ Conflict handling policy:
 6. formatting config (`prettier.config.*`)
 
 Interpretation rules:
-- If these artifacts are missing, the project is still **pre-implementation** for that capability.
+- If these artifacts are missing, the project is still **pre-baseline** for that capability.
 - Do not infer implemented capability from architecture docs alone.
 - Reference `.context/04-implementation-plan/` for planned rollout.
 
@@ -341,14 +357,14 @@ Interpretation rules:
 
 ### Repository State Awareness
 **BEFORE making any recommendations, verify:**
-1. Check if `tsconfig.json` exists
+1. Check if `tsconfig.base.json` and package-level `tsconfig.json` files exist
 2. Check if `packages/` directory exists
 3. Check if `.github/workflows/` exists
 4. Check if test runner is configured
 
 **If files are missing:**
-1. State clearly that project is in pre-implementation stage
-2. Recommend Phase 01/02 tasks before feature implementation
+1. State clearly that the repository baseline has regressed below completed Phase 01/02 expectations
+2. Recommend restoring Phase 01/02 artifacts before feature implementation
 3. Do NOT claim lint/test commands are available
 4. Reference `.context/04-implementation-plan/` for roadmap
 

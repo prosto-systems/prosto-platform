@@ -1,9 +1,15 @@
 # 00 Assumptions and Deep Audit Findings
 
+## Status Update (2026-03-29)
+- Repository reality has progressed since this audit baseline.
+- Phase 01 governance assets and Phase 02 workspace/package baseline are now completed.
+- Runtime implementation remains pending (Phase 03 onward).
+- Treat findings below as an early-stage audit snapshot unless explicitly updated by newer phase artifacts.
+
 ## 1. Key Assumptions
 
 1. The platform follows a mixed strategy: internal MVP first, then external ecosystem expansion.
-2. The current repository is in pre-implementation stage with architecture-first assets and no production runtime code yet.
+2. The current repository has completed governance and workspace baseline phases (Phase 01 and Phase 02) and still has no production runtime code.
 3. The main business objective of the first stage is to reduce time-to-first-module while keeping architecture quality high enough for externalization.
 4. The second-stage objective is secure and predictable third-party module onboarding with clear compatibility governance.
 5. This audit is evidence-based from repository artifacts and architecture documents, not from executed runtime behavior.
@@ -30,7 +36,7 @@
 
 ## 3. Executive Summary
 
-The project has strong architecture intent and unusually mature design documentation for an early stage. The largest current risk is execution asymmetry: governance and architecture are detailed, while implementation assets, test harnesses, CI policies, and operational runbooks are still largely absent in repository reality.
+The project has strong architecture intent and unusually mature design documentation for an early stage. Current risk has shifted from missing baseline assets to delivery sequencing: governance and workspace boundaries are implemented, while SDK/runtime/test execution capabilities are still being built.
 
 Net assessment:
 - Product and architecture direction: strong
@@ -79,8 +85,8 @@ Net assessment:
 
 ### Gaps
 - No source implementation for core contracts in this repository state.
-- Root-level dependency placement currently mixes concerns for future package boundaries.
-- No enforced dependency graph tooling committed yet.
+- Runtime packages still expose only placeholder entry points.
+- Boundary enforcement is baseline-level and does not yet include runtime-policy and contract conformance implementation.
 
 ### Risks
 - Boundary erosion during first implementation sprint if checks are not automated from day 1.
@@ -120,7 +126,7 @@ Net assessment:
 - Risk register includes supply-chain concerns and secret redaction.
 
 ### Gaps
-- No implemented policy-as-code checks in repository state.
+- Runtime security policy checks are not implemented yet.
 - No concrete secret scanning and SBOM workflow defined in CI artifacts.
 
 ### Risks
@@ -160,7 +166,7 @@ Net assessment:
 
 ### Gaps
 - No test framework standard formally enforced in project scripts.
-- No implemented contract test package in this repo state.
+- Contract test package exists as a workspace baseline, but no executable conformance suite is implemented yet.
 
 ### Risks
 - Inconsistent testing approach across future module repositories.
@@ -169,11 +175,11 @@ Net assessment:
 
 ### Strengths
 - Branching and release process is documented.
-- Architectural gate concepts are present.
+- Architectural gate concepts are present and wired into CI workflows.
 
 ### Gaps
-- No CI workflow files are visible in current repository state.
-- No automated policy gates for architecture, contracts, security, and performance.
+- Runtime-policy and quality checks (FF-03/FF-04/FF-05) are still placeholder scripts.
+- Security and performance workflow controls are not fully implemented yet.
 
 ### Risks
 - Manual compliance and drift from intended process.
@@ -207,13 +213,13 @@ Net assessment:
 ## 5. Bottlenecks, Technical Debt, Hidden Dependencies
 
 ## 5.1 Primary Bottlenecks
-1. Implementation gap: architecture complete, runtime not yet started.
-2. Automation gap: quality and security gates not yet executable.
+1. Implementation gap: runtime and SDK contracts are not implemented yet.
+2. Automation gap: runtime, contract-conformance, and lifecycle determinism checks are not yet executable.
 3. Product instrumentation gap: no measurable KPI dashboard for MVP learning loop.
 
 ## 5.2 Emerging Technical Debt
-1. Governance debt: policy docs without policy enforcement.
-2. Dependency scope debt: root dependency set may conflict with intended package layering.
+1. Governance debt: placeholder quality/runtime checks can create false confidence if not tracked.
+2. Dependency scope debt: boundary policy is present but will need expansion as package APIs become non-placeholder.
 3. Testing debt: no common test harness committed before module expansion.
 
 ## 5.3 Hidden Dependencies
