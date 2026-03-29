@@ -51,7 +51,7 @@ Effort values below represent execution effort for implementation work and gover
 
 ## QW-05 Create release readiness checklist as pipeline gate
 - Area: CI CD, governance
-- Problem: release process is documented but not yet operationalized.
+- Problem: release readiness workflow exists, but check statuses and evidence are still baseline-level placeholders.
 - Recommendation: turn release checklist into required gate artifact with automated evidence links.
 - Expected effect: predictable release quality and lower compliance variance.
 - Impact: 4
