@@ -8,11 +8,17 @@
 
 **IMPORTANT**: This project is in **pre-implementation stage**. Architecture documentation is complete, but runtime implementation has not started.
 
-### Not Yet Available
-- No linting commands (ESLint to be added in Phase 01)
-- No test commands (Vitest to be added in Phase 01)
-- No formatting commands (Prettier to be added in Phase 01)
-- No CI/CD pipelines (to be added in Phase 01)
+### Current Tooling Availability
+- CI workflow skeletons are present under `.github/workflows/` as Phase 01 governance gates.
+- Governance script contracts are present in root `package.json`:
+  - `lint:architecture`
+  - `validate:dependency-policy`
+  - `validate:runtime-policy`
+  - `test:contracts`
+  - `test:lifecycle-determinism`
+  - `release:evidence`
+- These scripts are currently Phase 01 placeholders for future phases and do not represent full lint/test framework setup yet.
+- No finalized ESLint, Prettier, or Vitest configuration is active yet.
 
 ### Architecture Documents Reference
 Documents in `.context/` describe **target state**, not current code:
