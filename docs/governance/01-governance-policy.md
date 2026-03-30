@@ -12,17 +12,18 @@
 
 ## 1) Non-Bypassable Checks
 The following checks are mandatory and configured as required branch checks:
-- `FF-01 kernel boundary guard`
-- `FF-02 dependency policy guard`
-- `FF-04 runtime-policy`
-- `FF-03 lifecycle determinism (placeholder)`
-- `FF-05 contracts gate`
-- `release-readiness-evidence`
+- `FF-01 kernel boundary guard` (implemented)
+- `FF-02 dependency policy guard` (implemented)
+- `FF-04 runtime-policy` (placeholder for Phase 04+)
+- `FF-03 lifecycle determinism` (placeholder for Phase 04+)
+- `FF-05 contracts gate` (placeholder for Phase 04+)
+- `release-readiness-evidence` (implemented)
 
 Policy constraints:
 - No direct push to `main` or `develop`.
 - No merge allowed when any required check is failing or missing.
 - Required checks are defined in `docs/governance/required-checks.md`.
+- Placeholder status does not remove branch protection requirement.
 
 ## 2) Exception Workflow with Expiration
 Exceptions are temporary and explicit. Every exception record must include:
@@ -49,15 +50,16 @@ Exceptions are temporary and explicit. Every exception record must include:
 ## 3) Required PR Evidence Links
 Each PR to protected branches must contain evidence links in PR description:
 - Architecture policy evidence FF-01 and FF-02
-- Runtime policy evidence FF-04
-- Quality evidence FF-03 and FF-05
+- Runtime policy evidence FF-04 (or placeholder evidence until implementation is completed)
+- Quality evidence FF-03 and FF-05 (or placeholder evidence until implementation is completed)
 - Risk-control acknowledgment linked to `.context/03-work-plan/02-metrics-acceptance-and-risk-controls.md`
 - Release evidence artifact link or run link where `release-evidence.json` is published
 
 ## 4) Enforcement Notes
 - Phase 01 governance workflows and check wiring are implemented.
+- Phase 02 package boundary checks are implemented and enforced.
+- Phase 03 SDK contract baseline is completed and now part of release evidence context.
 - Some checks remain placeholder implementations and will become fully functional in later phases.
-- Placeholder status does not remove branch protection requirement.
 
 ## 5) Audit Trail Requirements
 - Retain workflow logs and artifacts for minimum 30 days.

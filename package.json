@@ -55,7 +55,8 @@
     "typescript": "^5.9.3"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/*/*"
   ],
   "engines": {
     "node": ">=22.0.0",

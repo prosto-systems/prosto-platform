@@ -16,7 +16,20 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "build": "tsc -p tsconfig.package.json",
+    "typecheck": "tsc -p tsconfig.package.json --noEmit",
+    "test": "npm run test:types && npm run test:unit",
+    "test:types": "tsc -p tsconfig.type-tests.json --noEmit",
+    "test:unit": "vitest run"
+  },
+  "dependencies": {
+    "semver": "^7.7.4",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@internal/tsconfig": "*",
+    "@tsconfig/node22": "^22.0.5",
+    "@types/semver": "^7.7.1",
+    "vitest": "^4.1.2"
   }
 }
