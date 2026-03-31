@@ -33,11 +33,58 @@ export default tseslint.config(
     },
     rules: {
       'no-unused-vars': 'off',
+      '@typescript-eslint/consistent-type-imports': [
+        'warn',
+        { disallowTypeAnnotations: false },
+      ],
+      '@typescript-eslint/naming-convention': [
+        'error',
+        { selector: 'interface', format: ['PascalCase'], prefix: ['I'] },
+        {
+          selector: 'typeAlias',
+          format: ['PascalCase'],
+          suffix: ['Type'],
+          leadingUnderscore: 'allowSingleOrDouble',
+        },
+        { selector: 'enum', format: ['PascalCase'] },
+        { selector: 'enumMember', format: ['PascalCase'] },
+      ],
+      // '@typescript-eslint/no-inferrable-types': 'warn',
+      '@typescript-eslint/no-shadow': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
+        },
+      ],
+      curly: ['warn', 'multi-line', 'consistent'],
+      'no-shadow': 'off', // See: https://typescript-eslint.io/rules/no-shadow/#how-to-use
+      'prefer-rest-params': 'warn',
+      'spaced-comment': [
+        'warn',
+        'always',
+        {
+          //-+-+-+-+-+-+-+-+
+          // Banner example
+          //-+-+-+-+-+-+-+-+
+
+          //----------------
+          // Banner example
+          //----------------
+          line: {
+            markers: ['/'],
+            exceptions: ['-', '-+'],
+          },
+
+          /*****************
+           * Banner example
+           *****************/
+          block: {
+            markers: ['!'],
+            exceptions: ['*'],
+            balanced: true,
+          },
         },
       ],
     },

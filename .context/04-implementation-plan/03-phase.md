@@ -1,5 +1,40 @@
 # Phase 03 - SDK Contract Baseline and Manifest Validation
 
+## Execution Status
+- Status: Completed
+- Completed on: 2026-03-29
+- Validation date: 2026-03-30
+- Repository evidence:
+  - `packages/platform-sdk/package.json`
+  - `packages/platform-sdk/src/index.ts`
+  - `packages/platform-sdk/src/types/manifest.types.ts`
+  - `packages/platform-sdk/src/types/lifecycle.types.ts`
+  - `packages/platform-sdk/src/types/tokens.types.ts`
+  - `packages/platform-sdk/src/constants/lifecycle.constants.ts`
+  - `packages/platform-sdk/src/constants/manifest.constants.ts`
+  - `packages/platform-sdk/src/constants/tokens.constants.ts`
+  - `packages/platform-sdk/src/interfaces/platform-module.interface.ts`
+  - `packages/platform-sdk/src/interfaces/platform-module-manifest.interface.ts`
+  - `packages/platform-sdk/src/interfaces/module-context.interface.ts`
+  - `packages/platform-sdk/src/interfaces/service-registry.interface.ts`
+  - `packages/platform-sdk/src/interfaces/event-bus.interface.ts`
+  - `packages/platform-sdk/src/interfaces/module-logger.interface.ts`
+  - `packages/platform-sdk/src/errors/platform-sdk.error.ts`
+  - `packages/platform-sdk/src/errors/manifest-validation.error.ts`
+  - `packages/platform-sdk/src/errors/compatibility-validation.error.ts`
+  - `packages/platform-sdk/src/schemas/manifest.schema.ts`
+  - `packages/platform-sdk/src/utils/semver.utils.ts`
+  - `packages/platform-sdk/src/utils/tokens.utils.ts`
+  - `packages/platform-sdk/src/validation/manifest.validation.ts`
+  - `packages/platform-sdk/src/validation/compatibility.validation.ts`
+  - `packages/platform-sdk/tests/manifest-validation.test.ts`
+  - `packages/platform-sdk/tests/compatibility-validation.test.ts`
+  - `packages/platform-sdk/tests/tokens.test.ts`
+  - `packages/platform-sdk/tests/tokens.type-test.ts`
+  - `packages/platform-sdk/vitest.config.ts`
+  - `packages/platform-sdk/API_REPORT.md`
+  - `packages/platform-sdk/README.md`
+
 ## Phase Objective
 Implement `@prosto/platform-sdk` as the single contract authority for modules, manifests, lifecycle interfaces, service tokens, and validation primitives.
 
@@ -22,23 +57,23 @@ Implement `@prosto/platform-sdk` as the single contract authority for modules, m
   - `.context/02-architecture-design/02-domain-and-capability-model.md`
   - `.context/02-architecture-design/adr/ADR-0002-sdk-contract-and-semver-governance.md`
 
-## Detailed Ordered Implementation Steps
-1. Implement manifest types in `platform-sdk/src/types`:
+## Delivered Implementation Steps
+1. Implemented manifest types in `platform-sdk/src/types`:
    - module identity
    - version ranges
    - security class
    - criticality
    - capabilities
-2. Implement lifecycle and context interfaces in `platform-sdk/src/interfaces`:
+2. Implemented lifecycle and context interfaces in `platform-sdk/src/interfaces`:
    - `PlatformModule`
    - `ModuleContext`
    - `ServiceRegistry`
    - `EventBus`
-3. Implement tokens model in `platform-sdk/src/tokens` with typed token helper.
-4. Implement manifest schema and semantic validation helpers in `platform-sdk/src/validation`.
-5. Define explicit error model for validation and compatibility failures.
-6. Add package-level API report and stability labels for each exported symbol.
-7. Add unit tests for:
+3. Implemented token model via `platform-sdk/src/types` (token brands), `src/constants` (prefixes), and `src/utils` (typed token helpers).
+4. Implemented manifest schema and semantic validation helpers in `platform-sdk/src/validation`.
+5. Defined explicit error model for validation and compatibility failures.
+6. Added package-level API report and stability labels for each exported symbol.
+7. Added unit and type-level tests for:
    - schema validation pass/fail cases
    - semver compatibility validation
    - token uniqueness and typing behavior
@@ -60,7 +95,7 @@ export interface PlatformModule {
 export const PlatformModuleManifestSchema = z.object({
   id: z.string().min(3),
   version: z.string(),
-  platformVersion: z.string(),
+  sdkVersion: z.string(),
   criticality: z.enum(['normal', 'critical']),
   securityClass: z.enum(['trusted', 'internal', 'third-party-reviewed']),
   capabilities: z.array(z.string()).min(1)
@@ -71,31 +106,31 @@ export const PlatformModuleManifestSchema = z.object({
 ```typescript
 export type ServiceToken<T> = symbol & { readonly __type?: T };
 
-export const SERVICE_TOKEN_NAME_PREFIX = '__PPS_' // Prosto Platform Service
+export const SERVICE_TOKEN_NAME_PREFIX = 'PRST_PL_SERVICE_'
 
 export function createServiceToken<T>(name: string): ServiceToken<T> {
   return Symbol.for(SERVICE_TOKEN_NAME_PREFIX + name) as ServiceToken<T>;
 }
 ```
 
-## Affected Modules or Files
-### Existing files likely updated
+## Delivered Files Overview
 - `packages/platform-sdk/package.json`
 - `packages/platform-sdk/src/index.ts`
-
-### New files expected
 - `packages/platform-sdk/src/types/*.ts`
 - `packages/platform-sdk/src/interfaces/*.ts`
-- `packages/platform-sdk/src/tokens/*.ts`
+- `packages/platform-sdk/src/constants/*.ts`
+- `packages/platform-sdk/src/utils/*.ts`
+- `packages/platform-sdk/src/schemas/*.ts`
 - `packages/platform-sdk/src/validation/*.ts`
 - `packages/platform-sdk/src/errors/*.ts`
-- `packages/platform-sdk/test/*.test.ts`
+- `packages/platform-sdk/tests/*.test.ts`
+- `packages/platform-sdk/vitest.config.ts`
+- `packages/platform-sdk/API_REPORT.md`
 
 ## Validation and Testing Approach
-- Unit tests for schema, types, and semver rules.
-- Type-level tests for token and interface contracts.
-- Public API snapshot to detect accidental breaking changes.
-- CI gate requiring full pass before downstream package integration.
+- Package tests run through `npm run --workspace @prosto/platform-sdk test` (Vitest unit tests plus type-level checks).
+- Build and declaration checks run through `npm run --workspace @prosto/platform-sdk build` and `typecheck`.
+- Public API report recorded in `packages/platform-sdk/API_REPORT.md` to track contract surface drift.
 
 ## Data or Migration Impact
 - No runtime data migration.

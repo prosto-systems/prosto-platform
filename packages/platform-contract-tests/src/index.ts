@@ -1,4 +1,4 @@
 ﻿/** @internal Phase 02 placeholder export */
-export interface PlatformContractTestsPlaceholder {
+export interface IPlatformContractTestsPlaceholder {
   readonly packageName: '@prosto/platform-contract-tests';
 }

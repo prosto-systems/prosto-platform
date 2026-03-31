@@ -1,8 +1,16 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist"
-  },
-  "include": ["src/**/*.ts"]
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.package.json"
+    },
+    {
+      "path": "./tsconfig.type-tests.json"
+    },
+    {
+      "path": "./tsconfig.vitest.json"
+    }
+  ]
 }

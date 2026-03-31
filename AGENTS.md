@@ -6,7 +6,7 @@
 
 ## ⚠️ Current Project Status
 
-**IMPORTANT**: Phase 01 and Phase 02 are complete. The repository is now in an early implementation stage with governance and workspace baselines active, while runtime features are still pending.
+**IMPORTANT**: Phase 01, Phase 02, and Phase 03 are complete. The repository now has governance/workspace baselines plus the SDK contract baseline, while runtime kernel features are still pending.
 
 ### Current Tooling Availability
 - Phase 01 governance workflows are active under `.github/workflows/`:
@@ -19,8 +19,8 @@
   - `@prosto/platform-contract-tests`
   - `@prosto/platform-cli`
   - `@prosto/platform-adapter-http`
-- Root and package TypeScript baselines are present:
-  - `tsconfig.base.json`
+- Root/package TypeScript baselines are present:
+  - `packages/@internal/tsconfig/base.json`
   - `packages/*/tsconfig.json`
 - Governance and architecture policy scripts are present in root `package.json`:
   - `lint`
@@ -31,10 +31,12 @@
   - `validate:public-api-boundary`
   - `validate:runtime-policy` (placeholder for Phase 04+)
   - `test:contracts` (placeholder for Phase 04+)
-  - `test:lifecycle-determinism` (placeholder for Phase 05+)
+  - `test:lifecycle-determinism` (placeholder for Phase 04+)
   - `release:evidence`
 - `lint:architecture`, `validate:dependency-policy`, `validate:module-graph`, and `validate:public-api-boundary` are implemented and enforce Phase 02 boundary checks.
-- ESLint baseline config exists at `eslint.config.mjs`; finalized linting/test frameworks are still phased.
+- `@prosto/platform-sdk` now includes Phase 03 contract surface, manifest validation, typed token helpers, and package-level tests.
+- `@prosto/platform-sdk` test runner baseline uses Vitest (`packages/platform-sdk/vitest.config.ts` and package `test` scripts).
+- ESLint baseline config exists at `eslint.config.mjs`; repository-wide standardized test stack is still phased.
 
 ### Architecture Documents Reference
 Documents in `.context/` describe **target state**, not current code:
@@ -293,7 +295,7 @@ Closes #123
 - Git for version control
 
 ### IDE Configuration
-- Enable TypeScript strict mode from `tsconfig.base.json` and package-level `tsconfig.json`.
+- Enable TypeScript strict mode from `packages/@internal/tsconfig/base.json` and package-level `tsconfig.json`.
 - Configure code formatting rules (Prettier - pending future phase).
 - Use ESLint baseline config from `eslint.config.mjs`.
 - Use TypeScript path mapping when introduced in a future monorepo phase.
@@ -303,10 +305,11 @@ Closes #123
 **Completed Baseline**:
 1. Phase 01 governance activation (CI workflows, required checks, release evidence flow)
 2. Phase 02 monorepo workspace and package boundary setup
-3. ESLint + TypeScript baseline configuration
+3. Phase 03 SDK contract baseline and manifest validation
+4. ESLint + TypeScript baseline configuration
 
-**Current Priority (Phase 03)**:
-1. Establish SDK contract baseline and manifest validation
+**Current Priority (Phase 04)**:
+1. Implement contract conformance test package
 
 **Phase 04-06 (Runtime and Hardening)**:
 1. Implement contract conformance test package
@@ -338,7 +341,7 @@ Conflict handling policy:
 
 ### Repository Readiness Truth Table
 **BEFORE making recommendations about commands, tooling, or process maturity, verify these artifacts:**
-1. `tsconfig.base.json` and `packages/*/tsconfig.json`
+1. `packages/@internal/tsconfig/base.json` and `packages/*/tsconfig.json`
 2. `packages/`
 3. `.github/workflows/`
 4. test runner config (`vitest.config.*` / `jest.config.*`)
@@ -357,7 +360,7 @@ Interpretation rules:
 
 ### Repository State Awareness
 **BEFORE making any recommendations, verify:**
-1. Check if `tsconfig.base.json` and package-level `tsconfig.json` files exist
+1. Check if `packages/@internal/tsconfig/base.json` and package-level `tsconfig.json` files exist
 2. Check if `packages/` directory exists
 3. Check if `.github/workflows/` exists
 4. Check if test runner is configured
