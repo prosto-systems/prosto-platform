@@ -1,39 +1,58 @@
 import {
   createEventToken,
   createServiceToken,
+  type EventTokenType,
+  type IEventBus,
+  type IModuleLogger,
   type IServiceRegistry,
   type ServiceTokenType,
 } from '../src/index.js';
+
+type AssertType<TValue extends true> = TValue;
+type IsEqualType<TLeft, TRight> = (<TValue>() => TValue extends TLeft ? 1 : 2) extends <
+    TValue,
+  >() => TValue extends TRight ? 1 : 2
+  ? true
+  : false;
 
 interface IHealthService {
   ping: () => string;
 }
 
-type AssertType<TValue extends true> = TValue;
-type IsEqualType<TLeft, TRight> = (<TValue>() => TValue extends TLeft ? 1 : 2) extends <
-  TValue,
->() => TValue extends TRight ? 1 : 2
-  ? true
-  : false;
-
-const healthToken = createServiceToken<IHealthService>('health.service');
-const healthEventToken = createEventToken<{ status: 'ok' | 'failed' }>('health.updated');
-
-type _ServiceTokenTypeAssertionType = AssertType<IsEqualType<typeof healthToken, ServiceTokenType<IHealthService>>>;
-
-declare const registry: IServiceRegistry;
-
-registry.register(healthToken, {
-  ping: () => 'ok',
-});
-
-const healthService = registry.resolve(healthToken);
-
-if (healthService) {
-  healthService.ping();
+interface IHealthEventPayload {
+  status: 'ok' | 'failed';
 }
 
-void healthEventToken;
+declare const logger: IModuleLogger;
+declare const eventBus: IEventBus;
+declare const serviceRegistry: IServiceRegistry;
+
+const healthEventToken = createEventToken<IHealthEventPayload>('health.updated');
+const healthServiceToken = createServiceToken<IHealthService>('health.service');
+
+type _EventTokenTypeAssertionType =
+  AssertType<IsEqualType<typeof healthEventToken, EventTokenType<IHealthEventPayload>>>;
+
+type _ServiceTokenTypeAssertionType =
+  AssertType<IsEqualType<typeof healthServiceToken, ServiceTokenType<IHealthService>>>;
+
+eventBus.subscribe(healthEventToken, (payload) => {
+  if (payload.status === 'ok') {
+    logger.info('Healthy');
+  } else {
+    logger.warn('Unhealthy');
+  }
+});
+
+serviceRegistry.register(healthServiceToken, { ping: () => 'ok' });
+
+const healthService = serviceRegistry.resolve(healthServiceToken);
+
+if (!healthService) {
+  throw new Error('Health service not found.');
+}
+
+healthService.ping();
 
 // @ts-expect-error Intentional type-level guard: invalid service shape for token.
-registry.register(healthToken, { ping: (code: number) => String(code) });
+serviceRegistry.register(healthServiceToken, { ping: (code: number) => String(code) });
