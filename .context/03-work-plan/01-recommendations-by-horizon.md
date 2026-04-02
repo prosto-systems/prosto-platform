@@ -10,6 +10,11 @@ Priority label uses impact over effort ratio:
 
 Effort values below represent execution effort for implementation work and governance rollout.
 
+## Status Sync (2026-04-03)
+- Phases 01-04 completed, including implemented architecture gates and contract conformance suite.
+- `MT-01 Deliver SDK contract package plus contract test package first` is now satisfied in repository reality.
+- Remaining execution-critical items start from runtime foundation and FF-03/FF-04 activation.
+
 ## Quick Wins
 
 ## QW-01 Establish executable architecture gates in CI
@@ -51,7 +56,7 @@ Effort values below represent execution effort for implementation work and gover
 
 ## QW-05 Create release readiness checklist as pipeline gate
 - Area: CI CD, governance
-- Problem: release readiness workflow exists, but check statuses and evidence are still baseline-level placeholders.
+- Problem: release readiness workflow exists, but FF-03 and FF-04 evidence is still placeholder-level and exception evidence discipline needs stricter enforcement.
 - Recommendation: turn release checklist into required gate artifact with automated evidence links.
 - Expected effect: predictable release quality and lower compliance variance.
 - Impact: 4

@@ -28,6 +28,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build packages
+        run: npm run build
+
       - name: FF-03 lifecycle determinism (placeholder)
         run: npm run test:lifecycle-determinism
 

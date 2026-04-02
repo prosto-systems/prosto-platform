@@ -29,18 +29,19 @@
   ],
   "type": "module",
   "scripts": {
-    "build": "npm run --workspaces --if-present build",
-    "dev": "npm run --workspaces --if-present dev",
+    "build": "turbo build",
+    "dev": "turbo dev",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "typecheck": "npm run --workspaces --if-present typecheck",
+    "typecheck": "turbo typecheck",
     "lint:architecture": "node ./scripts/lint-architecture.mjs",
     "validate:dependency-policy": "node ./scripts/validate-dependency-policy.mjs",
     "validate:module-graph": "node ./scripts/validate-module-graph.mjs",
     "validate:public-api-boundary": "node ./scripts/validate-public-api-boundary.mjs",
-    "validate:runtime-policy": "node -e \"console.log('TODO Phase 04: validate:runtime-policy is not implemented yet')\"",
-    "test:contracts": "node -e \"console.log('TODO Phase 04: test:contracts is not implemented yet')\"",
-    "test:lifecycle-determinism": "node -e \"console.log('TODO Phase 04: test:lifecycle-determinism is not implemented yet')\"",
+    "validate:runtime-policy": "node -e \"console.log('TODO Phase 05: validate:runtime-policy is not implemented yet')\"",
+    "test": "turbo test",
+    "test:contracts": "turbo test:contracts",
+    "test:lifecycle-determinism": "node -e \"console.log('TODO Phase 05: test:lifecycle-determinism is not implemented yet')\"",
     "release:evidence": "node ./scripts/generate-release-evidence.mjs",
     "prepare": "husky"
   },
@@ -54,16 +55,19 @@
     "lint-staged": "^16.4.0",
     "nodemon": "^3.1.14",
     "p-limit": "^7.3.0",
+    "turbo": "^2.9.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.2"
   },
   "workspaces": [
     "packages/*",
-    "packages/*/*"
+    "packages/*/*",
+    "examples/*"
   ],
   "lint-staged": {
     "*.{js,mjs,cjs,ts,mts,cts}": "eslint --fix"
   },
+  "packageManager": "npm@10.32.1",
   "engines": {
     "node": ">=22.0.0",
     "npm": ">=8.0.0"

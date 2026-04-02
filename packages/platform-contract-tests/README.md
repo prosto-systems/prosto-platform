@@ -1,7 +1,34 @@
 # @prosto/platform-contract-tests
 
-Phase 02 baseline package for contract conformance suite scaffolding.
+Reusable Phase 04 contract conformance suite for Prosto modules.
 
-Current scope:
-- Package entry point and build/typecheck scripts
-- Contract test implementation is planned for Phase 04
+## Scope
+- Reusable entrypoint [`createModuleContractTests`](./src/create-module-contract-tests.ts)
+- Programmatic runner [`runModuleContractConformance`](./src/create-module-contract-tests.ts)
+- Standardized failure taxonomy via [`ContractFailureCodes`](src/types/index.ts)
+- Deterministic machine-readable report output via [`toConformanceReportJson`](src/utils/report.utils.ts)
+
+## Conformance Checks
+- Manifest conformance (schema + semantic)
+- Lifecycle method behavior (`register/init/start/stop`)
+- Capability declaration integrity
+- Security metadata presence
+- Observability metadata minimum contract
+
+## Commands
+- `npm run --workspace @prosto/platform-contract-tests build`
+- `npm run --workspace @prosto/platform-contract-tests typecheck`
+- `npm run --workspace @prosto/platform-contract-tests test`
+
+## Usage
+```ts
+import { describe, it } from 'vitest';
+import { createModuleContractTests } from '@prosto/platform-contract-tests';
+
+describe('MyModule contract', () => {
+  createModuleContractTests(
+    { module: myModuleInstance },
+    { describe, it },
+  );
+});
+```

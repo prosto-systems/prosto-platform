@@ -14,9 +14,9 @@
 The following checks are mandatory and configured as required branch checks:
 - `FF-01 kernel boundary guard` (implemented)
 - `FF-02 dependency policy guard` (implemented)
-- `FF-04 runtime-policy` (placeholder for Phase 04+)
-- `FF-03 lifecycle determinism` (placeholder for Phase 04+)
-- `FF-05 contracts gate` (placeholder for Phase 04+)
+- `FF-04 runtime-policy` (placeholder for Phase 05+)
+- `FF-03 lifecycle determinism` (placeholder for Phase 05+)
+- `FF-05 contracts gate` (implemented in Phase 04)
 - `release-readiness-evidence` (implemented)
 
 Policy constraints:
@@ -51,7 +51,8 @@ Exceptions are temporary and explicit. Every exception record must include:
 Each PR to protected branches must contain evidence links in PR description:
 - Architecture policy evidence FF-01 and FF-02
 - Runtime policy evidence FF-04 (or placeholder evidence until implementation is completed)
-- Quality evidence FF-03 and FF-05 (or placeholder evidence until implementation is completed)
+- Quality evidence FF-03 (or placeholder evidence until implementation is completed)
+- Quality evidence FF-05 contracts gate execution (`npm run test:contracts`)
 - Risk-control acknowledgment linked to `.context/03-work-plan/02-metrics-acceptance-and-risk-controls.md`
 - Release evidence artifact link or run link where `release-evidence.json` is published
 
@@ -59,7 +60,8 @@ Each PR to protected branches must contain evidence links in PR description:
 - Phase 01 governance workflows and check wiring are implemented.
 - Phase 02 package boundary checks are implemented and enforced.
 - Phase 03 SDK contract baseline is completed and now part of release evidence context.
-- Some checks remain placeholder implementations and will become fully functional in later phases.
+- FF-05 contracts gate is implemented in Phase 04 with conformance suite execution against reference modules.
+- Remaining placeholders are FF-03 and FF-04 and will become fully functional in later phases.
 
 ## 5) Audit Trail Requirements
 - Retain workflow logs and artifacts for minimum 30 days.
