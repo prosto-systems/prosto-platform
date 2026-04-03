@@ -1,6 +1,6 @@
 # prosto-platform
 
-A TypeScript-based headless platform with a micro-core architecture and expandable with plug-in modules.
+This is a TypeScript-based headless platform following modern development practices with a focus on maintainability, testability, and performance. The project uses a micro-core architecture with expansion through plug-in modules.
 
 ## Project Status
 
