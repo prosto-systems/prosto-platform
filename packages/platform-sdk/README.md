@@ -4,6 +4,7 @@ Contract authority for Prosto platform module manifests, lifecycle interfaces, t
 
 ## Status
 - Phase 03 baseline completed
+- Phase 04 contract conformance validation is active via `@prosto/platform-contract-tests` and `npm run test:contracts`
 - All exported contracts are marked `@stable`
 
 ## Public API

@@ -16,10 +16,16 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "build": "tsc -p tsconfig.package.json",
+    "typecheck": "tsc -p tsconfig.package.json --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@prosto/platform-sdk": "0.0.0"
+  },
+  "devDependencies": {
+    "@internal/tsconfig": "*",
+    "@tsconfig/node22": "^22.0.5",
+    "vitest": "^4.1.2"
   }
 }

@@ -6,7 +6,7 @@
 
 ## ⚠️ Current Project Status
 
-**IMPORTANT**: Phase 01, Phase 02, and Phase 03 are complete. The repository now has governance/workspace baselines plus the SDK contract baseline, while runtime kernel features are still pending.
+**IMPORTANT**: Phase 01 through Phase 04 are complete. The repository now has governance/workspace baselines, SDK contract baseline, and contract conformance validation, while runtime kernel features are still pending for Phase 05+.
 
 ### Current Tooling Availability
 - Phase 01 governance workflows are active under `.github/workflows/`:
@@ -29,13 +29,14 @@
   - `validate:dependency-policy`
   - `validate:module-graph`
   - `validate:public-api-boundary`
-  - `validate:runtime-policy` (placeholder for Phase 04+)
-  - `test:contracts` (placeholder for Phase 04+)
-  - `test:lifecycle-determinism` (placeholder for Phase 04+)
+  - `validate:runtime-policy` (placeholder for Phase 05+)
+  - `test:contracts` (implemented in Phase 04 via contract conformance suite)
+  - `test:lifecycle-determinism` (placeholder for Phase 05+)
   - `release:evidence`
 - `lint:architecture`, `validate:dependency-policy`, `validate:module-graph`, and `validate:public-api-boundary` are implemented and enforce Phase 02 boundary checks.
 - `@prosto/platform-sdk` now includes Phase 03 contract surface, manifest validation, typed token helpers, and package-level tests.
 - `@prosto/platform-sdk` test runner baseline uses Vitest (`packages/platform-sdk/vitest.config.ts` and package `test` scripts).
+- `@prosto/platform-contract-tests` now includes the Phase 04 reusable conformance suite, failure taxonomy, and machine-readable conformance report output.
 - ESLint baseline config exists at `eslint.config.mjs`; repository-wide standardized test stack is still phased.
 
 ### Architecture Documents Reference
@@ -293,6 +294,7 @@ Closes #123
 - npm >= 8
 - TypeScript compiler (dependency)
 - Git for version control
+- Turborepo (for monorepo task orchestration)
 
 ### IDE Configuration
 - Enable TypeScript strict mode from `packages/@internal/tsconfig/base.json` and package-level `tsconfig.json`.
@@ -300,20 +302,46 @@ Closes #123
 - Use ESLint baseline config from `eslint.config.mjs`.
 - Use TypeScript path mapping when introduced in a future monorepo phase.
 
+### Turborepo Configuration
+The project uses Turborepo for monorepo task orchestration. Key configurations:
+
+**Pipeline Tasks** (defined in `turbo.json`):
+- `build` - Compiles TypeScript packages (depends on `^build` for dependency order)
+- `typecheck` - Type checking (depends on `^build`)
+- `test` - Runs test suites (depends on `^build`)
+- `test:types`, `test:unit`, `test:contracts` - Specific test types
+- `lint` / `lint:fix` - ESLint checks (runs in parallel)
+- `dev` - Development mode (no cache, persistent)
+
+**Common Commands**:
+```bash
+turbo build          # Build all packages with dependency ordering
+turbo test           # Run tests across all packages
+turbo typecheck      # Type check all packages
+turbo dev            # Start dev mode in all packages
+turbo build --filter=@prosto/platform-sdk  # Build specific package
+```
+
+**Caching**:
+- Turborepo caches build outputs in `.turbo/` directory
+- Cache is gitignored but can be pushed to remote for CI/CD
+- Use `--force` flag to bypass cache when needed
+
 ### Development Workflow (Target State)
 
 **Completed Baseline**:
 1. Phase 01 governance activation (CI workflows, required checks, release evidence flow)
 2. Phase 02 monorepo workspace and package boundary setup
 3. Phase 03 SDK contract baseline and manifest validation
-4. ESLint + TypeScript baseline configuration
+4. Phase 04 contract conformance test package and reference module validation
+5. ESLint + TypeScript baseline configuration
 
-**Current Priority (Phase 04)**:
-1. Implement contract conformance test package
+**Current Priority (Phase 05)**:
+1. Implement core runtime lifecycle foundation and deterministic orchestration
 
-**Phase 04-06 (Runtime and Hardening)**:
-1. Implement contract conformance test package
-2. Implement core runtime lifecycle foundation
+**Phase 05-06 (Runtime and Hardening)**:
+1. Implement core runtime lifecycle foundation
+2. Activate FF-03 lifecycle determinism and FF-04 runtime-policy beyond placeholder mode
 3. Activate security and performance regression gates
 
 **Phase 07-09 (Admin Enablement Stream)**:
@@ -457,5 +485,5 @@ For questions about this project or AI agent guidelines:
 
 ---
 
-**Last Updated**: March 2026
+**Last Updated**: April 2026
 **Version**: 0.0.0

@@ -15,7 +15,7 @@ export interface IManifestValidationIssue {
  * Manifest validation failure with machine-readable issue details.
  */
 export class ManifestValidationError extends PlatformSdkError {
-  constructor(readonly issues: readonly IManifestValidationIssue[]) {
+  constructor(readonly issues: Readonly<IManifestValidationIssue>[]) {
     super(
       'MANIFEST_VALIDATION_FAILED',
       'Platform module manifest validation failed.',

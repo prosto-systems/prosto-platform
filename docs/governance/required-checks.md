@@ -16,9 +16,9 @@ This document defines required checks for `main` and `develop`, including owners
 |---|---|---|---|---|---|---|
 | `FF-01 kernel boundary guard` | FF-01 | `policy-gates` | Implemented | Architecture Owner | Platform Core Lead | 1) Architecture Owner 2) Platform Core Lead 3) Engineering Manager |
 | `FF-02 dependency policy guard` | FF-02 | `policy-gates` | Implemented | Architecture Owner | Platform Core Lead | 1) Architecture Owner 2) Platform Core Lead 3) Engineering Manager |
-| `FF-04 runtime-policy` | FF-04 | `policy-gates` | Placeholder (Phase 04+) | Core Runtime Owner | Observability Owner | 1) Core Runtime Owner 2) Observability Owner 3) Engineering Manager |
-| `FF-03 lifecycle determinism` | FF-03 | `quality-gates` | Placeholder (Phase 04+) | Core Runtime Owner | QA Lead | 1) Core Runtime Owner 2) QA Lead 3) Engineering Manager |
-| `FF-05 contracts gate` | FF-05 | `quality-gates` | Placeholder (Phase 04+) | QA and Core | SDK Owner | 1) QA and Core 2) SDK Owner 3) Engineering Manager |
+| `FF-04 runtime-policy` | FF-04 | `policy-gates` | Placeholder (Phase 05+) | Core Runtime Owner | Observability Owner | 1) Core Runtime Owner 2) Observability Owner 3) Engineering Manager |
+| `FF-03 lifecycle determinism` | FF-03 | `quality-gates` | Placeholder (Phase 05+) | Core Runtime Owner | QA Lead | 1) Core Runtime Owner 2) QA Lead 3) Engineering Manager |
+| `FF-05 contracts gate` | FF-05 | `quality-gates` | Implemented (Phase 04) | QA and Core | SDK Owner | 1) QA and Core 2) SDK Owner 3) Engineering Manager |
 | `release-readiness-evidence` | Release readiness control | `release-readiness` | Implemented | Release Manager | Platform Core Lead | 1) Release Manager 2) Platform Core Lead 3) Engineering Manager |
 
 ## Non-Bypassable Policy
@@ -32,6 +32,7 @@ Each required check must expose machine-readable or artifact evidence:
 - `policy-gates` and `quality-gates` logs as CI evidence.
 - `release-readiness` artifact `.temp/ci/release-evidence.json` uploaded in workflow.
 - Placeholder checks must emit explicit, machine-readable TODO status in workflow logs until implemented.
+- FF-05 contracts gate now runs `npm run test:contracts` and must pass for protected branch merges.
 
 ## Escalation SLA
 - Acknowledgement: within 4 business hours.

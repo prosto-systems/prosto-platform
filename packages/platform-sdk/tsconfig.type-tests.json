@@ -1,9 +1,9 @@
 {
   "extends": "@internal/tsconfig/base.json",
-  "include": [
-    "tests/**/*.type-test.ts"
-  ],
   "compilerOptions": {
     "noEmit": true
-  }
+  },
+  "include": [
+    "tests/**/*.type-test.ts"
+  ]
 }

@@ -1,0 +1,16 @@
+{
+  "name": "@examples/module-auth",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:contracts": "vitest run"
+  },
+  "dependencies": {
+    "@prosto/platform-contract-tests": "0.0.0",
+    "@prosto/platform-sdk": "0.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.2"
+  }
+}
