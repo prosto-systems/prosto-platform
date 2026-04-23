@@ -2,7 +2,7 @@ import type {
   IRuntimeOperationalReports,
   IRuntimeStartupReport,
 } from './diagnostics.types.js';
-import { assert } from '../utils/index.js';
+import { assert } from '../utils/common.utils.js';
 
 function assertStartupReport(report: IRuntimeStartupReport): void {
   assert(report.type === 'startup', 'startup.type must equal "startup"');

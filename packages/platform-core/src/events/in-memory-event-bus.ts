@@ -61,4 +61,8 @@ export class InMemoryEventBus implements IEventBus {
       this._handlersByToken.delete(token);
     }
   }
+
+  dispose(): void {
+    this._handlersByToken.clear();
+  }
 }

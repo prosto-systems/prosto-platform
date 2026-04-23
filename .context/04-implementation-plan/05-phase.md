@@ -1,13 +1,18 @@
 # Phase 05 - Core Runtime Foundation and Deterministic Lifecycle
 
 ## Execution Status
-- Status: Completed
+- Status: Partially Completed (reassessed)
 - Validation date: 2026-04-14
+- Reassessment date: 2026-04-23
+- Implementation update date: 2026-04-23
 - Repository evidence snapshot:
   - `packages/platform-core/src/` includes runtime bootstrap, compatibility, graph, lifecycle, policy, diagnostics, and runtime factory implementation
   - Root script `validate:runtime-policy` is executable via `scripts/validate-runtime-policy.mjs`
   - Root script `test:lifecycle-determinism` is executable via `scripts/test-lifecycle-determinism.mjs`
   - Phase 04 contract conformance package remains active and reusable
+- Reassessment rationale:
+  - Workstreams WS-03, WS-04, and WS-05 are operationally implemented and covered by active checks.
+  - WS-02 Step 3 remains partially implemented after universal-source baseline rollout: discovery and reject taxonomy are implemented, runtime/bootstrap integration is implemented, path-source checksum preflight is implemented; full source adapters and archive extraction/resolution for `url` and `registry` are still pending.
 
 ## Phase Objective
 Implement `@prosto/platform-core` minimal runtime kernel with deterministic lifecycle orchestration, compatibility validation, startup policy control `strict` and `best-effort`, and machine-readable diagnostics required to activate architecture fitness functions FF-03 and FF-04.
@@ -154,6 +159,151 @@ The ordered steps below are preserved as execution traceability for the complete
 - Acceptance signal:
   - Discovery output is stable for identical input config.
   - Rejected artifacts contain reason code and module identity.
+
+### Step 3A - Loader completion plan to fully satisfy Step 3
+- Objective: close remaining gaps in loader responsibilities so Step 3 acceptance criteria are fully satisfied.
+
+- Gap summary against Step 3 acceptance:
+  - Deterministic discovery ordering is implemented.
+  - Explicit rejected artifact output from loader boundary is not fully implemented.
+  - `module-loader` does not yet perform concrete artifact loading or loading-failure mapping.
+
+- Ordered implementation plan:
+  1. Extend loader contracts in `packages/platform-core/src/loader/loader.types.ts`
+     - Add artifact-source metadata fields required by loader stage.
+     - Add rejected artifact structure that supports reason code, phase, and remediation hint.
+  2. Expand discovery behavior in `packages/platform-core/src/loader/module-discovery.ts`
+     - Keep stable ordering key behavior.
+     - Populate `rejected` for pre-loading discovery failures.
+  3. Implement real loading path in `packages/platform-core/src/loader/module-loader.ts`
+     - Resolve artifact references and map loading failures into rejected artifact outputs.
+     - Preserve deterministic output ordering for loaded artifacts.
+  4. Refine bootstrap boundary usage in `packages/platform-core/src/bootstrap/bootstrap-coordinator.ts`
+     - Consume loader rejected outputs directly.
+     - Keep validation and policy logic focused on post-loading module candidates.
+  5. Add focused test coverage in `packages/platform-core/tests/integration/`
+     - Add loader integration test for deterministic output stability.
+     - Add loader integration test for rejected artifact taxonomy coverage.
+
+- Acceptance signals for Step 3 closure:
+  - For invalid or unavailable artifacts, loader returns non-empty `rejected` with explicit reason code and remediation hint.
+  - For identical input sets, discovery and loading outputs are deterministic across repeated runs.
+  - Bootstrap no longer duplicates artifact-stage failure mapping already emitted by loader.
+
+#### Step 3A.1 - Universal artifact source contract path url registry
+- Decision scope:
+  - Artifact source model is unified and supports `path`, `url`, and `registry` under one loader contract.
+  - Zip is first-class packaging format for `path` and `url` sources.
+  - Registry source may return either zip or tgz package artifact, resolved by source adapter.
+
+- File-level target:
+  - `packages/platform-core/src/loader/loader.types.ts`
+  - `packages/platform-core/src/loader/module-discovery.ts`
+  - `packages/platform-core/src/loader/module-loader.ts`
+  - `packages/platform-core/src/runtime/runtime.types.ts`
+
+- Contract baseline:
+  - Add source descriptor union in loader types:
+    - `path`: absolute or workspace-relative file path and expected digest metadata
+    - `url`: https artifact URL and expected digest metadata
+    - `registry`: package coordinate and version plus integrity metadata
+  - Add normalized artifact descriptor produced by discovery:
+    - `sourceType`, `sourceRef`, `packaging`, `orderingKey`
+  - Add rejected artifact diagnostic shape with required fields:
+    - `moduleId`, `phase`, `errorCode`, `message`, `remediationHint`, `sourceType`, `sourceRef`
+
+- Security and policy constraints:
+  - Allowlist applies before artifact fetch and extraction.
+  - Integrity verification is mandatory before loading executable module entry.
+  - `url` source requires HTTPS and explicit hash or signature evidence.
+  - Diagnostics must redact secrets and sensitive URL query fragments.
+
+#### Step 3A.2 - Loader pipeline design for zip and non-zip artifacts
+```mermaid
+flowchart TD
+  A[Input module refs with source descriptor]
+  B[Discover stage normalize source and ordering key]
+  C[Preflight policy allowlist and source validation]
+  D[Fetch artifact by source adapter]
+  E[Verify integrity checksum or signature]
+  F{Packaging type}
+  G[Extract zip into isolated temp location]
+  H[Extract tgz into isolated temp location]
+  I[Resolve module entry and manifest]
+  J[Emit loaded candidate]
+  K[Emit rejected artifact diagnostic]
+
+  A --> B --> C
+  C -->|pass| D
+  C -->|fail| K
+  D --> E
+  E -->|fail| K
+  E -->|pass| F
+  F -->|zip| G --> I --> J
+  F -->|tgz| H --> I --> J
+  D -->|fetch fail| K
+```
+
+- Stage behavior detail:
+  1. Discovery stage
+     - Normalizes raw source descriptors and computes deterministic ordering key.
+     - Rejects malformed source descriptors early with explicit reason code.
+  2. Fetch stage
+     - Uses source adapter by type: local path resolver, HTTPS fetcher, registry resolver.
+     - Produces immutable artifact record for downstream verification.
+  3. Integrity stage
+     - Compares digest or validates signature before extraction.
+     - Rejects mismatch with security-classified diagnostic.
+  4. Extraction stage
+     - Unpacks archive into isolated temp location.
+     - Enforces path traversal protections and file count or size limits.
+  5. Entry resolution stage
+     - Resolves module entrypoint and manifest from extracted content.
+     - Returns loaded candidate or rejected with deterministic reason taxonomy.
+
+#### Step 3A.3 - Ordered implementation plan for universal source support
+1. Extend runtime input contract
+   - Add source descriptor to runtime module references in `runtime.types.ts`.
+   - Preserve backward compatibility path for in-memory module references during migration.
+   - Status: implemented.
+2. Implement typed discovery normalization
+   - Add deterministic normalization for `path`, `url`, `registry`.
+   - Add early source validation and rejected output population.
+   - Status: implemented.
+3. Implement source adapters in loader
+   - Path adapter for local zip or tgz files.
+   - URL adapter for HTTPS artifacts with timeout and retry policy.
+   - Registry adapter for package coordinate resolution to artifact.
+   - Status: partially implemented (path checksum preflight and deterministic rejection are implemented; URL and registry adapters are TODO).
+4. Implement integrity verification and extraction guards
+   - Validate checksum or signature before extraction.
+   - Add secure extraction constraints and deterministic temp layout rules.
+   - Status: partially implemented (checksum preflight for path source implemented; extraction and entry resolution for external artifacts are TODO).
+5. Integrate loader outputs into bootstrap coordinator
+   - Consume loaded and rejected artifacts as source of truth.
+   - Remove duplicate artifact-stage rejection logic from bootstrap where applicable.
+   - Status: implemented.
+6. Expand integration and policy validation tests
+   - Add deterministic repeated-run tests across mixed source types.
+   - Add rejection taxonomy tests for source validation, fetch failure, integrity failure, extraction failure.
+   - Status: implemented for current baseline coverage.
+
+#### Step 3A.4 - Acceptance signals for universal source model
+- Functional acceptance:
+  - Runtime accepts mixed module source set with `path`, `url`, `registry` in one startup config.
+  - Zip artifacts from `path` and `url` are discovered, verified, extracted, and resolved deterministically.
+  - Current status: first condition is implemented at contract and runtime pipeline level; external artifact resolution is partially implemented.
+- Security acceptance:
+  - Any missing or invalid integrity evidence causes rejection before lifecycle phases.
+  - Any disallowed source by allowlist policy is rejected at preflight stage.
+  - Current status: integrity rejection is implemented for path source checksum preflight; allowlist and full signature policy remain pending.
+- Operability acceptance:
+  - Startup report includes source-aware rejected diagnostics without leaking secrets.
+  - Error taxonomy distinguishes source-validate, source-fetch, integrity, extraction, entry-resolve failures.
+  - Current status: implemented for source-stage diagnostics and reason taxonomy.
+- Determinism acceptance:
+  - Repeated startup runs with identical source set produce identical candidate order and identical reject ordering.
+  - Current status: implemented and covered by integration tests.
 
 ### Step 4 - Implement manifest and compatibility validation
 - File-level target:

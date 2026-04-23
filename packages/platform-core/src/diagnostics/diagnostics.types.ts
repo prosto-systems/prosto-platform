@@ -1,6 +1,10 @@
 import type { StartupPolicyType } from '@prosto/platform-sdk';
 import type { RuntimeReasonCodeType } from '../compatibility/reason-codes.js';
 
+/**
+ * @beta
+ * Enum representing the different stages of the runtime startup process.
+ */
 export type RuntimeStageType =
   | 'discover'
   | 'validate'
@@ -8,6 +12,10 @@ export type RuntimeStageType =
   | 'lifecycle'
   | 'shutdown';
 
+/**
+ * @beta
+ * Interface representing diagnostic information for a runtime failure.
+ */
 export interface IRuntimeFailureDiagnostic {
   readonly moduleId: string;
   readonly phase: RuntimeStageType;
@@ -16,24 +24,44 @@ export interface IRuntimeFailureDiagnostic {
   readonly remediationHint: string;
 }
 
+/**
+ * @beta
+ * Interface representing diagnostic information for a skipped module during runtime startup.
+ */
 export interface IRuntimeSkippedModuleDiagnostic {
   readonly moduleId: string;
   readonly reason: IRuntimeFailureDiagnostic;
 }
 
+/**
+ * @beta
+ * Interface representing diagnostic information for a loaded module during runtime startup.
+ */
 export interface IRuntimeLoadedModuleDiagnostic {
   readonly moduleId: string;
   readonly version: string;
 }
 
+/**
+ * @beta
+ * Enum representing the different statuses of the runtime startup process.
+ */
 export enum RuntimeStartupStatus {
   Success = 'success',
   Degraded = 'degraded',
   Failed = 'failed',
 }
 
+/**
+ * @beta
+ * Type representing the string representation of the runtime startup status.
+ */
 export type RuntimeStartupStatusType = `${RuntimeStartupStatus}`;
 
+/**
+ * @beta
+ * Interface representing diagnostic information for the runtime startup process.
+ */
 export interface IRuntimeStartupReport {
   readonly type: 'startup';
   readonly status: RuntimeStartupStatusType;
@@ -47,6 +75,10 @@ export interface IRuntimeStartupReport {
   readonly failedModules: readonly IRuntimeFailureDiagnostic[];
 }
 
+/**
+ * @beta
+ * Interface representing diagnostic information for a runtime shutdown issue.
+ */
 export interface IRuntimeShutdownIssue {
   readonly moduleId: string;
   readonly phase: 'shutdown';
@@ -55,6 +87,10 @@ export interface IRuntimeShutdownIssue {
   readonly remediationHint: string;
 }
 
+/**
+ * @beta
+ * Interface representing diagnostic information for the runtime shutdown process.
+ */
 export interface IRuntimeShutdownReport {
   readonly type: 'shutdown';
   readonly correlationId: string;
@@ -64,11 +100,19 @@ export interface IRuntimeShutdownReport {
   readonly issues: readonly IRuntimeShutdownIssue[];
 }
 
+/**
+ * @beta
+ * Interface representing diagnostic information for the runtime operational reports.
+ */
 export interface IRuntimeOperationalReports {
   readonly startup: IRuntimeStartupReport;
   readonly shutdown?: IRuntimeShutdownReport;
 }
 
+/**
+ * @beta
+ * Interface representing input for generating a runtime startup diagnostic report.
+ */
 export interface IStartupReportInput {
   readonly policyMode: StartupPolicyType;
   readonly correlationId: string;
@@ -78,6 +122,10 @@ export interface IStartupReportInput {
   readonly failedModules: readonly IRuntimeFailureDiagnostic[];
 }
 
+/**
+ * @beta
+ * Interface representing input for generating a runtime shutdown diagnostic report.
+ */
 export interface IShutdownReportInput {
   readonly correlationId: string;
   readonly startedAt: string;

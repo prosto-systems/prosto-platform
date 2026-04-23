@@ -8,7 +8,10 @@ import type {
   IRuntimeFailureDiagnostic,
   IRuntimeStartupReport,
 } from '../diagnostics/diagnostics.types.js';
-import type { IModuleCandidateArtifact } from '../loader/loader.types.js';
+import type {
+  IModuleCandidateArtifact,
+  IRejectedModuleArtifact,
+} from '../loader/loader.types.js';
 
 export type BootstrapStageType =
   | 'discover'
@@ -35,6 +38,7 @@ export interface IBootstrapCoordinatorInput {
   readonly policyMode: StartupPolicyType;
   readonly runtimeVersion: IPlatformRuntimeVersionContext;
   readonly candidates: readonly IModuleCandidateArtifact[];
+  readonly preRejectedArtifacts: readonly IRejectedModuleArtifact[];
   readonly correlationId: string;
   readonly startupStartedAt: string;
 }

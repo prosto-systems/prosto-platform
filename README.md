@@ -4,7 +4,7 @@ This is a TypeScript-based headless platform following modern development practi
 
 ## Project Status
 
-Current repository state (as of 2026-04-23): **Phase 05 completed and validated (core runtime foundation + deterministic lifecycle gates active), with Phase 06 as the active implementation window**.
+Current repository state (as of 2026-04-23): **Phase 05 partially completed and validated (core runtime foundation + deterministic lifecycle gates active), with Phase 06 as the active implementation window**.
 
 What this means right now:
 - Phase 01 governance workflows and required-check policy are in place under [`.github/workflows/`](.github/workflows/) and [`docs/governance/`](docs/governance/).

@@ -4,19 +4,49 @@ import type {
   StartupPolicyType,
 } from '@prosto/platform-sdk';
 import type { IRuntimeOperationalReports } from '../diagnostics/diagnostics.types.js';
+import type {
+  ModuleArtifactSourceDescriptorType,
+} from '../loader/loader.types.js';
 
-export interface IRuntimeModuleRef {
+/**
+ * @beta
+ * In-memory module reference passed directly to the runtime.
+ */
+export interface IRuntimeInMemoryModuleRef {
   readonly module: IPlatformModule;
 }
 
+/**
+ * @beta
+ * Artifact-based module reference resolved from an external source.
+ */
+export interface IRuntimeArtifactModuleRef {
+  readonly source: ModuleArtifactSourceDescriptorType;
+  readonly moduleIdHint?: string;
+}
+
+/**
+ * @beta
+ * Union of all supported module reference types.
+ */
+export type RuntimeModuleRefType = IRuntimeInMemoryModuleRef | IRuntimeArtifactModuleRef;
+
+/**
+ * @beta
+ * Configuration options for creating a platform runtime instance.
+ */
 export interface IRuntimeOptions {
   readonly startupPolicy: StartupPolicyType;
   readonly runtimeVersion: IPlatformRuntimeVersionContext;
-  readonly modules: readonly IRuntimeModuleRef[];
+  readonly modules: readonly RuntimeModuleRefType[];
   readonly shutdownTimeoutMs?: number;
   readonly correlationId?: string;
 }
 
+/**
+ * @beta
+ * Active platform runtime with startup reports and lifecycle control.
+ */
 export interface IPlatformRuntime {
   readonly reports: IRuntimeOperationalReports;
   readonly startedModuleIds: readonly string[];

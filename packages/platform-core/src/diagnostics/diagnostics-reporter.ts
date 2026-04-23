@@ -6,7 +6,7 @@ import {
   type IStartupReportInput,
   RuntimeStartupStatus,
 } from './diagnostics.types.js';
-import { dateNowIso, redactSecretsInMessage } from '../utils/index.js';
+import { dateNowIso, redactSecretsInMessage } from '../utils/common.utils.js';
 
 function sanitizeFailure(failure: IRuntimeFailureDiagnostic): IRuntimeFailureDiagnostic {
   return {

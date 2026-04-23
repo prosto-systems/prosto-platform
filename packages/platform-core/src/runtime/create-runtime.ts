@@ -32,7 +32,7 @@ import {
 import {
   InMemoryServiceRegistry,
 } from '../services/in-memory-service-registry.js';
-import { dateNowIso } from '../utils/index.js';
+import { dateNowIso } from '../utils/common.utils.js';
 
 function createCorrelationId(seed?: string): string {
   if (seed && seed.trim()) {
@@ -42,6 +42,11 @@ function createCorrelationId(seed?: string): string {
   return `rt-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
 }
 
+/**
+ * @beta
+ * Factory function that creates a deterministic platform runtime instance.
+ * Orchestrates module discovery, loading, lifecycle startup, and bootstrap coordination.
+ */
 export async function createPlatformRuntime(
   options: IRuntimeOptions,
 ): Promise<IPlatformRuntime> {
@@ -53,10 +58,10 @@ export async function createPlatformRuntime(
   const contextFactory = new ModuleContextFactory(services, events, loggerFactory);
 
   const discovery = discoverModules(options.modules);
-  const loadedArtifacts = loadModuleArtifacts(discovery.candidates);
+  const loadResult = await loadModuleArtifacts(discovery.candidates);
 
   const lifecycleResult = await runStartupLifecycle(
-    loadedArtifacts.map((artifact) => artifact.module),
+    loadResult.loaded.map((artifact) => artifact.module),
     contextFactory,
     options.startupPolicy,
     options.runtimeVersion.sdkVersion,
@@ -68,7 +73,8 @@ export async function createPlatformRuntime(
       startupStartedAt,
       policyMode: options.startupPolicy,
       runtimeVersion: options.runtimeVersion,
-      candidates: loadedArtifacts,
+      candidates: loadResult.loaded,
+      preRejectedArtifacts: [...discovery.rejected, ...loadResult.rejected],
     },
     lifecycleResult as IBootstrapCoordinatorLifecycleResult,
   );
@@ -119,7 +125,7 @@ export async function createPlatformRuntime(
     reports,
     startedModuleIds: bootstrapContext.loadedModules.map((module) => module.manifest.id),
     degraded: startupReport.degraded,
-    async stop(): Promise<void> {
+    async stop() {
       if (stopped) {
         return;
       }
@@ -132,6 +138,9 @@ export async function createPlatformRuntime(
         options.runtimeVersion.sdkVersion,
         options.shutdownTimeoutMs ?? 1000,
       );
+
+      services.dispose()
+      events.dispose()
 
       reports.shutdown = createShutdownReport({
         correlationId,

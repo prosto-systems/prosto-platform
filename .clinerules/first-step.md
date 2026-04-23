@@ -106,7 +106,7 @@ When analyzing the project, check for:
 - Completed: Phase 02 Monorepo Package Skeleton
 - Completed: Phase 03 SDK Contract Baseline
 - Completed: Phase 04 Contract Conformance Test Package
-- Completed: Phase 05 Core Runtime Foundation
+- Partially completed: Phase 05 Core Runtime Foundation
 - Active: Phase 06 Security and Performance Hardening
 - (See `.context/04-implementation-plan/` for full roadmap)
 

@@ -13,7 +13,7 @@ This index consolidates the execution-ready implementation plan for `prosto-plat
 - `Phase 02`: Completed (workspace packages, TypeScript baseline, dependency and public API boundary checks, dependency map).
 - `Phase 03`: Completed (SDK contracts, manifest schema/semantic validation, typed tokens, validation errors, unit and type-level tests).
 - `Phase 04`: Completed (contract conformance package implementation, failure taxonomy, reference module validation, compatibility matrix baseline).
-- `Phase 05`: Completed (core runtime foundation, deterministic lifecycle orchestration, active FF-03/FF-04 scripts).
+- `Phase 05`: Partially Completed (core runtime foundation, deterministic lifecycle orchestration, active FF-03/FF-04 scripts).
 - `Current active phase`: Phase 06 (security controls and performance regression gates).
 - `Phases 07-10`: Planned.
 
@@ -77,7 +77,7 @@ Current dependency fulfillment:
 - Phase 02 prerequisite: satisfied.
 - Phase 03 prerequisite: satisfied.
 - Phase 04: completed and validated.
-- Phase 05: completed and validated.
+- Phase 05: partially completed and validated.
 - Phases 06-10: pending implementation (Phase 06 is current active phase).
 
 ## Milestones and Stage Gates

@@ -6,7 +6,7 @@
 
 ## ⚠️ Current Project Status
 
-**IMPORTANT**: Phase 01 through Phase 05 are complete. The repository now has governance/workspace baselines, SDK contract baseline, contract conformance validation, and runtime lifecycle foundation; security/performance hardening gates remain for Phase 06+.
+**IMPORTANT**: Phase 01 through Phase 05 are partially complete. The repository now has governance/workspace baselines, SDK contract baseline, contract conformance validation, and runtime lifecycle foundation; security/performance hardening gates remain for Phase 06+.
 
 ### Current Tooling Availability
 - Phase 01 governance workflows are active under `.github/workflows/`:

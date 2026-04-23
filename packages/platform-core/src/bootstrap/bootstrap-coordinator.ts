@@ -8,6 +8,7 @@ import type {
 import type {
   IRuntimeFailureDiagnostic,
 } from '../diagnostics/diagnostics.types.js';
+import type { IRejectedModuleArtifact } from '../loader/loader.types.js';
 import {
   checkModuleCompatibility,
 } from '../compatibility/compatibility-checker.js';
@@ -23,11 +24,35 @@ export function coordinateBootstrap(
   lifecycleResult: IBootstrapCoordinatorLifecycleResult,
 ): Omit<IBootstrapContext, 'startupReport'> {
   const stageOutcomes: IBootstrapStageOutcome[] = [];
-  const failedDiagnostics: IRuntimeFailureDiagnostic[] = [];
-  const skippedModuleIds = new Set<string>();
   const loadedModules: IPlatformModule[] = [];
+  const skippedModuleIds = new Set<string>();
+  const failedDiagnostics: IRuntimeFailureDiagnostic[] = [];
+  const discoveryFailures: IRejectedModuleArtifact[] = []
 
-  stageOutcomes.push({ stage: 'discover', ok: true });
+  for (const preRejectedArtifact of input.preRejectedArtifacts) {
+    skippedModuleIds.add(preRejectedArtifact.moduleId)
+
+    failedDiagnostics.push({
+      moduleId: preRejectedArtifact.moduleId,
+      phase: preRejectedArtifact.phase,
+      errorCode: preRejectedArtifact.reasonCode,
+      message: preRejectedArtifact.message,
+      remediationHint: preRejectedArtifact.remediationHint,
+    })
+
+    if (preRejectedArtifact.phase === 'discover') {
+      discoveryFailures.push(preRejectedArtifact)
+    }
+  }
+
+  stageOutcomes.push({
+    stage: 'discover',
+    ok: discoveryFailures.length === 0,
+    details:
+      discoveryFailures.length > 0
+        ? `${discoveryFailures.length} modules rejected during discover stage`
+        : undefined,
+  });
 
   const validatedModules: IPlatformModule[] = [];
 
@@ -69,9 +94,11 @@ export function coordinateBootstrap(
     validatedModules.push(artifact.module);
   }
 
+  const validateFailuresCount = failedDiagnostics.filter((item) => item.phase === 'validate').length;
+
   stageOutcomes.push({
     stage: 'validate',
-    ok: failedDiagnostics.length === 0,
+    ok: validateFailuresCount === 0,
     details: `${validatedModules.length}/${input.candidates.length} modules validated`,
   });
 
