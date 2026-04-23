@@ -3,10 +3,10 @@
 This directory contains the actionable deep-audit outcome for `prosto-platform` under a mixed strategy:
 internal MVP first, then external ecosystem scale-out.
 
-## Status Note (2026-04-03)
-- Phase 01 through Phase 04 are completed in repository reality.
-- Current active implementation phase is Phase 05 (core runtime foundation).
-- This directory primarily captures audit and planning guidance produced before runtime implementation phases.
+## Status Note (2026-04-23)
+- Phase 01 through Phase 05 are completed in repository reality.
+- Current active implementation phase is Phase 06 (security controls and performance regression gates).
+- This directory primarily captures audit and planning guidance produced before runtime hardening phases.
 - For live phase status, use `.context/04-implementation-plan/README.md` and the root `README.md`.
 
 ## Execution Order

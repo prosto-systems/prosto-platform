@@ -34,6 +34,7 @@ Status context:
 
 ## Interfaces
 - `IServiceRegistry` (`@stable`)
+- `IEventMetadata` (`@stable`)
 - `IEventEnvelope` (`@stable`)
 - `EventHandlerType` (`@stable`)
 - `IEventBus` (`@stable`)

@@ -1,117 +1,325 @@
 # Phase 05 - Core Runtime Foundation and Deterministic Lifecycle
 
+## Execution Status
+- Status: Completed
+- Validation date: 2026-04-14
+- Repository evidence snapshot:
+  - `packages/platform-core/src/` includes runtime bootstrap, compatibility, graph, lifecycle, policy, diagnostics, and runtime factory implementation
+  - Root script `validate:runtime-policy` is executable via `scripts/validate-runtime-policy.mjs`
+  - Root script `test:lifecycle-determinism` is executable via `scripts/test-lifecycle-determinism.mjs`
+  - Phase 04 contract conformance package remains active and reusable
+
 ## Phase Objective
-Implement `@prosto/platform-core` minimal kernel with deterministic module lifecycle orchestration, compatibility validation, and startup policies `strict` and `best-effort`.
+Implement `@prosto/platform-core` minimal runtime kernel with deterministic lifecycle orchestration, compatibility validation, startup policy control `strict` and `best-effort`, and machine-readable diagnostics required to activate architecture fitness functions FF-03 and FF-04.
 
 ## Scope Boundaries
 ### In Scope
-- Runtime bootstrap pipeline: discover -> validate -> resolve -> lifecycle.
-- Dependency graph resolution and ordering.
-- Policy-driven startup behavior.
-- Startup diagnostics payload with explicit reasons for load outcomes.
+- Bootstrap pipeline in runtime kernel: discover -> validate -> resolve -> lifecycle.
+- Deterministic dependency graph resolution and stable ordering.
+- Startup policy decision engine for `strict` and `best-effort`.
+- Required diagnostics payload for loaded, skipped, failed modules with reason taxonomy.
+- Shutdown sequencing in reverse startup order with bounded timeout contract.
+- Integration and determinism tests for policy and ordering behavior.
 
 ### Out of Scope
-- Production-grade adapter coverage across all transports.
-- Ecosystem-wide external module onboarding.
-- Advanced distributed runtime topology.
+- Full production adapter matrix beyond minimal runtime entry.
+- Third-party ecosystem rollout and external catalog automation.
+- Distributed multi-node runtime topology.
+- Admin shell implementation and UI concerns.
 
 ## Prerequisites and Dependencies
-- Phase 03 SDK contract definitions complete.
-- Phase 04 contract tests and reference modules complete.
-- Lifecycle and policy baselines in:
+- Completed: Phase 03 SDK contracts and validation baseline.
+- Completed: Phase 04 contract conformance suite and reference modules.
+- Required architecture references:
   - `.context/02-architecture-design/01-architecture-baseline.md`
   - `.context/02-architecture-design/02-domain-and-capability-model.md`
   - `.context/02-architecture-design/adr/ADR-0004-lifecycle-orchestration-and-startup-policies.md`
+  - `.context/02-architecture-design/sequence/01-bootstrap-lifecycle.md`
+  - `.context/02-architecture-design/sequence/03-graceful-shutdown.md`
+  - `.context/02-architecture-design/sequence/04-critical-module-failure.md`
 
-## Detailed Ordered Implementation Steps
-1. Implement bootstrap coordinator in `platform-core/src/bootstrap`.
-2. Implement module discovery and manifest loading in `platform-core/src/loader`.
-3. Implement compatibility checks against SDK and platform version ranges.
-4. Implement dependency graph builder and topological sorting.
-5. Implement lifecycle orchestrator:
-   - `register`
-   - `init`
-   - `start`
-   - `stop`
-6. Implement startup policy handler:
-   - fail-fast for strict mode
-   - degrade-and-continue for best-effort on non-critical failures
-7. Implement diagnostics reporter capturing:
-   - loaded modules
-   - skipped modules
-   - failed modules with reason codes
-8. Add integration tests for deterministic ordering and policy behavior.
+## Execution Closure Snapshot
 
-## Code Examples
-### Example: startup policy guard
-```typescript
-if (policy === 'strict' && failure.kind !== 'none') {
-  throw new StartupPolicyError('STRICT_STARTUP_BLOCKED', failure);
-}
+| Area | Phase-start evidence | Delivered in Phase 05 | Verification signal |
+|---|---|---|---|
+| Runtime kernel | `packages/platform-core/src/index.ts` placeholder export | Runtime bootstrap, loader, graph, lifecycle, policy, diagnostics, and runtime factory are implemented | `@prosto/platform-core` integration tests and package exports |
+| Runtime policy validation | Root script existed as TODO | Executable policy validation command implemented in `scripts/validate-runtime-policy.mjs` | `npm run validate:runtime-policy` |
+| Determinism test gate | Root script existed as TODO | Deterministic order test gate implemented in `scripts/test-lifecycle-determinism.mjs` | `npm run test:lifecycle-determinism` |
+| Contract alignment | Phase 04 suite active | Runtime outcomes aligned with contract semantics and validated against reference modules | `npm run test:contracts` plus runtime integration suite |
 
-if (policy === 'best-effort' && failure.moduleCriticality === 'normal') {
-  diagnostics.recordSkipped(failure);
-  continue;
-}
+## Target Runtime Flow
+
+### Bootstrap pipeline
+```mermaid
+flowchart TD
+  A[Operator starts runtime]
+  B[Bootstrap coordinator loads config]
+  C[Module loader discovers artifacts]
+  D[Manifest and integrity validation]
+  E[Compatibility checker evaluates ranges]
+  F[Dependency graph resolver computes order]
+  G[Lifecycle orchestrator runs register init start]
+  H[Diagnostics reporter emits startup report]
+
+  A --> B --> C --> D --> E --> F --> G --> H
 ```
 
-### Example: deterministic lifecycle execution
-```typescript
-for (const moduleRef of orderedModules) {
-  await moduleRef.instance.register(ctx);
-  await moduleRef.instance.init(ctx);
-  await moduleRef.instance.start(ctx);
-}
+### Policy branching
+```mermaid
+flowchart TD
+  A[Lifecycle error detected]
+  B{Module criticality}
+  C[Abort startup with failure diagnostics]
+  D{Startup policy mode}
+  E[Abort startup]
+  F[Skip failed module]
+  G[Continue startup in degraded mode]
+
+  A --> B
+  B -->|critical| C
+  B -->|normal| D
+  D -->|strict| E
+  D -->|best effort| F --> G
 ```
 
-### Example: diagnostics output shape
-```json
-{
-  "policy": "best-effort",
-  "loaded": ["module-health@0.1.0"],
-  "skipped": [{ "id": "module-auth", "reason": "COMPATIBILITY_MISMATCH" }],
-  "failed": []
-}
+### Deterministic ordering and shutdown
+```mermaid
+flowchart LR
+  A[Graph topological order]
+  B[register phase order]
+  C[init phase order]
+  D[start phase order]
+  E[Runtime started]
+  F[stop phase reverse order]
+  G[Shutdown diagnostics]
+
+  A --> B --> C --> D --> E --> F --> G
 ```
 
-## Affected Modules or Files
-### Existing files likely updated
-- `packages/platform-core/package.json`
-- `packages/platform-core/src/index.ts`
+## Workstreams
 
-### New files expected
-- `packages/platform-core/src/bootstrap/*.ts`
-- `packages/platform-core/src/loader/*.ts`
-- `packages/platform-core/src/compatibility/*.ts`
-- `packages/platform-core/src/graph/*.ts`
-- `packages/platform-core/src/lifecycle/*.ts`
-- `packages/platform-core/src/policy/*.ts`
-- `packages/platform-core/src/diagnostics/*.ts`
-- `packages/platform-core/test/integration/*.test.ts`
+### WS-01 Runtime Contracts and Types
+Goal: define runtime contracts that align with SDK and diagnostics requirements.
 
-## Validation and Testing Approach
-- Integration tests for strict and best-effort startup paths.
-- Determinism tests ensuring stable order under same config.
-- Contract alignment tests with SDK interfaces.
-- Diagnostics schema validation tests.
+### WS-02 Bootstrap and Module Loading
+Goal: implement discover validate resolve pipeline with explicit failure mapping.
 
-## Data or Migration Impact
-- No persistent business data migration.
-- Runtime behavior migration for startup failure handling semantics.
+### WS-03 Deterministic Lifecycle and Policy Engine
+Goal: enforce stable lifecycle ordering and policy outcomes for all failure classes.
 
-## Risks and Mitigations
-- Risk: non-deterministic lifecycle due to implicit async side effects.
-  - Mitigation: enforce explicit phase sequencing and bounded async operations.
-- Risk: compatibility false negatives block valid modules.
-  - Mitigation: maintain compatibility test matrix and explicit semver policy tests.
+### WS-04 Diagnostics and Operability
+Goal: produce machine-readable startup and shutdown reports with required metadata.
+
+### WS-05 Test Gates and Script Activation
+Goal: replace Phase 05 placeholders with executable validation and determinism checks.
+Outcome: completed; both runtime scripts are active and wired to integration tests.
+
+## Detailed Ordered Implementation Plan
+The ordered steps below are preserved as execution traceability for the completed Phase 05 implementation.
+
+### Step 1 - Create runtime public API skeleton
+- File-level target:
+  - `packages/platform-core/src/index.ts`
+  - `packages/platform-core/src/runtime/runtime.types.ts`
+  - `packages/platform-core/src/runtime/create-runtime.ts`
+- Evidence linkage:
+  - Core was placeholder at phase start and required a runnable API baseline.
+  - Domain model requires explicit runtime object and startup policy representation.
+- Activation condition:
+  - Runtime APIs are available for subsequent workstreams.
+- Acceptance signal:
+  - `platform-core` exports typed runtime factory and startup options.
+  - `typecheck` passes for `platform-core` package.
+
+### Step 2 - Implement bootstrap coordinator
+- File-level target:
+  - `packages/platform-core/src/bootstrap/bootstrap-coordinator.ts`
+  - `packages/platform-core/src/bootstrap/bootstrap.types.ts`
+- Evidence linkage:
+  - Architecture baseline requires controlled pipeline discover validate resolve lifecycle.
+- Activation condition:
+  - Coordinator accepts config input and emits structured bootstrap context.
+- Acceptance signal:
+  - Coordinator executes stage transitions in fixed order and captures stage outcomes.
+
+### Step 3 - Implement module discovery and artifact loading
+- File-level target:
+  - `packages/platform-core/src/loader/module-discovery.ts`
+  - `packages/platform-core/src/loader/module-loader.ts`
+  - `packages/platform-core/src/loader/loader.types.ts`
+- Evidence linkage:
+  - Sequence model requires explicit discover stage before validation and lifecycle.
+- Activation condition:
+  - Loader returns module candidates and artifact metadata with deterministic ordering key.
+- Acceptance signal:
+  - Discovery output is stable for identical input config.
+  - Rejected artifacts contain reason code and module identity.
+
+### Step 4 - Implement manifest and compatibility validation
+- File-level target:
+  - `packages/platform-core/src/compatibility/manifest-guard.ts`
+  - `packages/platform-core/src/compatibility/compatibility-checker.ts`
+  - `packages/platform-core/src/compatibility/reason-codes.ts`
+- Evidence linkage:
+  - SDK contracts and ADR policy require explicit compatibility gating.
+- Activation condition:
+  - Every discovered module receives pass or fail decision with reason taxonomy.
+- Acceptance signal:
+  - Incompatible SDK or platform ranges are rejected before graph resolution.
+  - Validation result includes `moduleId`, `phase`, `errorCode`, `remediationHint`.
+
+### Step 5 - Implement dependency graph resolver and deterministic order
+- File-level target:
+  - `packages/platform-core/src/graph/dependency-graph.ts`
+  - `packages/platform-core/src/graph/topological-sort.ts`
+  - `packages/platform-core/src/graph/graph.errors.ts`
+- Evidence linkage:
+  - ADR lifecycle order is dependency-driven and deterministic.
+- Activation condition:
+  - Validated module set can be ordered or rejected on cycle detection.
+- Acceptance signal:
+  - Cycle detection returns explicit diagnostic with impacted modules.
+  - Repeated runs with same module set produce identical startup order.
+
+### Step 6 - Implement lifecycle orchestrator
+- File-level target:
+  - `packages/platform-core/src/lifecycle/lifecycle-orchestrator.ts`
+  - `packages/platform-core/src/lifecycle/lifecycle.types.ts`
+  - `packages/platform-core/src/lifecycle/lifecycle.errors.ts`
+- Evidence linkage:
+  - Required lifecycle sequence is register -> init -> start -> stop.
+- Activation condition:
+  - Orchestrator can execute startup phases and stop in reverse order.
+- Acceptance signal:
+  - Startup uses forward deterministic order.
+  - Shutdown uses reverse startup order with timeout handling.
+
+### Step 7 - Implement startup policy evaluator
+- File-level target:
+  - `packages/platform-core/src/policy/startup-policy-evaluator.ts`
+  - `packages/platform-core/src/policy/policy.types.ts`
+- Evidence linkage:
+  - ADR mandates strict and best-effort behavior with critical module override.
+- Activation condition:
+  - Policy evaluator returns one of: abort, skip, continue-degraded.
+- Acceptance signal:
+  - Critical module failure always aborts startup regardless of policy mode.
+  - Non-critical failure in best-effort produces skip with degraded flag.
+
+### Step 8 - Implement diagnostics reporter
+- File-level target:
+  - `packages/platform-core/src/diagnostics/diagnostics-reporter.ts`
+  - `packages/platform-core/src/diagnostics/diagnostics.schema.ts`
+  - `packages/platform-core/src/diagnostics/diagnostics.types.ts`
+- Evidence linkage:
+  - Operability baseline requires structured startup and shutdown reports.
+- Activation condition:
+  - Runtime emits diagnostics for success, degraded success, and startup failure.
+- Acceptance signal:
+  - Report includes policy mode, loaded modules, skipped modules, failed modules, correlation metadata.
+  - Secret fields are redacted from logs and report payload.
+
+### Step 9 - Add integration tests for runtime behavior
+- File-level target:
+  - `packages/platform-core/tests/integration/bootstrap-strict.test.ts`
+  - `packages/platform-core/tests/integration/bootstrap-best-effort.test.ts`
+  - `packages/platform-core/tests/integration/critical-failure.test.ts`
+  - `packages/platform-core/tests/integration/shutdown-order.test.ts`
+- Evidence linkage:
+  - FF-03 and FF-04 require deterministic lifecycle and diagnostics completeness.
+- Activation condition:
+  - Integration suite covers strict abort, best-effort degrade, critical failure override, reverse shutdown order.
+- Acceptance signal:
+  - Tests are deterministic and pass for stable reference fixtures.
+  - Failures emit actionable reason codes.
+
+### Step 10 - Activate repository gates and scripts
+- File-level target:
+  - `package.json`
+  - `scripts/validate-runtime-policy.mjs`
+  - `scripts/test-lifecycle-determinism.mjs`
+  - `turbo.json`
+- Evidence linkage:
+  - Root scripts were placeholders at phase start and could not enforce fitness functions.
+- Activation condition:
+  - Placeholder scripts are replaced by executable checks linked to runtime tests.
+- Acceptance signal:
+  - `validate:runtime-policy` validates diagnostics payload completeness.
+  - `test:lifecycle-determinism` executes deterministic order checks.
+
+### Step 11 - Update package documentation and rollout notes
+- File-level target:
+  - `packages/platform-core/README.md`
+  - `README.md`
+  - `docs/governance/required-checks.md`
+- Evidence linkage:
+  - Governance requires traceable checks and documented runtime behavior.
+- Activation condition:
+  - Runtime startup policy behavior and checks are documented in repository docs.
+- Acceptance signal:
+  - Docs map scripts and outcomes to FF-03 and FF-04.
+  - Operators can identify strict versus degraded startup outcomes.
+
+## Runtime Reason Taxonomy Baseline
+
+| Code | Phase | Meaning | Policy impact |
+|---|---|---|---|
+| MANIFEST_INVALID | validate | Manifest schema or required fields invalid | reject module |
+| INTEGRITY_CHECK_FAILED | validate | Artifact integrity evidence missing or invalid | reject module |
+| COMPATIBILITY_MISMATCH | validate | SDK or platform version range not satisfied | reject module |
+| DEPENDENCY_CYCLE_DETECTED | resolve | Module dependency graph contains cycle | abort startup |
+| DEPENDENCY_MISSING | resolve | Required dependency module unavailable | abort or skip by policy and criticality |
+| LIFECYCLE_REGISTER_FAILED | lifecycle | Module register phase failed | policy evaluation required |
+| LIFECYCLE_INIT_FAILED | lifecycle | Module init phase failed | policy evaluation required |
+| LIFECYCLE_START_FAILED | lifecycle | Module start phase failed | policy evaluation required |
+| SHUTDOWN_TIMEOUT | lifecycle | Module stop phase exceeded timeout | runtime shutdown degraded |
+
+## Validation and Testing Strategy
+- Unit tests per workstream component:
+  - graph ordering and cycle detection
+  - policy evaluator decisions
+  - diagnostics payload shape and redaction
+- Integration tests for full pipeline under strict and best-effort modes.
+- Determinism repeated-run tests with identical fixture sets.
+- Diagnostics schema conformance tests with required metadata checks.
+- Contract alignment checks using reference modules from `examples/`.
+
+## Data and Migration Impact
+- No business data migration.
+- Operational behavior migration:
+  - startup outcomes become explicitly policy-driven.
+  - diagnostics payload becomes required release artifact for runtime gates.
+
+## Risk Register and Mitigation Gates
+
+| Risk | Trigger | Mitigation gate | Exit criterion |
+|---|---|---|---|
+| Hidden module import side effects | Non-deterministic ordering or timing | Determinism tests with repeated runs | Stable order confirmed across repeated executions |
+| Overly strict compatibility checks | Valid module rejected | Compatibility matrix review using reference modules | False rejection cases resolved with tests |
+| Diagnostics drift | Missing required fields in report | Runtime policy validation script | Validation passes with full required payload |
+| Policy ambiguity in failure handling | Inconsistent strict and best-effort behavior | Integration tests for branch outcomes | Branch outcomes match ADR rules |
 
 ## Rollback Approach
-- Feature-flag new startup policy enforcement where possible.
-- On critical regression, rollback core package to previous tagged baseline and re-run compatibility suite.
-- Preserve failing diagnostics payload for root-cause analysis.
+- Keep Phase 05 runtime behind a controlled release flag at entry layer where practical.
+- On critical regression:
+  - revert `@prosto/platform-core` runtime API to previous tag,
+  - disable newly activated runtime policy gates temporarily with documented exception,
+  - preserve diagnostics and integration outputs for root-cause analysis.
 
 ## Completion Criteria
-- Core runtime can load and orchestrate reference modules end-to-end.
-- Strict and best-effort behavior match documented policy.
-- Startup diagnostics include required metadata and reason taxonomy.
-- Integration tests pass on protected branches.
+- `@prosto/platform-core` exposes runtime API capable of deterministic startup and shutdown orchestration.
+- Strict and best-effort policy branches behave according to ADR-0004, including critical failure override.
+- Diagnostics payload includes required metadata and reason taxonomy for all startup outcomes.
+- Root scripts `validate:runtime-policy` and `test:lifecycle-determinism` are executable and non-placeholder.
+- Integration tests pass for strict, best-effort, critical-failure, and reverse-shutdown scenarios.
+- Governance docs reflect activated runtime checks and fitness function coverage.
+
+## Traceability Matrix
+
+| Requirement | Architecture source | Implementation artifact | Verification artifact |
+|---|---|---|---|
+| Deterministic lifecycle ordering | ADR-0004 and SEQ-01 | `platform-core/src/graph` and `platform-core/src/lifecycle` | lifecycle determinism tests |
+| Policy-driven startup behavior | ADR-0004 and domain model policy table | `platform-core/src/policy` | strict and best-effort integration tests |
+| Startup diagnostics completeness | Architecture baseline FF-04 | `platform-core/src/diagnostics` and runtime policy script | `validate:runtime-policy` output |
+| Reverse-order graceful shutdown | SEQ-03 | `platform-core/src/lifecycle` stop orchestration | shutdown integration tests |
+| Critical module failure abort | SEQ-04 | policy evaluator plus bootstrap coordinator | critical failure integration tests |

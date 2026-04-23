@@ -31,7 +31,7 @@ jobs:
       - name: Build packages
         run: npm run build
 
-      - name: FF-03 lifecycle determinism (placeholder)
+      - name: FF-03 lifecycle determinism
         run: npm run test:lifecycle-determinism
 
       - name: FF-05 contracts gate

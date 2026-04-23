@@ -48,6 +48,7 @@ classDiagram
 
   class ServiceRegistry {
     +register(token, service)
+    +override(token, service)
     +resolve(token)
     +unregister(token)
   }

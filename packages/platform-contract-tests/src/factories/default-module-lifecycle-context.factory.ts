@@ -3,6 +3,7 @@ import type {
   EventTokenType,
   IEventBus,
   IEventEnvelope,
+  IEventMetadata,
   IModuleContext,
   IPlatformModule,
   IServiceRegistry,
@@ -11,35 +12,45 @@ import type {
 import type { IModuleLifecycleContextFactory } from '../types/index.js';
 
 class MockServiceRegistry implements IServiceRegistry {
-  private readonly _services = new Map<symbol, unknown>();
+  private readonly _registry = new Map<symbol, unknown>();
 
   register<TService>(token: ServiceTokenType<TService>, service: NoInfer<TService>): void {
-    this._services.set(token, service);
+    if (this._registry.has(token)) {
+      throw new Error(`Service with token ${token.toString()} already registered.`);
+    }
+
+    this._registry.set(token, service);
+  }
+
+  override<TService>(token: ServiceTokenType<TService>, service: NoInfer<TService>): void {
+    if (!this._registry.has(token)) {
+      throw new Error(`Service with token ${token.toString()} not found.`);
+    }
+
+    this._registry.set(token, service);
   }
 
   resolve<TService>(token: ServiceTokenType<TService>): TService | undefined {
-    return this._services.get(token) as TService | undefined;
+    return this._registry.get(token) as TService | undefined;
   }
 
   has<TService>(token: ServiceTokenType<TService>): boolean {
-    return this._services.has(token);
+    return this._registry.has(token);
   }
 
   unregister<TService>(token: ServiceTokenType<TService>): void {
-    this._services.delete(token);
+    this._registry.delete(token);
   }
 }
 
 class MockEventBus implements IEventBus {
   private readonly _handlers = new Map<symbol, Set<EventHandlerType<unknown>> | undefined>();
 
-  publish<TPayload>(
+  async publish<TPayload>(
     token: EventTokenType<TPayload>,
     payload: TPayload,
-    metadata?: Omit<IEventEnvelope<TPayload>, 'token' | 'payload' | 'timestamp'> & {
-      readonly timestamp?: string;
-    },
-  ): void {
+    metadata?: Partial<IEventMetadata>,
+  ): Promise<void> {
     const handlers = this._handlers.get(token);
 
     if (!handlers || !handlers.size) {
@@ -47,21 +58,22 @@ class MockEventBus implements IEventBus {
     }
 
     const envelope: IEventEnvelope<TPayload> = {
-      token,
       payload,
-      timestamp: metadata?.timestamp ?? new Date().toISOString(),
-      correlationId: metadata?.correlationId,
-      producerModuleId: metadata?.producerModuleId,
-      schemaVersion: metadata?.schemaVersion,
+      metadata: {
+        timestamp: metadata?.timestamp ?? new Date().toISOString(),
+        correlationId: metadata?.correlationId,
+        producerModuleId: metadata?.producerModuleId,
+        schemaVersion: metadata?.schemaVersion,
+      },
     };
 
     for (const handler of Array.from(handlers)) {
-      handler(payload, envelope);
+      await handler(envelope);
     }
   }
 
   subscribe<TPayload>(token: EventTokenType<TPayload>, handler: EventHandlerType<TPayload>): void {
-    const handlers = this._handlers.get(token) ?? new Set<EventHandlerType<unknown>>();
+    const handlers = this._handlers.get(token) ?? new Set();
     handlers.add(handler as EventHandlerType<unknown>);
     this._handlers.set(token, handlers);
   }

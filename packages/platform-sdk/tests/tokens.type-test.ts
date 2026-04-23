@@ -36,7 +36,7 @@ type _EventTokenTypeAssertionType =
 type _ServiceTokenTypeAssertionType =
   AssertType<IsEqualType<typeof healthServiceToken, ServiceTokenType<IHealthService>>>;
 
-eventBus.subscribe(healthEventToken, (payload) => {
+eventBus.subscribe(healthEventToken, ({ payload }) => {
   if (payload.status === 'ok') {
     logger.info('Healthy');
   } else {

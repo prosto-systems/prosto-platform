@@ -44,6 +44,7 @@ Contract authority for Prosto platform module manifests, lifecycle interfaces, t
 ### Interfaces
 - `IServiceRegistry`
 - `IEventBus`
+- `IEventMetadata`
 - `IEventEnvelope<TPayload>`
 - `IModuleLogger`
 - `IModuleContext`
