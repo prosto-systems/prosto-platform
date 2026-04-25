@@ -7,7 +7,7 @@ export * from './utils/index.js';
 export * from './validation/index.js';
 
 /**
- * @stable
+ * @alpha
  * SDK contract surface baseline identifier.
  */
 export const SDK_CONTRACT_SURFACE_VERSION = '0.0.0-phase-03';

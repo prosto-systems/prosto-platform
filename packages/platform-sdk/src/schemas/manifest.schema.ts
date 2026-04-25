@@ -8,7 +8,7 @@ import {
 import { isSemverRange, isSemverVersion } from '../utils/index.js';
 
 /**
- * @stable
+ * @alpha
  * Zod schema for semver version.
  */
 export const SemverVersionSchema = z.string().refine(isSemverVersion, {
@@ -16,7 +16,7 @@ export const SemverVersionSchema = z.string().refine(isSemverVersion, {
 });
 
 /**
- * @stable
+ * @alpha
  * Zod schema for semver range.
  */
 export const SemverRangeSchema = z.string().refine(isSemverRange, {
@@ -24,7 +24,7 @@ export const SemverRangeSchema = z.string().refine(isSemverRange, {
 });
 
 /**
- * @stable
+ * @alpha
  * Zod schema for module capability declarations.
  */
 export const CapabilitySchema = z.string().regex(MODULE_CAPABILITY_PATTERN, {
@@ -32,7 +32,7 @@ export const CapabilitySchema = z.string().regex(MODULE_CAPABILITY_PATTERN, {
 });
 
 /**
- * @stable
+ * @alpha
  * Zod schema for module dependency declarations.
  */
 export const ModuleDependencySchema = z
@@ -46,7 +46,7 @@ export const ModuleDependencySchema = z
   .strict();
 
 /**
- * @stable
+ * @alpha
  * Zod schema for platform module manifests.
  */
 export const PlatformModuleManifestSchema = z
@@ -68,13 +68,13 @@ export const PlatformModuleManifestSchema = z
   .strict();
 
 /**
- * @stable
+ * @alpha
  * Runtime input type accepted by manifest schema validation.
  */
 export type PlatformModuleManifestInputType = z.input<typeof PlatformModuleManifestSchema>;
 
 /**
- * @stable
+ * @alpha
  * Runtime output type produced by manifest schema validation.
  */
 export type PlatformModuleManifestOutputType = z.output<typeof PlatformModuleManifestSchema>;

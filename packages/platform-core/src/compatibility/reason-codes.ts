@@ -1,7 +1,7 @@
 import type { ModuleLifecycleStageType } from '@prosto/platform-sdk';
 
 /**
- * @beta
+ * @alpha
  * Canonical reason codes for runtime diagnostic reporting.
  */
 export enum RuntimeReasonCodes {
@@ -23,13 +23,13 @@ export enum RuntimeReasonCodes {
 }
 
 /**
- * @beta
+ * @alpha
  * A type representing a string literal that corresponds to values present in `RuntimeReasonCodes`.
  */
 export type RuntimeReasonCodeType = `${RuntimeReasonCodes}`;
 
 /**
- * @beta
+ * @alpha
  * Maps lifecycle startup phases to their corresponding reason codes.
  */
 export const LIFECYCLE_PHASE_TO_REASON_CODE: Readonly<

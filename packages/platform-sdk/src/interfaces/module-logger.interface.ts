@@ -1,5 +1,5 @@
 /**
- * @stable
+ * @alpha
  * Structured logger abstraction available to modules.
  */
 export interface IModuleLogger {

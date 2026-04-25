@@ -5,7 +5,7 @@ const OBSERVABILITY_PREFIX = 'obs.';
 export const OBSERVABILITY_CHECK_RESULT_ID = 'observability-metadata';
 
 /**
- * @stable
+ * @alpha
  * Verifies minimum observability capability contract.
  */
 export function runObservabilityConformanceCheck(

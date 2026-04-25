@@ -1,5 +1,5 @@
 /**
- * @stable
+ * @alpha
  * Base error code taxonomy for SDK validation and compatibility failures.
  */
 export type PlatformSdkErrorCodeType =
@@ -7,7 +7,7 @@ export type PlatformSdkErrorCodeType =
   | 'COMPATIBILITY_VALIDATION_FAILED';
 
 /**
- * @stable
+ * @alpha
  * Shared base class for SDK-level contract failures.
  */
 export class PlatformSdkError extends Error {

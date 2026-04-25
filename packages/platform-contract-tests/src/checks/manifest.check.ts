@@ -10,7 +10,7 @@ import {
 export const MANIFEST_CHECK_RESULT_ID = 'manifest-conformance';
 
 /**
- * @stable
+ * @alpha
  * Validates module manifest schema and semantic constraints.
  */
 export function runManifestConformanceCheck(

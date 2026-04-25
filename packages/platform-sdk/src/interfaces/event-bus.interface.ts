@@ -1,7 +1,7 @@
 import type { EventTokenType } from '../types/index.js';
 
 /**
- * @stable
+ * @alpha
  * Event envelope metadata.
  */
 export interface IEventMetadata {
@@ -12,7 +12,7 @@ export interface IEventMetadata {
 }
 
 /**
- * @stable
+ * @alpha
  * Event envelope.
  */
 export interface IEventEnvelope<TPayload> {
@@ -21,7 +21,7 @@ export interface IEventEnvelope<TPayload> {
 }
 
 /**
- * @stable
+ * @alpha
  * Event handler callback signature.
  */
 export type EventHandlerType<TPayload> = (
@@ -29,7 +29,7 @@ export type EventHandlerType<TPayload> = (
 ) => void | Promise<void>;
 
 /**
- * @stable
+ * @alpha
  * Typed event bus contract shared by modules and runtime.
  */
 export interface IEventBus {

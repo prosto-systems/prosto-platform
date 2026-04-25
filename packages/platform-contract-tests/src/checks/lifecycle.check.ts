@@ -11,7 +11,7 @@ import {
 export const LIFECYCLE_CHECK_RESULT_ID = 'lifecycle-conformance'
 
 /**
- * @stable
+ * beta
  * Verifies lifecycle method presence and successful execution.
  */
 export async function runLifecycleConformanceCheck(params: {

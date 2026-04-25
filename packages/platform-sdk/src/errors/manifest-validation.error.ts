@@ -1,7 +1,7 @@
 import { PlatformSdkError } from './platform-sdk.error.js';
 
 /**
- * @stable
+ * @alpha
  * Structured issue captured during manifest validation.
  */
 export interface IManifestValidationIssue {
@@ -11,7 +11,7 @@ export interface IManifestValidationIssue {
 }
 
 /**
- * @stable
+ * @alpha
  * Manifest validation failure with machine-readable issue details.
  */
 export class ManifestValidationError extends PlatformSdkError {

@@ -94,7 +94,7 @@ class MockEventBus implements IEventBus {
 }
 
 /**
- * @stable
+ * @alpha
  * Default lifecycle context factory for contract execution.
  */
 export class DefaultModuleLifecycleContextFactory implements IModuleLifecycleContextFactory {

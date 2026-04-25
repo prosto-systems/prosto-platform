@@ -151,6 +151,7 @@ export function _internalHelper(): void {
 |-------|---------|---------------|-------------------|
 | `@stable` | Default public contract | Backward compatible within major version | All modules and adapters |
 | `@beta` | Candidate public contract | May evolve in minor releases with migration notes | Early adopters by opt-in |
+| `@alpha` | Early public contract | May evolve in minor releases with migration notes | Early adopters by opt-in |
 | `@experimental` | Exploration surface | No compatibility guarantee | Internal use and controlled pilots |
 | `@internal` | Not public API | Can change without notice | Package maintainers only |
 

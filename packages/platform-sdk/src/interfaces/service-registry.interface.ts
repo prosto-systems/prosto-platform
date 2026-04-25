@@ -1,7 +1,7 @@
 import type { ServiceTokenType } from '../types/index.js';
 
 /**
- * @stable
+ * @alpha
  * Typed service registry contract shared by runtime and modules.
  */
 export interface IServiceRegistry {

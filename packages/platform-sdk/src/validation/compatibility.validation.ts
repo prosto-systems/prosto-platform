@@ -6,7 +6,7 @@ import {
 import { isSemverSatisfied, isSemverVersion } from '../utils/index.js';
 
 /**
- * @stable
+ * @alpha
  * Runtime version context used for manifest compatibility checks.
  */
 export interface IPlatformRuntimeVersionContext {
@@ -15,7 +15,7 @@ export interface IPlatformRuntimeVersionContext {
 }
 
 /**
- * @stable
+ * @alpha
  * Successful compatibility validation result.
  */
 export interface ICompatibilityValidationSuccess {
@@ -24,7 +24,7 @@ export interface ICompatibilityValidationSuccess {
 }
 
 /**
- * @stable
+ * @alpha
  * Failed compatibility validation result.
  */
 export interface ICompatibilityValidationFailure {
@@ -33,7 +33,7 @@ export interface ICompatibilityValidationFailure {
 }
 
 /**
- * @stable
+ * @alpha
  * Compatibility validation result union.
  */
 export type CompatibilityValidationResultType =
@@ -64,7 +64,7 @@ function validateRuntimeVersion(
 }
 
 /**
- * @stable
+ * @alpha
  * Validates runtime compatibility between manifest ranges and concrete versions.
  */
 export function validateManifestCompatibility(
@@ -131,7 +131,7 @@ export function validateManifestCompatibility(
 }
 
 /**
- * @stable
+ * @alpha
  * Asserts manifest compatibility and throws on mismatch.
  */
 export function assertManifestCompatibility(

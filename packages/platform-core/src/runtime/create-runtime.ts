@@ -43,7 +43,7 @@ function createCorrelationId(seed?: string): string {
 }
 
 /**
- * @beta
+ * @alpha
  * Factory function that creates a deterministic platform runtime instance.
  * Orchestrates module discovery, loading, lifecycle startup, and bootstrap coordination.
  */

@@ -8,7 +8,7 @@ import type {
 } from '../types/index.js';
 
 /**
- * @stable
+ * @alpha
  * Basic identity metadata for a module artifact.
  */
 export interface IModuleIdentity {
@@ -17,7 +17,7 @@ export interface IModuleIdentity {
 }
 
 /**
- * @stable
+ * @alpha
  * Compatibility metadata used by runtime admission checks.
  */
 export interface IModuleCompatibility {
@@ -26,7 +26,7 @@ export interface IModuleCompatibility {
 }
 
 /**
- * @stable
+ * @alpha
  * Dependency declaration against another module.
  */
 export interface IModuleDependency {
@@ -36,7 +36,7 @@ export interface IModuleDependency {
 }
 
 /**
- * @stable
+ * @alpha
  * Canonical SDK manifest contract for executable modules.
  */
 export interface IPlatformModuleManifest extends IModuleIdentity, IModuleCompatibility {

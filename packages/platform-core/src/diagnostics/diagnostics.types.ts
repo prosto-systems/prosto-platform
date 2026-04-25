@@ -2,7 +2,7 @@ import type { StartupPolicyType } from '@prosto/platform-sdk';
 import type { RuntimeReasonCodeType } from '../compatibility/reason-codes.js';
 
 /**
- * @beta
+ * @alpha
  * Enum representing the different stages of the runtime startup process.
  */
 export type RuntimeStageType =
@@ -13,7 +13,7 @@ export type RuntimeStageType =
   | 'shutdown';
 
 /**
- * @beta
+ * @alpha
  * Interface representing diagnostic information for a runtime failure.
  */
 export interface IRuntimeFailureDiagnostic {
@@ -25,7 +25,7 @@ export interface IRuntimeFailureDiagnostic {
 }
 
 /**
- * @beta
+ * @alpha
  * Interface representing diagnostic information for a skipped module during runtime startup.
  */
 export interface IRuntimeSkippedModuleDiagnostic {
@@ -34,7 +34,7 @@ export interface IRuntimeSkippedModuleDiagnostic {
 }
 
 /**
- * @beta
+ * @alpha
  * Interface representing diagnostic information for a loaded module during runtime startup.
  */
 export interface IRuntimeLoadedModuleDiagnostic {
@@ -43,7 +43,7 @@ export interface IRuntimeLoadedModuleDiagnostic {
 }
 
 /**
- * @beta
+ * @alpha
  * Enum representing the different statuses of the runtime startup process.
  */
 export enum RuntimeStartupStatus {
@@ -53,13 +53,13 @@ export enum RuntimeStartupStatus {
 }
 
 /**
- * @beta
+ * @alpha
  * Type representing the string representation of the runtime startup status.
  */
 export type RuntimeStartupStatusType = `${RuntimeStartupStatus}`;
 
 /**
- * @beta
+ * @alpha
  * Interface representing diagnostic information for the runtime startup process.
  */
 export interface IRuntimeStartupReport {
@@ -76,7 +76,7 @@ export interface IRuntimeStartupReport {
 }
 
 /**
- * @beta
+ * @alpha
  * Interface representing diagnostic information for a runtime shutdown issue.
  */
 export interface IRuntimeShutdownIssue {
@@ -88,7 +88,7 @@ export interface IRuntimeShutdownIssue {
 }
 
 /**
- * @beta
+ * @alpha
  * Interface representing diagnostic information for the runtime shutdown process.
  */
 export interface IRuntimeShutdownReport {
@@ -101,7 +101,7 @@ export interface IRuntimeShutdownReport {
 }
 
 /**
- * @beta
+ * @alpha
  * Interface representing diagnostic information for the runtime operational reports.
  */
 export interface IRuntimeOperationalReports {
@@ -110,7 +110,7 @@ export interface IRuntimeOperationalReports {
 }
 
 /**
- * @beta
+ * @alpha
  * Interface representing input for generating a runtime startup diagnostic report.
  */
 export interface IStartupReportInput {
@@ -123,7 +123,7 @@ export interface IStartupReportInput {
 }
 
 /**
- * @beta
+ * @alpha
  * Interface representing input for generating a runtime shutdown diagnostic report.
  */
 export interface IShutdownReportInput {

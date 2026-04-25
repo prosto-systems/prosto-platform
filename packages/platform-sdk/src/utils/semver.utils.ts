@@ -1,7 +1,7 @@
 import { satisfies, valid, validRange } from 'semver';
 
 /**
- * @stable
+ * @alpha
  * Checks whether a value is a valid semantic version string.
  */
 export function isSemverVersion(value: string): boolean {
@@ -9,7 +9,7 @@ export function isSemverVersion(value: string): boolean {
 }
 
 /**
- * @stable
+ * @alpha
  * Checks whether a value is a valid semantic version range expression.
  */
 export function isSemverRange(value: string): boolean {
@@ -17,7 +17,7 @@ export function isSemverRange(value: string): boolean {
 }
 
 /**
- * @stable
+ * @alpha
  * Checks whether a concrete version satisfies a semantic version range.
  */
 export function isSemverSatisfied(version: string, range: string): boolean {

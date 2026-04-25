@@ -7,7 +7,7 @@ import {
 import { PlatformModuleManifestSchema } from '../schemas/index.js';
 
 /**
- * @stable
+ * @alpha
  * Successful manifest validation result.
  */
 export interface IManifestValidationSuccess {
@@ -16,7 +16,7 @@ export interface IManifestValidationSuccess {
 }
 
 /**
- * @stable
+ * @alpha
  * Failed manifest validation result.
  */
 export interface IManifestValidationFailure {
@@ -25,7 +25,7 @@ export interface IManifestValidationFailure {
 }
 
 /**
- * @stable
+ * @alpha
  * Discriminated union for manifest validation outcomes.
  */
 export type ManifestValidationResultType =
@@ -91,7 +91,7 @@ function collectSemanticIssues(manifest: IPlatformModuleManifest): IManifestVali
 }
 
 /**
- * @stable
+ * @alpha
  * Validates a module manifest and returns a typed success or failure result.
  */
 export function safeValidatePlatformModuleManifest(manifest: unknown): ManifestValidationResultType {
@@ -120,7 +120,7 @@ export function safeValidatePlatformModuleManifest(manifest: unknown): ManifestV
 }
 
 /**
- * @stable
+ * @alpha
  * Validates a module manifest and throws on invalid input.
  */
 export function parsePlatformModuleManifest(manifest: unknown): IPlatformModuleManifest {

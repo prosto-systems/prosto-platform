@@ -1,7 +1,7 @@
 import { PlatformSdkError } from './platform-sdk.error.js';
 
 /**
- * @stable
+ * @alpha
  * Compatibility fields validated against runtime versions.
  */
 export type CompatibilityFieldType =
@@ -9,7 +9,7 @@ export type CompatibilityFieldType =
   | 'nodeVersion';
 
 /**
- * @stable
+ * @alpha
  * Compatibility issue code taxonomy.
  */
 export type CompatibilityIssueCodeType =
@@ -18,7 +18,7 @@ export type CompatibilityIssueCodeType =
   | 'RUNTIME_VERSION_INVALID';
 
 /**
- * @stable
+ * @alpha
  * Structured compatibility mismatch detail.
  */
 export interface ICompatibilityValidationIssue {
@@ -30,7 +30,7 @@ export interface ICompatibilityValidationIssue {
 }
 
 /**
- * @stable
+ * @alpha
  * Compatibility validation failure with detailed mismatch metadata.
  */
 export class CompatibilityValidationError extends PlatformSdkError {
