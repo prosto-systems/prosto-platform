@@ -19,7 +19,7 @@ import { DefaultModuleLifecycleContextFactory } from './factories/index.js';
 import { buildConformanceReport } from './utils/index.js';
 
 /**
- * @stable
+ * @alpha
  * Executes full module contract conformance suite and returns machine-readable report.
  */
 export async function runModuleContractConformance(
@@ -44,7 +44,7 @@ export async function runModuleContractConformance(
 }
 
 /**
- * @stable
+ * @alpha
  * Reusable test-entry helper for module repositories.
  */
 export function createModuleContractTests(

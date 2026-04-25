@@ -446,7 +446,7 @@ Every implementation recommendation should include:
 - Update AGENTS.md if adding new commands or tools
 - Reference architecture docs from `.context/`
 - Document public APIs with JSDoc comments
-- Include stability level (@stable/@beta/@experimental/@internal)
+- Include stability level (@stable/@beta/@alpha/@experimental/@internal)
 
 ## Code Review Guidelines
 

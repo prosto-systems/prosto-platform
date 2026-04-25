@@ -4,7 +4,7 @@ import { ContractFailureCodes, type IContractCheckResult } from '../types/index.
 export const SECURITY_CHECK_RESULT_ID = 'security-metadata';
 
 /**
- * @stable
+ * @alpha
  * Verifies required security metadata in module manifest.
  */
 export function runSecurityMetadataConformanceCheck(

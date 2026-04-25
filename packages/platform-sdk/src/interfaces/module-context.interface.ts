@@ -4,7 +4,7 @@ import type { IModuleLogger } from './module-logger.interface.js';
 import type { IServiceRegistry } from './service-registry.interface.js';
 
 /**
- * @stable
+ * @alpha
  * Shared runtime context passed to module lifecycle handlers.
  */
 export interface IModuleContext {

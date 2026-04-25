@@ -4,19 +4,19 @@ import type {
 } from '../constants/index.js';
 
 /**
- * @stable
+ * beta
  * A single lifecycle stage identifier.
  */
 export type ModuleLifecycleStageType = (typeof MODULE_LIFECYCLE_STAGES)[number];
 
 /**
- * @stable
+ * beta
  * Startup policy marker used for failure semantics.
  */
 export type StartupPolicyType = (typeof STARTUP_POLICIES)[number];
 
 /**
- * @stable
+ * beta
  * Common lifecycle handler return contract.
  */
 export type ModuleLifecycleResultType = void | Promise<void>;

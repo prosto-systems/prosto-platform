@@ -1,13 +1,13 @@
 import type { IModuleContext, IPlatformModule } from '@prosto/platform-sdk';
 
 /**
- * @stable
+ * @alpha
  * Severity level for contract conformance checks.
  */
 export type ContractCheckSeverityType = 'mandatory' | 'advisory';
 
 /**
- * @stable
+ * @alpha
  * Standardized failure code taxonomy for CI consumers.
  */
 export enum ContractFailureCodes {
@@ -23,13 +23,13 @@ export enum ContractFailureCodes {
 }
 
 /**
- * @stable
+ * @alpha
  * Single failure code identifier.
  */
 export type ContractFailureCodeType = `${ContractFailureCodes}`;
 
 /**
- * @stable
+ * @alpha
  * Structured check outcome used in machine-readable reports.
  */
 export interface IContractCheckResult {
@@ -44,7 +44,7 @@ export interface IContractCheckResult {
 }
 
 /**
- * @stable
+ * @alpha
  * Conformance summary for quick CI gate decisions.
  */
 export interface IContractConformanceSummary {
@@ -56,7 +56,7 @@ export interface IContractConformanceSummary {
 }
 
 /**
- * @stable
+ * @alpha
  * Machine-readable report produced by the conformance suite.
  */
 export interface IModuleContractConformanceReport {
@@ -68,7 +68,7 @@ export interface IModuleContractConformanceReport {
 }
 
 /**
- * @stable
+ * @alpha
  * Runtime context for module lifecycle checks.
  */
 export interface IModuleLifecycleContextFactory {
@@ -76,7 +76,7 @@ export interface IModuleLifecycleContextFactory {
 }
 
 /**
- * @stable
+ * @alpha
  * Input contract for conformance execution.
  */
 export interface IModuleContractTestInput {
@@ -86,7 +86,7 @@ export interface IModuleContractTestInput {
 }
 
 /**
- * @stable
+ * @alpha
  * Minimal test runner contract used by createModuleContractTests.
  */
 export interface IContractTestRunnerApi {

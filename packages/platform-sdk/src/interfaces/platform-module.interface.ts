@@ -5,7 +5,7 @@ import type {
 } from './platform-module-manifest.interface.js';
 
 /**
- * @stable
+ * @alpha
  * Canonical runtime module contract implemented by platform plugins.
  */
 export interface IPlatformModule {

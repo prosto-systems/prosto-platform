@@ -5,7 +5,7 @@ import type {
 } from '../types/index.js';
 
 /**
- * @stable
+ * @alpha
  * Builds deterministic conformance summary from check results.
  */
 export function buildConformanceSummary(
@@ -42,7 +42,7 @@ export function buildConformanceSummary(
 }
 
 /**
- * @stable
+ * @alpha
  * Builds machine-readable module conformance report.
  */
 export function buildConformanceReport(
@@ -58,7 +58,7 @@ export function buildConformanceReport(
 }
 
 /**
- * @stable
+ * @alpha
  * Serializes report in deterministic JSON format for CI consumers.
  */
 export function toConformanceReportJson(report: IModuleContractConformanceReport): string {

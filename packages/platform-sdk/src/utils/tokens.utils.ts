@@ -15,7 +15,7 @@ function normalizeTokenName(name: TokenNameType): string {
 }
 
 /**
- * @stable
+ * @alpha
  * Returns the canonical key used to create a service token.
  */
 export function getServiceTokenKey(name: TokenNameType): string {
@@ -23,7 +23,7 @@ export function getServiceTokenKey(name: TokenNameType): string {
 }
 
 /**
- * @stable
+ * @alpha
  * Returns the canonical key used to create an event token.
  */
 export function getEventTokenKey(name: TokenNameType): string {
@@ -31,7 +31,7 @@ export function getEventTokenKey(name: TokenNameType): string {
 }
 
 /**
- * @stable
+ * @alpha
  * Creates a globally stable, typed service token.
  */
 export function createServiceToken<TService>(name: TokenNameType): ServiceTokenType<TService> {
@@ -39,7 +39,7 @@ export function createServiceToken<TService>(name: TokenNameType): ServiceTokenT
 }
 
 /**
- * @stable
+ * @alpha
  * Creates a globally stable, typed event token.
  */
 export function createEventToken<TPayload>(name: TokenNameType): EventTokenType<TPayload> {

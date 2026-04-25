@@ -9,7 +9,7 @@ import type {
 } from '../loader/loader.types.js';
 
 /**
- * @beta
+ * @alpha
  * In-memory module reference passed directly to the runtime.
  */
 export interface IRuntimeInMemoryModuleRef {
@@ -17,7 +17,7 @@ export interface IRuntimeInMemoryModuleRef {
 }
 
 /**
- * @beta
+ * @alpha
  * Artifact-based module reference resolved from an external source.
  */
 export interface IRuntimeArtifactModuleRef {
@@ -26,13 +26,13 @@ export interface IRuntimeArtifactModuleRef {
 }
 
 /**
- * @beta
+ * @alpha
  * Union of all supported module reference types.
  */
 export type RuntimeModuleRefType = IRuntimeInMemoryModuleRef | IRuntimeArtifactModuleRef;
 
 /**
- * @beta
+ * @alpha
  * Configuration options for creating a platform runtime instance.
  */
 export interface IRuntimeOptions {
@@ -44,7 +44,7 @@ export interface IRuntimeOptions {
 }
 
 /**
- * @beta
+ * @alpha
  * Active platform runtime with startup reports and lifecycle control.
  */
 export interface IPlatformRuntime {

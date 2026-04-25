@@ -9,7 +9,7 @@ const MANDATORY_CAPABILITIES = ['lifecycle.register', 'lifecycle.start'] as cons
 export const CAPABILITY_CHECK_RESULT_ID = 'capability-conformance'
 
 /**
- * @stable
+ * beta
  * Verifies capability declaration integrity and mandatory lifecycle capabilities.
  */
 export function runCapabilityConformanceCheck(

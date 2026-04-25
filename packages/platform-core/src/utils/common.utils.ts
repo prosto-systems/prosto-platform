@@ -19,7 +19,7 @@ export function dateNowIso(): string {
 }
 
 /**
- * @stable
+ * @alpha
  * Redacts known secret patterns from a string message.
  * Covers tokens, passwords, bearer tokens, and authorization headers.
  */

@@ -4,37 +4,37 @@ import type {
 } from '../constants/index.js';
 
 /**
- * @stable
+ * @alpha
  * Canonical module identity token.
  */
 export type ModuleIdentifierType = string;
 
 /**
- * @stable
+ * @alpha
  * Semantic version string.
  */
 export type SemverVersionType = string;
 
 /**
- * @stable
+ * @alpha
  * Semantic version range expression.
  */
 export type SemverRangeType = string;
 
 /**
- * @stable
+ * @alpha
  * Security class taxonomy for module governance.
  */
 export type ModuleSecurityClassType = (typeof MODULE_SECURITY_CLASSES)[number];
 
 /**
- * @stable
+ * @alpha
  * Module startup criticality marker.
  */
 export type ModuleCriticalityType = (typeof MODULE_CRITICALITY_LEVELS)[number];
 
 /**
- * @stable
+ * @alpha
  * Namespaced capability string declared by a module.
  */
 export type ModuleCapabilityType = string;
