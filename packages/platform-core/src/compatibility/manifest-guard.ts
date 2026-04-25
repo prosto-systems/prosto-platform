@@ -1,8 +1,10 @@
-import type { IPlatformModuleManifest } from '@prosto/platform-sdk';
-import { safeValidatePlatformModuleManifest } from '@prosto/platform-sdk';
 import type {
   IRuntimeFailureDiagnostic,
 } from '../diagnostics/diagnostics.types.js';
+import {
+  type IModuleManifestValidator,
+  type IPlatformModuleManifest,
+} from '@prosto/platform-sdk';
 import { RuntimeReasonCodes } from './reason-codes.js';
 
 export interface IManifestGuardResult {
@@ -14,8 +16,9 @@ export interface IManifestGuardResult {
 export function guardManifest(
   moduleId: string,
   manifest: unknown,
+  manifestValidator: IModuleManifestValidator,
 ): IManifestGuardResult {
-  const validation = safeValidatePlatformModuleManifest(manifest);
+  const validation = manifestValidator.validate(manifest);
 
   if (validation.success) {
     return {

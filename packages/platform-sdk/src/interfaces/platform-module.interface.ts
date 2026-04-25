@@ -2,7 +2,7 @@ import type { ModuleLifecycleResultType } from '../types/index.js';
 import type { IModuleContext } from './module-context.interface.js';
 import type {
   IPlatformModuleManifest
-} from './platform-module-manifest.interface.js';
+} from './platform-module-manifest.interfaces.js';
 
 /**
  * @alpha

@@ -4,7 +4,7 @@ export * from './interfaces/index.js';
 export * from './schemas/index.js';
 export * from './types/index.js';
 export * from './utils/index.js';
-export * from './validation/index.js';
+export * from './validators/index.js';
 
 /**
  * @alpha

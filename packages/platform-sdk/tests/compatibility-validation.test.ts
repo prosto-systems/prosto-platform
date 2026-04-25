@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'vitest';
-
 import {
   CompatibilityValidationError,
-  assertManifestCompatibility,
   type IPlatformModuleManifest,
-  parsePlatformModuleManifest,
-  validateManifestCompatibility,
+  PlatformModuleCompatibilityValidator,
+  PlatformModuleManifestValidator,
 } from '../src/index.js';
 
 const validManifest: IPlatformModuleManifest = {
@@ -19,9 +17,12 @@ const validManifest: IPlatformModuleManifest = {
 };
 
 describe('compatibility validation', () => {
+  const manifestValidator = new PlatformModuleManifestValidator();
+  const compatibilityValidator = new PlatformModuleCompatibilityValidator();
+
   it('returns compatible for matching ranges', () => {
-    const manifest = parsePlatformModuleManifest(validManifest);
-    const result = validateManifestCompatibility(manifest, {
+    const manifest = manifestValidator.parse(validManifest);
+    const result = compatibilityValidator.validate(manifest, {
       sdkVersion: '0.1.5',
     });
 
@@ -29,8 +30,8 @@ describe('compatibility validation', () => {
   });
 
   it('returns mismatch details for incompatible SDK version', () => {
-    const manifest = parsePlatformModuleManifest(validManifest);
-    const result = validateManifestCompatibility(manifest, {
+    const manifest = manifestValidator.parse(validManifest);
+    const result = compatibilityValidator.validate(manifest, {
       sdkVersion: '0.2.0',
     });
 
@@ -45,10 +46,10 @@ describe('compatibility validation', () => {
   });
 
   it('throws CompatibilityValidationError on mismatch', () => {
-    const manifest = parsePlatformModuleManifest(validManifest);
+    const manifest = manifestValidator.parse(validManifest);
 
     expect(() =>
-      assertManifestCompatibility(manifest, {
+      compatibilityValidator.assert(manifest, {
         sdkVersion: '1.2.0',
       }),
     ).toThrow(CompatibilityValidationError);

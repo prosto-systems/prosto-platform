@@ -33,8 +33,8 @@ Contract authority for Prosto platform module manifests, lifecycle interfaces, t
 - `ServiceTokenType<TService>`
 - `EventTokenType<TPayload>`
 - `EventHandlerType<TPayload>`
-- `ManifestValidationResultType`
-- `CompatibilityValidationResultType`
+- `ModuleManifestValidationResultType`
+- `ModuleCompatibilityValidationResultType`
 - `PlatformModuleManifestInputType`
 - `PlatformModuleManifestOutputType`
 - `PlatformSdkErrorCodeType`
@@ -55,11 +55,13 @@ Contract authority for Prosto platform module manifests, lifecycle interfaces, t
 - `IPlatformModuleManifest`
 - `IPlatformRuntimeVersionContext`
 - `IManifestValidationIssue`
-- `IManifestValidationSuccess`
-- `IManifestValidationFailure`
+- `IModuleManifestValidationSuccess`
+- `IModuleManifestValidationFailure`
 - `ICompatibilityValidationIssue`
-- `ICompatibilityValidationSuccess`
-- `ICompatibilityValidationFailure`
+- `IModuleCompatibilityValidationSuccess`
+- `IModuleCompatibilityValidationFailure`
+- `IModuleManifestValidator`
+- `IModuleCompatibilityValidator`
 
 ### Schemas
 - `SemverVersionSchema`
@@ -77,11 +79,9 @@ Contract authority for Prosto platform module manifests, lifecycle interfaces, t
 - `createServiceToken`
 - `createEventToken`
 
-### Validation
-- `safeValidatePlatformModuleManifest`
-- `parsePlatformModuleManifest`
-- `validateManifestCompatibility`
-- `assertManifestCompatibility`
+### Validators
+- `PlatformModuleManifestValidator`
+- `PlatformModuleCompatibilityValidator`
 
 ### Errors
 - `PlatformSdkError`
@@ -92,13 +92,16 @@ Contract authority for Prosto platform module manifests, lifecycle interfaces, t
 
 ```ts
 import {
+  PlatformModuleCompatibilityValidator,
+  PlatformModuleManifestValidator,
   createEventToken,
   createServiceToken,
-  parsePlatformModuleManifest,
-  validateManifestCompatibility,
 } from '@prosto/platform-sdk';
 
-const manifest = parsePlatformModuleManifest({
+const manifestValidator = new PlatformModuleManifestValidator();
+const compatibilityValidator = new PlatformModuleCompatibilityValidator();
+
+const manifest = manifestValidator.parse({
   id: 'module-health',
   version: '1.2.3',
   sdkVersion: '^0.1.0',
@@ -108,14 +111,14 @@ const manifest = parsePlatformModuleManifest({
   dependencies: [],
 });
 
-const compatibility = validateManifestCompatibility(manifest, {
+const compatibility = compatibilityValidator.validate(manifest, {
   sdkVersion: '0.1.5',
 });
 
-const healthEventToken = createEventToken<{ status: 'ok' | 'failed'; }>('health.updated');
+const healthEventToken = createEventToken<{ status: 'ok' | 'failed' }>('health.updated');
 const healthServiceToken = createServiceToken<{ ping: () => 'ok' | 'failed' }>('health.service');
 
-eventBus.subscribe(healthEventToken, (payload) => {
+eventBus.subscribe(healthEventToken, ({ payload }) => {
   if (payload.status === 'ok') {
     logger.info('Healthy');
   } else {

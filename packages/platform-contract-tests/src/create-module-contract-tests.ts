@@ -3,6 +3,7 @@ import type {
   IModuleContractConformanceReport,
   IModuleContractTestInput,
 } from './types/index.js';
+import { PlatformModuleManifestValidator } from '@prosto/platform-sdk';
 import {
   CAPABILITY_CHECK_RESULT_ID,
   LIFECYCLE_CHECK_RESULT_ID,
@@ -30,7 +31,11 @@ export async function runModuleContractConformance(
     moduleVersion: input.module.manifest.version,
     generatedAt: input.now?.() ?? new Date().toISOString(),
     checks: [
-      runManifestConformanceCheck(input.module.manifest),
+      runManifestConformanceCheck({
+        manifest: input.module.manifest,
+        manifestValidator:
+          input.manifestValidator ?? new PlatformModuleManifestValidator(),
+      }),
       await runLifecycleConformanceCheck({
         module: input.module,
         moduleLifecycleContextFactory:

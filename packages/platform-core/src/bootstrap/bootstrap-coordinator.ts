@@ -1,4 +1,8 @@
-import type { IPlatformModule } from '@prosto/platform-sdk';
+import type {
+  IModuleCompatibilityValidator,
+  IModuleManifestValidator,
+  IPlatformModule,
+} from '@prosto/platform-sdk';
 import type {
   IBootstrapContext,
   IBootstrapCoordinatorInput,
@@ -22,15 +26,20 @@ import { evaluateStartupPolicy } from '../policy/startup-policy-evaluator.js';
 export function coordinateBootstrap(
   input: IBootstrapCoordinatorInput,
   lifecycleResult: IBootstrapCoordinatorLifecycleResult,
+  params: {
+    manifestValidator: IModuleManifestValidator,
+    compatibilityValidator: IModuleCompatibilityValidator,
+  },
 ): Omit<IBootstrapContext, 'startupReport'> {
+  const { manifestValidator, compatibilityValidator } = params;
   const stageOutcomes: IBootstrapStageOutcome[] = [];
   const loadedModules: IPlatformModule[] = [];
   const skippedModuleIds = new Set<string>();
   const failedDiagnostics: IRuntimeFailureDiagnostic[] = [];
-  const discoveryFailures: IRejectedModuleArtifact[] = []
+  const discoveryFailures: IRejectedModuleArtifact[] = [];
 
   for (const preRejectedArtifact of input.preRejectedArtifacts) {
-    skippedModuleIds.add(preRejectedArtifact.moduleId)
+    skippedModuleIds.add(preRejectedArtifact.moduleId);
 
     failedDiagnostics.push({
       moduleId: preRejectedArtifact.moduleId,
@@ -38,10 +47,10 @@ export function coordinateBootstrap(
       errorCode: preRejectedArtifact.reasonCode,
       message: preRejectedArtifact.message,
       remediationHint: preRejectedArtifact.remediationHint,
-    })
+    });
 
     if (preRejectedArtifact.phase === 'discover') {
-      discoveryFailures.push(preRejectedArtifact)
+      discoveryFailures.push(preRejectedArtifact);
     }
   }
 
@@ -57,7 +66,11 @@ export function coordinateBootstrap(
   const validatedModules: IPlatformModule[] = [];
 
   for (const artifact of input.candidates) {
-    const manifestCheck = guardManifest(artifact.moduleId, artifact.module.manifest);
+    const manifestCheck = guardManifest(
+      artifact.moduleId,
+      artifact.module.manifest,
+      manifestValidator,
+    );
 
     if (!manifestCheck.ok) {
       if (manifestCheck.error) {
@@ -80,7 +93,11 @@ export function coordinateBootstrap(
       continue;
     }
 
-    const compatibility = checkModuleCompatibility(artifact.module, input.runtimeVersion);
+    const compatibility = checkModuleCompatibility(
+      artifact.module,
+      input.runtimeVersion,
+      compatibilityValidator,
+    );
 
     if (!compatibility.compatible) {
       if (compatibility.error) {

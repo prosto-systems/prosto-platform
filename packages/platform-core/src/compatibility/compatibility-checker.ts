@@ -1,9 +1,11 @@
-import {
-  type IPlatformRuntimeVersionContext,
-  validateManifestCompatibility,
+import type {
+  IModuleCompatibilityValidator,
+  IPlatformModule,
+  IPlatformRuntimeVersionContext,
 } from '@prosto/platform-sdk';
-import type { IPlatformModule } from '@prosto/platform-sdk';
-import type { IRuntimeFailureDiagnostic } from '../diagnostics/diagnostics.types.js';
+import type {
+  IRuntimeFailureDiagnostic,
+} from '../diagnostics/diagnostics.types.js';
 import { RuntimeReasonCodes } from './reason-codes.js';
 
 export interface ICompatibilityCheckerResult {
@@ -14,8 +16,9 @@ export interface ICompatibilityCheckerResult {
 export function checkModuleCompatibility(
   module: IPlatformModule,
   runtimeVersion: IPlatformRuntimeVersionContext,
+  compatibilityValidator: IModuleCompatibilityValidator,
 ): ICompatibilityCheckerResult {
-  const result = validateManifestCompatibility(module.manifest, runtimeVersion);
+  const result = compatibilityValidator.validate(module.manifest, runtimeVersion);
 
   if (result.compatible) {
     return { compatible: true };

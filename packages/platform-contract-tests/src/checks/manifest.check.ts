@@ -1,5 +1,5 @@
 import {
-  safeValidatePlatformModuleManifest,
+  type IModuleManifestValidator,
   type IPlatformModuleManifest,
 } from '@prosto/platform-sdk';
 import {
@@ -13,10 +13,11 @@ export const MANIFEST_CHECK_RESULT_ID = 'manifest-conformance';
  * @alpha
  * Validates module manifest schema and semantic constraints.
  */
-export function runManifestConformanceCheck(
+export function runManifestConformanceCheck(params: {
   manifest: IPlatformModuleManifest,
-): IContractCheckResult {
-  const result = safeValidatePlatformModuleManifest(manifest);
+  manifestValidator: IModuleManifestValidator,
+}): IContractCheckResult {
+  const result = params.manifestValidator.validate(params.manifest);
 
   if (result.success) {
     return {
