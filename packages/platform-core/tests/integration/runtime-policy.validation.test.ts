@@ -20,5 +20,7 @@ describe('runtime policy diagnostics validation', () => {
     expect(() => validateOperationalReportsSchema(runtime.reports)).not.toThrow();
     expect(runtime.reports.startup.correlationId).toBe('rt-validation-test');
     expect(runtime.reports.startup.policyMode).toBe('strict');
+
+    await runtime.stop()
   });
 });

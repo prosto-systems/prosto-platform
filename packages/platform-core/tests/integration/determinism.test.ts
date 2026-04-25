@@ -28,5 +28,7 @@ describe('runtime determinism', () => {
 
     expect(new Set(orders).size).toBe(1);
     expect(orders[0]).toBe('module-a,module-b,module-c');
+
+    runs.forEach((runtime) => runtime.stop());
   });
 });

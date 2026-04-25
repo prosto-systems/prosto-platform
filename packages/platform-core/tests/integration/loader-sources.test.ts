@@ -22,6 +22,8 @@ describe('runtime loader sources', () => {
 
     expect(runtime.startedModuleIds).toEqual(['module-a']);
     expect(runtime.reports.startup.status).toBe('success');
+
+    await runtime.stop()
   });
 
   it('marks invalid url source as discover rejection and continues with memory module', async () => {
@@ -50,6 +52,8 @@ describe('runtime loader sources', () => {
     expect(runtime.reports.startup.status).toBe('degraded');
     expect(runtime.reports.startup.failedModules.some((item) => item.errorCode === RuntimeReasonCodes.SourceUrlInvalid)).toBe(true);
     expect(runtime.reports.startup.skippedModules.some((item) => item.moduleId === 'module-url')).toBe(true);
+
+    await runtime.stop()
   });
 
   it('validates path checksum and rejects on integrity mismatch', async () => {
@@ -82,6 +86,8 @@ describe('runtime loader sources', () => {
 
       expect(runtime.startedModuleIds).toEqual([]);
       expect(runtime.reports.startup.failedModules.some((item) => item.errorCode === RuntimeReasonCodes.SourceIntegrityMismatch)).toBe(true);
+
+      await runtime.stop()
     } finally {
       await rm(tempDir, { recursive: true, force: true });
     }
@@ -118,6 +124,8 @@ describe('runtime loader sources', () => {
 
       expect(runtime.startedModuleIds).toEqual([]);
       expect(runtime.reports.startup.failedModules.some((item) => item.errorCode === RuntimeReasonCodes.SourceEntryResolveFailed)).toBe(true);
+
+      await runtime.stop()
     } finally {
       await rm(tempDir, { recursive: true, force: true });
     }

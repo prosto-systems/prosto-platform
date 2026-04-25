@@ -26,5 +26,7 @@ describe('runtime bootstrap critical failure', () => {
     expect(runtime.reports.startup.status).toBe('failed');
     expect(runtime.startedModuleIds).toEqual([]);
     expect(runtime.reports.startup.failedModules.some((item) => item.moduleId === 'module-critical')).toBe(true);
+
+    await runtime.stop()
   });
 });

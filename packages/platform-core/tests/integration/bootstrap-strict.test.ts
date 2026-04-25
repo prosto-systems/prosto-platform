@@ -27,5 +27,7 @@ describe('runtime bootstrap (strict)', () => {
     expect(runtime.startedModuleIds).toEqual([]);
     expect(runtime.reports.startup.skippedModules.some((item) => item.moduleId === 'module-b')).toBe(true);
     expect(runtime.reports.startup.failedModules.some((item) => item.moduleId === 'module-b')).toBe(true);
+
+    await runtime.stop()
   });
 });
