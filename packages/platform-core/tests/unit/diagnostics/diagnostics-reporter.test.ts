@@ -1,0 +1,134 @@
+import { describe, expect, it } from 'vitest';
+import { RuntimeReasonCodes } from '../../../src/compatibility/reason-codes.js';
+import { createShutdownReport, createStartupReport } from '../../../src/diagnostics/diagnostics-reporter.js';
+import { RuntimeStartupStatus } from '../../../src/diagnostics/diagnostics.types.js';
+
+describe('createStartupReport', () => {
+  it('produces success status when no failures', () => {
+    const report = createStartupReport({
+      correlationId: 'cid',
+      policyMode: 'strict',
+      startedAt: '2024-01-01T00:00:00.000Z',
+      loadedModules: [{ moduleId: 'mod-a', version: '1.0.0' }],
+      skippedModules: [],
+      failedModules: [],
+    });
+
+    expect(report.status).toBe(RuntimeStartupStatus.Success);
+    expect(report.degraded).toBe(false);
+    expect(report.type).toBe('startup');
+  });
+
+  it('produces degraded status when skipped modules exist', () => {
+    const report = createStartupReport({
+      correlationId: 'cid',
+      policyMode: 'best-effort',
+      startedAt: '2024-01-01T00:00:00.000Z',
+      loadedModules: [{ moduleId: 'mod-a', version: '1.0.0' }],
+      skippedModules: [
+        {
+          moduleId: 'mod-b',
+          reason: {
+            moduleId: 'mod-b',
+            phase: 'validate',
+            errorCode: RuntimeReasonCodes.CompatibilityMismatch,
+            message: 'mismatch',
+            remediationHint: 'fix',
+          },
+        },
+      ],
+      failedModules: [],
+    });
+
+    expect(report.status).toBe(RuntimeStartupStatus.Degraded);
+    expect(report.degraded).toBe(true);
+  });
+
+  it('produces failed status when all modules fail', () => {
+    const report = createStartupReport({
+      correlationId: 'cid',
+      policyMode: 'strict',
+      startedAt: '2024-01-01T00:00:00.000Z',
+      loadedModules: [],
+      skippedModules: [],
+      failedModules: [
+        {
+          moduleId: 'mod-a',
+          phase: 'lifecycle',
+          errorCode: RuntimeReasonCodes.LifecycleStartFailed,
+          message: 'start failed',
+          remediationHint: 'check',
+        },
+      ],
+    });
+
+    expect(report.status).toBe(RuntimeStartupStatus.Failed);
+    expect(report.degraded).toBe(false);
+  });
+
+  it('redacts secrets in failure messages', () => {
+    const report = createStartupReport({
+      correlationId: 'cid',
+      policyMode: 'strict',
+      startedAt: '2024-01-01T00:00:00.000Z',
+      loadedModules: [],
+      skippedModules: [],
+      failedModules: [
+        {
+          moduleId: 'mod-a',
+          phase: 'validate',
+          errorCode: RuntimeReasonCodes.ManifestInvalid,
+          message: 'token=secret123',
+          remediationHint: 'password=secret456',
+        },
+      ],
+    });
+
+    expect(report.failedModules[0]?.message).toBe('token=[REDACTED]');
+    expect(report.failedModules[0]?.remediationHint).toBe('password=[REDACTED]');
+  });
+});
+
+describe('createShutdownReport', () => {
+  it('produces shutdown report with issues', () => {
+    const report = createShutdownReport({
+      correlationId: 'cid',
+      startedAt: '2024-01-01T00:00:00.000Z',
+      stopOrder: ['mod-b', 'mod-a'],
+      issues: [
+        {
+          moduleId: 'mod-b',
+          phase: 'shutdown',
+          errorCode: RuntimeReasonCodes.ShutdownTimeout,
+          message: 'timeout',
+          remediationHint: 'increase timeout',
+        },
+      ],
+    });
+
+    expect(report.type).toBe('shutdown');
+    expect(report.stopOrder).toEqual(['mod-b', 'mod-a']);
+    expect(report.issues).toHaveLength(1);
+    expect(report.issues[0]?.moduleId).toBe('mod-b');
+  });
+
+  it('redacts secrets in shutdown issues', () => {
+    const report = createShutdownReport({
+      correlationId: 'cid',
+      startedAt: '2024-01-01T00:00:00.000Z',
+      stopOrder: ['mod-a'],
+      issues: [
+        {
+          moduleId: 'mod-a',
+          phase: 'shutdown',
+          errorCode: RuntimeReasonCodes.ShutdownTimeout,
+          message: 'bearer leak',
+          remediationHint: 'apikey=leak',
+        },
+      ],
+    });
+
+    expect(report.issues[0]?.message).toBe('bearer [REDACTED]');
+    expect(report.issues[0]?.remediationHint).toBe('apikey=[REDACTED]');
+  });
+});
