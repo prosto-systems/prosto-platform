@@ -30,6 +30,7 @@ This package defines a detailed architecture baseline for `prosto-platform` base
 ## Document Map
 
 ### Foundation
+- [00 OOP, Clean Architecture, and SOLID Policy](./00-oop-clean-architecture-solid-policy.md)
 - [01 Architecture Baseline](./01-architecture-baseline.md)
 - [02 Domain And Capability Model](./02-domain-and-capability-model.md)
 - [03 Architecture Evolution Path](./03-architecture-evolution-path.md)
@@ -83,13 +84,14 @@ This package defines a detailed architecture baseline for `prosto-platform` base
 | Risk management | Research 05 | [06 Risk Management](./06-risk-management.md) | [ADR-0003](./adr/ADR-0003-module-loading-security-allowlist-integrity.md), [ADR-0007](./adr/ADR-0007-observability-and-operability-baseline.md) |
 
 ## Suggested Reading Order
-1. [01 Architecture Baseline](./01-architecture-baseline.md)
-2. [02 Domain And Capability Model](./02-domain-and-capability-model.md)
-3. [03 Architecture Evolution Path](./03-architecture-evolution-path.md) — For understanding growth trajectory
-4. [04 Package Structure Blueprint](./04-package-structure-blueprint.md) — Before implementation starts
-5. [05 Git Branching Strategy](./05-git-branching-strategy.md) — Before first commit
-6. [06 Risk Management](./06-risk-management.md) — Before production deployment
-7. C4 views (`c4/`)
-8. DFD views (`dfd/`)
-9. Sequence views (`sequence/`)
-10. ADRs (`adr/`)
+1. [00 OOP, Clean Architecture, and SOLID Policy](00-oop-clean-architecture-solid-policy.md) — Before implementation and refactoring sessions
+2. [01 Architecture Baseline](./01-architecture-baseline.md)
+3. [02 Domain And Capability Model](./02-domain-and-capability-model.md)
+4. [03 Architecture Evolution Path](./03-architecture-evolution-path.md) — For understanding growth trajectory
+5. [04 Package Structure Blueprint](./04-package-structure-blueprint.md) — Before implementation starts
+6. [05 Git Branching Strategy](./05-git-branching-strategy.md) — Before first commit
+7. [06 Risk Management](./06-risk-management.md) — Before production deployment
+8. C4 views (`c4/`)
+9. DFD views (`dfd/`)
+10. Sequence views (`sequence/`)
+11. ADRs (`adr/`)

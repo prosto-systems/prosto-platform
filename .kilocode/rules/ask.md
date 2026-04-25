@@ -7,3 +7,4 @@
 - README contains the live high-level status summary; deep architecture and roadmap context lives in `.context/` and should be labeled as design/draft context where applicable.
 - For admin UI topics, treat hybrid model from `ADR-0009` as target-state default: separate `admin-shell`, `platform-admin-contracts`, and `platform-adapter-admin-bff`.
 - Implementation sequencing now includes 10 phases with Admin Enablement stream in phases 07-09; avoid referencing old 7-phase roadmap.
+- For implementation and code-structure guidance, explicitly require object-oriented design, Clean Architecture boundaries, and SOLID principles.

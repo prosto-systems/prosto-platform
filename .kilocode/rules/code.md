@@ -6,3 +6,4 @@
 - Effective formatting/lint baselines come from `.editorconfig` and `eslint.config.mjs`.
 - Because root package is ESM (`"type": "module"`), prefer ESM-compatible imports/exports for any new TS/JS files.
 - Existing `.cursor/rules/*.md` and `.clinerules/*.md` are generic guidance; when conflicts appear, prefer concrete repository config files and scripts.
+- New and refactored implementation should prioritize object-oriented design, Clean Architecture layer boundaries, and explicit SOLID adherence.

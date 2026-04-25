@@ -100,6 +100,12 @@ type TStatus = 'pending' | 'completed' | 'failed';
 
 ## Architecture Guidelines
 
+### OOP, Clean Architecture, and SOLID Baseline
+- Apply object-oriented design for production code where it improves clarity, extension safety, and testability.
+- Follow Clean Architecture boundaries so business policies are isolated from infrastructure and framework details.
+- Follow SOLID principles for all new implementation and refactoring decisions.
+- Prefer dependency inversion and explicit interfaces for cross-layer and cross-package collaboration.
+
 ### Modular Design Principles
 - **Single Responsibility**: Each module should have one reason to change
 - **Loose Coupling**: Minimize dependencies between modules
@@ -418,6 +424,9 @@ Every implementation recommendation should include:
 - Bypass admin integration contracts with direct module-to-shell coupling
 
 **DO:**
+- Design implementation with object-oriented composition and explicit abstractions
+- Keep Clean Architecture dependency direction toward stable inner policies
+- Enforce SOLID trade-offs explicitly during design and code review
 - Reference ADRs when proposing architecture changes
 - Validate dependencies against package boundaries
 - Use contract-first approach (types before implementation)

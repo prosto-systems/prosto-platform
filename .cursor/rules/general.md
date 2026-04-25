@@ -20,6 +20,9 @@
 
 ## Architecture Principles
 - **Micro-core Architecture**: Maintain a minimal platform core with expansion through plug-in modules
+- **Object-Oriented Design**: Prefer object-oriented composition for production code when it improves clarity, extensibility, and testability
+- **Clean Architecture**: Keep domain policies independent from framework and infrastructure details
+- **SOLID**: Apply all SOLID principles explicitly in design and refactoring
 - **Single Responsibility**: Each module should have one reason to change
 - **Loose Coupling**: Minimize dependencies between modules
 - **High Cohesion**: Related functionality should be grouped together

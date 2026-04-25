@@ -7,3 +7,4 @@
 - Draft admin UI model follows hybrid separation from ADR-0009: separate `admin-shell`, contract package, and `platform-adapter-admin-bff`, with no UI runtime in `platform-core`.
 - Draft kernel component model mandates pre-start acyclic dependency resolution and structured lifecycle error mapping fields (`moduleId`, `phase`, `errorCode`, `remediationHint`).
 - Architecture docs repeatedly assume separate module repositories for feature modules and a separate admin shell repository; do not plan all modules as in-repo packages unless scope is explicitly changed.
+- For implementation planning, require object-oriented composition, Clean Architecture dependency direction, and SOLID-driven decomposition as first-class design constraints.
