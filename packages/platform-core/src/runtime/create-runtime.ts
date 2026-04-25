@@ -6,10 +6,11 @@ import type {
   IRuntimeShutdownReport,
   IRuntimeStartupReport,
 } from '../diagnostics/diagnostics.types.js';
-import type {
-  IPlatformRuntime,
-  IRuntimeOptions,
-} from './runtime.types.js';
+import type { IPlatformRuntime, IRuntimeOptions } from './runtime.types.js';
+import {
+  PlatformModuleCompatibilityValidator,
+  PlatformModuleManifestValidator,
+} from '@prosto/platform-sdk';
 import { coordinateBootstrap } from '../bootstrap/bootstrap-coordinator.js';
 import { RuntimeReasonCodes } from '../compatibility/reason-codes.js';
 import {
@@ -56,6 +57,8 @@ export async function createPlatformRuntime(
   const events = new InMemoryEventBus();
   const loggerFactory = new ConsoleModuleLoggerFactory();
   const contextFactory = new ModuleContextFactory(services, events, loggerFactory);
+  const manifestValidator = new PlatformModuleManifestValidator();
+  const compatibilityValidator = new PlatformModuleCompatibilityValidator();
 
   const discovery = discoverModules(options.modules);
   const loadResult = await loadModuleArtifacts(discovery.candidates);
@@ -77,6 +80,10 @@ export async function createPlatformRuntime(
       preRejectedArtifacts: [...discovery.rejected, ...loadResult.rejected],
     },
     lifecycleResult as IBootstrapCoordinatorLifecycleResult,
+    {
+      manifestValidator,
+      compatibilityValidator,
+    },
   );
 
   const failedDiagnosticsByModuleId =
@@ -139,8 +146,8 @@ export async function createPlatformRuntime(
         options.shutdownTimeoutMs ?? 1000,
       );
 
-      services.dispose()
-      events.dispose()
+      services.dispose();
+      events.dispose();
 
       reports.shutdown = createShutdownReport({
         correlationId,

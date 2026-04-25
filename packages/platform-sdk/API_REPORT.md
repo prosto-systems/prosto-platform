@@ -45,6 +45,15 @@ Status context:
 - `IModuleCompatibility` (`@alpha`)
 - `IModuleDependency` (`@alpha`)
 - `IPlatformModuleManifest` (`@alpha`)
+- `IPlatformRuntimeVersionContext` (`@alpha`)
+- `IModuleCompatibilityValidationSuccess` (`@alpha`)
+- `IModuleCompatibilityValidationFailure` (`@alpha`)
+- `IModuleManifestValidationSuccess` (`@alpha`)
+- `IModuleManifestValidationFailure` (`@alpha`)
+- `ModuleCompatibilityValidationResultType` (`@alpha`)
+- `ModuleManifestValidationResultType` (`@alpha`)
+- `IModuleManifestValidator` (`@alpha`)
+- `IModuleCompatibilityValidator` (`@alpha`)
 
 ## Errors
 - `PlatformSdkErrorCodeType` (`@alpha`)
@@ -74,15 +83,6 @@ Status context:
 - `createServiceToken` (`@alpha`)
 - `createEventToken` (`@alpha`)
 
-## Validation
-- `IManifestValidationSuccess` (`@alpha`)
-- `IManifestValidationFailure` (`@alpha`)
-- `ManifestValidationResultType` (`@alpha`)
-- `safeValidatePlatformModuleManifest` (`@alpha`)
-- `parsePlatformModuleManifest` (`@alpha`)
-- `IPlatformRuntimeVersionContext` (`@alpha`)
-- `ICompatibilityValidationSuccess` (`@alpha`)
-- `ICompatibilityValidationFailure` (`@alpha`)
-- `CompatibilityValidationResultType` (`@alpha`)
-- `validateManifestCompatibility` (`@alpha`)
-- `assertManifestCompatibility` (`@alpha`)
+## Validators
+- `PlatformModuleManifestValidator` (`@alpha`)
+- `PlatformModuleCompatibilityValidator` (`@alpha`)

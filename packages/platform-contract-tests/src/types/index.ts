@@ -1,4 +1,8 @@
-import type { IModuleContext, IPlatformModule } from '@prosto/platform-sdk';
+import type {
+  IModuleContext,
+  IModuleManifestValidator,
+  IPlatformModule,
+} from '@prosto/platform-sdk';
 
 /**
  * @alpha
@@ -9,6 +13,7 @@ export type ContractCheckSeverityType = 'mandatory' | 'advisory';
 /**
  * @alpha
  * Standardized failure code taxonomy for CI consumers.
+ * CT – Contract Test.
  */
 export enum ContractFailureCodes {
   ManifestSchemaInvalid = 'CT_MANIFEST_SCHEMA_INVALID',
@@ -81,6 +86,7 @@ export interface IModuleLifecycleContextFactory {
  */
 export interface IModuleContractTestInput {
   module: IPlatformModule;
+  manifestValidator?: IModuleManifestValidator,
   moduleLifecycleContextFactory?: IModuleLifecycleContextFactory;
   now?: () => string;
 }

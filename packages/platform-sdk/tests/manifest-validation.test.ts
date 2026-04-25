@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest';
-
 import {
   type IPlatformModuleManifest,
   ManifestValidationError,
-  parsePlatformModuleManifest,
-  safeValidatePlatformModuleManifest,
+  PlatformModuleManifestValidator,
 } from '../src/index.js';
 
 const validManifest: IPlatformModuleManifest = {
@@ -18,15 +16,17 @@ const validManifest: IPlatformModuleManifest = {
 };
 
 describe('manifest validation', () => {
+  const manifestValidator = new PlatformModuleManifestValidator();
+
   it('accepts a valid manifest', () => {
-    const parsedManifest = parsePlatformModuleManifest(validManifest);
+    const parsedManifest = manifestValidator.parse(validManifest);
 
     expect(parsedManifest.id).toBe(validManifest.id);
     expect(parsedManifest.version).toBe(validManifest.version);
   });
 
   it('returns failure for schema violations', () => {
-    const result = safeValidatePlatformModuleManifest({
+    const result = manifestValidator.validate({
       ...validManifest,
       capabilities: [],
     });
@@ -38,11 +38,13 @@ describe('manifest validation', () => {
     }
 
     expect(result.error).toBeInstanceOf(ManifestValidationError);
-    expect(result.error.issues.some((issue) => issue.path === 'capabilities')).toBe(true);
+    expect(result.error.issues.some(
+      (issue) => issue.path === 'capabilities')
+    ).toBe(true);
   });
 
   it('returns failure for duplicate capabilities', () => {
-    const result = safeValidatePlatformModuleManifest({
+    const result = manifestValidator.validate({
       ...validManifest,
       capabilities: ['feature.health', 'feature.health'],
     });
@@ -53,6 +55,8 @@ describe('manifest validation', () => {
       throw new Error('Expected validation failure.');
     }
 
-    expect(result.error.issues.some((issue) => issue.code === 'duplicate_capability')).toBe(true);
+    expect(result.error.issues.some(
+      (issue) => issue.code === 'duplicate_capability')
+    ).toBe(true);
   });
 });

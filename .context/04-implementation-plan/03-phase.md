@@ -14,10 +14,10 @@
   - `packages/platform-sdk/src/constants/manifest.constants.ts`
   - `packages/platform-sdk/src/constants/tokens.constants.ts`
   - `packages/platform-sdk/src/interfaces/platform-module.interface.ts`
-  - `packages/platform-sdk/src/interfaces/platform-module-manifest.interface.ts`
+  - `packages/platform-sdk/src/interfaces/platform-module-manifest.interfaces.ts`
   - `packages/platform-sdk/src/interfaces/module-context.interface.ts`
   - `packages/platform-sdk/src/interfaces/service-registry.interface.ts`
-  - `packages/platform-sdk/src/interfaces/event-bus.interface.ts`
+  - `packages/platform-sdk/src/interfaces/event-bus.interfaces.ts`
   - `packages/platform-sdk/src/interfaces/module-logger.interface.ts`
   - `packages/platform-sdk/src/errors/platform-sdk.error.ts`
   - `packages/platform-sdk/src/errors/manifest-validation.error.ts`
@@ -25,8 +25,8 @@
   - `packages/platform-sdk/src/schemas/manifest.schema.ts`
   - `packages/platform-sdk/src/utils/semver.utils.ts`
   - `packages/platform-sdk/src/utils/tokens.utils.ts`
-  - `packages/platform-sdk/src/validation/manifest.validation.ts`
-  - `packages/platform-sdk/src/validation/compatibility.validation.ts`
+  - `packages/platform-sdk/src/validation/platform-module-manifest.validator.ts`
+  - `packages/platform-sdk/src/validation/platform-compatibility.validator.ts`
   - `packages/platform-sdk/tests/manifest-validation.test.ts`
   - `packages/platform-sdk/tests/compatibility-validation.test.ts`
   - `packages/platform-sdk/tests/tokens.test.ts`

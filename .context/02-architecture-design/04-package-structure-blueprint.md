@@ -90,7 +90,7 @@ platform-sdk/
 │   ├── interfaces/
 │   │   ├── platform-module.interface.ts
 │   │   ├── service-registry.interface.ts
-│   │   └── event-bus.interface.ts
+│   │   └── event-bus.interfaces.ts
 │   ├── tokens/
 │   │   ├── service.tokens.ts
 │   │   └── event.tokens.ts
