@@ -1,6 +1,7 @@
 # Code Recommendations
 
-* Follow SOLID principles
-* Follow the design patterns
-* Adhere to the principles of Clean Architecture
-* Strictly adhere to the micro-core architecture (minimum platform core with expansion through plug-in modules)
+* Use object-oriented design for production code where it improves maintainability, extension safety, and testability
+* Follow SOLID principles in all new code and refactoring changes
+* Adhere to Clean Architecture with clear boundaries between domain policies and infrastructure details
+* Prefer explicit abstractions and dependency inversion across module boundaries
+* Strictly adhere to the micro-core architecture with a minimum platform core and expansion through plug-in modules

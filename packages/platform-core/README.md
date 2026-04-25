@@ -1,7 +1,20 @@
 # @prosto/platform-core
 
-Phase 02 baseline package for micro-core runtime scaffolding.
+Phase 05 runtime foundation package for deterministic module lifecycle orchestration.
 
-Current scope:
-- Package entry point and build/typecheck scripts
-- No runtime lifecycle implementation yet (planned for Phase 05)
+## Implemented Scope (Phase 05)
+- Bootstrap pipeline: `discover -> validate -> resolve -> lifecycle`
+- Deterministic dependency ordering with cycle detection and missing dependency diagnostics
+- Startup policy modes: `strict` and `best-effort`
+- Critical module failure override (always abort startup)
+- Structured startup and shutdown diagnostics payloads
+- Reverse-order shutdown with bounded timeout handling
+
+## Public API
+- `createPlatformRuntime(options)` runtime factory
+- Runtime report types for startup/shutdown diagnostics
+- Runtime reason taxonomy constants
+
+## Package Checks
+- `npm run typecheck --workspace @prosto/platform-core`
+- `npm run test --workspace @prosto/platform-core`

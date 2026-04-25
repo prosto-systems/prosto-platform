@@ -38,10 +38,10 @@
     "validate:dependency-policy": "node ./scripts/validate-dependency-policy.mjs",
     "validate:module-graph": "node ./scripts/validate-module-graph.mjs",
     "validate:public-api-boundary": "node ./scripts/validate-public-api-boundary.mjs",
-    "validate:runtime-policy": "node -e \"console.log('TODO Phase 05: validate:runtime-policy is not implemented yet')\"",
+    "validate:runtime-policy": "node ./scripts/validate-runtime-policy.mjs",
     "test": "turbo test",
     "test:contracts": "turbo test:contracts",
-    "test:lifecycle-determinism": "node -e \"console.log('TODO Phase 05: test:lifecycle-determinism is not implemented yet')\"",
+    "test:lifecycle-determinism": "node ./scripts/test-lifecycle-determinism.mjs",
     "release:evidence": "node ./scripts/generate-release-evidence.mjs",
     "prepare": "husky"
   },
@@ -55,7 +55,7 @@
     "lint-staged": "^16.4.0",
     "nodemon": "^3.1.14",
     "p-limit": "^7.3.0",
-    "turbo": "^2.9.3",
+    "turbo": "^2.9.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.2"
   },

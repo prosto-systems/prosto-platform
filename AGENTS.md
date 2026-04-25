@@ -6,7 +6,7 @@
 
 ## ⚠️ Current Project Status
 
-**IMPORTANT**: Phase 01 through Phase 04 are complete. The repository now has governance/workspace baselines, SDK contract baseline, and contract conformance validation, while runtime kernel features are still pending for Phase 05+.
+**IMPORTANT**: Phase 01 through Phase 05 are partially complete. The repository now has governance/workspace baselines, SDK contract baseline, contract conformance validation, and runtime lifecycle foundation; security/performance hardening gates remain for Phase 06+.
 
 ### Current Tooling Availability
 - Phase 01 governance workflows are active under `.github/workflows/`:
@@ -29,9 +29,9 @@
   - `validate:dependency-policy`
   - `validate:module-graph`
   - `validate:public-api-boundary`
-  - `validate:runtime-policy` (placeholder for Phase 05+)
+  - `validate:runtime-policy` (implemented in Phase 05 via runtime diagnostics validation)
   - `test:contracts` (implemented in Phase 04 via contract conformance suite)
-  - `test:lifecycle-determinism` (placeholder for Phase 05+)
+  - `test:lifecycle-determinism` (implemented in Phase 05 via deterministic lifecycle integration tests)
   - `release:evidence`
 - `lint:architecture`, `validate:dependency-policy`, `validate:module-graph`, and `validate:public-api-boundary` are implemented and enforce Phase 02 boundary checks.
 - `@prosto/platform-sdk` now includes Phase 03 contract surface, manifest validation, typed token helpers, and package-level tests.
@@ -99,6 +99,12 @@ type TStatus = 'pending' | 'completed' | 'failed';
 ```
 
 ## Architecture Guidelines
+
+### OOP, Clean Architecture, and SOLID Baseline
+- Apply object-oriented design for production code where it improves clarity, extension safety, and testability.
+- Follow Clean Architecture boundaries so business policies are isolated from infrastructure and framework details.
+- Follow SOLID principles for all new implementation and refactoring decisions.
+- Prefer dependency inversion and explicit interfaces for cross-layer and cross-package collaboration.
 
 ### Modular Design Principles
 - **Single Responsibility**: Each module should have one reason to change
@@ -334,15 +340,17 @@ turbo build --filter=@prosto/platform-sdk  # Build specific package
 2. Phase 02 monorepo workspace and package boundary setup
 3. Phase 03 SDK contract baseline and manifest validation
 4. Phase 04 contract conformance test package and reference module validation
-5. ESLint + TypeScript baseline configuration
+5. Phase 05 core runtime lifecycle foundation and deterministic orchestration
+6. ESLint + TypeScript baseline configuration
 
-**Current Priority (Phase 05)**:
-1. Implement core runtime lifecycle foundation and deterministic orchestration
+**Current Priority (Phase 06)**:
+1. Implement security controls and performance regression gates for runtime and CI
+2. Extend runtime-policy enforcement with allowlist, integrity, and redaction controls
 
 **Phase 05-06 (Runtime and Hardening)**:
-1. Implement core runtime lifecycle foundation
-2. Activate FF-03 lifecycle determinism and FF-04 runtime-policy beyond placeholder mode
-3. Activate security and performance regression gates
+1. Phase 05 completed: core runtime lifecycle foundation
+2. Phase 05 completed: FF-03 lifecycle determinism and FF-04 runtime-policy checks are active
+3. Phase 06 focus: activate security and performance regression gates
 
 **Phase 07-09 (Admin Enablement Stream)**:
 1. Implement `platform-admin-contracts`
@@ -416,6 +424,9 @@ Every implementation recommendation should include:
 - Bypass admin integration contracts with direct module-to-shell coupling
 
 **DO:**
+- Design implementation with object-oriented composition and explicit abstractions
+- Keep Clean Architecture dependency direction toward stable inner policies
+- Enforce SOLID trade-offs explicitly during design and code review
 - Reference ADRs when proposing architecture changes
 - Validate dependencies against package boundaries
 - Use contract-first approach (types before implementation)

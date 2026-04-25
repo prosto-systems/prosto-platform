@@ -43,7 +43,9 @@
 ## Code Organization
 - Group related functionality in modules
 - Use namespaces or folders for logical separation
+- Prefer object-oriented composition for production code when it improves maintainability and testability
 - Implement proper abstraction layers
+- Follow Clean Architecture boundaries between domain and infrastructure concerns
 - Follow SOLID principles
 - Maintain weak component coupling
 - Design for extensibility and testability

@@ -10,10 +10,10 @@ Priority label uses impact over effort ratio:
 
 Effort values below represent execution effort for implementation work and governance rollout.
 
-## Status Sync (2026-04-03)
-- Phases 01-04 completed, including implemented architecture gates and contract conformance suite.
-- `MT-01 Deliver SDK contract package plus contract test package first` is now satisfied in repository reality.
-- Remaining execution-critical items start from runtime foundation and FF-03/FF-04 activation.
+## Status Sync (2026-04-23)
+- Phases 01-05 are completed, including architecture gates, contract conformance suite, and runtime lifecycle foundation.
+- `MT-01` and `MT-02` are now satisfied in repository reality.
+- Remaining execution-critical items center on Phase 06 security/performance hardening and Phase 07-09 admin enablement stream.
 
 ## Quick Wins
 
@@ -56,7 +56,7 @@ Effort values below represent execution effort for implementation work and gover
 
 ## QW-05 Create release readiness checklist as pipeline gate
 - Area: CI CD, governance
-- Problem: release readiness workflow exists, but FF-03 and FF-04 evidence is still placeholder-level and exception evidence discipline needs stricter enforcement.
+- Problem: release readiness workflow exists, but evidence consistency and exception-expiration discipline still require stronger operational enforcement.
 - Recommendation: turn release checklist into required gate artifact with automated evidence links.
 - Expected effect: predictable release quality and lower compliance variance.
 - Impact: 4
@@ -67,6 +67,7 @@ Effort values below represent execution effort for implementation work and gover
 
 ## MT-01 Deliver SDK contract package plus contract test package first
 - Area: architecture, testing, ecosystem readiness
+- Status: Completed in Phase 04.
 - Problem: ecosystem success depends on stable contracts and conformance automation.
 - Recommendation: prioritize SDK and contract-tests implementation before expanding runtime features.
 - Expected effect: reduced contract drift and easier module onboarding.
@@ -76,8 +77,9 @@ Effort values below represent execution effort for implementation work and gover
 
 ## MT-02 Implement runtime policy engine for strict and best-effort behavior
 - Area: reliability, operability
-- Problem: lifecycle policy is designed but not executable yet.
-- Recommendation: implement deterministic lifecycle orchestration with policy-based failure handling and structured diagnostics.
+- Status: Completed in Phase 05.
+- Problem: lifecycle policy baseline is implemented but now requires Phase 06 hardening controls around module trust and integrity.
+- Recommendation: extend deterministic lifecycle orchestration with security policy enforcement and stronger diagnostics governance.
 - Expected effect: reliable startup behavior and incident triage quality.
 - Impact: 5
 - Effort: 3

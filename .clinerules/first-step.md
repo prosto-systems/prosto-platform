@@ -50,7 +50,8 @@ When analyzing the project, check for:
 - Phase 02 workspace/package baseline is implemented
 - Phase 03 SDK contract baseline is implemented
 - Phase 04 contract conformance package and reference module validation are implemented
-- Current active implementation phase: Phase 05 (core runtime foundation)
+- Phase 05 core runtime foundation and deterministic lifecycle gates are implemented
+- Current active implementation phase: Phase 06 (security/performance hardening)
 
 ### Existing Rules
 - `.cursorrules` - Cursor-specific rules
@@ -105,7 +106,8 @@ When analyzing the project, check for:
 - Completed: Phase 02 Monorepo Package Skeleton
 - Completed: Phase 03 SDK Contract Baseline
 - Completed: Phase 04 Contract Conformance Test Package
-- Active: Phase 05 Core Runtime Foundation
+- Partially completed: Phase 05 Core Runtime Foundation
+- Active: Phase 06 Security and Performance Hardening
 - (See `.context/04-implementation-plan/` for full roadmap)
 
 ### Performance & Security

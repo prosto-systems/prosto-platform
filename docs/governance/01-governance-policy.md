@@ -14,8 +14,8 @@
 The following checks are mandatory and configured as required branch checks:
 - `FF-01 kernel boundary guard` (implemented)
 - `FF-02 dependency policy guard` (implemented)
-- `FF-04 runtime-policy` (placeholder for Phase 05+)
-- `FF-03 lifecycle determinism` (placeholder for Phase 05+)
+- `FF-04 runtime-policy` (implemented in Phase 05)
+- `FF-03 lifecycle determinism` (implemented in Phase 05)
 - `FF-05 contracts gate` (implemented in Phase 04)
 - `release-readiness-evidence` (implemented)
 
@@ -23,7 +23,7 @@ Policy constraints:
 - No direct push to `main` or `develop`.
 - No merge allowed when any required check is failing or missing.
 - Required checks are defined in `docs/governance/required-checks.md`.
-- Placeholder status does not remove branch protection requirement.
+- Check maturity status does not remove branch protection requirement.
 
 ## 2) Exception Workflow with Expiration
 Exceptions are temporary and explicit. Every exception record must include:
@@ -50,8 +50,8 @@ Exceptions are temporary and explicit. Every exception record must include:
 ## 3) Required PR Evidence Links
 Each PR to protected branches must contain evidence links in PR description:
 - Architecture policy evidence FF-01 and FF-02
-- Runtime policy evidence FF-04 (or placeholder evidence until implementation is completed)
-- Quality evidence FF-03 (or placeholder evidence until implementation is completed)
+- Runtime policy evidence FF-04 execution (`npm run validate:runtime-policy`)
+- Quality evidence FF-03 execution (`npm run test:lifecycle-determinism`)
 - Quality evidence FF-05 contracts gate execution (`npm run test:contracts`)
 - Risk-control acknowledgment linked to `.context/03-work-plan/02-metrics-acceptance-and-risk-controls.md`
 - Release evidence artifact link or run link where `release-evidence.json` is published
@@ -61,7 +61,7 @@ Each PR to protected branches must contain evidence links in PR description:
 - Phase 02 package boundary checks are implemented and enforced.
 - Phase 03 SDK contract baseline is completed and now part of release evidence context.
 - FF-05 contracts gate is implemented in Phase 04 with conformance suite execution against reference modules.
-- Remaining placeholders are FF-03 and FF-04 and will become fully functional in later phases.
+- FF-03 and FF-04 are active in CI; next governance expansion focuses on Phase 06 security and performance controls.
 
 ## 5) Audit Trail Requirements
 - Retain workflow logs and artifacts for minimum 30 days.

@@ -4,17 +4,18 @@ This index consolidates the execution-ready implementation plan for `prosto-plat
 
 ## Planning Baseline
 - Repository has completed Phase 01 governance activation, Phase 02 workspace/package baseline setup, Phase 03 SDK contract baseline delivery, and Phase 04 contract conformance delivery.
-- No production runtime implementation is present yet; runtime phases begin after SDK contracts and conformance baseline are established.
+- Phase 05 runtime foundation is implemented and validated; current execution focus has moved to Phase 06 hardening controls.
 - Architecture intent emphasizes micro-core boundaries, contract-first delivery, deterministic lifecycle, security-first module loading, and hybrid admin model with shell plus UI plugins.
 - This plan is sequenced to reduce early architecture drift and keep risk controls enforceable from the first implementation increment.
 
-## Execution Status (As of 2026-04-03, post-Phase 04 validation)
+## Execution Status (As of 2026-04-23, post-Phase 05 validation)
 - `Phase 01`: Completed (governance workflows, required checks documentation, PR template, release evidence script).
 - `Phase 02`: Completed (workspace packages, TypeScript baseline, dependency and public API boundary checks, dependency map).
 - `Phase 03`: Completed (SDK contracts, manifest schema/semantic validation, typed tokens, validation errors, unit and type-level tests).
 - `Phase 04`: Completed (contract conformance package implementation, failure taxonomy, reference module validation, compatibility matrix baseline).
-- `Current active phase`: Phase 05 (core runtime foundation and deterministic lifecycle).
-- `Phases 06-10`: Planned.
+- `Phase 05`: Partially Completed (core runtime foundation, deterministic lifecycle orchestration, active FF-03/FF-04 scripts).
+- `Current active phase`: Phase 06 (security controls and performance regression gates).
+- `Phases 07-10`: Planned.
 
 ## Phase Order
 1. [Phase 01 - Governance Activation and Delivery Guardrails](./01-phase.md)
@@ -76,7 +77,8 @@ Current dependency fulfillment:
 - Phase 02 prerequisite: satisfied.
 - Phase 03 prerequisite: satisfied.
 - Phase 04: completed and validated.
-- Phases 05-10: pending implementation (Phase 05 is current active phase).
+- Phase 05: partially completed and validated.
+- Phases 06-10: pending implementation (Phase 06 is current active phase).
 
 ## Milestones and Stage Gates
 ### M1 Governance Gate Active

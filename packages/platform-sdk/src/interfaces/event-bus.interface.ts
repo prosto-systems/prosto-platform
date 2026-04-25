@@ -2,11 +2,9 @@ import type { EventTokenType } from '../types/index.js';
 
 /**
  * @stable
- * Metadata envelope attached to module events.
+ * Event envelope metadata.
  */
-export interface IEventEnvelope<TPayload> {
-  readonly token: EventTokenType<TPayload>;
-  readonly payload: TPayload;
+export interface IEventMetadata {
   readonly timestamp: string;
   readonly correlationId?: string;
   readonly producerModuleId?: string;
@@ -15,10 +13,18 @@ export interface IEventEnvelope<TPayload> {
 
 /**
  * @stable
+ * Event envelope.
+ */
+export interface IEventEnvelope<TPayload> {
+  readonly payload: TPayload;
+  readonly metadata: IEventMetadata;
+}
+
+/**
+ * @stable
  * Event handler callback signature.
  */
 export type EventHandlerType<TPayload> = (
-  payload: TPayload,
   envelope: IEventEnvelope<TPayload>,
 ) => void | Promise<void>;
 
@@ -30,9 +36,7 @@ export interface IEventBus {
   publish<TPayload>(
     token: EventTokenType<TPayload>,
     payload: TPayload,
-    metadata?: Omit<IEventEnvelope<TPayload>, 'token' | 'payload' | 'timestamp'> & {
-      readonly timestamp?: string;
-    },
+    metadata?: Partial<IEventMetadata>,
   ): void | Promise<void>;
   subscribe<TPayload>(token: EventTokenType<TPayload>, handler: EventHandlerType<TPayload>): void;
   unsubscribe<TPayload>(token: EventTokenType<TPayload>, handler: EventHandlerType<TPayload>): void;
