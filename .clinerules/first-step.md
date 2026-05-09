@@ -42,7 +42,7 @@ When analyzing the project, check for:
 3. **Reference** `.context/04-implementation-plan/` for roadmap
 4. **Recommend** Phase 01/02 tasks before feature implementation
 
-**Current Status (April 2026):**
+**Current Status (May 2026):**
 - Architecture documentation complete in `.context/`
 - 10-phase implementation plan ready with Admin Enablement stream
 - 9 ADRs drafted including hybrid admin model
@@ -50,7 +50,7 @@ When analyzing the project, check for:
 - Phase 02 workspace/package baseline is implemented
 - Phase 03 SDK contract baseline is implemented
 - Phase 04 contract conformance package and reference module validation are implemented
-- Phase 05 core runtime foundation and deterministic lifecycle gates are implemented
+- Phase 05 core runtime foundation is partially implemented (lifecycle, bootstrap, diagnostics, loader, graph, policy, events, services — 13 subsystems)
 - Current active implementation phase: Phase 06 (security/performance hardening)
 
 ### Existing Rules
@@ -106,7 +106,7 @@ When analyzing the project, check for:
 - Completed: Phase 02 Monorepo Package Skeleton
 - Completed: Phase 03 SDK Contract Baseline
 - Completed: Phase 04 Contract Conformance Test Package
-- Partially completed: Phase 05 Core Runtime Foundation
+- Partially completed: Phase 05 Core Runtime Foundation (13 subsystems implemented: bootstrap, common, context, diagnostics, events, graph, lifecycle, loader, logging, policy, runtime, services, validation)
 - Active: Phase 06 Security and Performance Hardening
 - (See `.context/04-implementation-plan/` for full roadmap)
 

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { createPlatformRuntime } from '../../src/runtime/create-runtime.js';
-import { createManifest, TestModule } from './runtime-fixtures.js';
+import {
+  createManifest,
+  createRuntime,
+  TestModule,
+} from '@/tests/fixtures/index.js';
 
 describe('runtime shutdown', () => {
   it('stops modules in reverse startup order', async () => {
@@ -12,13 +15,16 @@ describe('runtime shutdown', () => {
       }),
     );
 
-    const runtime = await createPlatformRuntime({
+    const runtime = await createRuntime({
       startupPolicy: 'strict',
       runtimeVersion: {
         sdkVersion: '0.0.0',
         nodeVersion: process.versions.node,
       },
-      modules: [{ module: moduleB }, { module: moduleA }],
+      modules: [
+        { module: moduleB, type: 'memory' },
+        { module: moduleA, type: 'memory' },
+      ],
     });
 
     await runtime.stop();

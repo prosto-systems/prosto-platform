@@ -51,7 +51,7 @@ logger.debug({ config, moduleId }, 'Module configuration loaded');
 ### Example: Lifecycle Logging
 
 ```typescript
-class LifecycleOrchestrator {
+class ModuleLifecycleOrchestrator {
   async executePhase(
     module: IPlatformModule,
     phase: LifecyclePhase,

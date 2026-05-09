@@ -4,7 +4,7 @@ This is a TypeScript-based headless platform following modern development practi
 
 ## Project Status
 
-Current repository state (as of 2026-04-23): **Phase 05 partially completed and validated (core runtime foundation + deterministic lifecycle gates active), with Phase 06 as the active implementation window**.
+Current repository state (as of 2026-05-15): **Phase 05 partially completed (core runtime foundation with lifecycle, bootstrap, diagnostics, loader, graph, policy, events, and services subsystems), with Phase 06 (security and performance hardening) as the active implementation window**.
 
 What this means right now:
 - Phase 01 governance workflows and required-check policy are in place under [`.github/workflows/`](.github/workflows/) and [`docs/governance/`](docs/governance/).
@@ -12,8 +12,10 @@ What this means right now:
 - Phase 03 SDK contract authority is implemented in [`packages/platform-sdk/`](packages/platform-sdk/) with manifest schema validation, lifecycle interfaces, typed tokens, compatibility helpers, and SDK tests.
 - Shared TypeScript baseline is active at [`packages/@internal/tsconfig/base.json`](packages/@internal/tsconfig/base.json).
 - Phase 02 boundary checks are executable via `lint:architecture`, `validate:dependency-policy`, `validate:module-graph`, and `validate:public-api-boundary`.
-- Runtime policy and lifecycle determinism checks are active via `validate:runtime-policy` and `test:lifecycle-determinism`.
-- Contract conformance gate is active via `test:contracts`, backed by `@prosto/platform-contract-tests` and reference modules in `examples/`.
+- Phase 04 contract conformance gate is active via `test:contracts`, backed by `@prosto/platform-contract-tests` and reference modules in `examples/`.
+- Phase 05 runtime policy and lifecycle determinism checks are active via `validate:runtime-policy` and `test:lifecycle-determinism`.
+- Phase 05 core runtime subsystems implemented: bootstrap pipeline, module lifecycle orchestrator, startup policy evaluator, dependency graph with topological sorting, module loader with integrity checks, event bus, service registry, diagnostics reports, and validation strategies.
+- Phase 06 is the active implementation window — security controls (allowlist loading, integrity enforcement, secret redaction) and performance regression gates.
 
 ## Current State vs Target State
 
@@ -21,7 +23,7 @@ What this means right now:
 - Workspace monorepo baseline with package entry points and strict TypeScript configuration.
 - Primary operational policy for AI agents: [`AGENTS.md`](AGENTS.md).
 - Architecture intent and roadmap are documented under `.context/`.
-- Runtime baseline is implemented in `@prosto/platform-core` (Phase 05), with security and performance hardening planned in Phase 06.
+- Runtime baseline is implemented in `@prosto/platform-core` (Phase 05 — 13 subsystems active), with security and performance hardening planned in Phase 06.
 
 ### Target State (design intent)
 - Monorepo with `platform-sdk`, `platform-core`, `platform-contract-tests`, adapters, and CLI packages.
@@ -48,6 +50,7 @@ Target-state details are documented in the architecture pack [`README.md`](.cont
 ## Immediate Priorities
 
 Current next priorities:
-1. Activate security and performance hardening gates (Phase 06).
-2. Implement admin enablement contracts and BFF stream (Phases 07-08).
-3. Prepare internal MVP validation pathway prerequisites (Phases 09-10).
+1. Implement security controls for runtime and CI: allowlist-only module loading in production, integrity checksum verification enforcement, secret redaction from logs/diagnostics (Phase 06).
+2. Implement performance regression gates: startup time benchmarks, memory consumption baselines, CI performance regression detection (Phase 06).
+3. Implement admin enablement contracts and BFF stream (Phases 07-08).
+4. Prepare internal MVP validation pathway prerequisites (Phases 09-10).

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createEventToken, type IEventEnvelope } from '@prosto/platform-sdk';
-import { InMemoryEventBus } from '../../../src/events/in-memory-event-bus.js';
+import { InMemoryEventBus } from '@/events/index.js';
 
 const TOKEN_A = createEventToken<string>('event-a');
 

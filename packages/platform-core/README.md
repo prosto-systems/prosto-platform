@@ -11,7 +11,8 @@ Phase 05 runtime foundation package for deterministic module lifecycle orchestra
 - Reverse-order shutdown with bounded timeout handling
 
 ## Public API
-- `createPlatformRuntime(options)` runtime factory
+- `RuntimeBuilder` composition root for runtime wiring
+- `PlatformRuntime` class with explicit `start()` and `stop()`
 - Runtime report types for startup/shutdown diagnostics
 - Runtime reason taxonomy constants
 

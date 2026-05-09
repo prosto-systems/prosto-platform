@@ -1,30 +1,62 @@
+import type { StartupPolicyType } from '@prosto/platform-sdk';
 import type {
-  IStartupPolicyEvaluationInput,
-  IStartupPolicyEvaluationResult,
-} from './policy.types.js';
+  IPolicyEvaluationInput,
+  IPolicyEvaluationResult,
+  IPolicyStrategy,
+  IStartupPolicyEvaluator,
+} from './interfaces/index.js';
+import {
+  BestEffortPolicyStrategy,
+  StrictPolicyStrategy,
+} from './strategies/index.js';
 
-export function evaluateStartupPolicy(
-  input: IStartupPolicyEvaluationInput,
-): IStartupPolicyEvaluationResult {
-  if (input.critical) {
-    return {
-      action: 'abort',
-      degraded: false,
-      reason: `Module "${input.moduleId}" is critical and startup must abort on failure.`,
-    };
+/**
+ * @alpha
+ * Startup policy evaluator class.
+ * Manages policy strategies and evaluates startup policies.
+ */
+export class StartupPolicyEvaluator implements IStartupPolicyEvaluator {
+  private readonly _strategies = new Map<StartupPolicyType, IPolicyStrategy>();
+
+  constructor(
+    policyStrategies: IPolicyStrategy[] = [
+      new StrictPolicyStrategy(),
+      new BestEffortPolicyStrategy(),
+    ],
+  ) {
+    for (const strategy of policyStrategies) {
+      this._strategies.set(strategy.policyMode, strategy);
+    }
   }
 
-  if (input.policyMode === 'strict') {
-    return {
-      action: 'abort',
-      degraded: false,
-      reason: `Startup policy is strict and module "${input.moduleId}" failed.`,
-    };
+  /**
+   * Evaluate the policy for the given input.
+   * Delegates to the appropriate strategy based on policy mode.
+   */
+  evaluate(input: IPolicyEvaluationInput): IPolicyEvaluationResult {
+    const strategy = this.getStrategy(input.policyMode);
+
+    if (!strategy) {
+      return {
+        action: 'abort',
+        reason: `Unknown policy mode: "${input.policyMode}".`,
+      };
+    }
+
+    return strategy.evaluate(input);
   }
 
-  return {
-    action: 'skip',
-    degraded: true,
-    reason: `Startup policy is best-effort; module "${input.moduleId}" is skipped.`,
-  };
+  /**
+   * Get the strategy for the given policy mode.
+   */
+  getStrategy(policyMode: StartupPolicyType): IPolicyStrategy | undefined {
+    return this._strategies.get(policyMode);
+  }
+
+  /**
+   * Register a new policy strategy.
+   */
+  registerStrategy(strategy: IPolicyStrategy): void {
+    this._strategies.set(strategy.policyMode, strategy);
+  }
 }

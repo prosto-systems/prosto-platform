@@ -3,57 +3,58 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { describe, expect, it } from 'vitest';
-import { RuntimeReasonCodes } from '../../src/compatibility/reason-codes.js';
-import { createPlatformRuntime } from '../../src/runtime/create-runtime.js';
-import { createManifest, TestModule } from './runtime-fixtures.js';
+import { RuntimeReasonCodes } from '@/runtime/index.js';
+import {
+  createManifest,
+  createRuntime,
+  TestModule,
+} from '@/tests/fixtures/index.js';
 
 describe('runtime loader sources', () => {
   it('keeps backward compatibility for memory module refs', async () => {
     const moduleA = new TestModule(createManifest({ id: 'module-a' }));
 
-    const runtime = await createPlatformRuntime({
+    const runtime = await createRuntime({
       startupPolicy: 'strict',
       runtimeVersion: {
         sdkVersion: '0.0.0',
         nodeVersion: process.versions.node,
       },
-      modules: [{ module: moduleA }],
+      modules: [{ module: moduleA, type: 'memory' }],
     });
 
     expect(runtime.startedModuleIds).toEqual(['module-a']);
-    expect(runtime.reports.startup.status).toBe('success');
+    expect(runtime.reports.startup?.status).toBe('success');
 
-    await runtime.stop()
+    await runtime.stop();
   });
 
   it('marks invalid url source as discover rejection and continues with memory module', async () => {
     const moduleA = new TestModule(createManifest({ id: 'module-a' }));
 
-    const runtime = await createPlatformRuntime({
+    const runtime = await createRuntime({
       startupPolicy: 'strict',
       runtimeVersion: {
         sdkVersion: '0.0.0',
         nodeVersion: process.versions.node,
       },
       modules: [
-        { module: moduleA },
+        { module: moduleA, type: 'memory' },
         {
           moduleIdHint: 'module-url',
-          source: {
-            type: 'url',
-            url: 'http://insecure.example/module.zip',
-            packaging: 'zip',
-          },
+          type: 'url',
+          url: 'http://insecure.example/module.zip',
+          packaging: 'zip',
         },
       ],
     });
 
     expect(runtime.startedModuleIds).toEqual(['module-a']);
-    expect(runtime.reports.startup.status).toBe('degraded');
-    expect(runtime.reports.startup.failedModules.some((item) => item.errorCode === RuntimeReasonCodes.SourceUrlInvalid)).toBe(true);
-    expect(runtime.reports.startup.skippedModules.some((item) => item.moduleId === 'module-url')).toBe(true);
+    expect(runtime.reports.startup?.status).toBe('degraded');
+    expect(runtime.reports.startup?.failedModules.some((item) => item.errorCode === RuntimeReasonCodes.SourceUrlInvalid)).toBe(true);
+    expect(runtime.reports.startup?.skippedModules.some((item) => item.moduleId === 'module-url')).toBe(true);
 
-    await runtime.stop()
+    await runtime.stop();
   });
 
   it('validates path checksum and rejects on integrity mismatch', async () => {
@@ -63,7 +64,7 @@ describe('runtime loader sources', () => {
     try {
       await writeFile(artifactPath, 'artifact payload', 'utf8');
 
-      const runtime = await createPlatformRuntime({
+      const runtime = await createRuntime({
         startupPolicy: 'strict',
         runtimeVersion: {
           sdkVersion: '0.0.0',
@@ -72,22 +73,20 @@ describe('runtime loader sources', () => {
         modules: [
           {
             moduleIdHint: 'module-path',
-            source: {
-              type: 'path',
-              path: artifactPath,
-              packaging: 'zip',
-              integrity: {
-                checksum: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
-              },
+            type: 'path',
+            path: artifactPath,
+            packaging: 'zip',
+            integrity: {
+              checksum: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
             },
           },
         ],
       });
 
       expect(runtime.startedModuleIds).toEqual([]);
-      expect(runtime.reports.startup.failedModules.some((item) => item.errorCode === RuntimeReasonCodes.SourceIntegrityMismatch)).toBe(true);
+      expect(runtime.reports.startup?.failedModules.some((item) => item.errorCode === RuntimeReasonCodes.SourceIntegrityMismatch)).toBe(true);
 
-      await runtime.stop()
+      await runtime.stop();
     } finally {
       await rm(tempDir, { recursive: true, force: true });
     }
@@ -101,7 +100,7 @@ describe('runtime loader sources', () => {
       await writeFile(artifactPath, 'artifact payload', 'utf8');
       const checksum = createHash('sha256').update('artifact payload').digest('hex');
 
-      const runtime = await createPlatformRuntime({
+      const runtime = await createRuntime({
         startupPolicy: 'strict',
         runtimeVersion: {
           sdkVersion: '0.0.0',
@@ -110,22 +109,20 @@ describe('runtime loader sources', () => {
         modules: [
           {
             moduleIdHint: 'module-path-ok',
-            source: {
-              type: 'path',
-              path: artifactPath,
-              packaging: 'zip',
-              integrity: {
-                checksum: `sha256:${checksum}`,
-              },
+            type: 'path',
+            path: artifactPath,
+            packaging: 'zip',
+            integrity: {
+              checksum: `sha256:${checksum}`,
             },
           },
         ],
       });
 
       expect(runtime.startedModuleIds).toEqual([]);
-      expect(runtime.reports.startup.failedModules.some((item) => item.errorCode === RuntimeReasonCodes.SourceEntryResolveFailed)).toBe(true);
+      expect(runtime.reports.startup?.failedModules.some((item) => item.errorCode === RuntimeReasonCodes.SourceEntryResolveFailed)).toBe(true);
 
-      await runtime.stop()
+      await runtime.stop();
     } finally {
       await rm(tempDir, { recursive: true, force: true });
     }

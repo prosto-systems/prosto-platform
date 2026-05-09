@@ -42,10 +42,10 @@ export interface IPlatformModule {
 }
 
 // ✅ Step 3: Implement in platform-core using contracts
-// packages/platform-core/src/lifecycle/lifecycle-orchestrator.ts
+// packages/platform-core/src/lifecycle/module-lifecycle.orchestrator.ts
 import { IPlatformModule, IModuleContext } from '@prosto/platform-sdk';
 
-export class LifecycleOrchestrator {
+export class ModuleLifecycleOrchestrator {
   async executePhase(module: IPlatformModule, phase: LifecyclePhase, ctx: IModuleContext): Promise<void> {
     // Implementation uses contract types
   }

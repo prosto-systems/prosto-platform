@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { createServiceToken } from '@prosto/platform-sdk';
-import { InMemoryServiceRegistry } from '../../../src/services/in-memory-service-registry.js';
-import { ServiceAlreadyRegisteredError, ServiceNotFoundError } from '../../../src/services/services.errors.js';
+import {
+  InMemoryServiceRegistry,
+  ServiceAlreadyRegisteredError,
+  ServiceNotFoundError,
+} from '@/services/index.js';
 
 const TOKEN_A = createServiceToken<string>('token-a');
 const TOKEN_B = createServiceToken<string>('token-b');

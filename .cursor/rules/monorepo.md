@@ -53,7 +53,7 @@
 ```typescript
 // ✅ Good: Using @prosto/* scoped imports for cross-package
 import { PlatformModule } from '@prosto/platform-sdk';
-import { LifecycleOrchestrator } from '@prosto/platform-core';
+import { ModuleLifecycleOrchestrator } from '@prosto/platform-core';
 
 // ✅ Good: Relative imports within same package
 import { UserService } from './services/user.service';
