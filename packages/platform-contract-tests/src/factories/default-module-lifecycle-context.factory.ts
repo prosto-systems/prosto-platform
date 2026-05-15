@@ -104,7 +104,7 @@ export class DefaultModuleLifecycleContextFactory implements IModuleLifecycleCon
       sdkVersion: module.manifest.sdkVersion,
       startupPolicy: 'best-effort',
       services: new MockServiceRegistry(),
-      events: new MockEventBus(),
+      eventBus: new MockEventBus(),
       getConfig: <TValue = unknown>(key: string): TValue | undefined => {
         if (key === 'contract.testing.enabled') {
           return true as TValue;

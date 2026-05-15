@@ -138,7 +138,7 @@ The ordered steps below are preserved as execution traceability for the complete
 
 ### Step 2 - Implement bootstrap coordinator
 - File-level target:
-  - `packages/platform-core/src/bootstrap/bootstrap-coordinator.ts`
+  - `packages/platform-core/src/bootstrap/bootstrap.coordinator.ts`
   - `packages/platform-core/src/bootstrap/bootstrap.types.ts`
 - Evidence linkage:
   - Architecture baseline requires controlled pipeline discover validate resolve lifecycle.
@@ -178,7 +178,7 @@ The ordered steps below are preserved as execution traceability for the complete
   3. Implement real loading path in `packages/platform-core/src/loader/module-loader.ts`
      - Resolve artifact references and map loading failures into rejected artifact outputs.
      - Preserve deterministic output ordering for loaded artifacts.
-  4. Refine bootstrap boundary usage in `packages/platform-core/src/bootstrap/bootstrap-coordinator.ts`
+  4. Refine bootstrap boundary usage in `packages/platform-core/src/bootstrap/bootstrap.coordinator.ts`
      - Consume loader rejected outputs directly.
      - Keep validation and policy logic focused on post-loading module candidates.
   5. Add focused test coverage in `packages/platform-core/tests/integration/`
@@ -309,7 +309,7 @@ flowchart TD
 - File-level target:
   - `packages/platform-core/src/compatibility/manifest-guard.ts`
   - `packages/platform-core/src/compatibility/compatibility-checker.ts`
-  - `packages/platform-core/src/compatibility/reason-codes.ts`
+  - `packages/platform-core/src/compatibility/runtime-reason-codes.ts`
 - Evidence linkage:
   - SDK contracts and ADR policy require explicit compatibility gating.
 - Activation condition:
@@ -320,9 +320,9 @@ flowchart TD
 
 ### Step 5 - Implement dependency graph resolver and deterministic order
 - File-level target:
-  - `packages/platform-core/src/graph/dependency-graph.ts`
+  - `packages/platform-core/src/graph/dependency.graph.ts`
   - `packages/platform-core/src/graph/topological-sort.ts`
-  - `packages/platform-core/src/graph/graph.errors.ts`
+  - `packages/platform-core/src/graph/dependency-graph.errors.ts`
 - Evidence linkage:
   - ADR lifecycle order is dependency-driven and deterministic.
 - Activation condition:
@@ -333,9 +333,9 @@ flowchart TD
 
 ### Step 6 - Implement lifecycle orchestrator
 - File-level target:
-  - `packages/platform-core/src/lifecycle/lifecycle-orchestrator.ts`
+  - `packages/platform-core/src/lifecycle/module-lifecycle.orchestrator.ts`
   - `packages/platform-core/src/lifecycle/lifecycle.types.ts`
-  - `packages/platform-core/src/lifecycle/lifecycle.errors.ts`
+  - `packages/platform-core/src/lifecycle/module-lifecycle.errors.ts`
 - Evidence linkage:
   - Required lifecycle sequence is register -> init -> start -> stop.
 - Activation condition:
@@ -358,8 +358,8 @@ flowchart TD
 
 ### Step 8 - Implement diagnostics reporter
 - File-level target:
-  - `packages/platform-core/src/diagnostics/diagnostics-reporter.ts`
-  - `packages/platform-core/src/diagnostics/diagnostics.schema.ts`
+  - `packages/platform-core/src/diagnostics/diagnostics.reporter.ts`
+  - `packages/platform-core/src/diagnostics/diagnostics-reports.schema.ts`
   - `packages/platform-core/src/diagnostics/diagnostics.types.ts`
 - Evidence linkage:
   - Operability baseline requires structured startup and shutdown reports.

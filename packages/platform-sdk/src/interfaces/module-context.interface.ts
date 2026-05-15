@@ -12,7 +12,7 @@ export interface IModuleContext {
   readonly sdkVersion: string;
   readonly startupPolicy: StartupPolicyType;
   readonly services: IServiceRegistry;
-  readonly events: IEventBus;
+  readonly eventBus: IEventBus;
   readonly logger?: IModuleLogger;
   readonly config?: Readonly<Record<string, unknown>>;
   getConfig<TValue = unknown>(key: string): TValue | undefined;

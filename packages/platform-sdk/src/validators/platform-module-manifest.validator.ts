@@ -1,4 +1,4 @@
-import type { ZodIssue, ZodObject } from 'zod';
+import type { ZodIssue, ZodType } from 'zod';
 import type {
   IModuleManifestValidator,
   IPlatformModuleManifest,
@@ -16,7 +16,7 @@ import { PlatformModuleManifestSchema } from '../schemas/index.js';
  */
 export class PlatformModuleManifestValidator implements IModuleManifestValidator {
   constructor(
-    protected readonly manifestSchema: ZodObject = PlatformModuleManifestSchema,
+    protected readonly manifestSchema: ZodType<IPlatformModuleManifest> = PlatformModuleManifestSchema,
   ) {
   }
 
@@ -76,7 +76,7 @@ export class PlatformModuleManifestValidator implements IModuleManifestValidator
   }
 
   protected validateManifestSchema(
-    manifestSchema: ZodObject,
+    manifestSchema: ZodType<IPlatformModuleManifest>,
     manifest: unknown,
   ): ModuleManifestValidationResultType {
     const parsed = manifestSchema.safeParse(manifest);
@@ -94,7 +94,7 @@ export class PlatformModuleManifestValidator implements IModuleManifestValidator
 
     return {
       success: true,
-      manifest: parsed.data as unknown as IPlatformModuleManifest,
+      manifest: parsed.data,
     };
   }
 

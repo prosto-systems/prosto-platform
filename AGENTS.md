@@ -6,7 +6,7 @@
 
 ## ⚠️ Current Project Status
 
-**IMPORTANT**: Phase 01 through Phase 05 are partially complete. The repository now has governance/workspace baselines, SDK contract baseline, contract conformance validation, and runtime lifecycle foundation; security/performance hardening gates remain for Phase 06+.
+**IMPORTANT**: Phase 01 through Phase 04 are fully implemented. Phase 05 (core runtime foundation) is partially implemented — the runtime lifecycle, deterministic orchestration, startup policy evaluation, and diagnostics baseline are complete. Phase 06 (security and performance hardening) is the **active implementation window**.
 
 ### Current Tooling Availability
 - Phase 01 governance workflows are active under `.github/workflows/`:
@@ -29,14 +29,25 @@
   - `validate:dependency-policy`
   - `validate:module-graph`
   - `validate:public-api-boundary`
-  - `validate:runtime-policy` (implemented in Phase 05 via runtime diagnostics validation)
-  - `test:contracts` (implemented in Phase 04 via contract conformance suite)
-  - `test:lifecycle-determinism` (implemented in Phase 05 via deterministic lifecycle integration tests)
+  - `validate:runtime-policy` (Phase 05 — validates manifests, security classes, startup policies)
+  - `test:contracts` (Phase 04 — contract conformance suite)
+  - `test:lifecycle-determinism` (Phase 05 — deterministic lifecycle integration tests)
   - `release:evidence`
 - `lint:architecture`, `validate:dependency-policy`, `validate:module-graph`, and `validate:public-api-boundary` are implemented and enforce Phase 02 boundary checks.
 - `@prosto/platform-sdk` now includes Phase 03 contract surface, manifest validation, typed token helpers, and package-level tests.
 - `@prosto/platform-sdk` test runner baseline uses Vitest (`packages/platform-sdk/vitest.config.ts` and package `test` scripts).
 - `@prosto/platform-contract-tests` now includes the Phase 04 reusable conformance suite, failure taxonomy, and machine-readable conformance report output.
+- Phase 05 implementation status:
+  - ✅ **Implemented**: Core runtime foundation (`ModuleLifecycleOrchestrator`, `StartupPolicyEvaluator`, `PlatformRuntime`, `RuntimeBuilder`)
+  - ✅ **Implemented**: Lifecycle determinism integration tests (`tests/integration/determinism.test.ts`)
+  - ✅ **Implemented**: Runtime policy validation integration tests (`tests/integration/runtime-policy-validation.test.ts`)
+  - ✅ **Implemented**: Diagnostics reports schema validation (`diagnostics-reports.schema.ts`, `diagnostics.reporter.ts`)
+  - ✅ **Implemented**: Bootstrap pipeline with strict/best-effort modes (`bootstrap/`)
+  - ✅ **Implemented**: Module loader with integrity checks and source plugins (`loader/`)
+  - ✅ **Implemented**: Dependency graph and topological sorting (`graph/`)
+  - ✅ **Implemented**: Policy evaluation strategies (`policy/strategies/`)
+  - ✅ **Implemented**: Event bus infrastructure (`events/`)
+  - ✅ **Implemented**: Service registry (`services/`)
 - ESLint baseline config exists at `eslint.config.mjs`; repository-wide standardized test stack is still phased.
 
 ### Architecture Documents Reference
@@ -67,16 +78,22 @@ This is a TypeScript-based headless platform following modern development practi
 
 ### Import/Export Strategy
 ```typescript
-// ✅ Good: Organized imports
-import { UserService } from './services/user.service.ts';
-import { Database } from './database.ts';
-import { Logger } from './utils/logger.ts';
+// ✅ Good: Organized imports with ESM (.js extensions for relative paths)
+import { UserService } from './services/user.service.js';
+import { Database } from './database.js';
+import { Logger } from './utils/logger.js';
+import type { IModuleContext } from '@prosto/platform-sdk';
 
 // Barrel exports for clean module interfaces
-export * from './services.ts';
-export * from './utils.ts';
-export * from './types.ts';
+export * from './services.js';
+export * from './utils.js';
+export * from './types.js';
+
+// ✅ Good: Named imports for better tree-shaking
+import { ServiceRegistry } from '@prosto/platform-core';
 ```
+
+**Important**: The project uses ESM (`"type": "module"` in root `package.json`). Use `.js` file extensions in relative imports even though writing TypeScript.
 
 ### Type Definitions
 ```typescript
@@ -95,10 +112,117 @@ class Repository<T> {
 }
 
 // ✅ Good: Union types over any
-type TStatus = 'pending' | 'completed' | 'failed';
+type StatusType = 'pending' | 'completed' | 'failed';
 ```
 
 ## Architecture Guidelines
+
+### Contract-First Development
+
+**ALWAYS implement in this order:**
+
+1. **Define types in `platform-sdk`** BEFORE implementing in `platform-core`
+2. **Define manifest schema** BEFORE implementing module loader
+3. **Define lifecycle interfaces** BEFORE implementing orchestrator
+4. **Test contracts** BEFORE implementing features
+
+#### Module Development Example
+
+```typescript
+// ✅ Step 1: Implement module with manifest
+export class HealthModule implements IPlatformModule {
+  readonly manifest: IPlatformModuleManifest = {
+    id: 'module-health',
+    version: '1.0.0',
+    sdkVersion: '^0.1.0',
+    criticality: 'normal',
+    securityClass: 'internal',
+    capabilities: ['lifecycle.register', 'feature.health', 'obs.metrics'],
+    dependencies: [],
+    checksum: 'sha256:...', // Computed artifact checksum
+  };
+  
+  register(ctx: IModuleContext): void { /* ... */ }
+  init(ctx: IModuleContext): void { /* ... */ }
+  start(ctx: IModuleContext): void { /* ... */ }
+  stop(ctx: IModuleContext): void { /* ... */ }
+}
+
+// ✅ Step 2: Test via contract conformance
+import { createModuleContractTests } from '@prosto/platform-contract-tests';
+
+describe('HealthModule contract', () => {
+  createModuleContractTests(
+    { module: new HealthModule() },
+    { describe, it }, // Pass Vitest helpers
+  );
+});
+```
+
+#### Module Manifest Structure
+
+Every module manifest MUST include:
+- `id`: Unique module identifier (kebab-case)
+- `version`: Semantic version (MAJOR.MINOR.PATCH)
+- `sdkVersion`: Compatible platform-sdk version
+- `criticality`: Impact on platform startup ('critical' | 'normal' | 'optional')
+- `securityClass`: Trust classification (see Security section)
+- `capabilities`: Array of feature namespaces provided
+- `dependencies`: Array of required module IDs
+- `checksum`: SHA-256 integrity checksum
+
+#### Stability Levels
+
+All public exports in `@prosto/platform-sdk` MUST include stability annotation:
+
+```typescript
+/**
+ * @stable
+ * Module interface - stable since v0.1.0, backward compatible
+ */
+export interface IPlatformModule {
+  readonly manifest: IPlatformModuleManifest;
+  register(ctx: IModuleContext): Promise<void>;
+  init(ctx: IModuleContext): Promise<void>;
+  start(ctx: IModuleContext): Promise<void>;
+  stop(ctx: IModuleContext): Promise<void>;
+}
+
+/**
+ * @beta
+ * Extended lifecycle hooks - may evolve in minor releases with migration path
+ */
+export interface IExtendedLifecycleHooks {
+  onBeforeInit?: (ctx: IModuleContext) => Promise<void>;
+  onAfterStart?: (ctx: IModuleContext) => Promise<void>;
+}
+
+/**
+ * @experimental
+ * Worker isolation API - no compatibility guarantee, subject to change
+ */
+export interface IWorkerIsolation {
+  isolate(fn: () => void): Promise<void>;
+}
+
+/**
+ * @internal
+ * Internal utility - not public API, can change without notice
+ */
+export function _internalHelper(): void {
+  // ...
+}
+```
+
+**Stability Level Definitions:**
+
+| Level | Meaning | Consumers | Backward Compatible |
+|-------|---------|-----------|-------|
+| `@stable` | Default public contract | All modules and adapters | ✅ Yes (semver minor/patch) |
+| `@beta` | Candidate public contract | Early adopters, opt-in | ⚠️ May evolve with migration notes |
+| `@alpha` | Early public contract | Early adopters, opt-in | ⚠️ May evolve in minor releases |
+| `@experimental` | Exploration surface | Internal use only | ❌ No guarantee |
+| `@internal` | Not public API | Package maintainers only | ❌ Can change anytime |
 
 ### OOP, Clean Architecture, and SOLID Baseline
 - Apply object-oriented design for production code where it improves clarity, extension safety, and testability.
@@ -147,6 +271,48 @@ async function processUser(userData: unknown): Promise<User> {
 ```
 
 ## Security Best Practices
+
+### Module Security Classification
+
+**Every module MUST declare security class in manifest:**
+
+```typescript
+type TSecurityClass = 
+  | 'trusted'               // Core platform modules, full access, signed artifacts
+  | 'internal'              // Internal team modules, standard platform APIs
+  | 'third-party-reviewed'; // External modules, reviewed and integrity-verified
+```
+
+Module classification determines:
+- Load restrictions (dev/staging/production)
+- Available platform APIs
+- Sandboxing level
+- Integrity verification requirements
+
+#### Allowlist-Only Loading (Production)
+
+```typescript
+// ✅ Required for production: Allowlist configuration
+const moduleAllowlist = [
+  {
+    id: 'prosto-module-health',
+    version: '^1.0.0',
+    checksum: 'sha256:abc123...',
+    securityClass: 'internal'
+  },
+  {
+    id: 'prosto-module-auth',
+    version: '^1.2.0', 
+    checksum: 'sha256:def456...',
+    securityClass: 'trusted'
+  }
+];
+
+// Reject any module not in allowlist for production
+if (process.env.NODE_ENV === 'production' && !isInAllowlist(moduleId)) {
+  throw new SecurityError('Module not in production allowlist', { moduleId });
+}
+```
 
 ### Input Validation
 - Always validate external inputs
@@ -197,37 +363,72 @@ async function processUser(userData: unknown): Promise<User> {
   Unit Tests (Many, Fast)
 ```
 
-### Unit Testing
+### Test Runner: Vitest
+
+The project uses **Vitest** for TypeScript testing. Test configuration files:
+- Root: None (Turbo-orchestrated)
+- Per-package: `packages/*/vitest.config.ts`
+- Examples: `examples/*/vitest.config.ts`
+
+**Common Commands:**
+```bash
+turbo test                                    # Run all tests across packages
+turbo test --filter=@prosto/platform-sdk      # Run tests in specific package
+turbo test:unit                               # Run unit tests only
+turbo test:contracts                          # Run contract conformance tests
+```
+
+### Unit Testing with Vitest
+
 ```typescript
-// ✅ Good: Unit test structure
+import { describe, it, beforeEach, expect } from 'vitest';
+
 describe('UserService', () => {
   let userService: UserService;
-  let mockRepository: jest.Mocked<UserRepository>;
+  let mockRepository: Partial<UserRepository>;
   
   beforeEach(() => {
     mockRepository = {
-      findById: jest.fn(),
-      save: jest.fn(),
+      findById: async () => ({ id: '123', name: 'John' }),
     };
-    userService = new UserService(mockRepository);
+    userService = new UserService(mockRepository as UserRepository);
   });
   
   describe('getUser', () => {
     it('should return user when found', async () => {
-      // Arrange
-      const userId = '123';
-      const expectedUser = { id: userId, name: 'John' };
-      mockRepository.findById.mockResolvedValue(expectedUser);
-      
-      // Act
-      const result = await userService.getUser(userId);
-      
-      // Assert
-      expect(result).toEqual(expectedUser);
-      expect(mockRepository.findById).toHaveBeenCalledWith(userId);
+      const result = await userService.getUser('123');
+      expect(result).toEqual({ id: '123', name: 'John' });
     });
   });
 });
+```
+
+### Module Contract Testing
+
+The platform provides reusable contract tests for module conformance. Reference modules in `examples/` demonstrate the pattern:
+
+```typescript
+// examples/module-health/tests/contracts.test.ts
+import { describe, it } from 'vitest';
+import { createModuleContractTests } from '@prosto/platform-contract-tests';
+import { HealthModule } from '../src/index.js';
+
+describe('HealthModule contract', () => {
+  // createModuleContractTests validates:
+  // - Manifest schema (id, version, capabilities, security class)
+  // - Lifecycle phases (register → init → start → stop)
+  // - Integrity checksum presence
+  // - Dependency resolution
+  createModuleContractTests(
+    { module: new HealthModule() },
+    { describe, it }, // Pass Vitest test helpers
+  );
+});
+```
+
+**All modules MUST pass contract tests before integration:**
+```bash
+turbo test:contracts
 ```
 
 ### Integration Testing
@@ -333,6 +534,28 @@ turbo build --filter=@prosto/platform-sdk  # Build specific package
 - Cache is gitignored but can be pushed to remote for CI/CD
 - Use `--force` flag to bypass cache when needed
 
+### Architecture & Dependency Validation
+
+The project enforces architectural boundaries through policy validation scripts. Run these before committing:
+
+**Package Boundary Checks:**
+```bash
+npm run lint:architecture       # Verify module import rules (ADR-0001)
+npm run validate:dependency-policy  # Enforce dependency layering
+npm run validate:module-graph   # Check module dependency tree
+npm run validate:public-api-boundary # Verify SDK public API contracts
+npm run validate:runtime-policy # Check runtime module loading policies
+```
+
+**What gets checked:**
+- `lint:architecture`: Module imports don't violate boundaries (platform-core → adapters is forbidden)
+- `validate:dependency-policy`: Strict dependency layering (no circular deps, correct directions)
+- `validate:module-graph`: Module interdependencies form a valid DAG
+- `validate:public-api-boundary`: SDK public exports match API_REPORT.md
+- `validate:runtime-policy`: Module manifests, security classes, and startup policies
+
+**These checks are enforced in CI** via `.github/workflows/` gates and must pass before merge.
+
 ### Development Workflow (Target State)
 
 **Completed Baseline**:
@@ -340,17 +563,39 @@ turbo build --filter=@prosto/platform-sdk  # Build specific package
 2. Phase 02 monorepo workspace and package boundary setup
 3. Phase 03 SDK contract baseline and manifest validation
 4. Phase 04 contract conformance test package and reference module validation
-5. Phase 05 core runtime lifecycle foundation and deterministic orchestration
+5. Phase 05 core runtime foundation (partially — lifecycle, policy, bootstrap, diagnostics, loader, graph, events, services)
 6. ESLint + TypeScript baseline configuration
 
-**Current Priority (Phase 06)**:
-1. Implement security controls and performance regression gates for runtime and CI
-2. Extend runtime-policy enforcement with allowlist, integrity, and redaction controls
+**Phase 05 Implemented Subsystems**:
+- `bootstrap/` — Bootstrap coordinator, pipeline, and stage definitions (strict + best-effort modes)
+- `common/` — Shared utilities, error types, assertion helpers
+- `context/` — Module context factory and interfaces
+- `diagnostics/` — Operational reports schema validation and reporter
+- `events/` — In-memory event bus infrastructure
+- `graph/` — Dependency graph construction, cycle detection, topological sorter
+- `lifecycle/` — Module lifecycle orchestrator (register → init → start → stop with timeout)
+- `loader/` — Module loader with integrity checks and source plugins
+- `logging/` — Module-scoped logger
+- `policy/` — Startup policy evaluator with strict and best-effort strategies
+- `runtime/` — Platform runtime and builder
+- `services/` — Service registry
+- `validation/` — Module validation strategies
 
-**Phase 05-06 (Runtime and Hardening)**:
-1. Phase 05 completed: core runtime lifecycle foundation
-2. Phase 05 completed: FF-03 lifecycle determinism and FF-04 runtime-policy checks are active
-3. Phase 06 focus: activate security and performance regression gates
+**Phase 05 Remaining Work** (moved to Phase 06 scope):
+- Allowlist-based production module loading enforcement
+- Additional integrity verification hardening
+- Secret redaction from diagnostics/logs
+
+**Current Priority (Phase 06)**:
+1. Implement security controls for runtime and CI:
+   - Allowlist-only module loading in production
+   - Integrity checksum verification enforcement
+   - Secret redaction from logs and diagnostics
+2. Implement performance regression gates:
+   - Startup time benchmarks
+   - Memory consumption baselines
+   - CI performance regression detection
+3. Extend `validate:runtime-policy` with security and performance checks
 
 **Phase 07-09 (Admin Enablement Stream)**:
 1. Implement `platform-admin-contracts`
@@ -496,5 +741,5 @@ For questions about this project or AI agent guidelines:
 
 ---
 
-**Last Updated**: April 2026
-**Version**: 0.0.0
+**Last Updated**: 2026-05-15
+**Version**: 0.1.0

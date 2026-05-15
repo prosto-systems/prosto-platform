@@ -2,11 +2,16 @@
   "extends": "@internal/tsconfig/base.json",
   "compilerOptions": {
     "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/tests/fixtures/*": ["./tests/fixtures/*"],
+      "@/*": ["./src/*"]
+    },
     "types": [
       "node"
     ]
   },
   "include": [
-    "tests/**/*.test.ts"
+    "tests/**/*.ts"
   ]
 }
