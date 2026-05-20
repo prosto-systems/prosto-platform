@@ -1,6 +1,7 @@
 export type * from './artifact-source.interface.js';
 export type * from './artifact-source-factory.interface.js';
 export type * from './discovered-module-artifact.interface.js';
+export type * from './http-client.interface.js';
 export type * from './integrity-verifier.interface.js';
 export type * from './module-artifact-integrity.interface.js';
 export type * from './module-candidate-artifact.interface.js';

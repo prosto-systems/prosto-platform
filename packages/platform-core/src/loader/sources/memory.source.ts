@@ -45,7 +45,7 @@ export class MemorySource extends ArtifactBaseSource {
     const validation = this.validate();
 
     if (!validation.ok) {
-      return this.createRejected('validate', validation.error);
+      return this.createRejected('discover', validation.error);
     }
 
     const module = this._descriptor.module;

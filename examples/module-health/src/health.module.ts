@@ -26,18 +26,18 @@ export class HealthModule implements IPlatformModule {
   };
 
   register(_ctx: IModuleContext): void {
-    // noop
+    console.log('Health module registered.');
   }
 
   init(_ctx: IModuleContext): void {
-    // noop
+    console.log('Health module initialized.');
   }
 
   start(_ctx: IModuleContext): void {
-    // noop
+    console.log('Health module started.');
   }
 
   stop(_ctx: IModuleContext): void {
-    // noop
+    console.log('Health module stopped.');
   }
 }

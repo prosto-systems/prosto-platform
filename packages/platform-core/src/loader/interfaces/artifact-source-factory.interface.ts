@@ -8,5 +8,7 @@ import type {
  * Factory interface for creating artifact sources.
  */
 export interface IArtifactSourceFactory {
-  create(descriptor: ModuleArtifactSourceDescriptorType): IArtifactSource;
+  create(
+    descriptor: ModuleArtifactSourceDescriptorType,
+  ): IArtifactSource;
 }

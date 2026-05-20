@@ -2,7 +2,10 @@ import type {
   IPlatformRuntimeVersionContext,
   StartupPolicyType,
 } from '@prosto/platform-sdk';
-import type { ModuleArtifactSourceDescriptorType } from '@/loader/index.js';
+import type { IArtifactCacheOptions } from '@/cache/index.js';
+import type {
+  ModuleArtifactSourceDescriptorType,
+} from '@/loader/index.js';
 
 /**
  * @alpha
@@ -14,4 +17,9 @@ export interface IRuntimeOptions {
   readonly runtimeVersion: IPlatformRuntimeVersionContext;
   readonly correlationId?: string;
   readonly shutdownTimeoutMs?: number;
+  /**
+   * Configuration for artifact caching
+   * @default false
+   */
+  readonly artifactCache?: boolean | IArtifactCacheOptions;
 }

@@ -4,10 +4,26 @@ import type {
   IModulePathArtifactSource,
   IRejectedModuleArtifact,
 } from '../interfaces/index.js';
-import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import {
+  ArtifactCacheKeyGenerator,
+  type IArtifactCache,
+  type IArtifactCacheEntryMetadata,
+  NoOpArtifactCache,
+} from '@/cache/index.js';
 import { RuntimeReasonCodes } from '@/runtime/index.js';
-import { ModuleArtifactSource } from '../constants/index.js';
+import {
+  ModuleArtifactPackaging,
+  ModuleArtifactSource,
+} from '../constants/index.js';
+import {
+  ArtifactExtractor,
+  cleanupTempDir,
+  createTempDir,
+  DynamicModuleLoader,
+} from '../utils/index.js';
 import { ArtifactBaseSource } from './artifact.base-source.js';
 
 /**
@@ -15,13 +31,13 @@ import { ArtifactBaseSource } from './artifact.base-source.js';
  * File system path-based artifact source.
  */
 export class PathSource extends ArtifactBaseSource {
-  constructor(private readonly _descriptor: IModulePathArtifactSource) {
+  constructor(
+    private readonly _descriptor: IModulePathArtifactSource,
+    private readonly _cache: IArtifactCache = new NoOpArtifactCache(),
+  ) {
     super(ModuleArtifactSource.Path);
   }
 
-  /**
-   * Validate path source configuration.
-   */
   override validate(): ArtifactSourceValidationResultType {
     if (!this._descriptor.path.trim()) {
       return {
@@ -37,10 +53,6 @@ export class PathSource extends ArtifactBaseSource {
     return { ok: true };
   }
 
-  /**
-   * Load and verify integrity of path-based artifact.
-   * Currently, returns rejected as extraction is not implemented.
-   */
   override async load(): Promise<IModuleCandidateArtifact | IRejectedModuleArtifact> {
     const validation = this.validate();
 
@@ -48,75 +60,50 @@ export class PathSource extends ArtifactBaseSource {
       return this.createRejected('discover', validation.error);
     }
 
-    const checksum = this._descriptor.integrity?.checksum;
+    const artifact = await this._getArtifact();
 
-    if (!checksum) {
-      return this.createRejected('validate', {
-        reasonCode: RuntimeReasonCodes.SourceIntegrityMismatch,
-        message: 'Missing checksum for path artifact source.',
-        remediationHint: 'Provide checksum in source.integrity.checksum for path source.',
-      });
+    if ('error' in artifact) {
+      return this.createRejected('discover', artifact.error);
     }
 
-    const parsed = this.parseChecksum(checksum);
+    const expectedChecksum = this._descriptor.integrity?.checksum;
 
-    if (!parsed) {
-      return this.createRejected('validate', {
-        reasonCode: RuntimeReasonCodes.SourceIntegrityMismatch,
-        message: 'Unsupported checksum format for path source.',
-        remediationHint: 'Use sha256:<hex> or <hex> checksum format.',
-      });
+    if (expectedChecksum) {
+      const checksumResult = this._verifyChecksum(artifact, expectedChecksum);
+
+      if (!checksumResult.ok) {
+        return this.createRejected('validate', checksumResult.error);
+      }
     }
 
-    if (parsed.algorithm !== 'sha256') {
-      return this.createRejected('validate', {
-        reasonCode: RuntimeReasonCodes.SourceIntegrityMismatch,
-        message: `Unsupported checksum algorithm "${parsed.algorithm}" for path source.`,
-        remediationHint: 'Use sha256 checksum for path source.',
-      });
-    }
+    const extractionResult = await this._extract(artifact);
 
-    let payload: Buffer;
+    if ('error' in extractionResult) {
+      return this.createRejected('discover', extractionResult.error);
+    }
 
     try {
-      payload = await readFile(this._descriptor.path);
+      const entryPath = await this.resolveEntryPath(extractionResult.extractPath);
+      const module = await DynamicModuleLoader.loadModuleEntry(entryPath);
+
+      return {
+        module,
+        moduleId: module.manifest.id,
+        moduleVersion: module.manifest.version,
+        orderingKey: `path:${this._descriptor.path}`,
+        sourceType: ModuleArtifactSource.Path,
+        sourceRef: this._descriptor.path,
+        packaging: extractionResult.packaging,
+      };
     } catch (error) {
-      return this.createRejected('validate', {
-        reasonCode: RuntimeReasonCodes.SourceFetchFailed,
-        message: `Unable to read artifact from path source: ${error instanceof Error ? error.message : 'unknown error'}`,
-        remediationHint: 'Ensure file exists and runtime has read permissions.',
+      return this.createRejected('discover', {
+        reasonCode: RuntimeReasonCodes.SourceEntryResolveFailed,
+        message: `Failed to resolve module entry: ${error instanceof Error ? error.message : 'unknown'}`,
+        remediationHint: 'Ensure artifact contains a valid module entry point.',
       });
+    } finally {
+      await cleanupTempDir(extractionResult.tempDir);
     }
-
-    const actual = createHash('sha256').update(payload).digest('hex');
-
-    if (actual !== parsed.value) {
-      return this.createRejected('validate', {
-        reasonCode: RuntimeReasonCodes.SourceIntegrityMismatch,
-        message: 'Path source checksum mismatch.',
-        remediationHint: 'Update checksum metadata or artifact payload to match expected integrity.',
-      });
-    }
-
-    // TODO: Implement path extraction and module entry resolution
-
-    /*
-    const artifact: IModuleCandidateArtifact = {
-      module,
-      moduleId: module.manifest.id,
-      moduleVersion: module.manifest.version,
-      orderingKey: `path:${this._descriptor.path}`,
-      sourceType: ModuleArtifactSource.Path,
-      sourceRef: this._descriptor.path,
-      packaging: this._descriptor.packaging ?? ModuleArtifactPackaging.Zip,
-    };
-    */
-
-    return this.createRejected('validate', {
-      reasonCode: RuntimeReasonCodes.SourceEntryResolveFailed,
-      message: 'Path source artifact verified but runtime entry resolution is not implemented yet.',
-      remediationHint: 'Enable path extraction and module entry resolution in loader implementation.',
-    });
   }
 
   protected override getModuleIdHint(): string | undefined {
@@ -127,30 +114,148 @@ export class PathSource extends ArtifactBaseSource {
     return this._descriptor.path;
   }
 
-  private parseChecksum(input: string): {
-    algorithm: string;
-    value: string
-  } | null {
-    const normalized = input.trim();
+  private _buildCacheMetadata(payload: Buffer): IArtifactCacheEntryMetadata {
+    return {
+      sourceRef: this._descriptor.path,
+      sourceType: ModuleArtifactSource.Path,
+      timestamp: Date.now(),
+      size: payload.length,
+      checksum: this._descriptor.integrity?.checksum ?? '',
+    };
+  }
 
-    if (!normalized) return null;
+  private async _getArtifact(): Promise<Buffer | {
+    error: {
+      reasonCode: RuntimeReasonCodes;
+      message: string;
+      remediationHint: string;
+    }
+  }> {
+    const cacheKey = ArtifactCacheKeyGenerator.forPath(this._descriptor);
+    const cached = await this._cache.get(cacheKey);
+    let payload: Buffer;
 
-    const [algorithm, value] = normalized.split(':');
+    if (cached) {
+      payload = cached;
+    } else {
+      try {
+        payload = await readFile(this._descriptor.path);
+        await this._cache.set(cacheKey, payload, this._buildCacheMetadata(payload));
+      } catch (error) {
+        return {
+          error: {
+            reasonCode: RuntimeReasonCodes.SourceFetchFailed,
+            message: `Failed to read artifact from path "${this._descriptor.path}": ${
+              error instanceof Error ? error.message : 'unknown'
+            }`,
+            remediationHint: 'Ensure the specified path exists and is readable by the platform.',
+          },
+        };
+      }
+    }
 
-    if (algorithm && value) {
+    return payload;
+  }
+
+  private _verifyChecksum(payload: Buffer, expectedChecksum: string): {
+    ok: true
+  } | {
+    ok: false;
+    error: {
+      reasonCode: RuntimeReasonCodes;
+      message: string;
+      remediationHint: string
+    }
+  } {
+    const parsed = this.parseChecksum(expectedChecksum);
+
+    if (!parsed) {
       return {
-        algorithm: algorithm.toLowerCase(),
-        value: value.toLowerCase(),
+        ok: false,
+        error: {
+          reasonCode: RuntimeReasonCodes.SourceIntegrityMismatch,
+          message: 'Unsupported checksum format for path source.',
+          remediationHint: 'Use sha256:<hex> or <hex> checksum format.',
+        },
       };
     }
 
-    if (/^[0-9a-fA-F]{64}$/.test(normalized)) {
+    if (parsed.algorithm !== 'sha256') {
       return {
-        algorithm: 'sha256',
-        value: normalized.toLowerCase(),
+        ok: false,
+        error: {
+          reasonCode: RuntimeReasonCodes.SourceIntegrityMismatch,
+          message: `Unsupported checksum algorithm "${parsed.algorithm}" for path source.`,
+          remediationHint: 'Use sha256 checksum for path source.',
+        },
       };
     }
 
-    return null;
+    const actual = createHash('sha256').update(payload).digest('hex');
+
+    if (actual !== parsed.value) {
+      return {
+        ok: false,
+        error: {
+          reasonCode: RuntimeReasonCodes.SourceIntegrityMismatch,
+          message: 'Path source checksum mismatch.',
+          remediationHint: 'Update checksum metadata or artifact payload to match expected integrity.',
+        },
+      };
+    }
+
+    return { ok: true };
+  }
+
+  private async _extract(artifact: Buffer): Promise<{
+    packaging: `${ModuleArtifactPackaging}`;
+    tempDir: string;
+    extractPath: string;
+  } | {
+    error: {
+      reasonCode: RuntimeReasonCodes;
+      message: string;
+      remediationHint: string;
+    }
+  }> {
+    const packaging = this._descriptor.packaging ?? ModuleArtifactPackaging.Zip;
+    const tempDir = await createTempDir('prosto-path');
+    const tempFilePath = join(tempDir, `artifact.${packaging}`);
+    const extractPath = join(tempDir, 'extracted');
+
+    try {
+      await writeFile(tempFilePath, artifact);
+
+      switch (packaging) {
+        case ModuleArtifactPackaging.Zip:
+          await ArtifactExtractor.extractZip(tempFilePath, extractPath);
+          break;
+
+        case ModuleArtifactPackaging.Tgz:
+          await ArtifactExtractor.extractTgz(tempFilePath, extractPath);
+          break;
+
+        default:
+          return {
+            error: {
+              reasonCode: RuntimeReasonCodes.SourceExtractionFailed,
+              message: `Unsupported packaging format "${packaging}" for path source.`,
+              remediationHint: 'Use zip or tgz packaging for path artifacts.',
+            },
+          };
+      }
+    } catch (error) {
+      return {
+        error: {
+          reasonCode: RuntimeReasonCodes.SourceExtractionFailed,
+          message: `Failed to extract artifact from path source "${this._descriptor.path}": ${
+            error instanceof Error ? error.message : 'unknown'
+          }`,
+          remediationHint: 'Ensure the artifact is a valid archive and not corrupted.',
+        },
+      };
+    }
+
+    return { packaging, tempDir, extractPath };
   }
 }

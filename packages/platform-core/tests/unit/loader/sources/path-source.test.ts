@@ -55,7 +55,7 @@ describe('PathSource', () => {
       expect('reasonCode' in result).toBe(true);
 
       if ('reasonCode' in result) {
-        expect(result.reasonCode).toBe(RuntimeReasonCodes.SourceEntryResolveFailed);
+        expect(result.reasonCode).toBe(RuntimeReasonCodes.SourceExtractionFailed);
       }
     } finally {
       await rm(dir, { recursive: true, force: true });

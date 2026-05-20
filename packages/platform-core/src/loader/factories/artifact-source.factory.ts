@@ -1,6 +1,8 @@
+import type { IArtifactCache } from '@/cache/index.js';
 import type {
   IArtifactSource,
   IArtifactSourceFactory,
+  IHttpClient,
   ModuleArtifactSourceDescriptorType,
 } from '../interfaces/index.js';
 import {
@@ -15,22 +17,25 @@ import {
  * Factory for creating artifact sources based on descriptor type.
  */
 export class ArtifactSourceFactory implements IArtifactSourceFactory {
-  /**
-   * Create an artifact source from a descriptor.
-   */
+  constructor(
+    private readonly _httpClient?: IHttpClient,
+    private readonly _artifactCache?: IArtifactCache,
+  ) {
+  }
+
   create(descriptor: ModuleArtifactSourceDescriptorType): IArtifactSource {
     switch (descriptor.type) {
       case 'memory':
         return new MemorySource(descriptor);
 
       case 'path':
-        return new PathSource(descriptor);
+        return new PathSource(descriptor, this._artifactCache);
 
       case 'url':
-        return new UrlSource(descriptor);
+        return new UrlSource(descriptor, this._httpClient, this._artifactCache);
 
       case 'registry':
-        return new RegistrySource(descriptor);
+        return new RegistrySource(descriptor, this._httpClient, this._artifactCache);
 
       default: {
         const _exhaustiveCheck: never = descriptor;
