@@ -27,18 +27,18 @@ export class AuthModule implements IPlatformModule {
   };
 
   register(_ctx: IModuleContext): void {
-    // noop
+    console.log('Auth module registered.');
   }
 
   init(_ctx: IModuleContext): void {
-    // noop
+    console.log('Auth module initialized.');
   }
 
   start(_ctx: IModuleContext): void {
-    // noop
+    console.log('Auth module started.');
   }
 
   stop(_ctx: IModuleContext): void {
-    // noop
+    console.log('Auth module stopped.');
   }
 }

@@ -120,7 +120,7 @@ describe('runtime loader sources', () => {
       });
 
       expect(runtime.startedModuleIds).toEqual([]);
-      expect(runtime.reports.startup?.failedModules.some((item) => item.errorCode === RuntimeReasonCodes.SourceEntryResolveFailed)).toBe(true);
+      expect(runtime.reports.startup?.failedModules.some((item) => item.errorCode === RuntimeReasonCodes.SourceExtractionFailed)).toBe(true);
 
       await runtime.stop();
     } finally {

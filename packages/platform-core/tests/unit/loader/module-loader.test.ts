@@ -16,7 +16,7 @@ describe('ModuleLoader', () => {
     expect(result.loaded[0]?.moduleId).toBe('module-a');
   });
 
-  it('marks url candidates as explicitly not implemented', async () => {
+  it('rejects url candidates on fetch failure', async () => {
     const result = await loader.load([
       {
         type: 'url',
@@ -28,7 +28,7 @@ describe('ModuleLoader', () => {
     expect(result.loaded).toEqual([]);
     expect(result.rejected).toHaveLength(1);
     expect(result.rejected[0]?.reasonCode).toBe(RuntimeReasonCodes.SourceFetchFailed);
-    expect(result.rejected[0]?.phase).toBe('validate');
+    expect(result.rejected[0]?.phase).toBe('discover');
   });
 
   it('rejects insecure url source at discover phase', async () => {

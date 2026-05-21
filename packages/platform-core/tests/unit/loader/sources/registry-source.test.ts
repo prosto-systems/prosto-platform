@@ -21,11 +21,11 @@ describe('RegistrySource', () => {
     }
   });
 
-  it('returns explicitly-not-implemented for valid coordinates', async () => {
+  it('rejects on fetch failure for unreachable registry', async () => {
     const source = new RegistrySource({
       type: 'registry',
       moduleIdHint: 'module-registry',
-      packageName: 'example-module',
+      packageName: 'nonexistent-package-xyz-123',
       version: '1.0.0',
     });
 
@@ -35,7 +35,7 @@ describe('RegistrySource', () => {
 
     if ('reasonCode' in result) {
       expect(result.reasonCode).toBe(RuntimeReasonCodes.SourceFetchFailed);
-      expect(result.phase).toBe('validate');
+      expect(result.phase).toBe('discover');
     }
   });
 });

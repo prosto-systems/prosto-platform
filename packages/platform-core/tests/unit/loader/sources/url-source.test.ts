@@ -20,7 +20,7 @@ describe('UrlSource', () => {
     }
   });
 
-  it('returns explicitly-not-implemented for https URL source', async () => {
+  it('rejects on fetch failure for unreachable URL', async () => {
     const source = new UrlSource({
       type: 'url',
       moduleIdHint: 'module-url',
@@ -33,7 +33,7 @@ describe('UrlSource', () => {
 
     if ('reasonCode' in result) {
       expect(result.reasonCode).toBe(RuntimeReasonCodes.SourceFetchFailed);
-      expect(result.phase).toBe('validate');
+      expect(result.phase).toBe('discover');
     }
   });
 });

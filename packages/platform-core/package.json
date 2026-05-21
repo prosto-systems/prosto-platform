@@ -21,11 +21,14 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@prosto/platform-sdk": "0.0.0"
+    "@prosto/platform-sdk": "0.0.0",
+    "adm-zip": "^0.5.17",
+    "tar": "^7.5.15"
   },
   "devDependencies": {
     "@internal/tsconfig": "*",
     "@tsconfig/node22": "^22.0.5",
+    "@types/adm-zip": "^0.5.5",
     "vitest": "^4.1.2"
   }
 }

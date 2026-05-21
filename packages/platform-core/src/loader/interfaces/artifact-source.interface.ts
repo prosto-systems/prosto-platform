@@ -57,6 +57,8 @@ export interface IModuleRegistryArtifactSource {
   readonly packageName: string;
   readonly version: string;
   readonly registryUrl?: string;
+  readonly authToken?: string;
+  readonly authType?: 'bearer' | 'basic';
   readonly packaging?: `${ModuleArtifactPackaging}`;
   readonly integrity?: IModuleArtifactIntegrity;
   readonly moduleIdHint?: string;

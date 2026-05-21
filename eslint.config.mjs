@@ -49,6 +49,7 @@ export default tseslint.config(
         { selector: 'enum', format: ['PascalCase'] },
         { selector: 'enumMember', format: ['PascalCase'] },
       ],
+      '@typescript-eslint/no-extraneous-class': 'off',
       // '@typescript-eslint/no-inferrable-types': 'warn',
       '@typescript-eslint/no-shadow': 'error',
       '@typescript-eslint/no-unused-vars': [

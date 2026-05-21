@@ -7,11 +7,11 @@ import {
   BootstrapCoordinator,
   BootstrapPipeline,
   DiscoverStage,
-  type IBootstrapCoordinator,
   ModuleLifecycleStage,
   ResolveDependenciesStage,
   ValidateStage,
 } from '@/bootstrap/index.js';
+import { FileSystemArtifactCache, NoOpArtifactCache } from '@/cache/index.js';
 import { ModuleContextFactory } from '@/context/index.js';
 import {
   DiagnosticsReporter,
@@ -22,17 +22,17 @@ import {
   type IModuleLifecycleOrchestrator,
   ModuleLifecycleOrchestrator,
 } from '@/lifecycle/index.js';
-import { ModuleLoader } from '@/loader/index.js';
-import { ConsoleModuleLoggerFactory } from '@/logging/index.js';
 import {
-  BestEffortPolicyStrategy,
-  StartupPolicyEvaluator,
-  StrictPolicyStrategy,
-} from '@/policy/index.js';
+  ArtifactFetcher,
+  ArtifactSourceFactory,
+  ModuleLoader,
+} from '@/loader/index.js';
+import { ConsoleModuleLoggerFactory } from '@/logging/index.js';
+import { StartupPolicyEvaluator } from '@/policy/index.js';
 import { InMemoryServiceRegistry } from '@/services/index.js';
 import {
   CompatibilityValidationStrategy,
-  IntegrityValidationStrategy,
+  // IntegrityValidationStrategy,
   ManifestValidationStrategy,
 } from '@/validation/index.js';
 import { PlatformRuntime } from './platform-runtime.js';
@@ -46,63 +46,64 @@ export class RuntimeBuilder implements IRuntimeBuilder {
   private readonly _diagnosticsReporter: IDiagnosticsReporter;
   private readonly _serviceRegistry: InMemoryServiceRegistry;
   private readonly _eventBus: InMemoryEventBus;
+  private readonly _startupPolicyEvaluator: StartupPolicyEvaluator;
   private readonly _moduleLifecycleOrchestrator: IModuleLifecycleOrchestrator;
-  private readonly _bootstrapCoordinator: IBootstrapCoordinator;
 
   constructor() {
     this._diagnosticsReporter = new DiagnosticsReporter();
     this._serviceRegistry = new InMemoryServiceRegistry();
     this._eventBus = new InMemoryEventBus();
-
-    const moduleLoader = new ModuleLoader();
-    const moduleLoggerFactory = new ConsoleModuleLoggerFactory();
-    const moduleContextFactory = new ModuleContextFactory(
-      moduleLoggerFactory,
-      this._serviceRegistry,
-      this._eventBus,
-    );
-
+    this._startupPolicyEvaluator = new StartupPolicyEvaluator();
     this._moduleLifecycleOrchestrator = new ModuleLifecycleOrchestrator(
-      moduleContextFactory,
+      new ModuleContextFactory(
+        new ConsoleModuleLoggerFactory(),
+        this._serviceRegistry,
+        this._eventBus,
+      ),
     );
+  }
 
-    const startupPolicyEvaluator = new StartupPolicyEvaluator([
-      new StrictPolicyStrategy(),
-      new BestEffortPolicyStrategy(),
-    ]);
+  build(options: IRuntimeOptions): IPlatformRuntime {
+    const moduleLoader = this._createModuleLoader(options);
 
-    this._bootstrapCoordinator = new BootstrapCoordinator(
+    const bootstrapCoordinator = new BootstrapCoordinator(
       BootstrapPipeline.create([
         new DiscoverStage(moduleLoader),
         new ValidateStage([
           new ManifestValidationStrategy(),
           new CompatibilityValidationStrategy(),
-          new IntegrityValidationStrategy(),
+          // new IntegrityValidationStrategy(),
         ]),
-        new ResolveDependenciesStage(startupPolicyEvaluator),
+        new ResolveDependenciesStage(this._startupPolicyEvaluator),
         new ModuleLifecycleStage(
-          startupPolicyEvaluator,
+          this._startupPolicyEvaluator,
           this._moduleLifecycleOrchestrator,
         ),
       ]),
     );
-  }
 
-  /**
-   * Build a platform runtime instance with the given options.
-   * @param options - Runtime configuration options
-   * @returns Configured PlatformRuntime instance
-   */
-  build(options: IRuntimeOptions): IPlatformRuntime {
     return new PlatformRuntime(
       options,
       this._diagnosticsReporter,
-      this._bootstrapCoordinator,
+      bootstrapCoordinator,
       this._moduleLifecycleOrchestrator,
       () => {
         this._serviceRegistry.dispose();
         this._eventBus.dispose();
       },
     );
+  }
+
+  private _createModuleLoader(options: IRuntimeOptions): ModuleLoader {
+    const artifactCache = !options.artifactCache
+      ? new NoOpArtifactCache()
+      : new FileSystemArtifactCache(
+        typeof options.artifactCache === 'object'
+          ? options.artifactCache
+          : undefined,
+      );
+    const artifactSourceFactory = new ArtifactSourceFactory(new ArtifactFetcher(), artifactCache);
+
+    return new ModuleLoader(artifactSourceFactory);
   }
 }

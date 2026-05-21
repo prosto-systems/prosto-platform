@@ -11,6 +11,8 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-contract-tests/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-core/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-sdk/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/module-auth/artifacts" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/module-health/artifacts" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

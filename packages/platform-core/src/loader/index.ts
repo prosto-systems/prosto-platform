@@ -3,3 +3,4 @@ export * from './constants/index.js';
 export * from './factories/index.js';
 export * from './sources/index.js';
 export * from './module-loader.js';
+export * from './utils/index.js';

@@ -3,14 +3,18 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "main": "dist/index.js",
   "scripts": {
-    "test:contracts": "vitest run"
+    "test:contracts": "vitest run",
+    "package:inner-artifact": "tsc -p tsconfig.json && node ../../scripts/package-artifact.mjs"
   },
   "dependencies": {
     "@prosto/platform-contract-tests": "0.0.0",
     "@prosto/platform-sdk": "0.0.0"
   },
   "devDependencies": {
+    "@internal/tsconfig": "*",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.2"
   }
 }

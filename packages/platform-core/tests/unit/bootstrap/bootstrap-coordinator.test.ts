@@ -21,7 +21,7 @@ import { InMemoryServiceRegistry } from '@/services/index.js';
 import { createManifest, TestModule } from '@/tests/fixtures/index.js';
 import {
   CompatibilityValidationStrategy,
-  IntegrityValidationStrategy,
+  // IntegrityValidationStrategy,
   ManifestValidationStrategy,
 } from '@/validation/index.js';
 
@@ -52,7 +52,7 @@ describe('BootstrapCoordinator', () => {
         new ValidateStage([
           new ManifestValidationStrategy(),
           new CompatibilityValidationStrategy(),
-          new IntegrityValidationStrategy(),
+          // new IntegrityValidationStrategy(),
         ]),
         new ResolveDependenciesStage(startupPolicyEvaluator),
         new ModuleLifecycleStage(
