@@ -1,4 +1,8 @@
-import type { IPlatformModule } from '@prosto/platform-sdk';
+import {
+  type IPlatformModule,
+  SDK_CONTRACT_VERSION,
+  type StartupPolicyType,
+} from '@prosto/platform-sdk';
 import type { IBootstrapCoordinator } from '@/bootstrap/index.js';
 import type {
   IDiagnosticsReporter,
@@ -7,7 +11,12 @@ import type {
 } from '@/diagnostics/index.js';
 import { RuntimeStartupStatus } from '@/diagnostics/index.js';
 import type { IModuleLifecycleOrchestrator } from '@/lifecycle/index.js';
-import type { IPlatformRuntime, IRuntimeOptions } from './interfaces/index.js';
+import type { ModuleArtifactSourceDescriptorType } from '@/loader/index.js';
+import type {
+  IPlatformConfig,
+  IPlatformRuntime,
+  IRuntimeOptions,
+} from './interfaces/index.js';
 import { assert, dateNowIso } from '@/common/index.js';
 
 /**
@@ -19,18 +28,21 @@ export class PlatformRuntime implements IPlatformRuntime {
   private _startedModules: readonly IPlatformModule[] = [];
   private _stoppingPromise: Promise<void> | null = null;
 
+  private readonly _startupPolicy: StartupPolicyType;
   private readonly _correlationId: string;
 
   constructor(
-    private readonly _options: IRuntimeOptions,
+    private readonly _modules: readonly ModuleArtifactSourceDescriptorType[],
+    private readonly _config: Readonly<IPlatformConfig>,
     private readonly _diagnosticsReporter: IDiagnosticsReporter,
     private readonly _bootstrapCoordinator: IBootstrapCoordinator,
     private readonly _moduleLifecycleOrchestrator: IModuleLifecycleOrchestrator,
-    private readonly _cleanup = () => {
-      /* To clean up resources during shutdown */
-    },
+    private readonly _options: IRuntimeOptions = {},
   ) {
-    this._correlationId = this.createCorrelationId(this._options.correlationId);
+    this._startupPolicy = this._config.platform.startupPolicy;
+    this._correlationId = this._createCorrelationId(
+      this._options.correlationId || this._config.runtime.correlationId,
+    );
   }
 
   get startedModuleIds(): readonly string[] {
@@ -65,13 +77,17 @@ export class PlatformRuntime implements IPlatformRuntime {
     if (this._started) return;
 
     const startupStartedAt = dateNowIso();
+    const policyMode = this._startupPolicy;
 
     const bootstrapContext = await this._bootstrapCoordinator.coordinate({
+      policyMode,
       startupStartedAt,
+      modules: this._modules,
       correlationId: this._correlationId,
-      policyMode: this._options.startupPolicy,
-      runtimeVersion: this._options.runtimeVersion,
-      modules: this._options.modules,
+      runtimeVersion: this._options.runtimeVersion ?? {
+        sdkVersion: SDK_CONTRACT_VERSION,
+        nodeVersion: process.versions.node,
+      },
     });
 
     const failedDiagnosticsByModuleId = new Map<string, IRuntimeFailureDiagnostic>(
@@ -82,9 +98,9 @@ export class PlatformRuntime implements IPlatformRuntime {
     );
 
     const startupReport = this._diagnosticsReporter.createStartupReport({
+      policyMode,
       startedAt: startupStartedAt,
       correlationId: this._correlationId,
-      policyMode: this._options.startupPolicy,
       failedModules: bootstrapContext.failedDiagnostics,
       loadedModules: bootstrapContext.loadedModules.map((module) => ({
         moduleId: module.manifest.id,
@@ -121,14 +137,13 @@ export class PlatformRuntime implements IPlatformRuntime {
     const shutdownResult = await this._moduleLifecycleOrchestrator.shutdown(
       this._startedModules,
       {
-        startupPolicy: this._options.startupPolicy,
-        sdkVersion: this._options.runtimeVersion.sdkVersion,
-        timeoutMs: this._options.shutdownTimeoutMs ?? 5000,
+        startupPolicy: this._startupPolicy,
+        sdkVersion: this._options.runtimeVersion?.sdkVersion ?? SDK_CONTRACT_VERSION,
+        timeoutMs: this._config.runtime.shutdownTimeoutMs,
       },
     );
 
-    // Clean up resources
-    this._cleanup();
+    await this._options.onStopped?.();
 
     const shutdownReport = this._diagnosticsReporter.createShutdownReport({
       startedAt: shutdownStartedAt,
@@ -147,7 +162,7 @@ export class PlatformRuntime implements IPlatformRuntime {
     }
   }
 
-  private createCorrelationId(seed?: string): string {
+  private _createCorrelationId(seed?: string): string {
     if (seed && seed.trim()) {
       return seed;
     }

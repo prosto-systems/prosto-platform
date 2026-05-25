@@ -1,4 +1,4 @@
-import type { RuntimeReasonCodes } from '@/runtime/constants/index.js';
+import type { RuntimeReasonCodes } from '@/runtime/index.js';
 import type { IDiscoveredModuleArtifact } from './discovered-module-artifact.interface.js';
 
 export type IntegrityVerificationResultType =

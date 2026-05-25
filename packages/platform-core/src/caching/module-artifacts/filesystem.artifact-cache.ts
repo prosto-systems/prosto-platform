@@ -11,7 +11,7 @@ import {
   unlink,
   writeFile,
 } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 
 /**
  * @alpha
@@ -22,14 +22,10 @@ export class FileSystemArtifactCache implements IArtifactCache {
   private readonly _maxAgeMs: number;
   private readonly _maxSizeBytes: number;
 
-  constructor(private readonly _options?: IArtifactCacheOptions) {
-    this._cachePath = resolve(
-      '..',
-      '..',
-      this._options?.basePath ?? '.cache/module-artifacts',
-    );
-    this._maxAgeMs = _options?.maxAgeMs ?? 14 * 24 * 60 * 60 * 1000; // 14 days
-    this._maxSizeBytes = _options?.maxSizeBytes ?? 500 * 1024 * 1024; // 500MB
+  constructor(private readonly _options: IArtifactCacheOptions) {
+    this._cachePath = this._options.path;
+    this._maxAgeMs = _options.maxAgeMs ?? 14 * 24 * 60 * 60 * 1000; // 14 days
+    this._maxSizeBytes = _options.maxSizeBytes ?? 500 * 1024 * 1024; // 500MB
   }
 
   async get(key: string): Promise<Buffer | null> {

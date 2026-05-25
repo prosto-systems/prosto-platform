@@ -1,13 +1,17 @@
-import type { IModuleContext, StartupPolicyType } from '@prosto/platform-sdk';
+import type {
+  IModuleContext,
+  IPlatformModuleManifest,
+  StartupPolicyType,
+} from '@prosto/platform-sdk';
 
 /**
  * @alpha
  * Options for creating module contexts.
  */
 export interface ICreateModuleContextOptions {
-  readonly moduleId: string;
   readonly startupPolicy: StartupPolicyType;
   readonly sdkVersion: string;
+  readonly moduleManifest: IPlatformModuleManifest;
 }
 
 /**

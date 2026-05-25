@@ -1,4 +1,6 @@
 import type { IModuleLifecycleShutdownIssue } from '@/lifecycle/index.js';
+import type { ISecretsRedactor } from '@/security/index.js';
+import { SecretsRedactor } from '@/security/index.js';
 import type {
   IReportBuilder,
   IRuntimeFailureDiagnostic,
@@ -9,7 +11,6 @@ import type {
   IShutdownReportBuildContext,
   IStartupReportBuildContext,
 } from '../interfaces/index.js';
-import { redactSecretsInMessage } from '@/common/index.js';
 import { RuntimeStartupStatus } from '../constants/index.js';
 
 /**
@@ -17,6 +18,11 @@ import { RuntimeStartupStatus } from '../constants/index.js';
  * Abstract base class for diagnostic report builders.
  */
 export abstract class ReportBaseBuilder implements IReportBuilder {
+  constructor(
+    protected readonly _secretsRedactor: ISecretsRedactor = new SecretsRedactor(),
+  ) {
+  }
+
   /**
    * Builds a startup report from the provided context.
    */
@@ -33,8 +39,8 @@ export abstract class ReportBaseBuilder implements IReportBuilder {
   protected sanitizeFailure(failure: IRuntimeFailureDiagnostic): IRuntimeFailureDiagnostic {
     return {
       ...failure,
-      message: redactSecretsInMessage(failure.message),
-      remediationHint: redactSecretsInMessage(failure.remediationHint),
+      message: this._secretsRedactor.redact(failure.message),
+      remediationHint: this._secretsRedactor.redact(failure.remediationHint),
     };
   }
 
@@ -46,8 +52,8 @@ export abstract class ReportBaseBuilder implements IReportBuilder {
   ): IModuleLifecycleShutdownIssue {
     return {
       ...issue,
-      message: redactSecretsInMessage(issue.message),
-      remediationHint: redactSecretsInMessage(issue.remediationHint),
+      message: this._secretsRedactor.redact(issue.message),
+      remediationHint: this._secretsRedactor.redact(issue.remediationHint),
     };
   }
 

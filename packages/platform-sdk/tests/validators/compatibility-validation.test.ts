@@ -4,7 +4,7 @@ import {
   type IPlatformModuleManifest,
   PlatformModuleCompatibilityValidator,
   PlatformModuleManifestValidator,
-} from '../src/index.js';
+} from '../../src/index.js';
 
 const validManifest: IPlatformModuleManifest = {
   id: 'module-health',

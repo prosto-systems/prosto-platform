@@ -3,7 +3,7 @@ import {
   type IPlatformModuleManifest,
   ManifestValidationError,
   PlatformModuleManifestValidator,
-} from '../src/index.js';
+} from '../../src/index.js';
 
 const validManifest: IPlatformModuleManifest = {
   id: 'module-health',

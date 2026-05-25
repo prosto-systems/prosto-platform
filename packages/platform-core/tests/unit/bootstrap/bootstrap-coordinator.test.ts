@@ -1,3 +1,4 @@
+import type { IPlatformConfig } from '@/runtime/index.js';
 import { describe, expect, it } from 'vitest';
 import {
   BootstrapCoordinator,
@@ -39,9 +40,11 @@ describe('BootstrapCoordinator', () => {
     const serviceRegistry = new InMemoryServiceRegistry();
     const eventBus = new InMemoryEventBus();
     const moduleContextFactory = new ModuleContextFactory(
-      new ConsoleModuleLoggerFactory(),
-      serviceRegistry,
+      'production',
+      {} as IPlatformConfig,
       eventBus,
+      serviceRegistry,
+      new ConsoleModuleLoggerFactory(),
     );
 
     const moduleLifecycleOrchestrator = new ModuleLifecycleOrchestrator(moduleContextFactory);

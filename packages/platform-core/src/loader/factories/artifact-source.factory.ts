@@ -1,4 +1,4 @@
-import type { IArtifactCache } from '@/cache/index.js';
+import type { IArtifactCache } from '@/caching/index.js';
 import type {
   IArtifactSource,
   IArtifactSourceFactory,

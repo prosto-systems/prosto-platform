@@ -35,9 +35,16 @@ export class ManifestValidationStrategy extends ModuleValidationBaseStrategy {
       return this.success();
     }
 
+    const issues = result.error.issues.map(
+      (issue) =>
+        ` - [${issue.code}] ${issue.message} (path: "${issue.path}");`,
+    ).join('\n')
+
     return this.failure({
       errorCode: RuntimeReasonCodes.ManifestInvalid,
-      message: `Manifest validation failed for module ${input.artifact.moduleId}: ${result.error.message}`,
+      message: `Manifest validation failed for module ${input.artifact.moduleId}: ${
+        result.error.message
+      }${issues.length ? `\n\nIssues:\n${issues}` : ''}`,
       remediationHint: 'Fix module manifest according to @prosto/platform-sdk schema and semantic rules.',
     });
   }

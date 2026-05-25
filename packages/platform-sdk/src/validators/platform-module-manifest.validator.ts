@@ -4,6 +4,8 @@ import type {
   IPlatformModuleManifest,
   ModuleManifestValidationResultType,
 } from '../interfaces/index.js';
+import type { ModuleCapabilityType } from '../types/index.js';
+import { MODULE_CAPABILITY_PATTERN } from '../constants/index.js';
 import {
   type IManifestValidationIssue,
   ManifestValidationError,
@@ -21,13 +23,13 @@ export class PlatformModuleManifestValidator implements IModuleManifestValidator
   }
 
   validate(manifest: unknown): ModuleManifestValidationResultType {
-    const schemaResult = this.validateManifestSchema(this.manifestSchema, manifest);
+    const schemaResult = this._validateManifestSchema(this.manifestSchema, manifest);
 
     if (!schemaResult.success) {
       return schemaResult;
     }
 
-    const semanticIssues = this.validateManifestSemantics(schemaResult.manifest);
+    const semanticIssues = this._validateManifestSemantics(schemaResult.manifest);
 
     if (semanticIssues.length) {
       return {
@@ -49,7 +51,7 @@ export class PlatformModuleManifestValidator implements IModuleManifestValidator
     return result.manifest;
   }
 
-  protected toManifestValidationIssue(
+  protected _toManifestValidationIssue(
     issue: ZodIssue,
   ): IManifestValidationIssue {
     return {
@@ -59,7 +61,7 @@ export class PlatformModuleManifestValidator implements IModuleManifestValidator
     };
   }
 
-  protected collectDuplicates(values: readonly string[]): string[] {
+  protected _collectDuplicates(values: readonly string[]): string[] {
     const seen = new Set<string>();
     const duplicates = new Set<string>();
 
@@ -75,7 +77,7 @@ export class PlatformModuleManifestValidator implements IModuleManifestValidator
     return [...duplicates];
   }
 
-  protected validateManifestSchema(
+  protected _validateManifestSchema(
     manifestSchema: ZodType<IPlatformModuleManifest>,
     manifest: unknown,
   ): ModuleManifestValidationResultType {
@@ -83,7 +85,7 @@ export class PlatformModuleManifestValidator implements IModuleManifestValidator
 
     if (!parsed.success) {
       const issues = parsed.error.issues.map(
-        (issue) => this.toManifestValidationIssue(issue),
+        (issue) => this._toManifestValidationIssue(issue),
       );
 
       return {
@@ -98,24 +100,15 @@ export class PlatformModuleManifestValidator implements IModuleManifestValidator
     };
   }
 
-  protected validateManifestSemantics(
+  protected _validateManifestSemantics(
     manifest: IPlatformModuleManifest,
   ): IManifestValidationIssue[] {
     const issues: IManifestValidationIssue[] = [];
-    const duplicateCapabilities = this.collectDuplicates(manifest.capabilities);
-
-    for (const capability of duplicateCapabilities) {
-      issues.push({
-        code: 'duplicate_capability',
-        message: `Capability "${capability}" is declared more than once.`,
-        path: 'capabilities',
-      });
-    }
 
     const dependencyIds = manifest.dependencies.map(
       (dependency) => dependency.id,
     );
-    const duplicateDependencies = this.collectDuplicates(dependencyIds);
+    const duplicateDependencies = this._collectDuplicates(dependencyIds);
 
     for (const dependencyId of duplicateDependencies) {
       issues.push({
@@ -131,6 +124,55 @@ export class PlatformModuleManifestValidator implements IModuleManifestValidator
         message: 'Manifest dependencies must not reference the module itself.',
         path: 'dependencies',
       });
+    }
+
+    const duplicateCapabilities = this._collectDuplicates(manifest.capabilities);
+
+    for (const capability of duplicateCapabilities) {
+      issues.push({
+        code: 'duplicate_capability',
+        message: `Capability "${capability}" is declared more than once.`,
+        path: 'capabilities',
+      });
+    }
+
+    const uniqCapabilities = [...new Set(manifest.capabilities)];
+    const capabilityIssues = this._validateCapabilities(uniqCapabilities);
+
+    if (capabilityIssues.length) {
+      issues.push(...capabilityIssues);
+    }
+
+    return issues;
+  }
+
+  protected _validateCapabilities(
+    capabilities: readonly ModuleCapabilityType[],
+  ): IManifestValidationIssue[] {
+    const issues: IManifestValidationIssue[] = [];
+
+    for (const capability of capabilities) {
+      // Validate capability format matches the standard pattern
+      if (!MODULE_CAPABILITY_PATTERN.test(capability)) {
+        issues.push({
+          code: 'invalid_capability_format',
+          message: `Capability "${capability}" has invalid format. Must match pattern: ${MODULE_CAPABILITY_PATTERN.source}`,
+          path: 'capabilities',
+        });
+
+        continue;
+      }
+
+      const isConfigCapability = capability.startsWith('config.');
+
+      // Check for wildcard patterns (forbidden)
+      if (isConfigCapability && capability.includes('*')) {
+        issues.push({
+          code: 'wildcard_config_capability_forbidden',
+          message: `Wildcard patterns are forbidden in config capabilities: "${capability}"`,
+          path: 'capabilities',
+        });
+      }
     }
 
     return issues;

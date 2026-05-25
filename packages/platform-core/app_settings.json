@@ -1,0 +1,26 @@
+{
+  "platform": {
+    "name": "Prosto Platform",
+    "startupPolicy": "strict"
+  },
+  "runtime": {
+    "shutdownTimeoutMs": 30000
+  },
+  "modules": {
+    "artifactCache": {
+      "enabled": false,
+      "path": ".cache/module-artifacts"
+    }
+  },
+  "security": {
+    "secretRedaction": {
+      "enabled": true,
+      "patterns": ["key", "token", "secret", "password", "passphrase"]
+    }
+  },
+  "logging": {
+    "level": "info",
+    "format": "text"
+  },
+  "custom": {}
+}

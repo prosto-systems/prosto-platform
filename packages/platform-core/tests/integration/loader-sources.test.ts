@@ -1,26 +1,41 @@
+import type { IPlatformConfig } from '@/runtime/index.js';
 import { createHash } from 'node:crypto';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { RuntimeReasonCodes } from '@/runtime/index.js';
 import {
   createManifest,
   createRuntime,
   TestModule,
 } from '@/tests/fixtures/index.js';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 
 describe('runtime loader sources', () => {
+  let tempDir: string;
+
+  beforeAll(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'prosto-config-test-'));
+  });
+
+  afterAll(() => {
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
   it('keeps backward compatibility for memory module refs', async () => {
+    const baseConfig = {
+      platform: { startupPolicy: 'strict' },
+      modules: { artifactCache: { enabled: false } },
+    } as IPlatformConfig;
+
+    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+
     const moduleA = new TestModule(createManifest({ id: 'module-a' }));
 
     const runtime = await createRuntime({
-      startupPolicy: 'strict',
-      runtimeVersion: {
-        sdkVersion: '0.0.0',
-        nodeVersion: process.versions.node,
-      },
       modules: [{ module: moduleA, type: 'memory' }],
+      configDir: tempDir,
     });
 
     expect(runtime.startedModuleIds).toEqual(['module-a']);
@@ -30,14 +45,16 @@ describe('runtime loader sources', () => {
   });
 
   it('marks invalid url source as discover rejection and continues with memory module', async () => {
+    const baseConfig = {
+      platform: { startupPolicy: 'strict' },
+      modules: { artifactCache: { enabled: false } },
+    } as IPlatformConfig;
+
+    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+
     const moduleA = new TestModule(createManifest({ id: 'module-a' }));
 
     const runtime = await createRuntime({
-      startupPolicy: 'strict',
-      runtimeVersion: {
-        sdkVersion: '0.0.0',
-        nodeVersion: process.versions.node,
-      },
       modules: [
         { module: moduleA, type: 'memory' },
         {
@@ -47,6 +64,7 @@ describe('runtime loader sources', () => {
           packaging: 'zip',
         },
       ],
+      configDir: tempDir,
     });
 
     expect(runtime.startedModuleIds).toEqual(['module-a']);
@@ -58,18 +76,20 @@ describe('runtime loader sources', () => {
   });
 
   it('validates path checksum and rejects on integrity mismatch', async () => {
-    const tempDir = await mkdtemp(join(tmpdir(), 'prosto-loader-'));
-    const artifactPath = join(tempDir, 'module.zip');
+    const baseConfig = {
+      platform: { startupPolicy: 'strict' },
+      modules: { artifactCache: { enabled: false } },
+    } as IPlatformConfig;
+
+    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+
+    const artifactTempDir = await mkdtemp(join(tmpdir(), 'prosto-loader-'));
+    const artifactPath = join(artifactTempDir, 'module.zip');
 
     try {
       await writeFile(artifactPath, 'artifact payload', 'utf8');
 
       const runtime = await createRuntime({
-        startupPolicy: 'strict',
-        runtimeVersion: {
-          sdkVersion: '0.0.0',
-          nodeVersion: process.versions.node,
-        },
         modules: [
           {
             moduleIdHint: 'module-path',
@@ -81,6 +101,7 @@ describe('runtime loader sources', () => {
             },
           },
         ],
+        configDir: tempDir,
       });
 
       expect(runtime.startedModuleIds).toEqual([]);
@@ -88,24 +109,26 @@ describe('runtime loader sources', () => {
 
       await runtime.stop();
     } finally {
-      await rm(tempDir, { recursive: true, force: true });
+      await rm(artifactTempDir, { recursive: true, force: true });
     }
   });
 
   it('passes path checksum preflight and reports entry resolve as not implemented', async () => {
-    const tempDir = await mkdtemp(join(tmpdir(), 'prosto-loader-'));
-    const artifactPath = join(tempDir, 'module.zip');
+    const baseConfig = {
+      platform: { startupPolicy: 'strict' },
+      modules: { artifactCache: { enabled: false } },
+    } as IPlatformConfig;
+
+    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+
+    const artifactTempDir = await mkdtemp(join(tmpdir(), 'prosto-loader-'));
+    const artifactPath = join(artifactTempDir, 'module.zip');
 
     try {
       await writeFile(artifactPath, 'artifact payload', 'utf8');
       const checksum = createHash('sha256').update('artifact payload').digest('hex');
 
       const runtime = await createRuntime({
-        startupPolicy: 'strict',
-        runtimeVersion: {
-          sdkVersion: '0.0.0',
-          nodeVersion: process.versions.node,
-        },
         modules: [
           {
             moduleIdHint: 'module-path-ok',
@@ -117,6 +140,7 @@ describe('runtime loader sources', () => {
             },
           },
         ],
+        configDir: tempDir,
       });
 
       expect(runtime.startedModuleIds).toEqual([]);
@@ -124,7 +148,7 @@ describe('runtime loader sources', () => {
 
       await runtime.stop();
     } finally {
-      await rm(tempDir, { recursive: true, force: true });
+      await rm(artifactTempDir, { recursive: true, force: true });
     }
   });
 });

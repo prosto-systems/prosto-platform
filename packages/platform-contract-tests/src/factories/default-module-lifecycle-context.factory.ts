@@ -5,11 +5,19 @@ import type {
   IEventEnvelope,
   IEventMetadata,
   IModuleContext,
+  IModuleLogger,
   IPlatformModule,
   IServiceRegistry,
   ServiceTokenType,
 } from '@prosto/platform-sdk';
 import type { IModuleLifecycleContextFactory } from '../types/index.js';
+
+class MockLogger implements IModuleLogger {
+  debug(_: string, __?: Readonly<Record<string, unknown>>): void { /* empty */ };
+  info(_: string, __?: Readonly<Record<string, unknown>>): void { /* empty */ };
+  warn(_: string, __?: Readonly<Record<string, unknown>>): void { /* empty */ };
+  error(_: string, __?: Readonly<Record<string, unknown>>): void { /* empty */ };
+}
 
 class MockServiceRegistry implements IServiceRegistry {
   private readonly _registry = new Map<symbol, unknown>();
@@ -100,17 +108,20 @@ class MockEventBus implements IEventBus {
 export class DefaultModuleLifecycleContextFactory implements IModuleLifecycleContextFactory {
   create(module: IPlatformModule): IModuleContext {
     return {
+      environment: 'test',
+      config: {},
       moduleId: module.manifest.id,
-      sdkVersion: module.manifest.sdkVersion,
       startupPolicy: 'best-effort',
+      sdkVersion: module.manifest.sdkVersion,
+      logger: new MockLogger(),
       services: new MockServiceRegistry(),
       eventBus: new MockEventBus(),
-      getConfig: <TValue = unknown>(key: string): TValue | undefined => {
+      getConfigValue: <T>(key: string): Readonly<T> => {
         if (key === 'contract.testing.enabled') {
-          return true as TValue;
+          return true as T;
         }
 
-        return undefined;
+        return undefined as T;
       },
     };
   }

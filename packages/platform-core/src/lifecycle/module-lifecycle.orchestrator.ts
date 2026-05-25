@@ -109,9 +109,9 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
     lifecycleContext: IModuleLifecycleContext,
   ): Promise<void> {
     const context = this._moduleContextFactory.create({
-      moduleId: module.manifest.id,
       startupPolicy: lifecycleContext.startupPolicy,
       sdkVersion: lifecycleContext.sdkVersion,
+      moduleManifest: module.manifest,
     });
 
     await module[stage](context);

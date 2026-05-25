@@ -12,7 +12,7 @@ import {
   type IArtifactCache,
   type IArtifactCacheEntryMetadata,
   NoOpArtifactCache,
-} from '@/cache/index.js';
+} from '@/caching/index.js';
 import { RuntimeReasonCodes } from '@/runtime/index.js';
 import {
   ModuleArtifactPackaging,

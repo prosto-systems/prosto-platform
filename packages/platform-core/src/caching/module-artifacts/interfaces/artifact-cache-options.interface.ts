@@ -5,9 +5,8 @@
 export interface IArtifactCacheOptions {
   /**
    * Path to the cache directory
-   * @default .cache/module-artifacts
    */
-  readonly basePath?: string;
+  readonly path: string;
   /**
    * Maximum age of cached artifacts in milliseconds
    * @default 14 days

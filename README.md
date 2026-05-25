@@ -16,6 +16,11 @@ What this means right now:
 - Phase 05 runtime policy and lifecycle determinism checks are active via `validate:runtime-policy` and `test:lifecycle-determinism`.
 - Phase 05 core runtime subsystems implemented: bootstrap pipeline, module lifecycle orchestrator, startup policy evaluator, dependency graph with topological sorting, module loader with integrity checks, event bus, service registry, diagnostics reports, and validation strategies.
 - Phase 06 is the active implementation window — security controls (allowlist loading, integrity enforcement, secret redaction) and performance regression gates.
+  - **Config Access Policy** is fully implemented with:
+    - Error taxonomy (`CONFIG_ACCESS_DENIED`, `CONFIG_CAPABILITY_INVALID`, `CONFIG_SECTION_NOT_ALLOWLISTED`, `CONFIG_WILDCARD_FORBIDDEN`)
+    - Secret redaction in logs and diagnostics
+    - Integration tests covering security class × capability × environment matrix
+    - See [`docs/architecture/module-config-access-policy.md`](docs/architecture/module-config-access-policy.md) for complete specification
 
 ## Current State vs Target State
 

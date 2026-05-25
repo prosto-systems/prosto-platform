@@ -6,7 +6,7 @@ Status context:
 - Phase 03: completed (SDK contract baseline)
 
 ## Surface Version
-- `SDK_CONTRACT_SURFACE_VERSION` (`@alpha`)
+- `SDK_CONTRACT_VERSION` (`@alpha`)
 
 ## Constants
 - `MODULE_LIFECYCLE_STAGES` (`@alpha`)
