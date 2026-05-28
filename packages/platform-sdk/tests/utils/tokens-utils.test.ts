@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  createEventToken,
-  createServiceToken,
-} from '../../src/index.js';
+import { createEventToken, createServiceToken } from '../../src/index.js';
 
 describe('tokens', () => {
   it('generate deterministic scoped symbols', () => {

@@ -63,10 +63,7 @@ export function buildScopedConfigProjection(
 
   // Include allowed global sections
   if (allowedSections.length) {
-    const globalSections = extractAllowedSections(
-      fullConfig,
-      allowedSections,
-    );
+    const globalSections = extractAllowedSections(fullConfig, allowedSections);
 
     Object.assign(projection, globalSections);
   }

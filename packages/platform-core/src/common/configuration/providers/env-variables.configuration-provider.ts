@@ -9,13 +9,13 @@ import {
 } from '@prosto/platform-sdk';
 
 type PrimitiveType = string | number | boolean | null;
-type ConfigValueType = PrimitiveType | ConfigValueType[] | {
-  [key: string]: ConfigValueType
-};
+type ConfigValueType =
+  | PrimitiveType
+  | ConfigValueType[]
+  | { [key: string]: ConfigValueType };
 
 export class EnvironmentVariablesConfigurationProvider implements IConfigurationProvider {
-  constructor(private readonly _options: IEnvOptions = {}) {
-  }
+  constructor(private readonly _options: IEnvOptions = {}) {}
 
   load(): Record<string, unknown> {
     const { prefix = '', separator = '__' } = this._options;
@@ -32,12 +32,9 @@ export class EnvironmentVariablesConfigurationProvider implements IConfiguration
         .join('.');
 
       if (path) {
-        setNestedValue(
-          result,
-          path,
-          this._parseValue(value),
-          { pathSeparator: '.' },
-        );
+        setNestedValue(result, path, this._parseValue(value), {
+          pathSeparator: '.',
+        });
       }
     }
 

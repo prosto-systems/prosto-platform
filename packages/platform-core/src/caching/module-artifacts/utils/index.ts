@@ -1,1 +1,1 @@
-export * from './artifact-cache-key-generation.js'
+export * from './artifact-cache-key-generation.js';

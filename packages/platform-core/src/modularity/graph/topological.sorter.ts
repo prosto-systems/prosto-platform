@@ -113,7 +113,9 @@ export class TopologicalSorter implements ITopologicalSorter {
       const module = graph.getModule(moduleId);
 
       if (!module) {
-        throw new Error(`Resolved module "${moduleId}" is missing from dependency graph.`);
+        throw new Error(
+          `Resolved module "${moduleId}" is missing from dependency graph.`,
+        );
       }
 
       orderedModules.push(module);

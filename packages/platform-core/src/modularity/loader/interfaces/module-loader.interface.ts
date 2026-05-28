@@ -1,12 +1,6 @@
-import type {
-  ModuleArtifactSourceDescriptorType,
-} from './artifact-source.interface.js';
-import type {
-  IModuleCandidateArtifact,
-} from './module-candidate-artifact.interface.js';
-import type {
-  IRejectedModuleArtifact,
-} from './rejected-module-artifact.interface.js';
+import type { ModuleArtifactSourceDescriptorType } from './artifact-source.interface.js';
+import type { IModuleCandidateArtifact } from './module-candidate-artifact.interface.js';
+import type { IRejectedModuleArtifact } from './rejected-module-artifact.interface.js';
 
 /**
  * @alpha

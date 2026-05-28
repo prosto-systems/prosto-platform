@@ -25,7 +25,9 @@ export class BootstrapPipeline implements IBootstrapPipeline {
    * @param initialContext - Initial bootstrap context
    * @returns Final bootstrap context after all stages
    */
-  async execute(initialContext: IBootstrapStageContext): Promise<IBootstrapStageContext> {
+  async execute(
+    initialContext: IBootstrapStageContext,
+  ): Promise<IBootstrapStageContext> {
     let context = initialContext;
 
     for (const stage of this._stages) {

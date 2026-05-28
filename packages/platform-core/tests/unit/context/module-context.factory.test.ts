@@ -126,10 +126,14 @@ describe('ModuleContextFactory', () => {
       }),
     });
 
-    expect(ctx.getConfigValue('modules.module-a.database.host')).toBe('localhost');
+    expect(ctx.getConfigValue('modules.module-a.database.host')).toBe(
+      'localhost',
+    );
     expect(ctx.getConfigValue('modules.module-a.database.port')).toBe(5432);
     expect(ctx.getConfigValue('missing.key', 'fallback')).toBe('fallback');
-    expect(ctx.getConfigValue('security.secretRedaction.enabled')).toBeUndefined();
+    expect(
+      ctx.getConfigValue('security.secretRedaction.enabled'),
+    ).toBeUndefined();
   });
 
   it('exposes logger, eventBus, services and metadata in context', () => {

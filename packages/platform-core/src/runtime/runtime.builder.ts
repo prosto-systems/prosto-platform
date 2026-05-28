@@ -50,7 +50,8 @@ import { platformConfigSchema } from './schemas/index.js';
  */
 export class RuntimeBuilder implements IRuntimeBuilder {
   build(options: IRuntimeBuilderOptions): IPlatformRuntime {
-    const environment = options.environment || process.env.NODE_ENV || 'production';
+    const environment =
+      options.environment || process.env.NODE_ENV || 'production';
 
     // Build platform configuration by merging defaults,
     // config files, environment variables, and command-line arguments.
@@ -120,7 +121,14 @@ export class RuntimeBuilder implements IRuntimeBuilder {
       modules: {
         configAccessPolicy: {
           sectionAllowlistBySecurityClass: {
-            trusted: ['platform', 'runtime', 'modules', 'security', 'logging', 'custom'],
+            trusted: [
+              'platform',
+              'runtime',
+              'modules',
+              'security',
+              'logging',
+              'custom',
+            ],
             internal: ['platform', 'runtime', 'security', 'logging', 'custom'],
             'third-party-reviewed': ['platform', 'logging', 'custom'],
           },
@@ -142,7 +150,9 @@ export class RuntimeBuilder implements IRuntimeBuilder {
     const configBuilder = new ConfigurationBuilder(platformConfigSchema)
       .addInMemoryCollection(defaultConfig)
       .addJsonFile(`${configDir}/app_settings.json`, { optional: true })
-      .addJsonFile(`${configDir}/app_settings.${environment}.json`, { optional: true })
+      .addJsonFile(`${configDir}/app_settings.${environment}.json`, {
+        optional: true,
+      })
       .addEnvironmentVariables({ prefix: 'PROSTO_' })
       .addCommandLine(commandLineArgs);
 
@@ -201,20 +211,17 @@ export class RuntimeBuilder implements IRuntimeBuilder {
 
     const artifactCache = artifactCacheConfig.enabled
       ? new FileSystemArtifactCache({
-        maxAgeMs: artifactCacheConfig.maxAgeMs,
-        maxSizeBytes: artifactCacheConfig.maxSizeBytes,
-        path: resolve(
-          config.platform.basePath,
-          artifactCacheConfig.path || '.cache/module-artifacts',
-        ),
-      })
+          maxAgeMs: artifactCacheConfig.maxAgeMs,
+          maxSizeBytes: artifactCacheConfig.maxSizeBytes,
+          path: resolve(
+            config.platform.basePath,
+            artifactCacheConfig.path || '.cache/module-artifacts',
+          ),
+        })
       : new NoOpArtifactCache();
 
     return new ModuleLoader(
-      new ArtifactSourceFactory(
-        new ArtifactFetcher(),
-        artifactCache,
-      ),
+      new ArtifactSourceFactory(new ArtifactFetcher(), artifactCache),
     );
   }
 }

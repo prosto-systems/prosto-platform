@@ -18,7 +18,9 @@ export abstract class ModuleValidationBaseStrategy implements IModuleValidationS
   /**
    * Validate input and return result.
    */
-  abstract validate(input: IModuleValidationStrategyInput): ModuleValidationResultType;
+  abstract validate(
+    input: IModuleValidationStrategyInput,
+  ): ModuleValidationResultType;
 
   /**
    * Helper to create success result.
@@ -30,7 +32,9 @@ export abstract class ModuleValidationBaseStrategy implements IModuleValidationS
   /**
    * Helper to create failure result.
    */
-  protected failure(error: ModuleValidationErrorType): ModuleValidationResultType {
+  protected failure(
+    error: ModuleValidationErrorType,
+  ): ModuleValidationResultType {
     return { ok: false, error };
   }
 }

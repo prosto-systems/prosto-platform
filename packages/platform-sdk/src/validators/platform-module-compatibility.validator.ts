@@ -21,8 +21,12 @@ export class PlatformModuleCompatibilityValidator implements IModuleCompatibilit
   ): ModuleCompatibilityValidationResultType {
     const issues: ICompatibilityValidationIssue[] = [];
 
-    issues.push(...this.validateRuntimeVersion('sdkVersion', runtime.sdkVersion));
-    issues.push(...this.validateRuntimeVersion('nodeVersion', runtime.nodeVersion));
+    issues.push(
+      ...this.validateRuntimeVersion('sdkVersion', runtime.sdkVersion),
+    );
+    issues.push(
+      ...this.validateRuntimeVersion('nodeVersion', runtime.nodeVersion),
+    );
 
     /*
     if (
@@ -57,14 +61,18 @@ export class PlatformModuleCompatibilityValidator implements IModuleCompatibilit
         issues.push({
           field: 'nodeVersion',
           code: 'RUNTIME_VERSION_MISSING',
-          message: 'Manifest requires nodeVersion but runtime context did not provide it.',
+          message:
+            'Manifest requires nodeVersion but runtime context did not provide it.',
           expectedRange: manifest.nodeVersion,
         });
-      } else if (!isSemverSatisfied(runtime.nodeVersion, manifest.nodeVersion)) {
+      } else if (
+        !isSemverSatisfied(runtime.nodeVersion, manifest.nodeVersion)
+      ) {
         issues.push({
           field: 'nodeVersion',
           code: 'VERSION_RANGE_MISMATCH',
-          message: 'Runtime nodeVersion is outside the manifest nodeVersion range.',
+          message:
+            'Runtime nodeVersion is outside the manifest nodeVersion range.',
           expectedRange: manifest.nodeVersion,
           actualVersion: runtime.nodeVersion,
         });

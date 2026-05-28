@@ -27,15 +27,24 @@ describe('ModuleLifecycleOrchestrator', () => {
       new ConsoleModuleLoggerFactory(),
     );
 
-    const moduleLifecycleOrchestrator = new ModuleLifecycleOrchestrator(contextFactory);
-    const result = await moduleLifecycleOrchestrator.startup([moduleA, moduleB], {
-      startupPolicy: 'strict',
-      sdkVersion: '0.0.0',
-    });
+    const moduleLifecycleOrchestrator = new ModuleLifecycleOrchestrator(
+      contextFactory,
+    );
+    const result = await moduleLifecycleOrchestrator.startup(
+      [moduleA, moduleB],
+      {
+        startupPolicy: 'strict',
+        sdkVersion: '0.0.0',
+      },
+    );
 
-    expect(result.startedModules.map((item) => item.manifest.id)).toEqual(['module-a']);
+    expect(result.startedModules.map((item) => item.manifest.id)).toEqual([
+      'module-a',
+    ]);
     expect(result.issues).toHaveLength(1);
-    expect(result.issues[0]?.errorCode).toBe(RuntimeErrorCodes.LifecycleStartFailed);
+    expect(result.issues[0]?.errorCode).toBe(
+      RuntimeErrorCodes.LifecycleStartFailed,
+    );
   });
 
   it('reports shutdown timeout issue', async () => {
@@ -53,7 +62,9 @@ describe('ModuleLifecycleOrchestrator', () => {
       new ConsoleModuleLoggerFactory(),
     );
 
-    const moduleLifecycleOrchestrator = new ModuleLifecycleOrchestrator(contextFactory);
+    const moduleLifecycleOrchestrator = new ModuleLifecycleOrchestrator(
+      contextFactory,
+    );
     const result = await moduleLifecycleOrchestrator.shutdown([slowModule], {
       startupPolicy: 'strict',
       sdkVersion: '0.0.0',

@@ -116,10 +116,12 @@ describe('createConfigObject', () => {
 
     expect(config.get<string>('server.host')).toBe('localhost');
     expect(config.getValue('server.timeout', 5000)).toBe(5000);
-    expect(config.getSection<{ host: string; port: number }>('server')).toEqual({
-      host: 'localhost',
-      port: 3000,
-    });
+    expect(config.getSection<{ host: string; port: number }>('server')).toEqual(
+      {
+        host: 'localhost',
+        port: 3000,
+      },
+    );
     expect(config.has('features.auth')).toBe(true);
     expect(config.has('features.missing')).toBe(false);
     expect(config.keys()).toEqual([

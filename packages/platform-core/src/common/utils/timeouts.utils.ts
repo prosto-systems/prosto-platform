@@ -12,7 +12,8 @@ export type CreateTimeoutErrorFunctionType = () => Error;
 export async function executeWithTimeout(
   promise: Promise<void>,
   timeoutMs: number,
-  createErrorFn: CreateTimeoutErrorFunctionType = () => new OperationTimeoutError()
+  createErrorFn: CreateTimeoutErrorFunctionType = () =>
+    new OperationTimeoutError(),
 ): Promise<void> {
   let timer: ReturnType<typeof setTimeout> | undefined;
 

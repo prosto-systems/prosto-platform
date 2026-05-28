@@ -17,8 +17,7 @@ import { ConfigAccessPolicyStrategy } from './strategies/index.js';
 export class ConfigAccessPolicyEvaluator implements IConfigAccessPolicyEvaluator {
   constructor(
     private readonly _strategy: IConfigAccessPolicyStrategy = new ConfigAccessPolicyStrategy(),
-  ) {
-  }
+  ) {}
 
   evaluate(
     input: IConfigAccessEvaluationInput,

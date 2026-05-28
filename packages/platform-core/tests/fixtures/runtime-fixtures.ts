@@ -28,9 +28,15 @@ export function createManifest(
     nodeVersion: input.nodeVersion,
     criticality: input.criticality ?? 'normal',
     securityClass: input.securityClass ?? 'internal',
-    capabilities: input.capabilities ?? ['lifecycle.register', 'lifecycle.start', 'feature.test'],
+    capabilities: input.capabilities ?? [
+      'lifecycle.register',
+      'lifecycle.start',
+      'feature.test',
+    ],
     dependencies: input.dependencies ?? [],
-    checksum: input.checksum ?? 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    checksum:
+      input.checksum ??
+      'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
     signature: input.signature,
     metadata: input.metadata,
   };
@@ -48,7 +54,10 @@ export class TestModule implements IPlatformModule {
   readonly calls: string[] = [];
   private readonly _behavior: ITestModuleBehavior;
 
-  constructor(manifest: IPlatformModuleManifest, behavior: ITestModuleBehavior = {}) {
+  constructor(
+    manifest: IPlatformModuleManifest,
+    behavior: ITestModuleBehavior = {},
+  ) {
     this.manifest = manifest;
     this._behavior = behavior;
   }
@@ -81,7 +90,9 @@ export class TestModule implements IPlatformModule {
     this.calls.push('stop');
 
     if (this._behavior.stopDelayMs && this._behavior.stopDelayMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, this._behavior.stopDelayMs));
+      await new Promise((resolve) =>
+        setTimeout(resolve, this._behavior.stopDelayMs),
+      );
     }
   }
 }

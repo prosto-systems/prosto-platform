@@ -1,11 +1,15 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 
-const releaseVersion = process.env.RELEASE_VERSION ?? process.env.npm_package_version ?? '0.0.0-dev';
+const releaseVersion =
+  process.env.RELEASE_VERSION ?? process.env.npm_package_version ?? '0.0.0-dev';
 const commitSha = process.env.GITHUB_SHA ?? 'local';
 const runId = process.env.GITHUB_RUN_ID ?? 'local';
-const runUrl = process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_RUN_ID
-  ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
-  : 'local-run';
+const runUrl =
+  process.env.GITHUB_SERVER_URL &&
+  process.env.GITHUB_REPOSITORY &&
+  process.env.GITHUB_RUN_ID
+    ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
+    : 'local-run';
 
 const now = new Date().toISOString();
 
@@ -57,6 +61,10 @@ const manifest = {
 };
 
 await mkdir('./.temp/ci', { recursive: true });
-await writeFile('./.temp/ci/release-evidence.json', `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+await writeFile(
+  './.temp/ci/release-evidence.json',
+  `${JSON.stringify(manifest, null, 2)}\n`,
+  'utf8',
+);
 
 console.log('release-evidence generated: .temp/ci/release-evidence.json');

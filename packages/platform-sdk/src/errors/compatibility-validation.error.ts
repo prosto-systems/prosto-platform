@@ -4,9 +4,7 @@ import { PlatformSdkError } from './platform-sdk.error.js';
  * @alpha
  * Compatibility fields validated against runtime versions.
  */
-export type CompatibilityFieldType =
-  | 'sdkVersion'
-  | 'nodeVersion';
+export type CompatibilityFieldType = 'sdkVersion' | 'nodeVersion';
 
 /**
  * @alpha

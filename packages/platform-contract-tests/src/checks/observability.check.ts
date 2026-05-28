@@ -1,5 +1,8 @@
 import type { IPlatformModuleManifest } from '@prosto/platform-sdk';
-import { ContractFailureCodes, type IContractCheckResult } from '../types/index.js';
+import {
+  ContractFailureCodes,
+  type IContractCheckResult,
+} from '../types/index.js';
 
 const OBSERVABILITY_PREFIX = 'obs.';
 export const OBSERVABILITY_CHECK_RESULT_ID = 'observability-metadata';
@@ -22,7 +25,8 @@ export function runObservabilityConformanceCheck(
       severity: 'advisory',
       passed: false,
       code: ContractFailureCodes.ObservabilityCapabilityMissing,
-      details: 'Manifest should declare at least one capability under the "obs." namespace.',
+      details:
+        'Manifest should declare at least one capability under the "obs." namespace.',
     };
   }
 

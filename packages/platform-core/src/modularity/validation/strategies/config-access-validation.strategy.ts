@@ -10,9 +10,7 @@ import type {
 } from '../interfaces/index.js';
 import type { IPlatformConfig } from '@/runtime/index.js';
 import { RuntimeErrorCodes } from '@/common/index.js';
-import {
-  ModuleValidationBaseStrategy,
-} from './module-validation.base-strategy.js';
+import { ModuleValidationBaseStrategy } from './module-validation.base-strategy.js';
 
 /**
  * @alpha
@@ -32,13 +30,15 @@ export class ConfigAccessValidationStrategy extends ModuleValidationBaseStrategy
   ) {
     super();
 
-    this._policy = _config.modules?.configAccessPolicy ?? this._createDefaultPolicy();
+    this._policy =
+      _config.modules?.configAccessPolicy ?? this._createDefaultPolicy();
   }
 
   validate(input: IModuleValidationStrategyInput): ModuleValidationResultType {
     const { manifest } = input.artifact.module;
-    const configCapabilities = manifest.capabilities
-      .filter((capability) => capability.startsWith('config.'));
+    const configCapabilities = manifest.capabilities.filter((capability) =>
+      capability.startsWith('config.'),
+    );
 
     // If module has no config capabilities, allow it to proceed
     if (!configCapabilities.length) {
@@ -64,7 +64,9 @@ export class ConfigAccessValidationStrategy extends ModuleValidationBaseStrategy
       return this.failure({
         errorCode: result.denialCode ?? RuntimeErrorCodes.ConfigAccessDenied,
         message: result.reason,
-        remediationHint: result.remediationHint ?? 'Review module configCapabilities and runtime policy configuration.',
+        remediationHint:
+          result.remediationHint ??
+          'Review module configCapabilities and runtime policy configuration.',
       });
     }
 

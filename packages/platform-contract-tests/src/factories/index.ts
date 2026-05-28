@@ -1,1 +1,1 @@
-export * from './default-module-lifecycle-context.factory.js'
+export * from './default-module-lifecycle-context.factory.js';

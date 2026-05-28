@@ -21,16 +21,17 @@ const CONFIG_ACCESS_ERROR_CODES = [
  * Check if an error code is a config access policy error.
  */
 function isConfigAccessErrorCode(errorCode: string): boolean {
-  return CONFIG_ACCESS_ERROR_CODES.some(
-    (code) => code === errorCode,
-  );
+  return CONFIG_ACCESS_ERROR_CODES.some((code) => code === errorCode);
 }
 
 /**
  * Validate that a diagnostic payload does not contain sensitive data.
  * This is a basic check; production systems should use more sophisticated redaction.
  */
-function validateNoSensitiveData(payload: Record<string, unknown>, context: string): void {
+function validateNoSensitiveData(
+  payload: Record<string, unknown>,
+  context: string,
+): void {
   const sensitivePatterns = [
     /key/i,
     /token/i,
@@ -51,7 +52,7 @@ function validateNoSensitiveData(payload: Record<string, unknown>, context: stri
         assert(
           false,
           `${context}: Sensitive field '${path}' detected in diagnostic payload. ` +
-          'This may indicate a security vulnerability.',
+            'This may indicate a security vulnerability.',
         );
       }
     }
@@ -81,35 +82,69 @@ function validateNoSensitiveData(payload: Record<string, unknown>, context: stri
 
 export function assertStartupReport(report: IRuntimeStartupReport): void {
   assert(report.type === 'startup', 'startup.type must equal "startup"');
-  assert(typeof report.policyMode === 'string', 'startup.policyMode must be present');
-  assert(typeof report.correlationId === 'string' && report.correlationId.length > 0, 'startup.correlationId is required');
-  assert(typeof report.startedAt === 'string' && report.startedAt.length > 0, 'startup.startedAt is required');
-  assert(typeof report.completedAt === 'string' && report.completedAt.length > 0, 'startup.completedAt is required');
-  assert(Array.isArray(report.loadedModules), 'startup.loadedModules must be an array');
-  assert(Array.isArray(report.skippedModules), 'startup.skippedModules must be an array');
-  assert(Array.isArray(report.failedModules), 'startup.failedModules must be an array');
+  assert(
+    typeof report.policyMode === 'string',
+    'startup.policyMode must be present',
+  );
+  assert(
+    typeof report.correlationId === 'string' && report.correlationId.length > 0,
+    'startup.correlationId is required',
+  );
+  assert(
+    typeof report.startedAt === 'string' && report.startedAt.length > 0,
+    'startup.startedAt is required',
+  );
+  assert(
+    typeof report.completedAt === 'string' && report.completedAt.length > 0,
+    'startup.completedAt is required',
+  );
+  assert(
+    Array.isArray(report.loadedModules),
+    'startup.loadedModules must be an array',
+  );
+  assert(
+    Array.isArray(report.skippedModules),
+    'startup.skippedModules must be an array',
+  );
+  assert(
+    Array.isArray(report.failedModules),
+    'startup.failedModules must be an array',
+  );
 
   for (const failed of report.failedModules as IRuntimeStartupReport['failedModules']) {
-    assert(typeof failed.moduleId === 'string' && failed.moduleId.length > 0, 'failedModules[].moduleId is required');
-    assert(typeof failed.phase === 'string' && failed.phase.length > 0, 'failedModules[].phase is required');
-    assert(typeof failed.errorCode === 'string' && failed.errorCode.length > 0, 'failedModules[].errorCode is required');
-    assert(typeof failed.remediationHint === 'string' && failed.remediationHint.length > 0, 'failedModules[].remediationHint is required');
+    assert(
+      typeof failed.moduleId === 'string' && failed.moduleId.length > 0,
+      'failedModules[].moduleId is required',
+    );
+    assert(
+      typeof failed.phase === 'string' && failed.phase.length > 0,
+      'failedModules[].phase is required',
+    );
+    assert(
+      typeof failed.errorCode === 'string' && failed.errorCode.length > 0,
+      'failedModules[].errorCode is required',
+    );
+    assert(
+      typeof failed.remediationHint === 'string' &&
+        failed.remediationHint.length > 0,
+      'failedModules[].remediationHint is required',
+    );
 
     // Validate config access error codes have proper structure
     if (isConfigAccessErrorCode(failed.errorCode)) {
       // Ensure remediation hints for config errors don't contain sensitive paths
       assert(
         !failed.remediationHint.includes('key') &&
-        !failed.remediationHint.includes('token') &&
-        !failed.remediationHint.includes('secret') &&
-        !failed.remediationHint.includes('password') &&
-        !failed.remediationHint.includes('passphrase') &&
-        !failed.remediationHint.includes('connection_string') &&
-        !failed.remediationHint.includes('private_key') &&
-        !failed.remediationHint.includes('api_key') &&
-        !failed.remediationHint.includes('database_url') &&
-        !failed.remediationHint.includes('jwt_secret') &&
-        !failed.remediationHint.includes('encryption_key'),
+          !failed.remediationHint.includes('token') &&
+          !failed.remediationHint.includes('secret') &&
+          !failed.remediationHint.includes('password') &&
+          !failed.remediationHint.includes('passphrase') &&
+          !failed.remediationHint.includes('connection_string') &&
+          !failed.remediationHint.includes('private_key') &&
+          !failed.remediationHint.includes('api_key') &&
+          !failed.remediationHint.includes('database_url') &&
+          !failed.remediationHint.includes('jwt_secret') &&
+          !failed.remediationHint.includes('encryption_key'),
         `failedModules[].remediationHint contains sensitive data for error ${failed.errorCode}`,
       );
     }
@@ -124,12 +159,20 @@ export function assertStartupReport(report: IRuntimeStartupReport): void {
 
 export function assertShutdownReport(report: IRuntimeShutdownReport): void {
   assert(report.type === 'shutdown', 'shutdown.type must equal "shutdown"');
-  assert(typeof report.correlationId === 'string' && report.correlationId.length > 0, 'shutdown.correlationId is required');
-  assert(Array.isArray(report.stopOrder), 'shutdown.stopOrder must be an array');
+  assert(
+    typeof report.correlationId === 'string' && report.correlationId.length > 0,
+    'shutdown.correlationId is required',
+  );
+  assert(
+    Array.isArray(report.stopOrder),
+    'shutdown.stopOrder must be an array',
+  );
   assert(Array.isArray(report.issues), 'shutdown.issues must be an array');
 }
 
-export function validateOperationalReportsSchema(reports: IRuntimeOperationalReports): void {
+export function validateOperationalReportsSchema(
+  reports: IRuntimeOperationalReports,
+): void {
   if (reports.startup) {
     assertStartupReport(reports.startup);
   }

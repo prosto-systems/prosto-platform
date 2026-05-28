@@ -1,0 +1,14 @@
+dist
+artifacts
+node_modules
+.context
+.git
+.github
+.husky
+.idea
+.promts
+.turbo
+*.md
+*.svg
+*.snap
+coverage

@@ -5,8 +5,9 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
     exclude: [...configDefaults.exclude],
     alias: {
-      '@/tests/fixtures/': new URL('./tests/fixtures/', import.meta.url).pathname,
+      '@/tests/fixtures/': new URL('./tests/fixtures/', import.meta.url)
+        .pathname,
       '@/': new URL('./src/', import.meta.url).pathname,
-    }
+    },
   },
 });

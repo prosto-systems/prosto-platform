@@ -23,7 +23,9 @@ export class ResolveDependenciesStage extends BootstrapBaseStage {
     super();
   }
 
-  override async execute(context: IBootstrapStageContext): Promise<IBootstrapStageContext> {
+  override async execute(
+    context: IBootstrapStageContext,
+  ): Promise<IBootstrapStageContext> {
     const validatedModules = context.validatedModules;
 
     if (!validatedModules.length) {
@@ -40,13 +42,17 @@ export class ResolveDependenciesStage extends BootstrapBaseStage {
       const topologicalSortResult = topologicalSorter.sort(dependencyGraph);
 
       // Check for missing dependencies
-      for (const [moduleId, missing] of topologicalSortResult.missingDependencies) {
+      for (const [
+        moduleId,
+        missing,
+      ] of topologicalSortResult.missingDependencies) {
         this.skipModule(context, moduleId);
         this.addFailure(context, {
           moduleId,
           errorCode: RuntimeErrorCodes.DependencyMissing,
           message: `Missing required dependencies: ${missing.join(', ')}`,
-          remediationHint: 'Ensure all required dependencies are discoverable by runtime.',
+          remediationHint:
+            'Ensure all required dependencies are discoverable by runtime.',
         });
 
         const module = dependencyGraph.getModule(moduleId);
@@ -81,7 +87,10 @@ export class ResolveDependenciesStage extends BootstrapBaseStage {
         this.addFailure(context, {
           moduleId: 'unknown',
           errorCode: RuntimeErrorCodes.DependencyFailed,
-          message: error instanceof Error ? error.message : 'Unknown graph resolution error.',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Unknown graph resolution error.',
           remediationHint: 'Inspect dependency graph resolver inputs.',
         });
       }

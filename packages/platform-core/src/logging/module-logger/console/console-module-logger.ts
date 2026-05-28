@@ -11,34 +11,45 @@ export class ConsoleModuleLogger implements IModuleLogger {
   constructor(
     private readonly _moduleId: string,
     private readonly _secretsRedactor: ISecretsRedactor = new SecretsRedactor(),
-  ) {
-  }
+  ) {}
 
   debug(message: string, context?: Record<string, unknown>): void {
     const redactedMessage = this._secretsRedactor.redact(message);
     const redactedContext = this._secretsRedactor.redactObject(context);
 
-    console.debug(`[Module:${this._moduleId}] ${redactedMessage}`, redactedContext ?? {});
+    console.debug(
+      `[Module:${this._moduleId}] ${redactedMessage}`,
+      redactedContext ?? {},
+    );
   }
 
   info(message: string, context?: Record<string, unknown>): void {
     const redactedMessage = this._secretsRedactor.redact(message);
     const redactedContext = this._secretsRedactor.redactObject(context);
 
-    console.info(`[Module:${this._moduleId}] ${redactedMessage}`, redactedContext ?? {});
+    console.info(
+      `[Module:${this._moduleId}] ${redactedMessage}`,
+      redactedContext ?? {},
+    );
   }
 
   warn(message: string, context?: Record<string, unknown>): void {
     const redactedMessage = this._secretsRedactor.redact(message);
     const redactedContext = this._secretsRedactor.redactObject(context);
 
-    console.warn(`[Module:${this._moduleId}] ${redactedMessage}`, redactedContext ?? {});
+    console.warn(
+      `[Module:${this._moduleId}] ${redactedMessage}`,
+      redactedContext ?? {},
+    );
   }
 
   error(message: string, context?: Record<string, unknown>): void {
     const redactedMessage = this._secretsRedactor.redact(message);
     const redactedContext = this._secretsRedactor.redactObject(context);
 
-    console.error(`[Module:${this._moduleId}] ${redactedMessage}`, redactedContext ?? {});
+    console.error(
+      `[Module:${this._moduleId}] ${redactedMessage}`,
+      redactedContext ?? {},
+    );
   }
 }

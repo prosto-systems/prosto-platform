@@ -53,7 +53,9 @@ export class PathSource extends ArtifactBaseSource {
     return { ok: true };
   }
 
-  override async load(): Promise<IModuleCandidateArtifact | IRejectedModuleArtifact> {
+  override async load(): Promise<
+    IModuleCandidateArtifact | IRejectedModuleArtifact
+  > {
     const validation = this.validate();
 
     if (!validation.ok) {
@@ -83,7 +85,9 @@ export class PathSource extends ArtifactBaseSource {
     }
 
     try {
-      const entryPath = await this.resolveEntryPath(extractionResult.extractPath);
+      const entryPath = await this.resolveEntryPath(
+        extractionResult.extractPath,
+      );
       const module = await DynamicModuleLoader.loadModuleEntry(entryPath);
 
       return {
@@ -124,13 +128,16 @@ export class PathSource extends ArtifactBaseSource {
     };
   }
 
-  private async _getArtifact(): Promise<Buffer | {
-    error: {
-      reasonCode: RuntimeErrorCodes;
-      message: string;
-      remediationHint: string;
-    }
-  }> {
+  private async _getArtifact(): Promise<
+    | Buffer
+    | {
+        error: {
+          reasonCode: RuntimeErrorCodes;
+          message: string;
+          remediationHint: string;
+        };
+      }
+  > {
     const cacheKey = ArtifactCacheKeyGenerator.forPath(this._descriptor);
     const cached = await this._cache.get(cacheKey);
     let payload: Buffer;
@@ -140,7 +147,11 @@ export class PathSource extends ArtifactBaseSource {
     } else {
       try {
         payload = await readFile(this._descriptor.path);
-        await this._cache.set(cacheKey, payload, this._buildCacheMetadata(payload));
+        await this._cache.set(
+          cacheKey,
+          payload,
+          this._buildCacheMetadata(payload),
+        );
       } catch (error) {
         return {
           error: {
@@ -148,7 +159,8 @@ export class PathSource extends ArtifactBaseSource {
             message: `Failed to read artifact from path "${this._descriptor.path}": ${
               error instanceof Error ? error.message : 'unknown'
             }`,
-            remediationHint: 'Ensure the specified path exists and is readable by the platform.',
+            remediationHint:
+              'Ensure the specified path exists and is readable by the platform.',
           },
         };
       }
@@ -157,16 +169,19 @@ export class PathSource extends ArtifactBaseSource {
     return payload;
   }
 
-  private _verifyChecksum(payload: Buffer, expectedChecksum: string): {
-    ok: true
-  } | {
-    ok: false;
-    error: {
-      reasonCode: RuntimeErrorCodes;
-      message: string;
-      remediationHint: string
-    }
-  } {
+  private _verifyChecksum(
+    payload: Buffer,
+    expectedChecksum: string,
+  ):
+    | { ok: true }
+    | {
+        ok: false;
+        error: {
+          reasonCode: RuntimeErrorCodes;
+          message: string;
+          remediationHint: string;
+        };
+      } {
     const parsed = this.parseChecksum(expectedChecksum);
 
     if (!parsed) {
@@ -199,7 +214,8 @@ export class PathSource extends ArtifactBaseSource {
         error: {
           reasonCode: RuntimeErrorCodes.SourceIntegrityMismatch,
           message: 'Path source checksum mismatch.',
-          remediationHint: 'Update checksum metadata or artifact payload to match expected integrity.',
+          remediationHint:
+            'Update checksum metadata or artifact payload to match expected integrity.',
         },
       };
     }
@@ -207,17 +223,20 @@ export class PathSource extends ArtifactBaseSource {
     return { ok: true };
   }
 
-  private async _extract(artifact: Buffer): Promise<{
-    packaging: `${ModuleArtifactPackaging}`;
-    tempDir: string;
-    extractPath: string;
-  } | {
-    error: {
-      reasonCode: RuntimeErrorCodes;
-      message: string;
-      remediationHint: string;
-    }
-  }> {
+  private async _extract(artifact: Buffer): Promise<
+    | {
+        packaging: `${ModuleArtifactPackaging}`;
+        tempDir: string;
+        extractPath: string;
+      }
+    | {
+        error: {
+          reasonCode: RuntimeErrorCodes;
+          message: string;
+          remediationHint: string;
+        };
+      }
+  > {
     const packaging = this._descriptor.packaging ?? ModuleArtifactPackaging.Zip;
     const tempDir = await createTempDir('prosto-path');
     const tempFilePath = join(tempDir, `artifact.${packaging}`);
@@ -251,7 +270,8 @@ export class PathSource extends ArtifactBaseSource {
           message: `Failed to extract artifact from path source "${this._descriptor.path}": ${
             error instanceof Error ? error.message : 'unknown'
           }`,
-          remediationHint: 'Ensure the artifact is a valid archive and not corrupted.',
+          remediationHint:
+            'Ensure the artifact is a valid archive and not corrupted.',
         },
       };
     }

@@ -37,7 +37,9 @@ export interface ISecretsRedactor {
    * String values are redacted using the secrets redactor.
    * Object keys matching sensitive patterns are replaced with [REDACTED].
    */
-  redactObject<T extends Record<string, unknown> = Record<string, unknown>>(obj?: T): T;
+  redactObject<T extends Record<string, unknown> = Record<string, unknown>>(
+    obj?: T,
+  ): T;
 }
 
 /**
@@ -53,7 +55,7 @@ export class SecretsRedactor implements ISecretsRedactor {
 
   private readonly _builtInRules: readonly {
     pattern: RegExp;
-    replacement: string
+    replacement: string;
   }[] = [
     // Redact basic authorization headers (e.g., "Authorization: Basic dXNlcjpwYXNz...")
     {
@@ -108,8 +110,8 @@ export class SecretsRedactor implements ISecretsRedactor {
     ];
 
     if (this._patterns.length > 0) {
-      this._patterns = this._patterns.map(
-        (pattern) => pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+      this._patterns = this._patterns.map((pattern) =>
+        pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
       );
 
       this._keyValueRegex = new RegExp(
@@ -146,7 +148,11 @@ export class SecretsRedactor implements ISecretsRedactor {
       if (typeof item === 'string') {
         // Redact string values
         return this.redact(item);
-      } else if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
+      } else if (
+        typeof item === 'object' &&
+        item !== null &&
+        !Array.isArray(item)
+      ) {
         // Recursively redact nested objects
         return this.redactObject(item);
       } else if (Array.isArray(item)) {
@@ -159,7 +165,12 @@ export class SecretsRedactor implements ISecretsRedactor {
   }
 
   redactObject<T extends object = Record<string, unknown>>(obj?: T): T {
-    if (!this._enabled || !obj || typeof obj !== 'object' || Array.isArray(obj)) {
+    if (
+      !this._enabled ||
+      !obj ||
+      typeof obj !== 'object' ||
+      Array.isArray(obj)
+    ) {
       return obj as unknown as T;
     }
 
@@ -172,7 +183,11 @@ export class SecretsRedactor implements ISecretsRedactor {
       } else if (typeof value === 'string') {
         // Redact string values
         redacted[key] = this.redact(value);
-      } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      } else if (
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value)
+      ) {
         // Recursively redact nested objects
         redacted[key] = this.redactObject(value);
       } else if (Array.isArray(value)) {
@@ -191,7 +206,8 @@ export class SecretsRedactor implements ISecretsRedactor {
    */
   private _isSensitiveKey(key: string): boolean {
     const sensitivePatterns = this._patterns
-      .map((pattern) => new RegExp(pattern, 'i')).concat([
+      .map((pattern) => new RegExp(pattern, 'i'))
+      .concat([
         /connection[_-]?string/i,
         /private[_-]?key/i,
         /api[_-]?key/i,

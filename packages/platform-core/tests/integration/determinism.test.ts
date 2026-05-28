@@ -26,7 +26,10 @@ describe('runtime determinism', () => {
       modules: { artifactCache: { enabled: false } },
     } as IPlatformConfig;
 
-    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+    writeFileSync(
+      join(tempDir, 'app_settings.json'),
+      JSON.stringify(baseConfig),
+    );
 
     const createRuntimeInstance = async () => {
       const moduleA = new TestModule(createManifest({ id: 'module-a' }));

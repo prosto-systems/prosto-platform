@@ -41,14 +41,18 @@ export class IntegrityVerifier implements IIntegrityVerifier {
           error: {
             reasonCode: RuntimeErrorCodes.IntegrityCheckFailed,
             message: validationError,
-            remediationHint: 'Provide a valid checksum in the format sha256:<hex> or sha512:<hex>',
+            remediationHint:
+              'Provide a valid checksum in the format sha256:<hex> or sha512:<hex>',
           },
         };
       }
     }
 
     // Validate signature is a non-empty string if present
-    if (signature !== undefined && (typeof signature !== 'string' || signature.length === 0)) {
+    if (
+      signature !== undefined &&
+      (typeof signature !== 'string' || signature.length === 0)
+    ) {
       return {
         ok: false,
         error: {

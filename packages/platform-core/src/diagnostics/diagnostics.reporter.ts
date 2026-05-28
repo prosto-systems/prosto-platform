@@ -16,8 +16,7 @@ import { DiagnosticReportBuilder } from './builders/index.js';
 export class DiagnosticsReporter implements IDiagnosticsReporter {
   constructor(
     private readonly _reportBuilder: IReportBuilder = new DiagnosticReportBuilder(),
-  ) {
-  }
+  ) {}
 
   /**
    * Creates a startup diagnostic report from the provided input.

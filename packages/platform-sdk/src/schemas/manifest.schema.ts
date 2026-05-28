@@ -61,7 +61,10 @@ export const PlatformModuleManifestSchema = z
     securityClass: z.enum(MODULE_SECURITY_CLASSES),
     capabilities: z.array(CapabilitySchema).min(1),
     dependencies: z.array(ModuleDependencySchema).default([]),
-    checksum: z.string().regex(/^sha256:[a-f0-9]{64}$/).optional(),
+    checksum: z
+      .string()
+      .regex(/^sha256:[a-f0-9]{64}$/)
+      .optional(),
     signature: z.string().min(1).optional(),
     metadata: z.record(z.string(), z.string()).optional(),
   })
@@ -71,10 +74,14 @@ export const PlatformModuleManifestSchema = z
  * @alpha
  * Runtime input type accepted by manifest schema validation.
  */
-export type PlatformModuleManifestInputType = z.input<typeof PlatformModuleManifestSchema>;
+export type PlatformModuleManifestInputType = z.input<
+  typeof PlatformModuleManifestSchema
+>;
 
 /**
  * @alpha
  * Runtime output type produced by manifest schema validation.
  */
-export type PlatformModuleManifestOutputType = z.output<typeof PlatformModuleManifestSchema>;
+export type PlatformModuleManifestOutputType = z.output<
+  typeof PlatformModuleManifestSchema
+>;

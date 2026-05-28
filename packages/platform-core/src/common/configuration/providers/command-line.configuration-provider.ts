@@ -2,13 +2,13 @@ import type { IConfigurationProvider } from '../interfaces/index.js';
 import { isPlainObject, setNestedValue } from '@prosto/platform-sdk';
 
 type PrimitiveType = string | number | boolean | null;
-type ConfigValueType = PrimitiveType | ConfigValueType[] | {
-  [key: string]: ConfigValueType
-};
+type ConfigValueType =
+  | PrimitiveType
+  | ConfigValueType[]
+  | { [key: string]: ConfigValueType };
 
 export class CommandLineConfigurationProvider implements IConfigurationProvider {
-  constructor(private readonly _args: string[]) {
-  }
+  constructor(private readonly _args: string[]) {}
 
   load(): Record<string, unknown> {
     const pathSeparator = ':';
@@ -29,39 +29,23 @@ export class CommandLineConfigurationProvider implements IConfigurationProvider 
         const path = argWithoutPrefix.slice(0, eqIndex);
         const value = argWithoutPrefix.slice(eqIndex + 1);
 
-        setNestedValue(
-          result,
-          path,
-          this._parseValue(value),
-          { pathSeparator },
-        );
+        setNestedValue(result, path, this._parseValue(value), {
+          pathSeparator,
+        });
       } else if (i + 1 < l) {
         const nextArg = this._args[i + 1];
 
         if (nextArg !== undefined && !nextArg.startsWith('-')) {
-          setNestedValue(
-            result,
-            argWithoutPrefix,
-            this._parseValue(nextArg),
-            { pathSeparator },
-          );
+          setNestedValue(result, argWithoutPrefix, this._parseValue(nextArg), {
+            pathSeparator,
+          });
 
           i++;
         } else {
-          setNestedValue(
-            result,
-            argWithoutPrefix,
-            true,
-            { pathSeparator },
-          );
+          setNestedValue(result, argWithoutPrefix, true, { pathSeparator });
         }
       } else {
-        setNestedValue(
-          result,
-          argWithoutPrefix,
-          true,
-          { pathSeparator },
-        );
+        setNestedValue(result, argWithoutPrefix, true, { pathSeparator });
       }
     }
 

@@ -33,6 +33,8 @@
     "dev": "turbo dev",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
     "typecheck": "turbo typecheck",
     "lint:architecture": "node ./scripts/lint-architecture.mjs",
     "validate:dependency-policy": "node ./scripts/validate-dependency-policy.mjs",
@@ -50,11 +52,13 @@
     "@types/node": "^22.0.0",
     "dotenv": "^16.5.0",
     "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
     "globals": "^16.5.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "nodemon": "^3.1.14",
     "p-limit": "^7.3.0",
+    "prettier": "^3.8.3",
     "turbo": "^2.9.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.2"
@@ -65,7 +69,11 @@
     "examples/*"
   ],
   "lint-staged": {
-    "*.{js,mjs,cjs,ts,mts,cts}": "eslint --fix"
+    "*.{js,mjs,cjs,ts,mts,cts}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,yml,yaml}": "prettier --write"
   },
   "packageManager": "npm@10.32.1",
   "engines": {

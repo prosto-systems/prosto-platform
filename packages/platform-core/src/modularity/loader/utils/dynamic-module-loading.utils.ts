@@ -21,7 +21,9 @@ export class DynamicModuleLoader {
     throw new Error('No valid IPlatformModule export found');
   }
 
-  private static _tryResolveDefaultExport(nameSpace: Record<string, unknown>): IPlatformModule | null {
+  private static _tryResolveDefaultExport(
+    nameSpace: Record<string, unknown>,
+  ): IPlatformModule | null {
     const defaultExport = nameSpace.default;
 
     if (!defaultExport) return null;
@@ -33,7 +35,9 @@ export class DynamicModuleLoader {
     return null;
   }
 
-  private static _tryResolveNamedExports(nameSpace: Record<string, unknown>): IPlatformModule | null {
+  private static _tryResolveNamedExports(
+    nameSpace: Record<string, unknown>,
+  ): IPlatformModule | null {
     for (const key of Object.keys(nameSpace)) {
       if (key === 'default') continue;
 
@@ -61,14 +65,20 @@ export class DynamicModuleLoader {
       typeof obj.manifest === 'object' &&
       obj.manifest !== null &&
       'id' in obj.manifest &&
-      'register' in obj && typeof obj.register === 'function' &&
-      'init' in obj && typeof obj.init === 'function' &&
-      'start' in obj && typeof obj.start === 'function' &&
-      'stop' in obj && typeof obj.stop === 'function'
+      'register' in obj &&
+      typeof obj.register === 'function' &&
+      'init' in obj &&
+      typeof obj.init === 'function' &&
+      'start' in obj &&
+      typeof obj.start === 'function' &&
+      'stop' in obj &&
+      typeof obj.stop === 'function'
     );
   }
 
-  private static _isPlatformModuleClass(fn: unknown): fn is new () => IPlatformModule {
+  private static _isPlatformModuleClass(
+    fn: unknown,
+  ): fn is new () => IPlatformModule {
     if (typeof fn !== 'function') return false;
 
     const proto = (fn as UnknownConstructorType).prototype;
@@ -76,10 +86,14 @@ export class DynamicModuleLoader {
     if (!proto || typeof proto !== 'object') return false;
 
     return (
-      'register' in proto && typeof proto.register === 'function' &&
-      'init' in proto && typeof proto.init === 'function' &&
-      'start' in proto && typeof proto.start === 'function' &&
-      'stop' in proto && typeof proto.stop === 'function'
+      'register' in proto &&
+      typeof proto.register === 'function' &&
+      'init' in proto &&
+      typeof proto.init === 'function' &&
+      'start' in proto &&
+      typeof proto.start === 'function' &&
+      'stop' in proto &&
+      typeof proto.stop === 'function'
     );
   }
 

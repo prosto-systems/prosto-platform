@@ -38,6 +38,12 @@ export interface IEventBus {
     payload: TPayload,
     metadata?: Partial<IEventMetadata>,
   ): void | Promise<void>;
-  subscribe<TPayload>(token: EventTokenType<TPayload>, handler: EventHandlerType<TPayload>): void;
-  unsubscribe<TPayload>(token: EventTokenType<TPayload>, handler: EventHandlerType<TPayload>): void;
+  subscribe<TPayload>(
+    token: EventTokenType<TPayload>,
+    handler: EventHandlerType<TPayload>,
+  ): void;
+  unsubscribe<TPayload>(
+    token: EventTokenType<TPayload>,
+    handler: EventHandlerType<TPayload>,
+  ): void;
 }

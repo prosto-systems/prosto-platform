@@ -32,7 +32,13 @@ export class CycleDetector implements ICycleDetector {
 
     for (const moduleId of moduleIds) {
       if (!visited.has(moduleId)) {
-        this.detectCycleFromModule(graph, moduleId, visited, recursionStack, cyclicModules);
+        this.detectCycleFromModule(
+          graph,
+          moduleId,
+          visited,
+          recursionStack,
+          cyclicModules,
+        );
       }
     }
 

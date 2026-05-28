@@ -34,12 +34,15 @@ describe('SecretsRedactor', () => {
   });
 
   it('redacts passphrase=value', () => {
-    expect(redactor.redact('passphrase=myphrase')).toBe('passphrase=[REDACTED]');
+    expect(redactor.redact('passphrase=myphrase')).toBe(
+      'passphrase=[REDACTED]',
+    );
   });
 
   it('handles multiple matches in single string', () => {
-    expect(redactor.redact('token=t1 password=p2 key=k3'))
-      .toBe('token=[REDACTED] password=[REDACTED] key=[REDACTED]');
+    expect(redactor.redact('token=t1 password=p2 key=k3')).toBe(
+      'token=[REDACTED] password=[REDACTED] key=[REDACTED]',
+    );
   });
 
   it('redacts bearer token', () => {
@@ -47,8 +50,9 @@ describe('SecretsRedactor', () => {
   });
 
   it('redacts authorization basic', () => {
-    expect(redactor.redact('authorization: basic dXNlcjpwYXNz'))
-      .toBe('authorization: basic [REDACTED]');
+    expect(redactor.redact('authorization: basic dXNlcjpwYXNz')).toBe(
+      'authorization: basic [REDACTED]',
+    );
   });
 
   it('preserves non-secret text', () => {
@@ -56,7 +60,10 @@ describe('SecretsRedactor', () => {
   });
 
   it('returns original value when disabled', () => {
-    const disabled = new SecretsRedactor({ enabled: false, patterns: ['password'] });
+    const disabled = new SecretsRedactor({
+      enabled: false,
+      patterns: ['password'],
+    });
 
     expect(disabled.redact('password=secret')).toBe('password=secret');
   });
@@ -66,7 +73,10 @@ describe('SecretsRedactor', () => {
   });
 
   it('uses custom patterns', () => {
-    const custom = new SecretsRedactor({ enabled: true, patterns: ['customKey'] });
+    const custom = new SecretsRedactor({
+      enabled: true,
+      patterns: ['customKey'],
+    });
 
     expect(custom.redact('customKey=secretValue')).toBe('customKey=[REDACTED]');
     expect(custom.redact('password=value')).toBe('password=value');

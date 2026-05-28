@@ -1,1 +1,1 @@
-export * from './service-registry/index.js'
+export * from './service-registry/index.js';

@@ -16,22 +16,32 @@ for (const packageDir of PACKAGE_DIRS) {
   const rootExport = manifest.exports?.['.'];
 
   if (!rootExport || typeof rootExport !== 'object') {
-    throw new Error(`Public API boundary violation: ${packageName} must export only the package root entry point.`);
+    throw new Error(
+      `Public API boundary violation: ${packageName} must export only the package root entry point.`,
+    );
   }
 
   const exportKeys = Object.keys(manifest.exports);
 
   if (exportKeys.length !== 1 || exportKeys[0] !== '.') {
-    throw new Error(`Public API boundary violation: ${packageName} exports must be restricted to "." during Phase 02.`);
+    throw new Error(
+      `Public API boundary violation: ${packageName} exports must be restricted to "." during Phase 02.`,
+    );
   }
 
   if (manifest.types !== './dist/index.d.ts') {
-    throw new Error(`Public API boundary violation: ${packageName} must set types to ./dist/index.d.ts.`);
+    throw new Error(
+      `Public API boundary violation: ${packageName} must set types to ./dist/index.d.ts.`,
+    );
   }
 
   if (manifest.main !== './dist/index.js') {
-    throw new Error(`Public API boundary violation: ${packageName} must set main to ./dist/index.js.`);
+    throw new Error(
+      `Public API boundary violation: ${packageName} must set main to ./dist/index.js.`,
+    );
   }
 }
 
-console.log('validate:public-api-boundary passed: package exports are constrained to root public entry points.');
+console.log(
+  'validate:public-api-boundary passed: package exports are constrained to root public entry points.',
+);

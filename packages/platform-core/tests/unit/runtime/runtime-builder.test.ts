@@ -6,7 +6,12 @@ import { createManifest, TestModule } from '@/tests/fixtures/index.js';
 describe('RuntimeBuilder', () => {
   it('builds runtime and wires startup/shutdown flow', async () => {
     const runtime = new RuntimeBuilder().build({
-      modules: [{ type: 'memory', module: new TestModule(createManifest({ id: 'module-a' })) }],
+      modules: [
+        {
+          type: 'memory',
+          module: new TestModule(createManifest({ id: 'module-a' })),
+        },
+      ],
     });
 
     await runtime.start();
@@ -14,7 +19,9 @@ describe('RuntimeBuilder', () => {
     expect(runtime.started).toBe(true);
     expect(runtime.stopped).toBe(false);
     expect(runtime.startedModuleIds).toEqual(['module-a']);
-    expect(runtime.reports.startup?.status).toEqual(RuntimeStartupStatus.Success);
+    expect(runtime.reports.startup?.status).toEqual(
+      RuntimeStartupStatus.Success,
+    );
 
     await runtime.stop();
 

@@ -7,9 +7,7 @@ import {
   PlatformModuleManifestValidator,
 } from '@prosto/platform-sdk';
 import { RuntimeErrorCodes } from '@/common/index.js';
-import {
-  ModuleValidationBaseStrategy,
-} from './module-validation.base-strategy.js';
+import { ModuleValidationBaseStrategy } from './module-validation.base-strategy.js';
 
 /**
  * @alpha
@@ -35,17 +33,20 @@ export class ManifestValidationStrategy extends ModuleValidationBaseStrategy {
       return this.success();
     }
 
-    const issues = result.error.issues.map(
-      (issue) =>
-        ` - [${issue.code}] ${issue.message} (path: "${issue.path}");`,
-    ).join('\n')
+    const issues = result.error.issues
+      .map(
+        (issue) =>
+          ` - [${issue.code}] ${issue.message} (path: "${issue.path}");`,
+      )
+      .join('\n');
 
     return this.failure({
       errorCode: RuntimeErrorCodes.ManifestInvalid,
       message: `Manifest validation failed for module ${input.artifact.moduleId}: ${
         result.error.message
       }${issues.length ? `\n\nIssues:\n${issues}` : ''}`,
-      remediationHint: 'Fix module manifest according to @prosto/platform-sdk schema and semantic rules.',
+      remediationHint:
+        'Fix module manifest according to @prosto/platform-sdk schema and semantic rules.',
     });
   }
 }

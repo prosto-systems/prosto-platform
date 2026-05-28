@@ -26,7 +26,10 @@ describe('runtime shutdown', () => {
       modules: { artifactCache: { enabled: false } },
     } as IPlatformConfig;
 
-    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+    writeFileSync(
+      join(tempDir, 'app_settings.json'),
+      JSON.stringify(baseConfig),
+    );
 
     const moduleA = new TestModule(createManifest({ id: 'module-a' }));
     const moduleB = new TestModule(
@@ -46,7 +49,10 @@ describe('runtime shutdown', () => {
 
     await runtime.stop();
 
-    expect(runtime.reports.shutdown?.stopOrder).toEqual(['module-b', 'module-a']);
+    expect(runtime.reports.shutdown?.stopOrder).toEqual([
+      'module-b',
+      'module-a',
+    ]);
     expect(runtime.reports.shutdown?.issues).toEqual([]);
   });
 });

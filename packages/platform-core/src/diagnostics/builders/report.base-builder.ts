@@ -20,23 +20,28 @@ import { RuntimeStartupStatus } from '../constants/index.js';
 export abstract class ReportBaseBuilder implements IReportBuilder {
   constructor(
     protected readonly _secretsRedactor: ISecretsRedactor = new SecretsRedactor(),
-  ) {
-  }
+  ) {}
 
   /**
    * Builds a startup report from the provided context.
    */
-  abstract buildStartupReport(context: IStartupReportBuildContext): IRuntimeStartupReport;
+  abstract buildStartupReport(
+    context: IStartupReportBuildContext,
+  ): IRuntimeStartupReport;
 
   /**
    * Builds a shutdown report from the provided context.
    */
-  abstract buildShutdownReport(context: IShutdownReportBuildContext): IRuntimeShutdownReport;
+  abstract buildShutdownReport(
+    context: IShutdownReportBuildContext,
+  ): IRuntimeShutdownReport;
 
   /**
    * Sanitizes a failure diagnostic by redacting secrets from message fields.
    */
-  protected sanitizeFailure(failure: IRuntimeFailureDiagnostic): IRuntimeFailureDiagnostic {
+  protected sanitizeFailure(
+    failure: IRuntimeFailureDiagnostic,
+  ): IRuntimeFailureDiagnostic {
     return {
       ...failure,
       message: this._secretsRedactor.redact(failure.message),
@@ -65,7 +70,8 @@ export abstract class ReportBaseBuilder implements IReportBuilder {
     skippedModules: readonly IRuntimeSkippedModuleDiagnostic[],
     failedModules: readonly IRuntimeFailureDiagnostic[],
   ): RuntimeStartupStatus {
-    const hasFatalFailure = failedModules.length > 0 && loadedModules.length === 0;
+    const hasFatalFailure =
+      failedModules.length > 0 && loadedModules.length === 0;
 
     if (hasFatalFailure) {
       return RuntimeStartupStatus.Failed;

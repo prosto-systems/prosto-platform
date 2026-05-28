@@ -33,6 +33,12 @@
     "lint:fix": {
       "outputs": []
     },
+    "format": {
+      "outputs": []
+    },
+    "format:fix": {
+      "outputs": []
+    },
     "dev": {
       "cache": false,
       "persistent": true

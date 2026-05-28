@@ -44,7 +44,9 @@ describe('BootstrapCoordinator', () => {
       new ConsoleModuleLoggerFactory(),
     );
 
-    const moduleLifecycleOrchestrator = new ModuleLifecycleOrchestrator(moduleContextFactory);
+    const moduleLifecycleOrchestrator = new ModuleLifecycleOrchestrator(
+      moduleContextFactory,
+    );
 
     const bootstrapCoordinator = new BootstrapCoordinator(
       BootstrapPipeline.create([
@@ -73,7 +75,9 @@ describe('BootstrapCoordinator', () => {
       startupStartedAt: '2026-01-01T00:00:00.000Z',
     });
 
-    expect(result.loadedModules.map((item) => item.manifest.id)).toEqual(['module-a']);
+    expect(result.loadedModules.map((item) => item.manifest.id)).toEqual([
+      'module-a',
+    ]);
     expect(result.failedDiagnostics).toEqual([]);
     expect(result.stageOutcomes).toHaveLength(4);
   });

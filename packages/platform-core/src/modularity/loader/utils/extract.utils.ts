@@ -42,7 +42,10 @@ export class ArtifactExtractor {
   private static readonly MAX_TOTAL_SIZE = 100 * 1024 * 1024; // 100MB
   private static readonly MAX_FILENAME_LENGTH = 255;
 
-  static async extractZip(archivePath: string, extractPath: string): Promise<void> {
+  static async extractZip(
+    archivePath: string,
+    extractPath: string,
+  ): Promise<void> {
     await mkdir(extractPath, { recursive: true });
 
     const zip = new AdmZip(archivePath);
@@ -68,18 +71,25 @@ export class ArtifactExtractor {
       totalSize += entry.header.size;
 
       if (fileCount > this.MAX_FILES) {
-        throw new Error(`Archive exceeds maximum file count of ${this.MAX_FILES}`);
+        throw new Error(
+          `Archive exceeds maximum file count of ${this.MAX_FILES}`,
+        );
       }
 
       if (totalSize > this.MAX_TOTAL_SIZE) {
-        throw new Error(`Archive exceeds maximum size of ${this.MAX_TOTAL_SIZE / (1024 * 1024)}MB`);
+        throw new Error(
+          `Archive exceeds maximum size of ${this.MAX_TOTAL_SIZE / (1024 * 1024)}MB`,
+        );
       }
     }
 
     zip.extractAllTo(extractPath, true);
   }
 
-  static async extractTgz(archivePath: string, extractPath: string): Promise<void> {
+  static async extractTgz(
+    archivePath: string,
+    extractPath: string,
+  ): Promise<void> {
     await mkdir(extractPath, { recursive: true });
 
     let fileCount = 0;
@@ -109,11 +119,15 @@ export class ArtifactExtractor {
           totalSize += entry.size;
 
           if (fileCount > this.MAX_FILES) {
-            throw new Error(`Archive exceeds maximum file count of ${this.MAX_FILES}`);
+            throw new Error(
+              `Archive exceeds maximum file count of ${this.MAX_FILES}`,
+            );
           }
 
           if (totalSize > this.MAX_TOTAL_SIZE) {
-            throw new Error(`Archive exceeds maximum size of ${this.MAX_TOTAL_SIZE / (1024 * 1024)}MB`);
+            throw new Error(
+              `Archive exceeds maximum size of ${this.MAX_TOTAL_SIZE / (1024 * 1024)}MB`,
+            );
           }
         }
       },
@@ -122,7 +136,8 @@ export class ArtifactExtractor {
 
   private static _isPathSafe(entryName: string, destDir: string): boolean {
     if (entryName.includes('..')) return false;
-    if (entryName.startsWith('/') || /^[a-zA-Z]:\\/.test(entryName)) return false;
+    if (entryName.startsWith('/') || /^[a-zA-Z]:\\/.test(entryName))
+      return false;
     if (entryName.includes('\\') && entryName.includes('/')) return false;
 
     const resolved = resolve(destDir, entryName);

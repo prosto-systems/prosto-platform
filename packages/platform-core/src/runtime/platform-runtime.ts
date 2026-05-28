@@ -92,7 +92,10 @@ export class PlatformRuntime implements IPlatformRuntime {
       },
     });
 
-    const failedDiagnosticsByModuleId = new Map<string, IRuntimeFailureDiagnostic>(
+    const failedDiagnosticsByModuleId = new Map<
+      string,
+      IRuntimeFailureDiagnostic
+    >(
       bootstrapContext.failedDiagnostics.map((diagnostic) => [
         diagnostic.moduleId,
         diagnostic,
@@ -140,7 +143,8 @@ export class PlatformRuntime implements IPlatformRuntime {
       this._startedModules,
       {
         startupPolicy: this._startupPolicy,
-        sdkVersion: this._options.runtimeVersion?.sdkVersion ?? SDK_CONTRACT_VERSION,
+        sdkVersion:
+          this._options.runtimeVersion?.sdkVersion ?? SDK_CONTRACT_VERSION,
         timeoutMs: this._config.runtime.shutdownTimeoutMs,
       },
     );

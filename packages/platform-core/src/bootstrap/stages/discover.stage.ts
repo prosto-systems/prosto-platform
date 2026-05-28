@@ -13,14 +13,16 @@ import { BootstrapBaseStage } from './bootstrap.base-stage.js';
 export class DiscoverStage extends BootstrapBaseStage {
   readonly stageType = BootstrapStage.Discover;
 
-  constructor(
-    private readonly _moduleLoader: IModuleLoader,
-  ) {
+  constructor(private readonly _moduleLoader: IModuleLoader) {
     super();
   }
 
-  override async execute(context: IBootstrapStageContext): Promise<IBootstrapStageContext> {
-    const modulesLoadResult = await this._moduleLoader.load(context.moduleSources);
+  override async execute(
+    context: IBootstrapStageContext,
+  ): Promise<IBootstrapStageContext> {
+    const modulesLoadResult = await this._moduleLoader.load(
+      context.moduleSources,
+    );
 
     // Process pre-rejected artifacts
     for (const preRejectedArtifact of modulesLoadResult.rejected) {

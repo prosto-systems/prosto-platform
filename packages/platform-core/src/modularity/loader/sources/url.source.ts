@@ -69,7 +69,9 @@ export class UrlSource extends ArtifactBaseSource {
     return { ok: true };
   }
 
-  override async load(): Promise<IModuleCandidateArtifact | IRejectedModuleArtifact> {
+  override async load(): Promise<
+    IModuleCandidateArtifact | IRejectedModuleArtifact
+  > {
     const validation = this.validate();
 
     if (!validation.ok) {
@@ -99,7 +101,9 @@ export class UrlSource extends ArtifactBaseSource {
     }
 
     try {
-      const entryPath = await this.resolveEntryPath(extractionResult.extractPath);
+      const entryPath = await this.resolveEntryPath(
+        extractionResult.extractPath,
+      );
       const module = await DynamicModuleLoader.loadModuleEntry(entryPath);
       const safeUrl = this._redactUrl(this._descriptor.url);
 
@@ -138,7 +142,14 @@ export class UrlSource extends ArtifactBaseSource {
   private _redactUrl(url: string): string {
     try {
       const parsed = new URL(url);
-      const sensitiveParams = ['token', 'key', 'secret', 'auth', 'password', 'api_key'];
+      const sensitiveParams = [
+        'token',
+        'key',
+        'secret',
+        'auth',
+        'password',
+        'api_key',
+      ];
 
       for (const param of sensitiveParams) {
         parsed.searchParams.delete(param);
@@ -160,13 +171,16 @@ export class UrlSource extends ArtifactBaseSource {
     };
   }
 
-  private async _getArtifact(): Promise<Buffer | {
-    error: {
-      reasonCode: RuntimeErrorCodes;
-      message: string;
-      remediationHint: string;
-    }
-  }> {
+  private async _getArtifact(): Promise<
+    | Buffer
+    | {
+        error: {
+          reasonCode: RuntimeErrorCodes;
+          message: string;
+          remediationHint: string;
+        };
+      }
+  > {
     const cacheKey = ArtifactCacheKeyGenerator.forUrl(this._descriptor);
     const cached = await this._cache.get(cacheKey);
     let payload: Buffer;
@@ -176,13 +190,18 @@ export class UrlSource extends ArtifactBaseSource {
     } else {
       try {
         payload = await this._fetchArtifact();
-        await this._cache.set(cacheKey, payload, this._buildCacheMetadata(payload));
+        await this._cache.set(
+          cacheKey,
+          payload,
+          this._buildCacheMetadata(payload),
+        );
       } catch (error) {
         return {
           error: {
             reasonCode: RuntimeErrorCodes.SourceFetchFailed,
             message: `Failed to fetch artifact from URL "${this._descriptor.url}": ${error instanceof Error ? error.message : 'unknown'}`,
-            remediationHint: 'Ensure URL is accessible and runtime has network permissions.',
+            remediationHint:
+              'Ensure URL is accessible and runtime has network permissions.',
           },
         };
       }
@@ -191,16 +210,19 @@ export class UrlSource extends ArtifactBaseSource {
     return payload;
   }
 
-  private _verifyChecksum(payload: Buffer, expectedChecksum: string): {
-    ok: true
-  } | {
-    ok: false;
-    error: {
-      reasonCode: RuntimeErrorCodes;
-      message: string;
-      remediationHint: string
-    }
-  } {
+  private _verifyChecksum(
+    payload: Buffer,
+    expectedChecksum: string,
+  ):
+    | { ok: true }
+    | {
+        ok: false;
+        error: {
+          reasonCode: RuntimeErrorCodes;
+          message: string;
+          remediationHint: string;
+        };
+      } {
     const parsed = this.parseChecksum(expectedChecksum);
 
     if (!parsed) {
@@ -233,7 +255,8 @@ export class UrlSource extends ArtifactBaseSource {
         error: {
           reasonCode: RuntimeErrorCodes.SourceIntegrityMismatch,
           message: 'URL source checksum mismatch.',
-          remediationHint: 'Update checksum metadata or artifact payload to match expected integrity.',
+          remediationHint:
+            'Update checksum metadata or artifact payload to match expected integrity.',
         },
       };
     }
@@ -241,17 +264,20 @@ export class UrlSource extends ArtifactBaseSource {
     return { ok: true };
   }
 
-  private async _extract(artifact: Buffer): Promise<{
-    packaging: `${ModuleArtifactPackaging}`;
-    tempDir: string;
-    extractPath: string;
-  } | {
-    error: {
-      reasonCode: RuntimeErrorCodes;
-      message: string;
-      remediationHint: string;
-    }
-  }> {
+  private async _extract(artifact: Buffer): Promise<
+    | {
+        packaging: `${ModuleArtifactPackaging}`;
+        tempDir: string;
+        extractPath: string;
+      }
+    | {
+        error: {
+          reasonCode: RuntimeErrorCodes;
+          message: string;
+          remediationHint: string;
+        };
+      }
+  > {
     const packaging = this._descriptor.packaging ?? ModuleArtifactPackaging.Zip;
     const tempDir = await createTempDir('prosto-url');
     const tempFilePath = join(tempDir, `artifact.${packaging}`);
@@ -285,7 +311,8 @@ export class UrlSource extends ArtifactBaseSource {
           message: `Failed to extract artifact from URL "${this._descriptor.url}": ${
             error instanceof Error ? error.message : 'unknown'
           }`,
-          remediationHint: 'Ensure artifact packaging is correct and supported by the platform.',
+          remediationHint:
+            'Ensure artifact packaging is correct and supported by the platform.',
         },
       };
     }

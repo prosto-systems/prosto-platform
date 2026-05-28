@@ -19,7 +19,8 @@ describe('PathSource', () => {
         moduleIdHint: 'module-path',
         path: artifactPath,
         integrity: {
-          checksum: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+          checksum:
+            'sha256:0000000000000000000000000000000000000000000000000000000000000000',
         },
       });
 
@@ -28,7 +29,9 @@ describe('PathSource', () => {
       expect('reasonCode' in result).toBe(true);
 
       if ('reasonCode' in result) {
-        expect(result.reasonCode).toBe(RuntimeErrorCodes.SourceIntegrityMismatch);
+        expect(result.reasonCode).toBe(
+          RuntimeErrorCodes.SourceIntegrityMismatch,
+        );
       }
     } finally {
       await rm(dir, { recursive: true, force: true });
@@ -55,7 +58,9 @@ describe('PathSource', () => {
       expect('reasonCode' in result).toBe(true);
 
       if ('reasonCode' in result) {
-        expect(result.reasonCode).toBe(RuntimeErrorCodes.SourceExtractionFailed);
+        expect(result.reasonCode).toBe(
+          RuntimeErrorCodes.SourceExtractionFailed,
+        );
       }
     } finally {
       await rm(dir, { recursive: true, force: true });

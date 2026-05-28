@@ -8,8 +8,7 @@ export class JsonFileConfigurationProvider implements IConfigurationProvider {
   constructor(
     private readonly _filePath: string,
     private readonly _options: IJsonFileOptions = {},
-  ) {
-  }
+  ) {}
 
   load(): Record<string, unknown> {
     const { optional = false } = this._options;

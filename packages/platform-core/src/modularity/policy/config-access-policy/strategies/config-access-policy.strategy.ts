@@ -6,7 +6,7 @@ import type {
   IConfigAccessPolicyStrategy,
 } from '../interfaces/index.js';
 import {
-  type  ModuleCapabilityType,
+  type ModuleCapabilityType,
   resolveNestedValue,
   snakeToCamel,
 } from '@prosto/platform-sdk';
@@ -48,10 +48,11 @@ export class ConfigAccessPolicyStrategy implements IConfigAccessPolicyStrategy {
       return {
         granted: false,
         denialCode: RuntimeErrorCodes.ConfigWildcardForbidden,
-        reason: `Module "${input.moduleId}" requested wildcard config capabilities: ${
-          wildcardCapabilities.map((capability) => `"${capability}"`).join(', ')
-        }. Wildcards are forbidden.`,
-        remediationHint: 'Remove wildcard patterns from capabilities. Use explicit capability identifiers.',
+        reason: `Module "${input.moduleId}" requested wildcard config capabilities: ${wildcardCapabilities
+          .map((capability) => `"${capability}"`)
+          .join(', ')}. Wildcards are forbidden.`,
+        remediationHint:
+          'Remove wildcard patterns from capabilities. Use explicit capability identifiers.',
         allowedSections: [],
       };
     }
@@ -71,10 +72,11 @@ export class ConfigAccessPolicyStrategy implements IConfigAccessPolicyStrategy {
       return {
         granted: false,
         denialCode: RuntimeErrorCodes.ConfigCapabilityInvalid,
-        reason: `Module "${input.moduleId}" requested unknown config capabilities: ${
-          unknownCapabilities.map((capability) => `"${capability}"`).join(', ')
-        }.`,
-        remediationHint: 'Ensure all requested capabilities are registered in the runtime policy capability-to-section map.',
+        reason: `Module "${input.moduleId}" requested unknown config capabilities: ${unknownCapabilities
+          .map((capability) => `"${capability}"`)
+          .join(', ')}.`,
+        remediationHint:
+          'Ensure all requested capabilities are registered in the runtime policy capability-to-section map.',
         allowedSections: [],
       };
     }
@@ -84,8 +86,8 @@ export class ConfigAccessPolicyStrategy implements IConfigAccessPolicyStrategy {
       policy.sectionAllowlistBySecurityClass[input.securityClass] || [];
 
     // Filter sections by allowlist
-    const allowedSections = [...requestedSections.values()].filter(
-      (section) => allowlist.includes(section),
+    const allowedSections = [...requestedSections.values()].filter((section) =>
+      allowlist.includes(section),
     );
 
     // Check if all requested sections are allowed
@@ -99,14 +101,15 @@ export class ConfigAccessPolicyStrategy implements IConfigAccessPolicyStrategy {
         denialCode: RuntimeErrorCodes.ConfigSectionNotAllowlisted,
         reason: `Module "${input.moduleId}" with security class "${
           input.securityClass
-        }" requested sections not in allowlist: ${
-          deniedSections.map((section) => `"${section}"`).join(', ')
-        }. Allowed sections for this class: ${
+        }" requested sections not in allowlist: ${deniedSections
+          .map((section) => `"${section}"`)
+          .join(', ')}. Allowed sections for this class: ${
           allowlist.length
             ? allowlist.map((section) => `"${section}"`).join(', ')
             : 'none'
         }.`,
-        remediationHint: 'Request a higher security class or remove capabilities that access non-allowlisted sections.',
+        remediationHint:
+          'Request a higher security class or remove capabilities that access non-allowlisted sections.',
         allowedSections,
       };
     }
@@ -122,7 +125,8 @@ export class ConfigAccessPolicyStrategy implements IConfigAccessPolicyStrategy {
         granted: false,
         denialCode: RuntimeErrorCodes.ConfigAccessDenied,
         reason: `Module "${input.moduleId}" requested global config access in production but no sections are allowed. Production strict mode is enabled.`,
-        remediationHint: 'Production strict mode blocked access. Review policy configuration or reduce capability requests.',
+        remediationHint:
+          'Production strict mode blocked access. Review policy configuration or reduce capability requests.',
         allowedSections: [],
       };
     }

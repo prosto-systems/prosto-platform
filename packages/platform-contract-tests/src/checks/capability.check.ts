@@ -4,9 +4,12 @@ import {
   type IContractCheckResult,
 } from '../types/index.js';
 
-const MANDATORY_CAPABILITIES = ['lifecycle.register', 'lifecycle.start'] as const;
+const MANDATORY_CAPABILITIES = [
+  'lifecycle.register',
+  'lifecycle.start',
+] as const;
 
-export const CAPABILITY_CHECK_RESULT_ID = 'capability-conformance'
+export const CAPABILITY_CHECK_RESULT_ID = 'capability-conformance';
 
 /**
  * beta
@@ -50,6 +53,7 @@ export function runCapabilityConformanceCheck(
     severity: 'mandatory',
     passed: true,
     code: null,
-    details: 'Capability declarations are unique and include required lifecycle capabilities.',
+    details:
+      'Capability declarations are unique and include required lifecycle capabilities.',
   };
 }

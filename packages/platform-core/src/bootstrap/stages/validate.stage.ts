@@ -10,11 +10,15 @@ import { BootstrapBaseStage } from './bootstrap.base-stage.js';
 export class ValidateStage extends BootstrapBaseStage {
   readonly stageType = BootstrapStage.Validate;
 
-  constructor(private readonly _validationStrategies: IModuleValidationStrategy[]) {
+  constructor(
+    private readonly _validationStrategies: IModuleValidationStrategy[],
+  ) {
     super();
   }
 
-  override async execute(context: IBootstrapStageContext): Promise<IBootstrapStageContext> {
+  override async execute(
+    context: IBootstrapStageContext,
+  ): Promise<IBootstrapStageContext> {
     // Process pre-rejected artifacts
     for (const preRejectedArtifact of context.preRejectedArtifacts) {
       if (preRejectedArtifact.phase !== this.stageType) {

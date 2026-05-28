@@ -1,1 +1,1 @@
-export * from './config-access-policy.strategy.js'
+export * from './config-access-policy.strategy.js';

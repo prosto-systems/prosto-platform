@@ -16,17 +16,26 @@ describe('JsonFileConfigurationProvider', () => {
     const config = provider.load();
 
     expect(config).toEqual({ key: 'value', port: 8080 });
-    expect(loadJsonFileSync).toHaveBeenCalledWith('/path/to/config.json', false);
+    expect(loadJsonFileSync).toHaveBeenCalledWith(
+      '/path/to/config.json',
+      false,
+    );
   });
 
   it('passes optional flag when set to true', () => {
     vi.mocked(loadJsonFileSync).mockReturnValue({});
 
-    const provider = new JsonFileConfigurationProvider('/path/to/optional.json', { optional: true });
+    const provider = new JsonFileConfigurationProvider(
+      '/path/to/optional.json',
+      { optional: true },
+    );
     const config = provider.load();
 
     expect(config).toEqual({});
-    expect(loadJsonFileSync).toHaveBeenCalledWith('/path/to/optional.json', true);
+    expect(loadJsonFileSync).toHaveBeenCalledWith(
+      '/path/to/optional.json',
+      true,
+    );
   });
 
   it('passes optional flag as false by default', () => {
@@ -35,7 +44,10 @@ describe('JsonFileConfigurationProvider', () => {
     const provider = new JsonFileConfigurationProvider('/path/to/config.json');
     provider.load();
 
-    expect(loadJsonFileSync).toHaveBeenCalledWith('/path/to/config.json', false);
+    expect(loadJsonFileSync).toHaveBeenCalledWith(
+      '/path/to/config.json',
+      false,
+    );
   });
 
   it('forwards errors from loadJsonFileSync', () => {
@@ -45,13 +57,18 @@ describe('JsonFileConfigurationProvider', () => {
 
     const provider = new JsonFileConfigurationProvider('/path/to/missing.json');
 
-    expect(() => provider.load()).toThrow('File not found: /path/to/missing.json');
+    expect(() => provider.load()).toThrow(
+      'File not found: /path/to/missing.json',
+    );
   });
 
   it('forwards empty object from optional missing file', () => {
     vi.mocked(loadJsonFileSync).mockReturnValue({});
 
-    const provider = new JsonFileConfigurationProvider('/path/to/missing.json', { optional: true });
+    const provider = new JsonFileConfigurationProvider(
+      '/path/to/missing.json',
+      { optional: true },
+    );
     const config = provider.load();
 
     expect(config).toEqual({});

@@ -16,12 +16,11 @@ import {
  * Configuration builder that merges configuration sources and optionally validates the result.
  */
 export class ConfigurationBuilder<
-  TSchema extends ZodTypeAny = ZodType<Record<string, unknown>>
+  TSchema extends ZodTypeAny = ZodType<Record<string, unknown>>,
 > implements IConfigurationBuilder<TSchema> {
   protected readonly _providers: IConfigurationProvider[] = [];
 
-  constructor(protected readonly schema?: TSchema) {
-  }
+  constructor(protected readonly schema?: TSchema) {}
 
   addInMemoryCollection(config: Record<string, unknown>): this {
     this._providers.push(new InMemoryConfigurationProvider(config));
@@ -34,7 +33,9 @@ export class ConfigurationBuilder<
   }
 
   addEnvironmentVariables(options?: IEnvOptions): this {
-    this._providers.push(new EnvironmentVariablesConfigurationProvider(options));
+    this._providers.push(
+      new EnvironmentVariablesConfigurationProvider(options),
+    );
     return this;
   }
 
@@ -43,8 +44,8 @@ export class ConfigurationBuilder<
     return this;
   }
 
-  build(): output<TSchema>
-  build<T extends object>(): T
+  build(): output<TSchema>;
+  build<T extends object>(): T;
   build(): unknown {
     const sources: Record<string, unknown>[] = [];
 
@@ -61,7 +62,9 @@ export class ConfigurationBuilder<
     return merged;
   }
 
-  protected _merge(sources: Record<string, unknown>[]): Record<string, unknown> {
+  protected _merge(
+    sources: Record<string, unknown>[],
+  ): Record<string, unknown> {
     const result: Record<string, unknown> = {};
 
     for (const source of sources) {
@@ -71,7 +74,10 @@ export class ConfigurationBuilder<
     return result;
   }
 
-  protected _deepMerge(target: Record<string, unknown>, source: Record<string, unknown>): void {
+  protected _deepMerge(
+    target: Record<string, unknown>,
+    source: Record<string, unknown>,
+  ): void {
     for (const [key, value] of Object.entries(source)) {
       if (
         value &&
@@ -82,7 +88,10 @@ export class ConfigurationBuilder<
         typeof target[key] === 'object' &&
         !Array.isArray(target[key])
       ) {
-        this._deepMerge(target[key] as Record<string, unknown>, value as Record<string, unknown>);
+        this._deepMerge(
+          target[key] as Record<string, unknown>,
+          value as Record<string, unknown>,
+        );
       } else {
         target[key] = value;
       }

@@ -36,7 +36,9 @@ describe('EnvironmentVariablesConfigurationProvider', () => {
     setEnv('MYAPP_DB__PORT', '5432');
     setEnv('OTHER_VAR', 'should-be-ignored');
 
-    const provider = new EnvironmentVariablesConfigurationProvider({ prefix: 'MYAPP_' });
+    const provider = new EnvironmentVariablesConfigurationProvider({
+      prefix: 'MYAPP_',
+    });
     const config = provider.load();
 
     expect(config).toEqual({
@@ -48,7 +50,9 @@ describe('EnvironmentVariablesConfigurationProvider', () => {
     setEnv('CFG_DB_HOST', 'localhost');
     setEnv('CFG_DB_PORT', '3306');
 
-    const provider = new EnvironmentVariablesConfigurationProvider({ separator: '_' });
+    const provider = new EnvironmentVariablesConfigurationProvider({
+      separator: '_',
+    });
     const config = provider.load();
 
     expect(config).toMatchObject({
@@ -138,7 +142,9 @@ describe('EnvironmentVariablesConfigurationProvider', () => {
     setEnv('APP__DB__PORT', '5432');
     setEnv('APP__LOGGING__LEVEL', 'debug');
 
-    const provider = new EnvironmentVariablesConfigurationProvider({ prefix: '' });
+    const provider = new EnvironmentVariablesConfigurationProvider({
+      prefix: '',
+    });
     const config = provider.load();
 
     expect(config).toMatchObject({
@@ -152,7 +158,9 @@ describe('EnvironmentVariablesConfigurationProvider', () => {
   it('handles empty prefix gracefully', () => {
     setEnv('SOME_KEY', 'value');
 
-    const provider = new EnvironmentVariablesConfigurationProvider({ prefix: '' });
+    const provider = new EnvironmentVariablesConfigurationProvider({
+      prefix: '',
+    });
     const config = provider.load();
 
     expect(config).toMatchObject({ someKey: 'value' });

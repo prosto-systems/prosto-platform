@@ -12,10 +12,14 @@ const REQUIRED_PACKAGE_DIRS = [
 ];
 
 const rootManifest = JSON.parse(await readFile(ROOT_PACKAGE_JSON, 'utf8'));
-const workspaces = Array.isArray(rootManifest.workspaces) ? rootManifest.workspaces : [];
+const workspaces = Array.isArray(rootManifest.workspaces)
+  ? rootManifest.workspaces
+  : [];
 
 if (!workspaces.includes(REQUIRED_WORKSPACE_GLOB)) {
-  throw new Error(`Expected root workspaces to include "${REQUIRED_WORKSPACE_GLOB}".`);
+  throw new Error(
+    `Expected root workspaces to include "${REQUIRED_WORKSPACE_GLOB}".`,
+  );
 }
 
 for (const packageDir of REQUIRED_PACKAGE_DIRS) {
@@ -23,8 +27,12 @@ for (const packageDir of REQUIRED_PACKAGE_DIRS) {
   try {
     await readFile(packageJsonPath, 'utf8');
   } catch {
-    throw new Error(`Missing required Phase 02 package manifest: ${packageJsonPath}`);
+    throw new Error(
+      `Missing required Phase 02 package manifest: ${packageJsonPath}`,
+    );
   }
 }
 
-console.log('lint:architecture passed: workspace topology and required package manifests are present.');
+console.log(
+  'lint:architecture passed: workspace topology and required package manifests are present.',
+);

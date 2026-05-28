@@ -39,7 +39,8 @@ export async function runModuleContractConformance(
       await runLifecycleConformanceCheck({
         module: input.module,
         moduleLifecycleContextFactory:
-          input.moduleLifecycleContextFactory ?? new DefaultModuleLifecycleContextFactory(),
+          input.moduleLifecycleContextFactory ??
+          new DefaultModuleLifecycleContextFactory(),
       }),
       runCapabilityConformanceCheck(input.module.manifest),
       runSecurityMetadataConformanceCheck(input.module.manifest),
@@ -57,8 +58,9 @@ export function createModuleContractTests(
   runner: IContractTestRunnerApi,
 ): void {
   // Start all checks once; shared promise across all tests
-  const checksMapPromise = runModuleContractConformance(input)
-    .then(({ checks }) => new Map(checks.map((check) => [check.id, check])));
+  const checksMapPromise = runModuleContractConformance(input).then(
+    ({ checks }) => new Map(checks.map((check) => [check.id, check])),
+  );
 
   runner.describe('manifest', () => {
     runner.it('should satisfy schema and semantic constraints', async () => {
@@ -86,18 +88,15 @@ export function createModuleContractTests(
   });
 
   runner.describe('capabilities', () => {
-    runner.it(
-      'should satisfy capability declaration integrity',
-      async () => {
-        const check = (await checksMapPromise).get(CAPABILITY_CHECK_RESULT_ID);
+    runner.it('should satisfy capability declaration integrity', async () => {
+      const check = (await checksMapPromise).get(CAPABILITY_CHECK_RESULT_ID);
 
-        if (!check?.passed) {
-          throw new Error(
-            check?.details ?? 'Capability conformance check failed.',
-          );
-        }
-      },
-    );
+      if (!check?.passed) {
+        throw new Error(
+          check?.details ?? 'Capability conformance check failed.',
+        );
+      }
+    });
   });
 
   runner.describe('security metadata', () => {
@@ -111,15 +110,12 @@ export function createModuleContractTests(
   });
 
   runner.describe('observability metadata', () => {
-    runner.it(
-      'should satisfy minimum observability contract',
-      async () => {
-        const check = (await checksMapPromise).get(OBSERVABILITY_CHECK_RESULT_ID);
+    runner.it('should satisfy minimum observability contract', async () => {
+      const check = (await checksMapPromise).get(OBSERVABILITY_CHECK_RESULT_ID);
 
-        if (!check?.passed && check?.severity === 'mandatory') {
-          throw new Error(check.details);
-        }
-      },
-    );
+      if (!check?.passed && check?.severity === 'mandatory') {
+        throw new Error(check.details);
+      }
+    });
   });
 }

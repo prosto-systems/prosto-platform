@@ -14,16 +14,17 @@ export class NoOpArtifactCache implements IArtifactCache {
     return null;
   }
 
-  async set(_key: string, _data: Buffer, _metadata: IArtifactCacheEntryMetadata): Promise<void> {
-  }
+  async set(
+    _key: string,
+    _data: Buffer,
+    _metadata: IArtifactCacheEntryMetadata,
+  ): Promise<void> {}
 
   async has(_key: string): Promise<boolean> {
     return false;
   }
 
-  async evict(_key: string): Promise<void> {
-  }
+  async evict(_key: string): Promise<void> {}
 
-  async clear(): Promise<void> {
-  }
+  async clear(): Promise<void> {}
 }

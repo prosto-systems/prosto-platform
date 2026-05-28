@@ -23,7 +23,9 @@ describe('InMemoryServiceRegistry', () => {
 
     registry.register(TOKEN_A, 'first');
 
-    expect(() => registry.register(TOKEN_A, 'second')).toThrow(ServiceAlreadyRegisteredError);
+    expect(() => registry.register(TOKEN_A, 'second')).toThrow(
+      ServiceAlreadyRegisteredError,
+    );
   });
 
   it('overrides an existing service', () => {
@@ -38,7 +40,9 @@ describe('InMemoryServiceRegistry', () => {
   it('throws ServiceNotFoundError when overriding non-existent token', () => {
     const registry = new InMemoryServiceRegistry();
 
-    expect(() => registry.override(TOKEN_A, 'value')).toThrow(ServiceNotFoundError);
+    expect(() => registry.override(TOKEN_A, 'value')).toThrow(
+      ServiceNotFoundError,
+    );
   });
 
   it('returns undefined for unregistered token', () => {

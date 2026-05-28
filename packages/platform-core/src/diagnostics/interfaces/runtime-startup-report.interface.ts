@@ -1,14 +1,8 @@
 import type { StartupPolicyType } from '@prosto/platform-sdk';
 import type { RuntimeStartupStatus } from '../constants/index.js';
-import type {
-  IRuntimeFailureDiagnostic,
-} from './runtime-failure-diagnostic.interface.js';
-import type {
-  IRuntimeLoadedModuleDiagnostic,
-} from './runtime-loaded-module-diagnostic.interface.js';
-import type {
-  IRuntimeSkippedModuleDiagnostic,
-} from './runtime-skipped-module-diagnostic.interface.js';
+import type { IRuntimeFailureDiagnostic } from './runtime-failure-diagnostic.interface.js';
+import type { IRuntimeLoadedModuleDiagnostic } from './runtime-loaded-module-diagnostic.interface.js';
+import type { IRuntimeSkippedModuleDiagnostic } from './runtime-skipped-module-diagnostic.interface.js';
 
 /**
  * @alpha

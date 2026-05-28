@@ -77,6 +77,8 @@ describe('InMemoryConfigurationProvider', () => {
 
     expect(config).toEqual(input);
     expect(config.level1).not.toBe(input.level1);
-    expect((config.level1 as Record<string, unknown>).level2).not.toBe(input.level1.level2);
+    expect((config.level1 as Record<string, unknown>).level2).not.toBe(
+      input.level1.level2,
+    );
   });
 });

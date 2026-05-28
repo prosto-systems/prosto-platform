@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { DiagnosticReportBuilder, DiagnosticsReporter, RuntimeStartupStatus } from '@/diagnostics/index.js';
+import {
+  DiagnosticReportBuilder,
+  DiagnosticsReporter,
+  RuntimeStartupStatus,
+} from '@/diagnostics/index.js';
 import { RuntimeErrorCodes } from '@/common/index.js';
 import { SecretsRedactor } from '@/security/index.js';
 
@@ -101,7 +105,9 @@ describe('createStartupReport', () => {
     });
 
     expect(report.failedModules[0]?.message).toBe('token=[REDACTED]');
-    expect(report.failedModules[0]?.remediationHint).toBe('password=[REDACTED]');
+    expect(report.failedModules[0]?.remediationHint).toBe(
+      'password=[REDACTED]',
+    );
   });
 });
 

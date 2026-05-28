@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  assert,
-  AssertionError,
-  dateNowIso,
-} from '@/common/index.js';
+import { assert, AssertionError, dateNowIso } from '@/common/index.js';
 
 describe('assert', () => {
   it('does not throw when condition is truthy', () => {

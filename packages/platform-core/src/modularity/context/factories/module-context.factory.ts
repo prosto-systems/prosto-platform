@@ -27,8 +27,7 @@ export class ModuleContextFactory implements IModuleContextFactory {
     private readonly _services: IServiceRegistry,
     private readonly _moduleLoggerFactory: IModuleLoggerFactory,
     private readonly _configAccessPolicyEvaluator: IConfigAccessPolicyEvaluator = new ConfigAccessPolicyEvaluator(),
-  ) {
-  }
+  ) {}
 
   create(options: ICreateModuleContextOptions): IModuleContext {
     const { startupPolicy, sdkVersion, moduleManifest } = options;
@@ -47,13 +46,13 @@ export class ModuleContextFactory implements IModuleContextFactory {
       services: this._services,
       config: scopedConfig,
       getConfigValue<T>(key: string, defaultValue?: T): Readonly<T> {
-        return resolveNestedValue(scopedConfig, key) ?? defaultValue as T;
+        return resolveNestedValue(scopedConfig, key) ?? (defaultValue as T);
       },
     };
   }
 
   private _getScopedConfig(
-    moduleManifest: IPlatformModuleManifest
+    moduleManifest: IPlatformModuleManifest,
   ): Record<string, unknown> {
     const moduleId = moduleManifest.id;
 
@@ -69,7 +68,8 @@ export class ModuleContextFactory implements IModuleContextFactory {
     };
 
     const configAccessPolicy =
-      this._config.modules?.configAccessPolicy ?? this._createDefaultConfigAccessPolicy();
+      this._config.modules?.configAccessPolicy ??
+      this._createDefaultConfigAccessPolicy();
 
     const configAccessResult = this._configAccessPolicyEvaluator.evaluate(
       configAccessEvalInput,

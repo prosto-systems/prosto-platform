@@ -1,7 +1,5 @@
 import type { BootstrapStage } from '../constants/index.js';
-import type {
-  IBootstrapStageContext,
-} from './bootstrap-stage-context.interface.js';
+import type { IBootstrapStageContext } from './bootstrap-stage-context.interface.js';
 
 /**
  * @alpha
