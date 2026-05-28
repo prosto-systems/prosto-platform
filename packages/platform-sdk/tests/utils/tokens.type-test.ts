@@ -6,7 +6,7 @@ import {
   type IModuleLogger,
   type IServiceRegistry,
   type ServiceTokenType,
-} from '../../src/index.js';
+} from '@/index.js';
 
 type AssertType<TValue extends true> = TValue;
 type IsEqualType<TLeft, TRight> =

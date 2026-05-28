@@ -3,12 +3,12 @@ import type {
   IModuleCompatibilityValidator,
   IPlatformModuleManifest,
   IPlatformRuntimeVersionContext,
-} from '../interfaces/index.js';
+} from '@/interfaces/index.js';
 import {
   CompatibilityValidationError,
   type ICompatibilityValidationIssue,
-} from '../errors/index.js';
-import { isSemverSatisfied, isSemverVersion } from '../utils/index.js';
+} from '@/errors/index.js';
+import { isSemverSatisfied, isSemverVersion } from '@/utils/index.js';
 
 /**
  * @alpha

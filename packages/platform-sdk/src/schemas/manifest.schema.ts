@@ -4,8 +4,8 @@ import {
   MODULE_CRITICALITY_LEVELS,
   MODULE_ID_PATTERN,
   MODULE_SECURITY_CLASSES,
-} from '../constants/index.js';
-import { isSemverRange, isSemverVersion } from '../utils/index.js';
+} from '@/constants/index.js';
+import { isSemverRange, isSemverVersion } from '@/utils/index.js';
 
 /**
  * @alpha

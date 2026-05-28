@@ -1,4 +1,12 @@
 {
+  "files": [],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/tests/fixtures/*": ["./tests/fixtures/*"],
+      "@/*": ["./src/*"]
+    }
+  },
   "references": [
     {
       "path": "./tsconfig.node.json"

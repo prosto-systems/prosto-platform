@@ -3,14 +3,14 @@ import type {
   IModuleManifestValidator,
   IPlatformModuleManifest,
   ModuleManifestValidationResultType,
-} from '../interfaces/index.js';
-import type { ModuleCapabilityType } from '../types/index.js';
-import { MODULE_CAPABILITY_PATTERN } from '../constants/index.js';
+} from '@/interfaces/index.js';
+import type { ModuleCapabilityType } from '@/types/index.js';
+import { MODULE_CAPABILITY_PATTERN } from '@/constants/index.js';
 import {
   type IManifestValidationIssue,
   ManifestValidationError,
-} from '../errors/index.js';
-import { PlatformModuleManifestSchema } from '../schemas/index.js';
+} from '@/errors/index.js';
+import { PlatformModuleManifestSchema } from '@/schemas/index.js';
 
 /**
  * @alpha

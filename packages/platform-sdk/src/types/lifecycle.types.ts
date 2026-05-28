@@ -1,7 +1,7 @@
 import type {
   MODULE_LIFECYCLE_STAGES,
   STARTUP_POLICIES,
-} from '../constants/index.js';
+} from '@/constants/index.js';
 
 /**
  * beta

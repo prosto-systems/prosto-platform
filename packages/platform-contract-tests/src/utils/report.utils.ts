@@ -2,7 +2,7 @@ import type {
   IContractCheckResult,
   IContractConformanceSummary,
   IModuleContractConformanceReport,
-} from '../types/index.js';
+} from '@/interfaces/index.js';
 
 /**
  * @alpha

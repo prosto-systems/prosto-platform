@@ -2,7 +2,7 @@ import type {
   IContractTestRunnerApi,
   IModuleContractConformanceReport,
   IModuleContractTestInput,
-} from './types/index.js';
+} from '@/interfaces/index.js';
 import { PlatformModuleManifestValidator } from '@prosto/platform-sdk';
 import {
   CAPABILITY_CHECK_RESULT_ID,
@@ -15,9 +15,9 @@ import {
   runObservabilityConformanceCheck,
   runSecurityMetadataConformanceCheck,
   SECURITY_CHECK_RESULT_ID,
-} from './checks/index.js';
-import { DefaultModuleLifecycleContextFactory } from './factories/index.js';
-import { buildConformanceReport } from './utils/index.js';
+} from '@/checks/index.js';
+import { DefaultModuleLifecycleContextFactory } from '@/factories/index.js';
+import { buildConformanceReport } from '@/utils/index.js';
 
 /**
  * @alpha

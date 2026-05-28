@@ -1,12 +1,12 @@
+import type {
+  IContractCheckResult,
+  IModuleLifecycleContextFactory,
+} from '@/interfaces/index.js';
 import {
   type IPlatformModule,
   MODULE_LIFECYCLE_STAGES,
 } from '@prosto/platform-sdk';
-import {
-  ContractFailureCodes,
-  type IContractCheckResult,
-  type IModuleLifecycleContextFactory,
-} from '../types/index.js';
+import { ContractFailureCodes } from '@/constants/index.js';
 
 export const LIFECYCLE_CHECK_RESULT_ID = 'lifecycle-conformance';
 

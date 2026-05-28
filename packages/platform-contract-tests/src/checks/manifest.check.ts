@@ -1,11 +1,9 @@
-import {
-  type IModuleManifestValidator,
-  type IPlatformModuleManifest,
+import type {
+  IModuleManifestValidator,
+  IPlatformModuleManifest,
 } from '@prosto/platform-sdk';
-import {
-  ContractFailureCodes,
-  type IContractCheckResult,
-} from '../types/index.js';
+import type { IContractCheckResult } from '@/interfaces/index.js';
+import { ContractFailureCodes } from '@/constants/index.js';
 
 export const MANIFEST_CHECK_RESULT_ID = 'manifest-conformance';
 

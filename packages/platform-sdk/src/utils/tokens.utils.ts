@@ -2,11 +2,11 @@ import type {
   EventTokenType,
   ServiceTokenType,
   TokenNameType,
-} from '../types/index.js';
+} from '@/types/index.js';
 import {
   EVENT_TOKEN_NAME_PREFIX,
   SERVICE_TOKEN_NAME_PREFIX,
-} from '../constants/index.js';
+} from '@/constants/index.js';
 
 function normalizeTokenName(name: TokenNameType): string {
   const normalized = name.trim();

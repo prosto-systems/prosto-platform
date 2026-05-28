@@ -3,29 +3,13 @@ import type {
   IModuleManifestValidator,
   IPlatformModule,
 } from '@prosto/platform-sdk';
+import type { ContractFailureCodes } from '@/constants/index.js';
 
 /**
  * @alpha
  * Severity level for contract conformance checks.
  */
 export type ContractCheckSeverityType = 'mandatory' | 'advisory';
-
-/**
- * @alpha
- * Standardized failure code taxonomy for CI consumers.
- * CT – Contract Test.
- */
-export enum ContractFailureCodes {
-  ManifestSchemaInvalid = 'CT_MANIFEST_SCHEMA_INVALID',
-  ManifestSemanticInvalid = 'CT_MANIFEST_SEMANTIC_INVALID',
-  LifecycleMethodMissing = 'CT_LIFECYCLE_METHOD_MISSING',
-  LifecycleMethodFailed = 'CT_LIFECYCLE_METHOD_FAILED',
-  CapabilityMissing = 'CT_CAPABILITY_MISSING',
-  CapabilityDuplicate = 'CT_CAPABILITY_DUPLICATE',
-  SecurityClassMissing = 'CT_SECURITY_CLASS_MISSING',
-  SecuritySignatureOrChecksumMissing = 'CT_SECURITY_SIGNATURE_OR_CHECKSUM_MISSING',
-  ObservabilityCapabilityMissing = 'CT_OBSERVABILITY_CAPABILITY_MISSING',
-}
 
 /**
  * @alpha

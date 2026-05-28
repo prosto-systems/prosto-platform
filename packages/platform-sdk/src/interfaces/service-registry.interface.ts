@@ -1,4 +1,4 @@
-import type { ServiceTokenType } from '../types/index.js';
+import type { ServiceTokenType } from '@/types/index.js';
 
 /**
  * @alpha

@@ -1,8 +1,6 @@
 import type { IPlatformModuleManifest } from '@prosto/platform-sdk';
-import {
-  ContractFailureCodes,
-  type IContractCheckResult,
-} from '../types/index.js';
+import type { IContractCheckResult } from '@/interfaces/index.js';
+import { ContractFailureCodes } from '@/constants/index.js';
 
 const OBSERVABILITY_PREFIX = 'obs.';
 export const OBSERVABILITY_CHECK_RESULT_ID = 'observability-metadata';
