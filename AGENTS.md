@@ -20,7 +20,7 @@
   - `@prosto/platform-cli`
   - `@prosto/platform-adapter-http`
 - Root/package TypeScript baselines are present:
-  - `packages/@internal/tsconfig/base.json`
+  - `packages/platform-utils/tsconfig/base.json`
   - `packages/*/tsconfig.json`
 - Governance and architecture policy scripts are present in root `package.json`:
   - `lint`
@@ -43,9 +43,13 @@
   - ✅ **Implemented**: Runtime policy validation integration tests (`tests/integration/runtime-policy-validation.test.ts`)
   - ✅ **Implemented**: Diagnostics reports schema validation (`diagnostics-reports.schema.ts`, `diagnostics.reporter.ts`)
   - ✅ **Implemented**: Bootstrap pipeline with strict/best-effort modes (`bootstrap/`)
-  - ✅ **Implemented**: Module loader with integrity checks and source plugins (`loader/`)
-  - ✅ **Implemented**: Dependency graph and topological sorting (`graph/`)
-  - ✅ **Implemented**: Policy evaluation strategies (`policy/strategies/`)
+  - ✅ **Implemented**: Module modularity subsystem (`modularity/` — consolidated):
+    - `modularity/context/` — Module context factory and interfaces
+    - `modularity/graph/` — Dependency graph construction, cycle detection, topological sorter
+    - `modularity/lifecycle/` — Module lifecycle orchestrator (register → init → start → stop with timeout)
+    - `modularity/loader/` — Module loader with integrity checks and source plugins
+    - `modularity/policy/` — Startup policy evaluator with strict and best-effort strategies + config access policy
+    - `modularity/validation/` — Module validation strategies
   - ✅ **Implemented**: Event bus infrastructure (`events/`)
   - ✅ **Implemented**: Service registry (`services/`)
 - ESLint baseline config exists at `eslint.config.mjs`; repository-wide standardized test stack is still phased.
@@ -504,7 +508,7 @@ Closes #123
 - Turborepo (for monorepo task orchestration)
 
 ### IDE Configuration
-- Enable TypeScript strict mode from `packages/@internal/tsconfig/base.json` and package-level `tsconfig.json`.
+- Enable TypeScript strict mode from `packages/platform-utils/tsconfig/base.json` and package-level `tsconfig.json`.
 - Configure code formatting rules (Prettier - pending future phase).
 - Use ESLint baseline config from `eslint.config.mjs`.
 - Use TypeScript path mapping when introduced in a future monorepo phase.
@@ -569,17 +573,18 @@ npm run validate:runtime-policy # Check runtime module loading policies
 **Phase 05 Implemented Subsystems**:
 - `bootstrap/` — Bootstrap coordinator, pipeline, and stage definitions (strict + best-effort modes)
 - `common/` — Shared utilities, error types, assertion helpers
-- `context/` — Module context factory and interfaces
 - `diagnostics/` — Operational reports schema validation and reporter
 - `events/` — In-memory event bus infrastructure
-- `graph/` — Dependency graph construction, cycle detection, topological sorter
-- `lifecycle/` — Module lifecycle orchestrator (register → init → start → stop with timeout)
-- `loader/` — Module loader with integrity checks and source plugins
 - `logging/` — Module-scoped logger
-- `policy/` — Startup policy evaluator with strict and best-effort strategies
+- `modularity/` — Module modularity subsystem (consolidated):
+  - `modularity/context/` — Module context factory and interfaces
+  - `modularity/graph/` — Dependency graph construction, cycle detection, topological sorter
+  - `modularity/lifecycle/` — Module lifecycle orchestrator (register → init → start → stop with timeout)
+  - `modularity/loader/` — Module loader with integrity checks and source plugins
+  - `modularity/policy/` — Startup policy evaluator with strict and best-effort strategies + config access policy
+  - `modularity/validation/` — Module validation strategies
 - `runtime/` — Platform runtime and builder
 - `services/` — Service registry
-- `validation/` — Module validation strategies
 
 **Phase 05 Remaining Work** (moved to Phase 06 scope):
 - Allowlist-based production module loading enforcement
@@ -622,7 +627,7 @@ Conflict handling policy:
 
 ### Repository Readiness Truth Table
 **BEFORE making recommendations about commands, tooling, or process maturity, verify these artifacts:**
-1. `packages/@internal/tsconfig/base.json` and `packages/*/tsconfig.json`
+1. `packages/platform-utils/tsconfig/base.json` and `packages/*/tsconfig.json`
 2. `packages/`
 3. `.github/workflows/`
 4. test runner config (`vitest.config.*` / `jest.config.*`)
@@ -641,7 +646,7 @@ Interpretation rules:
 
 ### Repository State Awareness
 **BEFORE making any recommendations, verify:**
-1. Check if `packages/@internal/tsconfig/base.json` and package-level `tsconfig.json` files exist
+1. Check if `packages/platform-utils/tsconfig/base.json` and package-level `tsconfig.json` files exist
 2. Check if `packages/` directory exists
 3. Check if `.github/workflows/` exists
 4. Check if test runner is configured

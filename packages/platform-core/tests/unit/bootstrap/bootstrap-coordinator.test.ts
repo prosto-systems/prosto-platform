@@ -1,5 +1,3 @@
-import type { IPlatformConfig } from '@/runtime/index.js';
-import { describe, expect, it } from 'vitest';
 import {
   BootstrapCoordinator,
   BootstrapPipeline,
@@ -8,23 +6,22 @@ import {
   ResolveDependenciesStage,
   ValidateStage,
 } from '@/bootstrap/index.js';
-import { ModuleContextFactory } from '@/context/index.js';
 import { InMemoryEventBus } from '@/events/index.js';
-import { ModuleLifecycleOrchestrator } from '@/lifecycle/index.js';
-import { ModuleLoader } from '@/loader/index.js';
 import { ConsoleModuleLoggerFactory } from '@/logging/index.js';
 import {
   BestEffortPolicyStrategy,
+  CompatibilityValidationStrategy,
+  ManifestValidationStrategy,
+  ModuleContextFactory,
+  ModuleLifecycleOrchestrator,
+  ModuleLoader,
   StartupPolicyEvaluator,
   StrictPolicyStrategy,
-} from '@/policy/index.js';
+} from '@/modularity/index.js';
+import type { IPlatformConfig } from '@/runtime/index.js';
 import { InMemoryServiceRegistry } from '@/services/index.js';
 import { createManifest, TestModule } from '@/tests/fixtures/index.js';
-import {
-  CompatibilityValidationStrategy,
-  // IntegrityValidationStrategy,
-  ManifestValidationStrategy,
-} from '@/validation/index.js';
+import { describe, expect, it } from 'vitest';
 
 describe('BootstrapCoordinator', () => {
   it('coordinates discover -> validate -> resolve -> lifecycle and starts modules', async () => {

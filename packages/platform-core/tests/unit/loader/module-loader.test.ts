@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ModuleLoader } from '@/loader/index.js';
-import { RuntimeReasonCodes } from '@/runtime/index.js';
+import { ModuleLoader } from '@/modularity/index.js';
+import { RuntimeErrorCodes } from '@/common/index.js';
 import { createManifest, TestModule } from '@/tests/fixtures/index.js';
 
 describe('ModuleLoader', () => {
@@ -27,7 +27,7 @@ describe('ModuleLoader', () => {
 
     expect(result.loaded).toEqual([]);
     expect(result.rejected).toHaveLength(1);
-    expect(result.rejected[0]?.reasonCode).toBe(RuntimeReasonCodes.SourceFetchFailed);
+    expect(result.rejected[0]?.reasonCode).toBe(RuntimeErrorCodes.SourceFetchFailed);
     expect(result.rejected[0]?.phase).toBe('discover');
   });
 
@@ -42,7 +42,7 @@ describe('ModuleLoader', () => {
 
     expect(result.loaded).toEqual([]);
     expect(result.rejected).toHaveLength(1);
-    expect(result.rejected[0]?.reasonCode).toBe(RuntimeReasonCodes.SourceUrlInvalid);
+    expect(result.rejected[0]?.reasonCode).toBe(RuntimeErrorCodes.SourceUrlInvalid);
     expect(result.rejected[0]?.phase).toBe('discover');
   });
 });

@@ -2,16 +2,13 @@ import type {
   ModuleCapabilityType,
   ModuleSecurityClassType,
 } from '@prosto/platform-sdk';
+import type { IPlatformConfig, IPlatformRuntime } from '@/runtime/index.js';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { RuntimeErrorCodes } from '@/common/index.js';
 import { validateOperationalReportsSchema } from '@/diagnostics/index.js';
-import {
-  type IPlatformConfig,
-  type IPlatformRuntime,
-  RuntimeReasonCodes,
-} from '@/runtime/index.js';
 import {
   createManifest,
   createRuntime,
@@ -31,7 +28,7 @@ describe('config access policy matrix', () => {
 
   function hasAnyReasonCode(
     runtime: IPlatformRuntime,
-    code: `${RuntimeReasonCodes}`,
+    code: `${RuntimeErrorCodes}`,
   ): boolean {
     const failed = runtime.reports.startup?.failedModules
       .some((f) => f.errorCode === code) ?? false;
@@ -101,7 +98,7 @@ describe('config access policy matrix', () => {
     );
 
     expect(() => validateOperationalReportsSchema(runtime.reports)).not.toThrow();
-    expect(hasAnyReasonCode(runtime, RuntimeReasonCodes.ConfigSectionNotAllowlisted)).toBe(true);
+    expect(hasAnyReasonCode(runtime, RuntimeErrorCodes.ConfigSectionNotAllowlisted)).toBe(true);
 
     await runtime.stop();
   });
@@ -114,7 +111,7 @@ describe('config access policy matrix', () => {
       'third-party-reviewed',
     );
 
-    expect(hasAnyReasonCode(runtime, RuntimeReasonCodes.ConfigCapabilityInvalid)).toBe(true);
+    expect(hasAnyReasonCode(runtime, RuntimeErrorCodes.ConfigCapabilityInvalid)).toBe(true);
 
     await runtime.stop();
   });
@@ -128,7 +125,7 @@ describe('config access policy matrix', () => {
     );
 
     expect(runtime.reports.startup?.policyMode).toBe('strict');
-    expect(hasAnyReasonCode(runtime, RuntimeReasonCodes.ConfigSectionNotAllowlisted)).toBe(true);
+    expect(hasAnyReasonCode(runtime, RuntimeErrorCodes.ConfigSectionNotAllowlisted)).toBe(true);
 
     await runtime.stop();
   });

@@ -1,6 +1,6 @@
 import type { IModuleContext } from '@prosto/platform-sdk';
 import { describe, expect, it } from 'vitest';
-import { ModuleContextFactory } from '@/context/index.js';
+import { ModuleContextFactory } from '@/modularity/index.js';
 import { InMemoryEventBus } from '@/events/index.js';
 import { ConsoleModuleLoggerFactory } from '@/logging/index.js';
 import type { IPlatformConfig } from '@/runtime/index.js';

@@ -1,5 +1,5 @@
 import type { StartupPolicyType } from '@prosto/platform-sdk';
-import type { IConfigAccessPolicy } from '@/policy/index.js';
+import type { IConfigAccessPolicy } from '@/modularity/index.js';
 
 /**
  * @alpha

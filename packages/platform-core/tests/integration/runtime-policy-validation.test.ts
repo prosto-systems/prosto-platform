@@ -1,5 +1,5 @@
 import type { IPlatformConfig } from '@/runtime/index.js';
-import { RuntimeReasonCodes } from '@/runtime/index.js';
+import { RuntimeErrorCodes } from '@/common/index.js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -123,11 +123,11 @@ describe('config access policy validation', () => {
       const hasRestriction =
         runtime.reports.startup?.failedModules.some(
           (failed) =>
-            failed.errorCode === RuntimeReasonCodes.ConfigSectionNotAllowlisted,
+            failed.errorCode === RuntimeErrorCodes.ConfigSectionNotAllowlisted,
         ) ||
         runtime.reports.startup?.skippedModules.some(
           (skipped) =>
-            skipped.reason.errorCode === RuntimeReasonCodes.ConfigSectionNotAllowlisted,
+            skipped.reason.errorCode === RuntimeErrorCodes.ConfigSectionNotAllowlisted,
         );
 
       expect(hasRestriction).toBe(true);

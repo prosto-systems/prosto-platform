@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { UrlSource } from '@/loader/index.js';
-import { RuntimeReasonCodes } from '@/runtime/index.js';
+import { UrlSource } from '@/modularity/index.js';
+import { RuntimeErrorCodes } from '@/common/index.js';
 
 describe('UrlSource', () => {
   it('rejects non-https URL descriptors', async () => {
@@ -15,7 +15,7 @@ describe('UrlSource', () => {
     expect('reasonCode' in result).toBe(true);
 
     if ('reasonCode' in result) {
-      expect(result.reasonCode).toBe(RuntimeReasonCodes.SourceUrlInvalid);
+      expect(result.reasonCode).toBe(RuntimeErrorCodes.SourceUrlInvalid);
       expect(result.phase).toBe('discover');
     }
   });
@@ -32,7 +32,7 @@ describe('UrlSource', () => {
     expect('reasonCode' in result).toBe(true);
 
     if ('reasonCode' in result) {
-      expect(result.reasonCode).toBe(RuntimeReasonCodes.SourceFetchFailed);
+      expect(result.reasonCode).toBe(RuntimeErrorCodes.SourceFetchFailed);
       expect(result.phase).toBe('discover');
     }
   });

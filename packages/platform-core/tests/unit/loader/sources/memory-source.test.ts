@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MemorySource } from '@/loader/index.js';
+import { MemorySource } from '@/modularity/index.js';
 import { createManifest, TestModule } from '@/tests/fixtures/index.js';
 
 describe('MemorySource', () => {

@@ -1,7 +1,9 @@
 import type { IPlatformModuleManifest } from '@prosto/platform-sdk';
-import type { IModuleLifecycleOrchestrator } from '@/lifecycle/index.js';
-import type { IStartupPolicyEvaluator } from '@/policy/index.js';
-import { type IBootstrapStageContext } from '../interfaces/index.js';
+import type {
+  IModuleLifecycleOrchestrator,
+  IStartupPolicyEvaluator,
+} from '@/modularity/index.js';
+import type { IBootstrapStageContext } from '../interfaces/index.js';
 import { BootstrapStage } from '../constants/index.js';
 import { BootstrapBaseStage } from './bootstrap.base-stage.js';
 

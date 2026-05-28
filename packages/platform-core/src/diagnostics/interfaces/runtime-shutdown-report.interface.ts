@@ -1,4 +1,4 @@
-import type { IModuleLifecycleShutdownIssue } from '@/lifecycle/index.js';
+import type { IModuleLifecycleShutdownIssue } from '@/modularity/index.js';
 
 /**
  * @alpha

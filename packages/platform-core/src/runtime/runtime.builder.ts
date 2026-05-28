@@ -19,35 +19,29 @@ import {
 import { FileSystemArtifactCache, NoOpArtifactCache } from '@/caching/index.js';
 import { ConfigurationBuilder } from '@/common/index.js';
 import {
-  type IModuleContextFactory,
-  ModuleContextFactory,
-} from '@/context/index.js';
-import {
   DiagnosticReportBuilder,
   DiagnosticsReporter,
 } from '@/diagnostics/index.js';
 import { InMemoryEventBus } from '@/events/index.js';
-import {
-  type IModuleLifecycleOrchestrator,
-  ModuleLifecycleOrchestrator,
-} from '@/lifecycle/index.js';
+import { ConsoleModuleLoggerFactory } from '@/logging/index.js';
 import {
   ArtifactFetcher,
   ArtifactSourceFactory,
-  type IModuleLoader,
-  ModuleLoader,
-} from '@/loader/index.js';
-import { ConsoleModuleLoggerFactory } from '@/logging/index.js';
-import { StartupPolicyEvaluator } from '@/policy/index.js';
-import { type ISecretsRedactor, SecretsRedactor } from '@/security/index.js';
-import { InMemoryServiceRegistry } from '@/services/index.js';
-import {
   CompatibilityValidationStrategy,
   ConfigAccessValidationStrategy,
+  type IModuleContextFactory,
+  type IModuleLifecycleOrchestrator,
+  type IModuleLoader,
   ManifestValidationStrategy,
-} from '@/validation/index.js';
-import { platformConfigSchema } from './schemas/index.js';
+  ModuleContextFactory,
+  ModuleLifecycleOrchestrator,
+  ModuleLoader,
+  StartupPolicyEvaluator,
+} from '@/modularity/index.js';
+import { type ISecretsRedactor, SecretsRedactor } from '@/security/index.js';
+import { InMemoryServiceRegistry } from '@/services/index.js';
 import { PlatformRuntime } from './platform-runtime.js';
+import { platformConfigSchema } from './schemas/index.js';
 
 /**
  * @alpha
@@ -69,6 +63,10 @@ export class RuntimeBuilder implements IRuntimeBuilder {
     const eventBus = new InMemoryEventBus();
     const serviceRegistry = new InMemoryServiceRegistry();
 
+    const diagnosticsReporter = new DiagnosticsReporter(
+      new DiagnosticReportBuilder(secretsRedactor),
+    );
+
     const moduleContextFactory = this._createModuleContextFactory(
       environment,
       config,
@@ -76,12 +74,9 @@ export class RuntimeBuilder implements IRuntimeBuilder {
       serviceRegistry,
       secretsRedactor,
     );
+
     const moduleLifecycleOrchestrator = new ModuleLifecycleOrchestrator(
       moduleContextFactory,
-    );
-
-    const diagnosticsReporter = new DiagnosticsReporter(
-      new DiagnosticReportBuilder(secretsRedactor),
     );
 
     const bootstrapCoordinator = this._createBootstrapCoordinator(

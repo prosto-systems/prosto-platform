@@ -4,17 +4,17 @@ import type {
   IRuntimeStartupReport,
 } from './interfaces/index.js';
 import { assert } from '@/common/index.js';
-import { RuntimeReasonCodes } from '@/runtime/index.js';
+import { RuntimeErrorCodes } from '@/common/index.js';
 
 /**
  * Valid error codes for configuration access policy violations.
  * These codes are used to categorize failures in a structured, machine-readable way.
  */
 const CONFIG_ACCESS_ERROR_CODES = [
-  RuntimeReasonCodes.ConfigAccessDenied,
-  RuntimeReasonCodes.ConfigCapabilityInvalid,
-  RuntimeReasonCodes.ConfigSectionNotAllowlisted,
-  RuntimeReasonCodes.ConfigWildcardForbidden,
+  RuntimeErrorCodes.ConfigAccessDenied,
+  RuntimeErrorCodes.ConfigCapabilityInvalid,
+  RuntimeErrorCodes.ConfigSectionNotAllowlisted,
+  RuntimeErrorCodes.ConfigWildcardForbidden,
 ];
 
 /**

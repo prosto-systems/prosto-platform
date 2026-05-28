@@ -10,12 +10,12 @@ What this means right now:
 - Phase 01 governance workflows and required-check policy are in place under [`.github/workflows/`](.github/workflows/) and [`docs/governance/`](docs/governance/).
 - Phase 02 workspace baseline is implemented under [`packages/`](packages/) with package manifests, entry points, and per-package TypeScript configs.
 - Phase 03 SDK contract authority is implemented in [`packages/platform-sdk/`](packages/platform-sdk/) with manifest schema validation, lifecycle interfaces, typed tokens, compatibility helpers, and SDK tests.
-- Shared TypeScript baseline is active at [`packages/@internal/tsconfig/base.json`](packages/@internal/tsconfig/base.json).
+- Shared TypeScript baseline is active at [`packages/platform-utils/tsconfig/base.json`](packages/platform-utils/tsconfig/base.json).
 - Phase 02 boundary checks are executable via `lint:architecture`, `validate:dependency-policy`, `validate:module-graph`, and `validate:public-api-boundary`.
 - Phase 04 contract conformance gate is active via `test:contracts`, backed by `@prosto/platform-contract-tests` and reference modules in `examples/`.
 - Phase 05 runtime policy and lifecycle determinism checks are active via `validate:runtime-policy` and `test:lifecycle-determinism`.
 - Phase 05 core runtime subsystems implemented: bootstrap pipeline, module lifecycle orchestrator, startup policy evaluator, dependency graph with topological sorting, module loader with integrity checks, event bus, service registry, diagnostics reports, and validation strategies.
-- Phase 06 is the active implementation window — security controls (allowlist loading, integrity enforcement, secret redaction) and performance regression gates.
+- Phase 06 is the active implementation window — security controls (allowlist loading, full integrity enforcement) and performance regression gates.
   - **Config Access Policy** is fully implemented with:
     - Error taxonomy (`CONFIG_ACCESS_DENIED`, `CONFIG_CAPABILITY_INVALID`, `CONFIG_SECTION_NOT_ALLOWLISTED`, `CONFIG_WILDCARD_FORBIDDEN`)
     - Secret redaction in logs and diagnostics
