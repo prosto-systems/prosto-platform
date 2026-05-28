@@ -1,10 +1,12 @@
 import type { IPlatformConfig } from '@/runtime/index.js';
+import { RuntimeErrorCodes } from '@/common/index.js';
 import { describe, expect, it } from 'vitest';
-import { ModuleContextFactory } from '@/context/index.js';
 import { InMemoryEventBus } from '@/events/index.js';
-import { ModuleLifecycleOrchestrator } from '@/lifecycle/index.js';
 import { ConsoleModuleLoggerFactory } from '@/logging/index.js';
-import { RuntimeReasonCodes } from '@/runtime/index.js';
+import {
+  ModuleContextFactory,
+  ModuleLifecycleOrchestrator,
+} from '@/modularity/index.js';
 import { InMemoryServiceRegistry } from '@/services/index.js';
 import { createManifest, TestModule } from '@/tests/fixtures/index.js';
 
@@ -33,7 +35,7 @@ describe('ModuleLifecycleOrchestrator', () => {
 
     expect(result.startedModules.map((item) => item.manifest.id)).toEqual(['module-a']);
     expect(result.issues).toHaveLength(1);
-    expect(result.issues[0]?.errorCode).toBe(RuntimeReasonCodes.LifecycleStartFailed);
+    expect(result.issues[0]?.errorCode).toBe(RuntimeErrorCodes.LifecycleStartFailed);
   });
 
   it('reports shutdown timeout issue', async () => {
@@ -60,6 +62,6 @@ describe('ModuleLifecycleOrchestrator', () => {
 
     expect(result.stopOrder).toEqual(['module-slow']);
     expect(result.issues).toHaveLength(1);
-    expect(result.issues[0]?.errorCode).toBe(RuntimeReasonCodes.ShutdownTimeout);
+    expect(result.issues[0]?.errorCode).toBe(RuntimeErrorCodes.ShutdownTimeout);
   });
 });

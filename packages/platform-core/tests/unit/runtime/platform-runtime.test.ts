@@ -10,7 +10,7 @@ import type {
   IStartupReportInput,
 } from '@/diagnostics/index.js';
 import { RuntimeStartupStatus } from '@/diagnostics/index.js';
-import type { IModuleLifecycleOrchestrator } from '@/lifecycle/index.js';
+import type { IModuleLifecycleOrchestrator } from '@/modularity/index.js';
 import { createManifest, TestModule } from '@/tests/fixtures/index.js';
 
 class TestDiagnosticsReporter implements IDiagnosticsReporter {

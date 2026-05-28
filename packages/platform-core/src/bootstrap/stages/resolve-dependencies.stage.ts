@@ -1,12 +1,12 @@
-import type { IPlatformModule } from '@prosto/platform-sdk';
-import type { IStartupPolicyEvaluator } from '@/policy/index.js';
-import type { IBootstrapStageContext } from '../interfaces/index.js';
+import type { IStartupPolicyEvaluator } from '@/modularity/index.js';
 import {
   DependencyCycleError,
   DependencyGraph,
   TopologicalSorter,
-} from '@/graph/index.js';
-import { RuntimeReasonCodes } from '@/runtime/index.js';
+} from '@/modularity/index.js';
+import type { IPlatformModule } from '@prosto/platform-sdk';
+import type { IBootstrapStageContext } from '../interfaces/index.js';
+import { RuntimeErrorCodes } from '@/common/index.js';
 import { BootstrapStage } from '../constants/index.js';
 import { BootstrapBaseStage } from './bootstrap.base-stage.js';
 
@@ -44,7 +44,7 @@ export class ResolveDependenciesStage extends BootstrapBaseStage {
         this.skipModule(context, moduleId);
         this.addFailure(context, {
           moduleId,
-          errorCode: RuntimeReasonCodes.DependencyMissing,
+          errorCode: RuntimeErrorCodes.DependencyMissing,
           message: `Missing required dependencies: ${missing.join(', ')}`,
           remediationHint: 'Ensure all required dependencies are discoverable by runtime.',
         });
@@ -73,14 +73,14 @@ export class ResolveDependenciesStage extends BootstrapBaseStage {
       if (error instanceof DependencyCycleError) {
         this.addFailure(context, {
           moduleId: error.moduleIds.join(', '),
-          errorCode: RuntimeReasonCodes.DependencyCycleDetected,
+          errorCode: RuntimeErrorCodes.DependencyCycleDetected,
           message: error.message,
           remediationHint: 'Remove dependency cycle between impacted modules.',
         });
       } else {
         this.addFailure(context, {
           moduleId: 'unknown',
-          errorCode: RuntimeReasonCodes.DependencyFailed,
+          errorCode: RuntimeErrorCodes.DependencyFailed,
           message: error instanceof Error ? error.message : 'Unknown graph resolution error.',
           remediationHint: 'Inspect dependency graph resolver inputs.',
         });

@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { CompatibilityValidationStrategy } from '@/validation/index.js';
 import {
+  CompatibilityValidationStrategy,
   ModuleArtifactPackaging,
   ModuleArtifactSource,
-} from '@/loader/index.js';
+} from '@/modularity/index.js';
 import { createManifest, TestModule } from '@/tests/fixtures/index.js';
 
 describe('CompatibilityValidationStrategy', () => {

@@ -1,7 +1,7 @@
 import type { StartupPolicyType } from '@prosto/platform-sdk';
 import type {
   IModuleLifecycleShutdownIssue,
-} from '@/lifecycle/index.js';
+} from '@/modularity/index.js';
 import type {
   IRuntimeFailureDiagnostic,
 } from './runtime-failure-diagnostic.interface.js';

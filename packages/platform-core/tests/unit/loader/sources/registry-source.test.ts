@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { RegistrySource } from '@/loader/index.js';
-import { RuntimeReasonCodes } from '@/runtime/index.js';
+import { RegistrySource } from '@/modularity/index.js';
+import { RuntimeErrorCodes } from '@/common/index.js';
 
 describe('RegistrySource', () => {
   it('rejects empty package coordinates', async () => {
@@ -16,7 +16,7 @@ describe('RegistrySource', () => {
     expect('reasonCode' in result).toBe(true);
 
     if ('reasonCode' in result) {
-      expect(result.reasonCode).toBe(RuntimeReasonCodes.SourceDescriptorInvalid);
+      expect(result.reasonCode).toBe(RuntimeErrorCodes.SourceDescriptorInvalid);
       expect(result.phase).toBe('discover');
     }
   });
@@ -34,7 +34,7 @@ describe('RegistrySource', () => {
     expect('reasonCode' in result).toBe(true);
 
     if ('reasonCode' in result) {
-      expect(result.reasonCode).toBe(RuntimeReasonCodes.SourceFetchFailed);
+      expect(result.reasonCode).toBe(RuntimeErrorCodes.SourceFetchFailed);
       expect(result.phase).toBe('discover');
     }
   });

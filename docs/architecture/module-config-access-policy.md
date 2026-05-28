@@ -2,7 +2,7 @@
 
 ## Status
 - Scope: Phase 06 security hardening (`AGENTS.md`)
-- Applies to: runtime policy enforcement and module context shaping in `packages/platform-core/src/runtime/` and context factory pipeline
+- Applies to: runtime policy enforcement and module context shaping in `packages/platform-core/src/modularity/policy/` and `packages/platform-core/src/modularity/context/`
 - Principle baseline: **default deny** + **scoped-by-default** access
 
 ## Purpose
@@ -200,6 +200,6 @@ const redactor = new SecretsRedactor({
 
 ## Evidence Linkage
 - Active hardening window: `AGENTS.md` (Phase 06 priorities).
-- Runtime enforcement integration points: `packages/platform-core/src/runtime/`.
-- Context shaping integration point: `packages/platform-core/src/context/factories/module-context.factory.ts`.
+- Runtime enforcement integration points: `packages/platform-core/src/modularity/policy/`.
+- Context shaping integration point: `packages/platform-core/src/modularity/context/factories/module-context.factory.ts`.
 - Diagnostics validation: `packages/platform-core/src/diagnostics/diagnostics-reports.schema.ts`.

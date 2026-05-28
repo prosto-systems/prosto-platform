@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DiagnosticReportBuilder, DiagnosticsReporter, RuntimeStartupStatus } from '@/diagnostics/index.js';
-import { RuntimeReasonCodes } from '@/runtime/index.js';
+import { RuntimeErrorCodes } from '@/common/index.js';
 import { SecretsRedactor } from '@/security/index.js';
 
 function createReporter(): DiagnosticsReporter {
@@ -46,7 +46,7 @@ describe('createStartupReport', () => {
           reason: {
             moduleId: 'mod-b',
             phase: 'validate',
-            errorCode: RuntimeReasonCodes.CompatibilityMismatch,
+            errorCode: RuntimeErrorCodes.CompatibilityMismatch,
             message: 'mismatch',
             remediationHint: 'fix',
           },
@@ -70,7 +70,7 @@ describe('createStartupReport', () => {
         {
           moduleId: 'mod-a',
           phase: 'lifecycle',
-          errorCode: RuntimeReasonCodes.LifecycleStartFailed,
+          errorCode: RuntimeErrorCodes.LifecycleStartFailed,
           message: 'start failed',
           remediationHint: 'check',
         },
@@ -93,7 +93,7 @@ describe('createStartupReport', () => {
         {
           moduleId: 'mod-a',
           phase: 'validate',
-          errorCode: RuntimeReasonCodes.ManifestInvalid,
+          errorCode: RuntimeErrorCodes.ManifestInvalid,
           message: 'token=secret123',
           remediationHint: 'password=secret456',
         },
@@ -117,7 +117,7 @@ describe('createShutdownReport', () => {
         {
           moduleId: 'mod-b',
           phase: 'shutdown',
-          errorCode: RuntimeReasonCodes.ShutdownTimeout,
+          errorCode: RuntimeErrorCodes.ShutdownTimeout,
           message: 'timeout',
           remediationHint: 'increase timeout',
         },
@@ -139,7 +139,7 @@ describe('createShutdownReport', () => {
         {
           moduleId: 'mod-a',
           phase: 'shutdown',
-          errorCode: RuntimeReasonCodes.ShutdownTimeout,
+          errorCode: RuntimeErrorCodes.ShutdownTimeout,
           message: 'bearer leak',
           remediationHint: 'apikey=leak',
         },

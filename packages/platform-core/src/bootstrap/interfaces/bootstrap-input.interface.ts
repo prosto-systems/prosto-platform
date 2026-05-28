@@ -2,7 +2,7 @@ import type {
   IPlatformRuntimeVersionContext,
   StartupPolicyType,
 } from '@prosto/platform-sdk';
-import type { ModuleArtifactSourceDescriptorType } from '@/loader/index.js';
+import type { ModuleArtifactSourceDescriptorType } from '@/modularity/index.js';
 
 /**
  * @alpha

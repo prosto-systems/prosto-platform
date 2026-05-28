@@ -1,8 +1,3 @@
-import {
-  type IPlatformModule,
-  SDK_CONTRACT_VERSION,
-  type StartupPolicyType,
-} from '@prosto/platform-sdk';
 import type { IBootstrapCoordinator } from '@/bootstrap/index.js';
 import type {
   IDiagnosticsReporter,
@@ -10,13 +5,20 @@ import type {
   IRuntimeOperationalReports,
 } from '@/diagnostics/index.js';
 import { RuntimeStartupStatus } from '@/diagnostics/index.js';
-import type { IModuleLifecycleOrchestrator } from '@/lifecycle/index.js';
-import type { ModuleArtifactSourceDescriptorType } from '@/loader/index.js';
+import type {
+  IModuleLifecycleOrchestrator,
+  ModuleArtifactSourceDescriptorType,
+} from '@/modularity/index.js';
 import type {
   IPlatformConfig,
   IPlatformRuntime,
   IRuntimeOptions,
 } from './interfaces/index.js';
+import {
+  type IPlatformModule,
+  SDK_CONTRACT_VERSION,
+  type StartupPolicyType,
+} from '@prosto/platform-sdk';
 import { assert, dateNowIso } from '@/common/index.js';
 
 /**

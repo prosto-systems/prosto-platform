@@ -2,7 +2,7 @@ import type {
   IModulePathArtifactSource,
   IModuleUrlArtifactSource,
   IModuleRegistryArtifactSource,
-} from '@/loader/index.js';
+} from '@/modularity/index.js';
 import { createHash } from 'node:crypto';
 
 /**

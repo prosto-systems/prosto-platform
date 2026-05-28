@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { StartupPolicyEvaluator } from '@/policy/index.js';
+import { StartupPolicyEvaluator } from '@/modularity/index.js';
 
 describe('evaluateStartupPolicy', () => {
   const startupPolicyEvaluator = new StartupPolicyEvaluator();

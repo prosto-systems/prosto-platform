@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { IPlatformModule } from '@prosto/platform-sdk';
-import { CycleDetector, DependencyGraph } from '@/graph/index.js';
+import { CycleDetector, DependencyGraph } from '@/modularity/index.js';
 
 describe('DependencyGraph', () => {
   it('creates graph from modules', () => {

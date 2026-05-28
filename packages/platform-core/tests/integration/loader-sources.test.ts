@@ -4,7 +4,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { RuntimeReasonCodes } from '@/runtime/index.js';
+import { RuntimeErrorCodes } from '@/common/index.js';
 import {
   createManifest,
   createRuntime,
@@ -69,7 +69,7 @@ describe('runtime loader sources', () => {
 
     expect(runtime.startedModuleIds).toEqual(['module-a']);
     expect(runtime.reports.startup?.status).toBe('degraded');
-    expect(runtime.reports.startup?.failedModules.some((item) => item.errorCode === RuntimeReasonCodes.SourceUrlInvalid)).toBe(true);
+    expect(runtime.reports.startup?.failedModules.some((item) => item.errorCode === RuntimeErrorCodes.SourceUrlInvalid)).toBe(true);
     expect(runtime.reports.startup?.skippedModules.some((item) => item.moduleId === 'module-url')).toBe(true);
 
     await runtime.stop();
@@ -105,7 +105,7 @@ describe('runtime loader sources', () => {
       });
 
       expect(runtime.startedModuleIds).toEqual([]);
-      expect(runtime.reports.startup?.failedModules.some((item) => item.errorCode === RuntimeReasonCodes.SourceIntegrityMismatch)).toBe(true);
+      expect(runtime.reports.startup?.failedModules.some((item) => item.errorCode === RuntimeErrorCodes.SourceIntegrityMismatch)).toBe(true);
 
       await runtime.stop();
     } finally {
@@ -144,7 +144,7 @@ describe('runtime loader sources', () => {
       });
 
       expect(runtime.startedModuleIds).toEqual([]);
-      expect(runtime.reports.startup?.failedModules.some((item) => item.errorCode === RuntimeReasonCodes.SourceExtractionFailed)).toBe(true);
+      expect(runtime.reports.startup?.failedModules.some((item) => item.errorCode === RuntimeErrorCodes.SourceExtractionFailed)).toBe(true);
 
       await runtime.stop();
     } finally {

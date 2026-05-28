@@ -1,4 +1,4 @@
-import type { IModuleValidationStrategy } from '@/validation/index.js';
+import type { IModuleValidationStrategy } from '@/modularity/index.js';
 import { type IBootstrapStageContext } from '../interfaces/index.js';
 import { BootstrapStage } from '../constants/index.js';
 import { BootstrapBaseStage } from './bootstrap.base-stage.js';

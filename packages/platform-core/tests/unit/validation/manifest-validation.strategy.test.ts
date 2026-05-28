@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { ManifestValidationStrategy } from '@/validation/index.js';
-import { ModuleArtifactPackaging, ModuleArtifactSource } from '@/loader/index.js';
+import {
+  ManifestValidationStrategy,
+  ModuleArtifactPackaging,
+  ModuleArtifactSource,
+} from '@/modularity/index.js';
 import { createManifest, TestModule } from '@/tests/fixtures/index.js';
 
 describe('ManifestValidationStrategy', () => {

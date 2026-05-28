@@ -9,6 +9,36 @@ Phase 05 runtime foundation package for deterministic module lifecycle orchestra
 - Critical module failure override (always abort startup)
 - Structured startup and shutdown diagnostics payloads
 - Reverse-order shutdown with bounded timeout handling
+- Runtime builder composition root with config loading, diagnostics wiring, and lifecycle orchestration dependencies
+- Secrets redaction wired through module logging and diagnostics reporting
+- Optional artifact cache wiring for module source fetchers
+
+## Package Structure
+
+### `modularity/` — Module Modularity Subsystem (Consolidated)
+
+| Subsystem | Path | Responsibility |
+|-----------|------|----------------|
+| Context | `modularity/context/` | Module context factory, interfaces, and config utilities |
+| Graph | `modularity/graph/` | Dependency graph construction, cycle detection, topological sorting |
+| Lifecycle | `modularity/lifecycle/` | Module lifecycle orchestrator (register → init → start → stop with timeout) |
+| Loader | `modularity/loader/` | Module loader with integrity checks and source plugins (path, url, registry, memory) |
+| Policy | `modularity/policy/` | Startup policy evaluator + config access policy with strict/best-effort strategies |
+| Validation | `modularity/validation/` | Module validation strategies (manifest, integrity, compatibility, config access) |
+
+### Other Subsystems
+
+| Subsystem | Path | Responsibility |
+|-----------|------|----------------|
+| Bootstrap | `bootstrap/` | Bootstrap coordinator, pipeline, and stage definitions |
+| Caching | `caching/` | Module artifact cache (filesystem + noop implementations) |
+| Common | `common/` | Shared utilities, error types, configuration system, assertion helpers |
+| Diagnostics | `diagnostics/` | Operational reports schema validation and reporter |
+| Events | `events/` | In-memory event bus infrastructure |
+| Logging | `logging/` | Module-scoped logger with console implementation |
+| Runtime | `runtime/` | Platform runtime and builder |
+| Security | `security/` | Secrets redaction engine |
+| Services | `services/` | Service registry |
 
 ## Configuration System
 
@@ -68,7 +98,7 @@ Format: `PREFIX_KEY__NESTED` (double underscore for nesting)
 
 ```bash
 PROSTO_LOGGING__LEVEL=debug    # → { logging: { level: 'debug' } }
-PROSTO_MODULES__CACHE_ENABLED=true  # → { modules: { cacheEnabled: true } }
+PROSTO_MODULES__ARTIFACT_CACHE__ENABLED=true  # → { modules: { artifactCache: { enabled: true } } }
 ```
 
 ### Configuration Files
@@ -83,10 +113,36 @@ PROSTO_MODULES__CACHE_ENABLED=true  # → { modules: { cacheEnabled: true } }
 
 ```typescript
 const runtime = new RuntimeBuilder().build({
+  modules: [
+    {
+      source: 'path',
+      path: './dist/modules/module-health/module.zip',
+      checksum: 'sha256:...'
+    }
+  ],
   configDir: './config',
   environment: 'production',
+  commandLineArgs: process.argv.slice(2),
+  correlationId: 'startup-2026-05-28-01',
 });
 ```
+
+### RuntimeBuilder Defaults
+
+When no overrides are provided, the builder seeds these defaults before applying JSON/env/CLI sources:
+
+- `platform.startupPolicy`: `strict`
+- `modules.configAccessPolicy.sectionAllowlistBySecurityClass`:
+  - `trusted`: `['platform', 'runtime', 'modules', 'security', 'logging', 'custom']`
+  - `internal`: `['platform', 'runtime', 'security', 'logging', 'custom']`
+  - `third-party-reviewed`: `['platform', 'logging', 'custom']`
+- `modules.configAccessPolicy.productionStrictMode`: `true`
+- `modules.configAccessPolicy.denyOnUnknownCapability`: `true`
+- `modules.artifactCache.enabled`: `false`
+- `security.secretRedaction.enabled`: `true`
+- `security.secretRedaction.patterns`: `['key', 'token', 'secret', 'password', 'passphrase']`
+
+If `modules.artifactCache.enabled` is set to `true` and `modules.artifactCache.path` is omitted, cache files are stored under `.cache/module-artifacts` resolved from `platform.basePath`.
 
 Modules access config via `IModuleContext`:
 
@@ -150,6 +206,13 @@ npm run validate:runtime-policy
 ```
 
 This command runs the full policy validation suite including config access checks.
+
+Current validation stage composition in runtime bootstrap:
+- `ManifestValidationStrategy`
+- `CompatibilityValidationStrategy`
+- `ConfigAccessValidationStrategy`
+
+`IntegrityValidationStrategy` remains in Phase 06 hardening scope.
 
 ### Secret Redaction
 

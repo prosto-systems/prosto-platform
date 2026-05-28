@@ -1,4 +1,4 @@
-import type { IModuleLoader } from '@/loader/index.js';
+import type { IModuleLoader } from '@/modularity/index.js';
 import type { IBootstrapStageContext } from '../interfaces/index.js';
 import { BootstrapStage } from '../constants/index.js';
 import { BootstrapBaseStage } from './bootstrap.base-stage.js';

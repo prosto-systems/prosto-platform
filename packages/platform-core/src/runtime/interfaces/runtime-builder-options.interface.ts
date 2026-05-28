@@ -1,4 +1,4 @@
-import type { ModuleArtifactSourceDescriptorType } from '@/loader/index.js';
+import type { ModuleArtifactSourceDescriptorType } from '@/modularity/index.js';
 
 /**
  * @alpha

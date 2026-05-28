@@ -1,4 +1,4 @@
-import type { ModuleArtifactSource } from '@/loader/index.js';
+import type { ModuleArtifactSource } from '@/modularity/index.js';
 
 /**
  * @alpha

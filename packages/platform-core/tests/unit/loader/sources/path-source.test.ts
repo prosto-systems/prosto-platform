@@ -3,8 +3,8 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { PathSource } from '@/loader/index.js';
-import { RuntimeReasonCodes } from '@/runtime/index.js';
+import { PathSource } from '@/modularity/index.js';
+import { RuntimeErrorCodes } from '@/common/index.js';
 
 describe('PathSource', () => {
   it('rejects when checksum does not match artifact payload', async () => {
@@ -28,7 +28,7 @@ describe('PathSource', () => {
       expect('reasonCode' in result).toBe(true);
 
       if ('reasonCode' in result) {
-        expect(result.reasonCode).toBe(RuntimeReasonCodes.SourceIntegrityMismatch);
+        expect(result.reasonCode).toBe(RuntimeErrorCodes.SourceIntegrityMismatch);
       }
     } finally {
       await rm(dir, { recursive: true, force: true });
@@ -55,7 +55,7 @@ describe('PathSource', () => {
       expect('reasonCode' in result).toBe(true);
 
       if ('reasonCode' in result) {
-        expect(result.reasonCode).toBe(RuntimeReasonCodes.SourceExtractionFailed);
+        expect(result.reasonCode).toBe(RuntimeErrorCodes.SourceExtractionFailed);
       }
     } finally {
       await rm(dir, { recursive: true, force: true });

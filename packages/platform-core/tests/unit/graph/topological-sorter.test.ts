@@ -4,7 +4,7 @@ import {
   DependencyCycleError,
   DependencyGraph,
   TopologicalSorter,
-} from '@/graph/index.js';
+} from '@/modularity/index.js';
 
 describe('TopologicalSorter', () => {
   const topologicalSorter = TopologicalSorter.create();

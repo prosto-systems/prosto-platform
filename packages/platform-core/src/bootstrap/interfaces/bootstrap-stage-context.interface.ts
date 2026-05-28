@@ -8,7 +8,7 @@ import type {
   IModuleCandidateArtifact,
   IRejectedModuleArtifact,
   ModuleArtifactSourceDescriptorType,
-} from '@/loader/index.js';
+} from '@/modularity/index.js';
 import type { BootstrapStage } from '../constants/index.js';
 
 /**

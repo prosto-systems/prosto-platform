@@ -1,4 +1,4 @@
-import type { RuntimeReasonCodes, RuntimeStage } from '@/runtime/index.js';
+import type { RuntimeErrorCodes, RuntimeStage } from '@/common/index.js';
 
 /**
  * @alpha
@@ -7,7 +7,7 @@ import type { RuntimeReasonCodes, RuntimeStage } from '@/runtime/index.js';
 export interface IRuntimeFailureDiagnostic {
   readonly moduleId: string;
   readonly phase: `${RuntimeStage}`;
-  readonly errorCode: `${RuntimeReasonCodes}`;
+  readonly errorCode: `${RuntimeErrorCodes}`;
   readonly message: string;
   readonly remediationHint: string;
 }
