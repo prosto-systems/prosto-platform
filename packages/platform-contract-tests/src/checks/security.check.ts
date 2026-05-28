@@ -1,8 +1,6 @@
 import type { IPlatformModuleManifest } from '@prosto/platform-sdk';
-import {
-  ContractFailureCodes,
-  type IContractCheckResult,
-} from '../types/index.js';
+import type { IContractCheckResult } from '@/interfaces/index.js';
+import { ContractFailureCodes } from '@/constants/index.js';
 
 export const SECURITY_CHECK_RESULT_ID = 'security-metadata';
 

@@ -16,7 +16,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.package.json",
+    "build": "vite build",
     "typecheck": "tsc -p tsconfig.package.json --noEmit",
     "test": "npm run test:types && npm run test:unit",
     "test:types": "tsc -p tsconfig.type-tests.json --noEmit",
@@ -30,6 +30,8 @@
     "@internal/tsconfig": "*",
     "@tsconfig/node22": "^22.0.5",
     "@types/semver": "^7.7.1",
-    "vitest": "^4.1.2"
+    "vite": "^8.0.14",
+    "vite-plugin-dts": "^5.0.1",
+    "vitest": "^4.1.7"
   }
 }

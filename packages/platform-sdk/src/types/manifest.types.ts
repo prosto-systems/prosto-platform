@@ -1,7 +1,7 @@
 import type {
   MODULE_CRITICALITY_LEVELS,
   MODULE_SECURITY_CLASSES,
-} from '../constants/index.js';
+} from '@/constants/index.js';
 
 /**
  * @alpha

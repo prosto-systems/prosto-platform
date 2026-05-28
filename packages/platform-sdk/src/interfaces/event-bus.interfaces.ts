@@ -1,4 +1,4 @@
-import type { EventTokenType } from '../types/index.js';
+import type { EventTokenType } from '@/types/index.js';
 
 /**
  * @alpha

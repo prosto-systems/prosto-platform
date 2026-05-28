@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-
 import type {
   IModuleContext,
   IPlatformModule,
@@ -7,14 +6,12 @@ import type {
 } from '@prosto/platform-sdk';
 import {
   CAPABILITY_CHECK_RESULT_ID,
+  ContractFailureCodes,
   LIFECYCLE_CHECK_RESULT_ID,
   OBSERVABILITY_CHECK_RESULT_ID,
-} from '../src/checks/index.js';
-import {
-  ContractFailureCodes,
   runModuleContractConformance,
   toConformanceReportJson,
-} from '../src/index.js';
+} from '@/index.js';
 
 const validManifest: IPlatformModuleManifest = {
   id: 'module-health',

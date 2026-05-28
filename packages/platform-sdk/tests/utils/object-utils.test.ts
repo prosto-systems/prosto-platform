@@ -5,7 +5,7 @@ import {
   isPlainObject,
   resolveNestedValue,
   setNestedValue,
-} from '../../src/utils/index.js';
+} from '@/index.js';
 
 describe('isPlainObject', () => {
   it('returns true for plain object', () => {

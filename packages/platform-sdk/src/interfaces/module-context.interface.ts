@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { StartupPolicyType } from '../types/index.js';
+import type { StartupPolicyType } from '@/types/index.js';
 import type { IEventBus } from './event-bus.interfaces.js';
 import type { IModuleLogger } from './module-logger.interface.js';
 import type { IServiceRegistry } from './service-registry.interface.js';

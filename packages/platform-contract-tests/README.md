@@ -5,7 +5,7 @@ Reusable Phase 04 contract conformance suite for Prosto modules.
 ## Scope
 - Reusable entrypoint [`createModuleContractTests`](./src/create-module-contract-tests.ts)
 - Programmatic runner [`runModuleContractConformance`](./src/create-module-contract-tests.ts)
-- Standardized failure taxonomy via [`ContractFailureCodes`](src/types/index.ts)
+- Standardized failure taxonomy via [`ContractFailureCodes`](src/constants/index.ts)
 - Deterministic machine-readable report output via [`toConformanceReportJson`](src/utils/report.utils.ts)
 
 ## Conformance Checks

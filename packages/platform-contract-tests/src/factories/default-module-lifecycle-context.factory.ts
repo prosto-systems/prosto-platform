@@ -10,7 +10,7 @@ import type {
   IServiceRegistry,
   ServiceTokenType,
 } from '@prosto/platform-sdk';
-import type { IModuleLifecycleContextFactory } from '../types/index.js';
+import type { IModuleLifecycleContextFactory } from '@/interfaces/index.js';
 
 class MockLogger implements IModuleLogger {
   debug(_: string, __?: Readonly<Record<string, unknown>>): void {

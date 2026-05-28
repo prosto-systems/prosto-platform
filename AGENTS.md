@@ -22,6 +22,7 @@
 - Root/package TypeScript baselines are present:
   - `packages/platform-utils/tsconfig/base.json`
   - `packages/*/tsconfig.json`
+- Package JavaScript build baseline uses Vite 8 (`vite.config.ts`) with `vite-plugin-dts` declaration generation for publishable packages.
 - Governance and architecture policy scripts are present in root `package.json`:
   - `lint`
   - `lint:fix`
@@ -501,9 +502,10 @@ Closes #123
 ## Development Environment
 
 ### Required Tools
-- Node.js >= 22 (see `package.json` engines)
+- Node.js >= 22.12 (see `package.json` engines)
 - npm >= 8
 - TypeScript compiler (dependency)
+- Vite 8 and `vite-plugin-dts` for publishable package builds
 - Git for version control
 - Turborepo (for monorepo task orchestration)
 
@@ -517,7 +519,7 @@ Closes #123
 The project uses Turborepo for monorepo task orchestration. Key configurations:
 
 **Pipeline Tasks** (defined in `turbo.json`):
-- `build` - Compiles TypeScript packages (depends on `^build` for dependency order)
+- `build` - Builds publishable packages with Vite 8 and emits declarations via `vite-plugin-dts` (depends on `^build` for dependency order)
 - `typecheck` - Type checking (depends on `^build`)
 - `test` - Runs test suites (depends on `^build`)
 - `test:types`, `test:unit`, `test:contracts` - Specific test types

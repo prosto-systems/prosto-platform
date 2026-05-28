@@ -1,4 +1,4 @@
-import type { ManifestValidationError } from '../errors/index.js';
+import type { ManifestValidationError } from '@/errors/index.js';
 import type { IPlatformModuleManifest } from './platform-module-manifest.interfaces.js';
 
 /**

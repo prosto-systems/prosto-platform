@@ -5,7 +5,7 @@ import type {
   ModuleSecurityClassType,
   SemverRangeType,
   SemverVersionType,
-} from '../types/index.js';
+} from '@/types/index.js';
 
 /**
  * @alpha
