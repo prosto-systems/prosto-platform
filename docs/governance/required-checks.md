@@ -32,8 +32,35 @@ Each required check must expose machine-readable or artifact evidence:
 - `policy-gates` and `quality-gates` logs as CI evidence.
 - `release-readiness` artifact `.temp/ci/release-evidence.json` uploaded in workflow.
 - FF-04 runtime-policy now runs `npm run validate:runtime-policy` and must pass for protected branch merges.
+  - This includes config access policy validation (wildcard detection, security class checks, strict mode enforcement).
+  - Test coverage: integration tests across `runtime-policy-validation.test.ts` and `config-access-matrix.test.ts`.
 - FF-03 lifecycle determinism now runs `npm run test:lifecycle-determinism` and must pass for protected branch merges.
 - FF-05 contracts gate runs `npm run test:contracts` and must pass for protected branch merges.
+
+## Runtime Policy Validation Details (FF-04)
+
+The `validate:runtime-policy` check validates the following:
+
+### Diagnostics Schema Validation
+- All failed module diagnostics include required fields: `moduleId`, `phase`, `errorCode`, `message`, `remediationHint`
+- No sensitive data (passwords, tokens, secrets) in diagnostic payloads
+
+### Config Access Policy Validation
+- **Wildcard capability detection**: Rejects modules with wildcard patterns like `config.read.*`
+- **Security class consistency**: Validates that module security class matches requested capabilities
+- **Production strict mode**: Ensures strict enforcement in production environments
+- **Deterministic behavior**: Verifies consistent results across multiple runs
+
+### Test Matrix Coverage
+| Dimension | Values Tested |
+|---|---|
+| Security Class | trusted, internal, third-party-reviewed |
+| Capabilities | valid, unknown, multiple |
+| Environment | development, staging, production |
+| Policy Mode | strict, best-effort |
+| Outcome | allowed, denied |
+
+See [`docs/architecture/module-config-access-policy.md`](../architecture/module-config-access-policy.md) for complete policy specification.
 
 ## Escalation SLA
 - Acknowledgement: within 4 business hours.

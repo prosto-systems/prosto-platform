@@ -13,6 +13,7 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-sdk/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/examples/module-auth/artifacts" />
       <excludeFolder url="file://$MODULE_DIR$/examples/module-health/artifacts" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-core/.cache" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

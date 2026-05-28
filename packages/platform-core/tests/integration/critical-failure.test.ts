@@ -1,12 +1,33 @@
-import { describe, expect, it } from 'vitest';
+import type { IPlatformConfig } from '@/runtime/index.js';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   createManifest,
   createRuntime,
   TestModule,
 } from '@/tests/fixtures/index.js';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 
 describe('runtime bootstrap critical failure', () => {
+  let tempDir: string;
+
+  beforeAll(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'prosto-config-test-'));
+  });
+
+  afterAll(() => {
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
   it('aborts startup even in best-effort mode when critical module fails', async () => {
+    const baseConfig = {
+      platform: { startupPolicy: 'best-effort' },
+      modules: { artifactCache: { enabled: false } },
+    } as IPlatformConfig;
+
+    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+
     const critical = new TestModule(
       createManifest({
         id: 'module-critical',
@@ -18,15 +39,11 @@ describe('runtime bootstrap critical failure', () => {
     const nonCritical = new TestModule(createManifest({ id: 'module-normal' }));
 
     const runtime = await createRuntime({
-      startupPolicy: 'best-effort',
-      runtimeVersion: {
-        sdkVersion: '0.0.0',
-        nodeVersion: process.versions.node,
-      },
       modules: [
         { module: nonCritical, type: 'memory' },
         { module: critical, type: 'memory' },
       ],
+      configDir: tempDir,
     });
 
     expect(runtime.reports.startup?.status).toBe('failed');

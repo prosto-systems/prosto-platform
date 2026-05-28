@@ -1,15 +1,16 @@
+import type { IPlatformConfig } from '@/runtime/index.js';
+import { PlatformRuntime } from '@/runtime/index.js';
 import { describe, expect, it } from 'vitest';
 import type { IBootstrapCoordinator } from '@/bootstrap/index.js';
 import type {
   IDiagnosticsReporter,
-  IShutdownReportInput,
-  IStartupReportInput,
   IRuntimeShutdownReport,
   IRuntimeStartupReport,
+  IShutdownReportInput,
+  IStartupReportInput,
 } from '@/diagnostics/index.js';
 import { RuntimeStartupStatus } from '@/diagnostics/index.js';
 import type { IModuleLifecycleOrchestrator } from '@/lifecycle/index.js';
-import { PlatformRuntime } from '@/runtime/index.js';
 import { createManifest, TestModule } from '@/tests/fixtures/index.js';
 
 class TestDiagnosticsReporter implements IDiagnosticsReporter {
@@ -69,14 +70,12 @@ describe('PlatformRuntime', () => {
     };
 
     const runtime = new PlatformRuntime(
+      [{ type: 'memory', module }],
       {
-        startupPolicy: 'strict',
-        runtimeVersion: {
-          sdkVersion: '0.0.0',
-          nodeVersion: process.versions.node,
-        },
-        modules: [{ type: 'memory', module }],
-      },
+        platform: { startupPolicy: 'strict' },
+        modules: { artifactCache: { enabled: false } },
+        runtime: { shutdownTimeoutMs: 30000 },
+      } as IPlatformConfig,
       new TestDiagnosticsReporter(),
       bootstrapCoordinator,
       lifecycleOrchestrator,

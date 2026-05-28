@@ -1,0 +1,14 @@
+{
+  "runtime": {
+    "shutdownTimeoutMs": 60000
+  },
+  "modules": {
+    "artifactCache": {
+      "enabled": true
+    }
+  },
+  "logging": {
+    "level": "error",
+    "format": "json"
+  }
+}

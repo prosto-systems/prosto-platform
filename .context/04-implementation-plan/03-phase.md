@@ -29,7 +29,7 @@
   - `packages/platform-sdk/src/validation/platform-compatibility.validator.ts`
   - `packages/platform-sdk/tests/manifest-validation.test.ts`
   - `packages/platform-sdk/tests/compatibility-validation.test.ts`
-  - `packages/platform-sdk/tests/tokens.test.ts`
+  - `packages/platform-sdk/tests/tokens-utils.test.ts`
   - `packages/platform-sdk/tests/tokens.type-test.ts`
   - `packages/platform-sdk/vitest.config.ts`
   - `packages/platform-sdk/API_REPORT.md`

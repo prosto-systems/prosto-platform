@@ -6,11 +6,6 @@ import { createManifest, TestModule } from '@/tests/fixtures/index.js';
 describe('RuntimeBuilder', () => {
   it('builds runtime and wires startup/shutdown flow', async () => {
     const runtime = new RuntimeBuilder().build({
-      startupPolicy: 'strict',
-      runtimeVersion: {
-        sdkVersion: '0.0.0',
-        nodeVersion: process.versions.node,
-      },
       modules: [{ type: 'memory', module: new TestModule(createManifest({ id: 'module-a' })) }],
     });
 

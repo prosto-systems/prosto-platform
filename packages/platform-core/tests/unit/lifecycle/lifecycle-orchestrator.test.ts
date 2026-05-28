@@ -1,3 +1,4 @@
+import type { IPlatformConfig } from '@/runtime/index.js';
 import { describe, expect, it } from 'vitest';
 import { ModuleContextFactory } from '@/context/index.js';
 import { InMemoryEventBus } from '@/events/index.js';
@@ -17,9 +18,11 @@ describe('ModuleLifecycleOrchestrator', () => {
     const serviceRegistry = new InMemoryServiceRegistry();
     const eventBus = new InMemoryEventBus();
     const contextFactory = new ModuleContextFactory(
-      new ConsoleModuleLoggerFactory(),
-      serviceRegistry,
+      'production',
+      {} as IPlatformConfig,
       eventBus,
+      serviceRegistry,
+      new ConsoleModuleLoggerFactory(),
     );
 
     const moduleLifecycleOrchestrator = new ModuleLifecycleOrchestrator(contextFactory);
@@ -41,9 +44,11 @@ describe('ModuleLifecycleOrchestrator', () => {
     const serviceRegistry = new InMemoryServiceRegistry();
     const eventBus = new InMemoryEventBus();
     const contextFactory = new ModuleContextFactory(
-      new ConsoleModuleLoggerFactory(),
-      serviceRegistry,
+      'production',
+      {} as IPlatformConfig,
       eventBus,
+      serviceRegistry,
+      new ConsoleModuleLoggerFactory(),
     );
 
     const moduleLifecycleOrchestrator = new ModuleLifecycleOrchestrator(contextFactory);

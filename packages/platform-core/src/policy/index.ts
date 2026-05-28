@@ -1,3 +1,2 @@
-export type * from './interfaces/index.js';
-export * from './strategies/index.js';
-export * from './startup-policy-evaluator.js';
+export * from './config-access-policy/index.js'
+export * from './startup-policy/index.js'

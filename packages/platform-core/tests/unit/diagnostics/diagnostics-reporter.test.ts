@@ -1,9 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { DiagnosticsReporter, RuntimeStartupStatus } from '@/diagnostics/index.js';
+import { DiagnosticReportBuilder, DiagnosticsReporter, RuntimeStartupStatus } from '@/diagnostics/index.js';
 import { RuntimeReasonCodes } from '@/runtime/index.js';
+import { SecretsRedactor } from '@/security/index.js';
+
+function createReporter(): DiagnosticsReporter {
+  const redactor = new SecretsRedactor({ enabled: false });
+  return new DiagnosticsReporter(new DiagnosticReportBuilder(redactor));
+}
+
+function createRedactingReporter(): DiagnosticsReporter {
+  const redactor = new SecretsRedactor({
+    enabled: true,
+    patterns: ['password', 'token', 'secret', 'key', 'apiKey', 'passphrase'],
+  });
+  return new DiagnosticsReporter(new DiagnosticReportBuilder(redactor));
+}
 
 describe('createStartupReport', () => {
-  const reporter = new DiagnosticsReporter();
+  const reporter = createReporter();
 
   it('produces success status when no failures', () => {
     const report = reporter.createStartupReport({
@@ -68,7 +82,8 @@ describe('createStartupReport', () => {
   });
 
   it('redacts secrets in failure messages', () => {
-    const report = reporter.createStartupReport({
+    const redactingReporter = createRedactingReporter();
+    const report = redactingReporter.createStartupReport({
       correlationId: 'cid',
       policyMode: 'strict',
       startedAt: '2024-01-01T00:00:00.000Z',
@@ -91,10 +106,10 @@ describe('createStartupReport', () => {
 });
 
 describe('createShutdownReport', () => {
-  const reporter = new DiagnosticsReporter();
+  const redactingReporter = createRedactingReporter();
 
   it('produces shutdown report with issues', () => {
-    const report = reporter.createShutdownReport({
+    const report = redactingReporter.createShutdownReport({
       correlationId: 'cid',
       startedAt: '2024-01-01T00:00:00.000Z',
       stopOrder: ['mod-b', 'mod-a'],
@@ -116,7 +131,7 @@ describe('createShutdownReport', () => {
   });
 
   it('redacts secrets in shutdown issues', () => {
-    const report = reporter.createShutdownReport({
+    const report = redactingReporter.createShutdownReport({
       correlationId: 'cid',
       startedAt: '2024-01-01T00:00:00.000Z',
       stopOrder: ['mod-a'],

@@ -24,6 +24,9 @@ export type SemverRangeType = string;
 /**
  * @alpha
  * Security class taxonomy for module governance.
+ * - 'trusted' – Core platform modules, full access
+ * - 'internal' – Internal team modules, standard access
+ * - 'third-party-reviewed' – External modules, reviewed and approved
  */
 export type ModuleSecurityClassType = (typeof MODULE_SECURITY_CLASSES)[number];
 

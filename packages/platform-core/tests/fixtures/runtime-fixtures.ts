@@ -3,19 +3,18 @@ import type {
   IPlatformModule,
   IPlatformModuleManifest,
 } from '@prosto/platform-sdk';
+import { SDK_CONTRACT_VERSION } from '@prosto/platform-sdk';
 import {
   type IPlatformRuntime,
-  type IRuntimeOptions,
+  type IRuntimeBuilderOptions,
   RuntimeBuilder,
 } from '@/runtime/index.js';
 
 export async function createRuntime(
-  options: IRuntimeOptions,
+  options: IRuntimeBuilderOptions,
 ): Promise<IPlatformRuntime> {
   const runtime = new RuntimeBuilder().build(options);
-
   await runtime.start();
-
   return runtime;
 }
 
@@ -24,7 +23,7 @@ export function createManifest(
 ): IPlatformModuleManifest {
   return {
     id: input.id,
-    version: input.version ?? '1.0.0',
+    version: input.version ?? SDK_CONTRACT_VERSION,
     sdkVersion: input.sdkVersion ?? '^0.0.0',
     nodeVersion: input.nodeVersion,
     criticality: input.criticality ?? 'normal',

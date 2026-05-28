@@ -1,3 +1,5 @@
+import pkg from '../package.json' with { type: 'json' };
+
 export * from './constants/index.js';
 export * from './errors/index.js';
 export * from './interfaces/index.js';
@@ -10,4 +12,4 @@ export * from './validators/index.js';
  * @alpha
  * SDK contract surface baseline identifier.
  */
-export const SDK_CONTRACT_SURFACE_VERSION = '0.0.0-phase-03';
+export const SDK_CONTRACT_VERSION = pkg.version;
