@@ -1,7 +1,5 @@
 import type { IPlatformRuntime } from './platform-runtime.interface.js';
-import type {
-  IRuntimeBuilderOptions,
-} from './runtime-builder-options.interface.js';
+import type { IRuntimeBuilderOptions } from './runtime-builder-options.interface.js';
 
 /**
  * @alpha

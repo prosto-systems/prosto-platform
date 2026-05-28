@@ -21,7 +21,7 @@ export interface IPlatformConfig extends Record<string, unknown> {
   };
   modules: {
     [key: string]: unknown;
-    configAccessPolicy: IConfigAccessPolicy,
+    configAccessPolicy: IConfigAccessPolicy;
     artifactCache: {
       /** @default true – for production, false – for development */
       enabled: boolean;

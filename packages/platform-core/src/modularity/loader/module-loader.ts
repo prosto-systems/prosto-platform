@@ -15,8 +15,7 @@ import { ArtifactSourceFactory } from './factories/index.js';
 export class ModuleLoader implements IModuleLoader {
   constructor(
     private readonly _artifactSourceFactory: IArtifactSourceFactory = new ArtifactSourceFactory(),
-  ) {
-  }
+  ) {}
 
   async load(
     sourceDescriptors: readonly ModuleArtifactSourceDescriptorType[],
@@ -35,8 +34,8 @@ export class ModuleLoader implements IModuleLoader {
       }
     }
 
-    loaded.sort(
-      (left, right) => left.orderingKey.localeCompare(right.orderingKey),
+    loaded.sort((left, right) =>
+      left.orderingKey.localeCompare(right.orderingKey),
     );
 
     rejected.sort((left, right) => {

@@ -30,11 +30,15 @@ describe('config access policy matrix', () => {
     runtime: IPlatformRuntime,
     code: `${RuntimeErrorCodes}`,
   ): boolean {
-    const failed = runtime.reports.startup?.failedModules
-      .some((f) => f.errorCode === code) ?? false;
+    const failed =
+      runtime.reports.startup?.failedModules.some(
+        (f) => f.errorCode === code,
+      ) ?? false;
 
-    const skipped = runtime.reports.startup?.skippedModules
-      .some((s) => s.reason.errorCode === code) ?? false;
+    const skipped =
+      runtime.reports.startup?.skippedModules.some(
+        (s) => s.reason.errorCode === code,
+      ) ?? false;
 
     return failed || skipped;
   }
@@ -42,7 +46,10 @@ describe('config access policy matrix', () => {
   async function createTestRuntime(
     config: Partial<IPlatformConfig>,
     moduleId: string,
-    capabilities: ModuleCapabilityType[] = ['lifecycle.register', 'lifecycle.start'],
+    capabilities: ModuleCapabilityType[] = [
+      'lifecycle.register',
+      'lifecycle.start',
+    ],
     securityClass: ModuleSecurityClassType = 'internal',
   ) {
     const fullConfig = {
@@ -51,7 +58,10 @@ describe('config access policy matrix', () => {
       ...config,
     } as IPlatformConfig;
 
-    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(fullConfig));
+    writeFileSync(
+      join(tempDir, 'app_settings.json'),
+      JSON.stringify(fullConfig),
+    );
 
     const module = new TestModule(
       createManifest({
@@ -83,7 +93,9 @@ describe('config access policy matrix', () => {
       'trusted',
     );
 
-    expect(() => validateOperationalReportsSchema(runtime.reports)).not.toThrow();
+    expect(() =>
+      validateOperationalReportsSchema(runtime.reports),
+    ).not.toThrow();
     expect(wasModuleAllowed(runtime)).toBe(true);
 
     await runtime.stop();
@@ -97,8 +109,12 @@ describe('config access policy matrix', () => {
       'internal',
     );
 
-    expect(() => validateOperationalReportsSchema(runtime.reports)).not.toThrow();
-    expect(hasAnyReasonCode(runtime, RuntimeErrorCodes.ConfigSectionNotAllowlisted)).toBe(true);
+    expect(() =>
+      validateOperationalReportsSchema(runtime.reports),
+    ).not.toThrow();
+    expect(
+      hasAnyReasonCode(runtime, RuntimeErrorCodes.ConfigSectionNotAllowlisted),
+    ).toBe(true);
 
     await runtime.stop();
   });
@@ -111,7 +127,9 @@ describe('config access policy matrix', () => {
       'third-party-reviewed',
     );
 
-    expect(hasAnyReasonCode(runtime, RuntimeErrorCodes.ConfigCapabilityInvalid)).toBe(true);
+    expect(
+      hasAnyReasonCode(runtime, RuntimeErrorCodes.ConfigCapabilityInvalid),
+    ).toBe(true);
 
     await runtime.stop();
   });
@@ -125,7 +143,9 @@ describe('config access policy matrix', () => {
     );
 
     expect(runtime.reports.startup?.policyMode).toBe('strict');
-    expect(hasAnyReasonCode(runtime, RuntimeErrorCodes.ConfigSectionNotAllowlisted)).toBe(true);
+    expect(
+      hasAnyReasonCode(runtime, RuntimeErrorCodes.ConfigSectionNotAllowlisted),
+    ).toBe(true);
 
     await runtime.stop();
   });
@@ -139,8 +159,12 @@ describe('config access policy matrix', () => {
     );
 
     const hasWildcardError =
-      runtime.reports.startup?.failedModules.some(f => f.message.includes('wildcard_config_capability_forbidden')) ||
-      runtime.reports.startup?.skippedModules.some(s => s.reason.message.includes('wildcard_config_capability_forbidden'));
+      runtime.reports.startup?.failedModules.some((f) =>
+        f.message.includes('wildcard_config_capability_forbidden'),
+      ) ||
+      runtime.reports.startup?.skippedModules.some((s) =>
+        s.reason.message.includes('wildcard_config_capability_forbidden'),
+      );
 
     expect(hasWildcardError).toBe(true);
 

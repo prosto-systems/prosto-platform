@@ -14,8 +14,8 @@ export const MANIFEST_CHECK_RESULT_ID = 'manifest-conformance';
  * Validates module manifest schema and semantic constraints.
  */
 export function runManifestConformanceCheck(params: {
-  manifest: IPlatformModuleManifest,
-  manifestValidator: IModuleManifestValidator,
+  manifest: IPlatformModuleManifest;
+  manifestValidator: IModuleManifestValidator;
 }): IContractCheckResult {
   const result = params.manifestValidator.validate(params.manifest);
 
@@ -30,11 +30,10 @@ export function runManifestConformanceCheck(params: {
     };
   }
 
-  const isSemantic = result.error
-    .issues
-    .some((issue) =>
-      issue.code.startsWith('duplicate_')
-      || issue.code === 'self_dependency');
+  const isSemantic = result.error.issues.some(
+    (issue) =>
+      issue.code.startsWith('duplicate_') || issue.code === 'self_dependency',
+  );
 
   return {
     id: MANIFEST_CHECK_RESULT_ID,

@@ -26,7 +26,10 @@ describe('runtime bootstrap critical failure', () => {
       modules: { artifactCache: { enabled: false } },
     } as IPlatformConfig;
 
-    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+    writeFileSync(
+      join(tempDir, 'app_settings.json'),
+      JSON.stringify(baseConfig),
+    );
 
     const critical = new TestModule(
       createManifest({
@@ -48,7 +51,11 @@ describe('runtime bootstrap critical failure', () => {
 
     expect(runtime.reports.startup?.status).toBe('failed');
     expect(runtime.startedModuleIds).toEqual([]);
-    expect(runtime.reports.startup?.failedModules.some((item) => item.moduleId === 'module-critical')).toBe(true);
+    expect(
+      runtime.reports.startup?.failedModules.some(
+        (item) => item.moduleId === 'module-critical',
+      ),
+    ).toBe(true);
 
     await runtime.stop();
   });

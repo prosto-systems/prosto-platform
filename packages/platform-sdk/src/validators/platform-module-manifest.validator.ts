@@ -19,17 +19,21 @@ import { PlatformModuleManifestSchema } from '../schemas/index.js';
 export class PlatformModuleManifestValidator implements IModuleManifestValidator {
   constructor(
     protected readonly manifestSchema: ZodType<IPlatformModuleManifest> = PlatformModuleManifestSchema,
-  ) {
-  }
+  ) {}
 
   validate(manifest: unknown): ModuleManifestValidationResultType {
-    const schemaResult = this._validateManifestSchema(this.manifestSchema, manifest);
+    const schemaResult = this._validateManifestSchema(
+      this.manifestSchema,
+      manifest,
+    );
 
     if (!schemaResult.success) {
       return schemaResult;
     }
 
-    const semanticIssues = this._validateManifestSemantics(schemaResult.manifest);
+    const semanticIssues = this._validateManifestSemantics(
+      schemaResult.manifest,
+    );
 
     if (semanticIssues.length) {
       return {
@@ -84,8 +88,8 @@ export class PlatformModuleManifestValidator implements IModuleManifestValidator
     const parsed = manifestSchema.safeParse(manifest);
 
     if (!parsed.success) {
-      const issues = parsed.error.issues.map(
-        (issue) => this._toManifestValidationIssue(issue),
+      const issues = parsed.error.issues.map((issue) =>
+        this._toManifestValidationIssue(issue),
       );
 
       return {
@@ -126,7 +130,9 @@ export class PlatformModuleManifestValidator implements IModuleManifestValidator
       });
     }
 
-    const duplicateCapabilities = this._collectDuplicates(manifest.capabilities);
+    const duplicateCapabilities = this._collectDuplicates(
+      manifest.capabilities,
+    );
 
     for (const capability of duplicateCapabilities) {
       issues.push({

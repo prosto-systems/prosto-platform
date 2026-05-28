@@ -1,1 +1,1 @@
-export * from './module-logger/index.js'
+export * from './module-logger/index.js';

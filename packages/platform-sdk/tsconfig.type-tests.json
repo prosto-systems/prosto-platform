@@ -3,7 +3,5 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": [
-    "tests/**/*.type-test.ts"
-  ]
+  "include": ["tests/**/*.type-test.ts"]
 }

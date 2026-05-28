@@ -15,7 +15,9 @@ export class DiagnosticReportBuilder extends ReportBaseBuilder {
   /**
    * Builds a startup report from the provided context.
    */
-  override buildStartupReport(context: IStartupReportBuildContext): IRuntimeStartupReport {
+  override buildStartupReport(
+    context: IStartupReportBuildContext,
+  ): IRuntimeStartupReport {
     return {
       type: 'startup',
       policyMode: context.policyMode,
@@ -33,8 +35,8 @@ export class DiagnosticReportBuilder extends ReportBaseBuilder {
         ...skippedModule,
         reason: this.sanitizeFailure(skippedModule.reason),
       })),
-      failedModules: context.failedModules.map(
-        (failedModule) => this.sanitizeFailure(failedModule),
+      failedModules: context.failedModules.map((failedModule) =>
+        this.sanitizeFailure(failedModule),
       ),
     };
   }
@@ -42,7 +44,9 @@ export class DiagnosticReportBuilder extends ReportBaseBuilder {
   /**
    * Builds a shutdown report from the provided context.
    */
-  override buildShutdownReport(context: IShutdownReportBuildContext): IRuntimeShutdownReport {
+  override buildShutdownReport(
+    context: IShutdownReportBuildContext,
+  ): IRuntimeShutdownReport {
     return {
       type: 'shutdown',
       correlationId: context.correlationId,

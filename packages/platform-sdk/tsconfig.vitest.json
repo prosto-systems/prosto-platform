@@ -2,11 +2,7 @@
   "extends": "@internal/tsconfig/base.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
-  "include": [
-    "tests/**/*.test.ts"
-  ]
+  "include": ["tests/**/*.test.ts"]
 }

@@ -23,10 +23,7 @@ import { ShutdownTimeoutError } from './module-lifecycle.errors.js';
  * Lifecycle orchestrator for managing module startup and shutdown.
  */
 export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator {
-  constructor(
-    private readonly _moduleContextFactory: IModuleContextFactory,
-  ) {
-  }
+  constructor(private readonly _moduleContextFactory: IModuleContextFactory) {}
 
   /**
    * Run the startup lifecycle for all modules.
@@ -89,7 +86,8 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
           errorCode: isTimeoutError
             ? RuntimeErrorCodes.ShutdownTimeout
             : RuntimeErrorCodes.ShutdownFailed,
-          message: error instanceof Error ? error.message : 'Unknown shutdown error.',
+          message:
+            error instanceof Error ? error.message : 'Unknown shutdown error.',
           remediationHint: isTimeoutError
             ? `Ensure module "${moduleId}" stop() resolves before timeout.`
             : `Inspect module "${moduleId}" stop() implementation and dependencies.`,

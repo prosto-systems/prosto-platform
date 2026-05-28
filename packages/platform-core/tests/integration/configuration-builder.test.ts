@@ -1,6 +1,9 @@
 import { describe, expect, it, beforeAll, afterAll } from 'vitest';
-import { ConfigurationBuilder, ConfigurationValidator } from '@/common/index.js';
-import {type IPlatformConfig, platformConfigSchema } from '@/runtime/index.js';
+import {
+  ConfigurationBuilder,
+  ConfigurationValidator,
+} from '@/common/index.js';
+import { type IPlatformConfig, platformConfigSchema } from '@/runtime/index.js';
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -19,19 +22,30 @@ describe('Config Integration', () => {
 
   it('builds config from files with environment overrides', () => {
     const baseConfig: IPlatformConfig = {
-      platform: { name: 'prosto-platform', version: '1.0.0', basePath: process.cwd(), startupPolicy: 'strict' },
+      platform: {
+        name: 'prosto-platform',
+        version: '1.0.0',
+        basePath: process.cwd(),
+        startupPolicy: 'strict',
+      },
       runtime: { shutdownTimeoutMs: 30000 },
       modules: { artifactCache: { enabled: false, path: './.cache' } },
       security: { secretRedaction: { enabled: true, patterns: ['password'] } },
       logging: { level: 'info', format: 'text' },
       custom: {},
-    }
+    };
 
-    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
-    writeFileSync(join(tempDir, 'app_settings.production.json'), JSON.stringify({
-      logging: { level: 'error' },
-      runtime: { shutdownTimeoutMs: 60000 },
-    } as IPlatformConfig));
+    writeFileSync(
+      join(tempDir, 'app_settings.json'),
+      JSON.stringify(baseConfig),
+    );
+    writeFileSync(
+      join(tempDir, 'app_settings.production.json'),
+      JSON.stringify({
+        logging: { level: 'error' },
+        runtime: { shutdownTimeoutMs: 60000 },
+      } as IPlatformConfig),
+    );
 
     const rawConfig = new ConfigurationBuilder()
       .addJsonFile(join(tempDir, 'app_settings.json'))
@@ -50,13 +64,18 @@ describe('Config Integration', () => {
 
   it('handles missing environment file as optional', () => {
     const baseConfig: IPlatformConfig = {
-      platform: { name: 'test', version: '0.1.0', basePath: process.cwd(), startupPolicy: 'strict' },
+      platform: {
+        name: 'test',
+        version: '0.1.0',
+        basePath: process.cwd(),
+        startupPolicy: 'strict',
+      },
       runtime: { shutdownTimeoutMs: 5000 },
       modules: { artifactCache: { enabled: false, path: './.cache' } },
       security: { secretRedaction: { enabled: true, patterns: [] } },
       logging: { level: 'info', format: 'text' },
       custom: {},
-    }
+    };
 
     writeFileSync(join(tempDir, 'base_only.json'), JSON.stringify(baseConfig));
 
@@ -72,7 +91,12 @@ describe('Config Integration', () => {
 
   it('command line overrides nested config values', () => {
     const baseConfig: IPlatformConfig = {
-      platform: { name: 'test', version: '0.1.0', basePath: process.cwd(), startupPolicy: 'strict' },
+      platform: {
+        name: 'test',
+        version: '0.1.0',
+        basePath: process.cwd(),
+        startupPolicy: 'strict',
+      },
       runtime: { shutdownTimeoutMs: 5000 },
       modules: { artifactCache: { enabled: false, path: './.cache' } },
       security: { secretRedaction: { enabled: true, patterns: [] } },
@@ -82,7 +106,10 @@ describe('Config Integration', () => {
 
     const rawConfig = new ConfigurationBuilder()
       .addInMemoryCollection(baseConfig)
-      .addCommandLine(['--logging:level=debug', '--modules:artifactCache:enabled=true'])
+      .addCommandLine([
+        '--logging:level=debug',
+        '--modules:artifactCache:enabled=true',
+      ])
       .build();
 
     const validated = configValidator.validate(rawConfig, platformConfigSchema);
@@ -97,7 +124,12 @@ describe('Config Integration', () => {
     process.env['PROSTO_LOGGING__LEVEL'] = 'debug';
 
     const baseConfig: IPlatformConfig = {
-      platform: { name: 'test', version: '0.1.0', basePath: process.cwd(), startupPolicy: 'strict' },
+      platform: {
+        name: 'test',
+        version: '0.1.0',
+        basePath: process.cwd(),
+        startupPolicy: 'strict',
+      },
       runtime: { shutdownTimeoutMs: 5000 },
       modules: { artifactCache: { enabled: false, path: './.cache' } },
       security: { secretRedaction: { enabled: true, patterns: [] } },

@@ -1,6 +1,4 @@
-import type {
-  IRuntimeFailureDiagnostic,
-} from './runtime-failure-diagnostic.interface.js';
+import type { IRuntimeFailureDiagnostic } from './runtime-failure-diagnostic.interface.js';
 
 /**
  * @alpha

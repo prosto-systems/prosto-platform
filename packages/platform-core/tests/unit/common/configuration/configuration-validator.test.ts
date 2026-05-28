@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { ConfigurationValidator, ConfigurationValidationError } from '@/common/index.js';
+import {
+  ConfigurationValidator,
+  ConfigurationValidationError,
+} from '@/common/index.js';
 
 const testSchema = z.object({
   name: z.string(),
@@ -31,19 +34,13 @@ describe('ConfigValidator', () => {
 
   it('throws ConfigValidationError for invalid config', () => {
     expect(() =>
-      configValidator.validate(
-        { name: 'test', age: -1 },
-        testSchema,
-      ),
+      configValidator.validate({ name: 'test', age: -1 }, testSchema),
     ).toThrow(ConfigurationValidationError);
   });
 
   it('throws ConfigValidationError for missing required fields', () => {
     expect(() =>
-      configValidator.validate(
-        { name: 'test' },
-        testSchema,
-      ),
+      configValidator.validate({ name: 'test' }, testSchema),
     ).toThrow(ConfigurationValidationError);
   });
 
@@ -59,9 +56,11 @@ describe('ConfigValidator', () => {
   });
 
   it('rejects extra keys when schema is strict', () => {
-    const strictSchema = z.object({
-      name: z.string(),
-    }).strict();
+    const strictSchema = z
+      .object({
+        name: z.string(),
+      })
+      .strict();
 
     expect(() =>
       configValidator.validate({ name: 'test', extra: 'field' }, strictSchema),
@@ -98,7 +97,10 @@ describe('ConfigValidator', () => {
       name: z.string().transform((s) => s.trim()),
     });
 
-    const result = configValidator.validate({ name: '  hello  ' }, trimmedSchema);
+    const result = configValidator.validate(
+      { name: '  hello  ' },
+      trimmedSchema,
+    );
     expect(result.name).toBe('hello');
   });
 });

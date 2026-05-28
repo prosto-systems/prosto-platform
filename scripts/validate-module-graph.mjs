@@ -13,7 +13,10 @@ const manifests = [];
 
 for (const packageDir of PACKAGE_DIRS) {
   const manifest = JSON.parse(
-    await readFile(path.resolve('packages', packageDir, 'package.json'), 'utf8'),
+    await readFile(
+      path.resolve('packages', packageDir, 'package.json'),
+      'utf8',
+    ),
   );
 
   manifests.push(manifest);
@@ -23,7 +26,9 @@ const graph = new Map();
 
 for (const manifest of manifests) {
   const packageName = String(manifest.name ?? '');
-  const dependencies = Object.keys(manifest.dependencies ?? {}).filter((dep) => dep.startsWith('@prosto/'));
+  const dependencies = Object.keys(manifest.dependencies ?? {}).filter((dep) =>
+    dep.startsWith('@prosto/'),
+  );
 
   graph.set(packageName, dependencies);
 }
@@ -54,4 +59,6 @@ for (const node of graph.keys()) {
   walk(node);
 }
 
-console.log('validate:module-graph passed: no workspace internal dependency cycles detected.');
+console.log(
+  'validate:module-graph passed: no workspace internal dependency cycles detected.',
+);

@@ -3,20 +3,16 @@ import type {
   IPlatformModuleManifest,
   StartupPolicyType,
 } from '@prosto/platform-sdk';
-import type {
-  IModuleLifecycleExecutionIssue,
-} from './module-lifecycle-execution-issue.interface.js';
-import type {
-  IModuleLifecycleShutdownIssue,
-} from './module-lifecycle-shutdown-issue.interface.js';
+import type { IModuleLifecycleExecutionIssue } from './module-lifecycle-execution-issue.interface.js';
+import type { IModuleLifecycleShutdownIssue } from './module-lifecycle-shutdown-issue.interface.js';
 
 /**
  * @alpha
  * Options for module lifecycle startup.
  */
 export interface IModuleLifecycleStartupOptions {
-  startupPolicy: StartupPolicyType,
-  sdkVersion: string,
+  startupPolicy: StartupPolicyType;
+  sdkVersion: string;
 }
 
 /**
@@ -24,9 +20,9 @@ export interface IModuleLifecycleStartupOptions {
  * Options for module lifecycle shutdown.
  */
 export interface IModuleLifecycleShutdownOptions {
-  startupPolicy: StartupPolicyType,
-  sdkVersion: string,
-  timeoutMs: number,
+  startupPolicy: StartupPolicyType;
+  sdkVersion: string;
+  timeoutMs: number;
 }
 
 /**

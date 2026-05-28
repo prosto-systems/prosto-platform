@@ -1,1 +1,1 @@
-export * from './secrets.redactor.js'
+export * from './secrets.redactor.js';

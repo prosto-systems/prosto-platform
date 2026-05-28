@@ -1,4 +1,8 @@
-import type { EventTokenType, ServiceTokenType, TokenNameType } from '../types/index.js';
+import type {
+  EventTokenType,
+  ServiceTokenType,
+  TokenNameType,
+} from '../types/index.js';
 import {
   EVENT_TOKEN_NAME_PREFIX,
   SERVICE_TOKEN_NAME_PREFIX,
@@ -34,7 +38,9 @@ export function getEventTokenKey(name: TokenNameType): string {
  * @alpha
  * Creates a globally stable, typed service token.
  */
-export function createServiceToken<TService>(name: TokenNameType): ServiceTokenType<TService> {
+export function createServiceToken<TService>(
+  name: TokenNameType,
+): ServiceTokenType<TService> {
   return Symbol.for(getServiceTokenKey(name)) as ServiceTokenType<TService>;
 }
 
@@ -42,6 +48,8 @@ export function createServiceToken<TService>(name: TokenNameType): ServiceTokenT
  * @alpha
  * Creates a globally stable, typed event token.
  */
-export function createEventToken<TPayload>(name: TokenNameType): EventTokenType<TPayload> {
+export function createEventToken<TPayload>(
+  name: TokenNameType,
+): EventTokenType<TPayload> {
   return Symbol.for(getEventTokenKey(name)) as EventTokenType<TPayload>;
 }

@@ -9,11 +9,12 @@ import {
 } from '../../src/index.js';
 
 type AssertType<TValue extends true> = TValue;
-type IsEqualType<TLeft, TRight> = (<TValue>() => TValue extends TLeft ? 1 : 2) extends <
+type IsEqualType<TLeft, TRight> =
+  (<TValue>() => TValue extends TLeft ? 1 : 2) extends <
     TValue,
   >() => TValue extends TRight ? 1 : 2
-  ? true
-  : false;
+    ? true
+    : false;
 
 interface IHealthService {
   ping: () => string;
@@ -27,14 +28,17 @@ declare const logger: IModuleLogger;
 declare const eventBus: IEventBus;
 declare const serviceRegistry: IServiceRegistry;
 
-const healthEventToken = createEventToken<IHealthEventPayload>('health.updated');
+const healthEventToken =
+  createEventToken<IHealthEventPayload>('health.updated');
 const healthServiceToken = createServiceToken<IHealthService>('health.service');
 
-type _EventTokenTypeAssertionType =
-  AssertType<IsEqualType<typeof healthEventToken, EventTokenType<IHealthEventPayload>>>;
+type _EventTokenTypeAssertionType = AssertType<
+  IsEqualType<typeof healthEventToken, EventTokenType<IHealthEventPayload>>
+>;
 
-type _ServiceTokenTypeAssertionType =
-  AssertType<IsEqualType<typeof healthServiceToken, ServiceTokenType<IHealthService>>>;
+type _ServiceTokenTypeAssertionType = AssertType<
+  IsEqualType<typeof healthServiceToken, ServiceTokenType<IHealthService>>
+>;
 
 eventBus.subscribe(healthEventToken, ({ payload }) => {
   if (payload.status === 'ok') {
@@ -54,5 +58,7 @@ if (!healthService) {
 
 healthService.ping();
 
-// @ts-expect-error Intentional type-level guard: invalid service shape for token.
-serviceRegistry.register(healthServiceToken, { ping: (code: number) => String(code) });
+serviceRegistry.register(healthServiceToken, {
+  // @ts-expect-error Intentional type-level guard: invalid service shape for token.
+  ping: (code: number) => String(code),
+});

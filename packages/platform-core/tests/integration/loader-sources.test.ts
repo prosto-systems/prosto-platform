@@ -29,7 +29,10 @@ describe('runtime loader sources', () => {
       modules: { artifactCache: { enabled: false } },
     } as IPlatformConfig;
 
-    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+    writeFileSync(
+      join(tempDir, 'app_settings.json'),
+      JSON.stringify(baseConfig),
+    );
 
     const moduleA = new TestModule(createManifest({ id: 'module-a' }));
 
@@ -50,7 +53,10 @@ describe('runtime loader sources', () => {
       modules: { artifactCache: { enabled: false } },
     } as IPlatformConfig;
 
-    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+    writeFileSync(
+      join(tempDir, 'app_settings.json'),
+      JSON.stringify(baseConfig),
+    );
 
     const moduleA = new TestModule(createManifest({ id: 'module-a' }));
 
@@ -69,8 +75,16 @@ describe('runtime loader sources', () => {
 
     expect(runtime.startedModuleIds).toEqual(['module-a']);
     expect(runtime.reports.startup?.status).toBe('degraded');
-    expect(runtime.reports.startup?.failedModules.some((item) => item.errorCode === RuntimeErrorCodes.SourceUrlInvalid)).toBe(true);
-    expect(runtime.reports.startup?.skippedModules.some((item) => item.moduleId === 'module-url')).toBe(true);
+    expect(
+      runtime.reports.startup?.failedModules.some(
+        (item) => item.errorCode === RuntimeErrorCodes.SourceUrlInvalid,
+      ),
+    ).toBe(true);
+    expect(
+      runtime.reports.startup?.skippedModules.some(
+        (item) => item.moduleId === 'module-url',
+      ),
+    ).toBe(true);
 
     await runtime.stop();
   });
@@ -81,7 +95,10 @@ describe('runtime loader sources', () => {
       modules: { artifactCache: { enabled: false } },
     } as IPlatformConfig;
 
-    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+    writeFileSync(
+      join(tempDir, 'app_settings.json'),
+      JSON.stringify(baseConfig),
+    );
 
     const artifactTempDir = await mkdtemp(join(tmpdir(), 'prosto-loader-'));
     const artifactPath = join(artifactTempDir, 'module.zip');
@@ -97,7 +114,8 @@ describe('runtime loader sources', () => {
             path: artifactPath,
             packaging: 'zip',
             integrity: {
-              checksum: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+              checksum:
+                'sha256:0000000000000000000000000000000000000000000000000000000000000000',
             },
           },
         ],
@@ -105,7 +123,12 @@ describe('runtime loader sources', () => {
       });
 
       expect(runtime.startedModuleIds).toEqual([]);
-      expect(runtime.reports.startup?.failedModules.some((item) => item.errorCode === RuntimeErrorCodes.SourceIntegrityMismatch)).toBe(true);
+      expect(
+        runtime.reports.startup?.failedModules.some(
+          (item) =>
+            item.errorCode === RuntimeErrorCodes.SourceIntegrityMismatch,
+        ),
+      ).toBe(true);
 
       await runtime.stop();
     } finally {
@@ -119,14 +142,19 @@ describe('runtime loader sources', () => {
       modules: { artifactCache: { enabled: false } },
     } as IPlatformConfig;
 
-    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+    writeFileSync(
+      join(tempDir, 'app_settings.json'),
+      JSON.stringify(baseConfig),
+    );
 
     const artifactTempDir = await mkdtemp(join(tmpdir(), 'prosto-loader-'));
     const artifactPath = join(artifactTempDir, 'module.zip');
 
     try {
       await writeFile(artifactPath, 'artifact payload', 'utf8');
-      const checksum = createHash('sha256').update('artifact payload').digest('hex');
+      const checksum = createHash('sha256')
+        .update('artifact payload')
+        .digest('hex');
 
       const runtime = await createRuntime({
         modules: [
@@ -144,7 +172,11 @@ describe('runtime loader sources', () => {
       });
 
       expect(runtime.startedModuleIds).toEqual([]);
-      expect(runtime.reports.startup?.failedModules.some((item) => item.errorCode === RuntimeErrorCodes.SourceExtractionFailed)).toBe(true);
+      expect(
+        runtime.reports.startup?.failedModules.some(
+          (item) => item.errorCode === RuntimeErrorCodes.SourceExtractionFailed,
+        ),
+      ).toBe(true);
 
       await runtime.stop();
     } finally {

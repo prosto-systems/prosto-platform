@@ -1,1 +1,1 @@
-export * from './module-artifacts/index.js'
+export * from './module-artifacts/index.js';

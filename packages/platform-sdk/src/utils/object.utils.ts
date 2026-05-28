@@ -1,14 +1,19 @@
 /**
  * Checks if a value is a plain object (not an array or null).
  */
-export function isPlainObject(value: unknown): value is Record<string, unknown> {
+export function isPlainObject(
+  value: unknown,
+): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /**
  * Resolves a nested value from a data object using a dot-separated key.
  */
-export function resolveNestedValue<T>(data: Record<string, unknown>, key = ''): T | undefined {
+export function resolveNestedValue<T>(
+  data: Record<string, unknown>,
+  key = '',
+): T | undefined {
   return key.split('.').reduce<unknown>((obj, part) => {
     if (obj && typeof obj === 'object' && part in obj) {
       return (obj as Record<string, unknown>)[part];
@@ -27,7 +32,7 @@ export function setNestedValue(
   value: unknown,
   options: {
     /** @default '.' */
-    pathSeparator?: string
+    pathSeparator?: string;
   } = {},
 ): void {
   const { pathSeparator = '.' } = options;
@@ -52,7 +57,10 @@ export function setNestedValue(
 /**
  * Collects all keys in a data object, optionally with a prefix.
  */
-export function collectKeys(data: Record<string, unknown>, prefix = ''): string[] {
+export function collectKeys(
+  data: Record<string, unknown>,
+  prefix = '',
+): string[] {
   const keys: string[] = [];
 
   for (const [key, value] of Object.entries(data)) {
@@ -91,15 +99,16 @@ export interface IConfigUtils {
  *  config.keys(); // ['a.b.c', 'a']
  *  config.keys('a'); // ['b.c']
  */
-export function createConfigObject<TConfig extends object = Record<string, unknown>>(
-  data: TConfig,
-): TConfig & IConfigUtils {
-  return Object.setPrototypeOf(data, ({
+export function createConfigObject<
+  TConfig extends object = Record<string, unknown>,
+>(data: TConfig): TConfig & IConfigUtils {
+  return Object.setPrototypeOf(data, {
     get<T = unknown>(key = ''): T {
       if (key === '') return this as T;
 
       return resolveNestedValue(
-        this as unknown as Record<string, unknown>, key,
+        this as unknown as Record<string, unknown>,
+        key,
       ) as T;
     },
 
@@ -112,9 +121,10 @@ export function createConfigObject<TConfig extends object = Record<string, unkno
     },
 
     has(key: string): boolean {
-      return resolveNestedValue(
-        this as unknown as Record<string, unknown>, key,
-      ) !== undefined;
+      return (
+        resolveNestedValue(this as unknown as Record<string, unknown>, key) !==
+        undefined
+      );
     },
 
     keys(key = ''): string[] {
@@ -126,5 +136,5 @@ export function createConfigObject<TConfig extends object = Record<string, unkno
 
       return collectKeys(value as Record<string, unknown>);
     },
-  } as IConfigUtils));
+  } as IConfigUtils);
 }

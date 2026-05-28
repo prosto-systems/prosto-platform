@@ -22,8 +22,7 @@ export class ConfigurationValidationError extends Error {
 export class ConfigurationValidator {
   constructor(
     private readonly _secretsRedactor: ISecretsRedactor = new SecretsRedactor(),
-  ) {
-  }
+  ) {}
 
   validate<T>(configuration: unknown, schema: ZodType<T>): T {
     const result = schema.safeParse(configuration);
@@ -31,7 +30,7 @@ export class ConfigurationValidator {
     if (!result.success) {
       const errors = this._formatZodErrors(result.error);
       const message = this._secretsRedactor.redact(
-        `Configuration validation failed:\n${errors.join('\n')}`
+        `Configuration validation failed:\n${errors.join('\n')}`,
       );
 
       throw new ConfigurationValidationError(message, result.error);
@@ -42,9 +41,7 @@ export class ConfigurationValidator {
 
   private _formatZodErrors(error: ZodError): string[] {
     return error.issues.map((issue) => {
-      const path = issue.path.length > 0
-        ? issue.path.join('.')
-        : 'root';
+      const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
 
       return `  - "${path}": ${issue.message}`;
     });

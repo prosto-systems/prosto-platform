@@ -15,8 +15,7 @@ import { fileExists } from '../utils/index.js';
  * Abstract base class for artifact sources.
  */
 export abstract class ArtifactBaseSource implements IArtifactSource {
-  constructor(private readonly _sourceType: ModuleArtifactSource) {
-  }
+  constructor(private readonly _sourceType: ModuleArtifactSource) {}
 
   /**
    * Source type identifier (public for interface compliance).
@@ -69,7 +68,7 @@ export abstract class ArtifactBaseSource implements IArtifactSource {
 
   protected parseChecksum(input: string): {
     algorithm: string;
-    value: string
+    value: string;
   } | null {
     const normalized = input.trim();
 
@@ -120,9 +119,10 @@ export abstract class ArtifactBaseSource implements IArtifactSource {
       }
 
       if (pkg.exports) {
-        const entry = typeof pkg.exports === 'string'
-          ? pkg.exports
-          : pkg.exports['.']?.import ?? pkg.exports['.']?.default;
+        const entry =
+          typeof pkg.exports === 'string'
+            ? pkg.exports
+            : (pkg.exports['.']?.import ?? pkg.exports['.']?.default);
 
         if (entry) {
           return join(packageDir, entry);
@@ -130,7 +130,12 @@ export abstract class ArtifactBaseSource implements IArtifactSource {
       }
     }
 
-    for (const candidate of ['index.mjs', 'index.js', 'dist/index.mjs', 'dist/index.js']) {
+    for (const candidate of [
+      'index.mjs',
+      'index.js',
+      'dist/index.mjs',
+      'dist/index.js',
+    ]) {
       const candidatePath = join(packageDir, candidate);
 
       if (await fileExists(candidatePath)) {

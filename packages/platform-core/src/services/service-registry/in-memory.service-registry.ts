@@ -1,10 +1,16 @@
 import type { IServiceRegistry, ServiceTokenType } from '@prosto/platform-sdk';
-import { ServiceAlreadyRegisteredError, ServiceNotFoundError } from './service-registry.errors.js';
+import {
+  ServiceAlreadyRegisteredError,
+  ServiceNotFoundError,
+} from './service-registry.errors.js';
 
 export class InMemoryServiceRegistry implements IServiceRegistry {
   private readonly _registry = new Map<ServiceTokenType<unknown>, unknown>();
 
-  register<TService>(token: ServiceTokenType<TService>, service: NoInfer<TService>): void {
+  register<TService>(
+    token: ServiceTokenType<TService>,
+    service: NoInfer<TService>,
+  ): void {
     if (this._registry.has(token)) {
       throw new ServiceAlreadyRegisteredError(token.toString());
     }
@@ -12,7 +18,10 @@ export class InMemoryServiceRegistry implements IServiceRegistry {
     this._registry.set(token, service);
   }
 
-  override<TService>(token: ServiceTokenType<TService>, service: NoInfer<TService>): void {
+  override<TService>(
+    token: ServiceTokenType<TService>,
+    service: NoInfer<TService>,
+  ): void {
     if (!this._registry.has(token)) {
       throw new ServiceNotFoundError(token.toString());
     }

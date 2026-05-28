@@ -1,5 +1,8 @@
 import type { IPlatformModuleManifest } from '@prosto/platform-sdk';
-import { ContractFailureCodes, type IContractCheckResult } from '../types/index.js';
+import {
+  ContractFailureCodes,
+  type IContractCheckResult,
+} from '../types/index.js';
 
 export const SECURITY_CHECK_RESULT_ID = 'security-metadata';
 
@@ -28,7 +31,8 @@ export function runSecurityMetadataConformanceCheck(
       severity: 'advisory',
       passed: false,
       code: ContractFailureCodes.SecuritySignatureOrChecksumMissing,
-      details: 'Manifest should provide checksum or signature metadata for artifact integrity.',
+      details:
+        'Manifest should provide checksum or signature metadata for artifact integrity.',
     };
   }
 

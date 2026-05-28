@@ -41,7 +41,9 @@ export class MemorySource extends ArtifactBaseSource {
   /**
    * Load module from memory - returns immediately with normalized artifact.
    */
-  override async load(): Promise<IModuleCandidateArtifact | IRejectedModuleArtifact> {
+  override async load(): Promise<
+    IModuleCandidateArtifact | IRejectedModuleArtifact
+  > {
     const validation = this.validate();
 
     if (!validation.ok) {
@@ -64,8 +66,9 @@ export class MemorySource extends ArtifactBaseSource {
   }
 
   protected override getModuleIdHint(): string | undefined {
-    return this._descriptor.module?.manifest.id
-      ?? this._descriptor.moduleIdHint;
+    return (
+      this._descriptor.module?.manifest.id ?? this._descriptor.moduleIdHint
+    );
   }
 
   protected override getSourceRef(): string {

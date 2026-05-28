@@ -38,8 +38,8 @@ describe('manifest validation', () => {
     }
 
     expect(result.error).toBeInstanceOf(ManifestValidationError);
-    expect(result.error.issues.some(
-      (issue) => issue.path === 'capabilities')
+    expect(
+      result.error.issues.some((issue) => issue.path === 'capabilities'),
     ).toBe(true);
   });
 
@@ -55,8 +55,10 @@ describe('manifest validation', () => {
       throw new Error('Expected validation failure.');
     }
 
-    expect(result.error.issues.some(
-      (issue) => issue.code === 'duplicate_capability')
+    expect(
+      result.error.issues.some(
+        (issue) => issue.code === 'duplicate_capability',
+      ),
     ).toBe(true);
   });
 });

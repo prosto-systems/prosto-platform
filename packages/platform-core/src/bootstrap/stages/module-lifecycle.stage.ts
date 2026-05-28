@@ -21,7 +21,9 @@ export class ModuleLifecycleStage extends BootstrapBaseStage {
     super();
   }
 
-  override async execute(context: IBootstrapStageContext): Promise<IBootstrapStageContext> {
+  override async execute(
+    context: IBootstrapStageContext,
+  ): Promise<IBootstrapStageContext> {
     const loadedModules = context.loadedModules;
 
     if (!loadedModules.length) {
@@ -67,11 +69,14 @@ export class ModuleLifecycleStage extends BootstrapBaseStage {
         this.stopPipeline(context);
 
         // Shutdown any started modules
-        await this._moduleLifecycleOrchestrator.shutdown(startupResult.startedModules, {
-          startupPolicy: context.policyMode,
-          sdkVersion: context.runtimeVersion.sdkVersion,
-          timeoutMs: 10000,
-        });
+        await this._moduleLifecycleOrchestrator.shutdown(
+          startupResult.startedModules,
+          {
+            startupPolicy: context.policyMode,
+            sdkVersion: context.runtimeVersion.sdkVersion,
+            timeoutMs: 60000,
+          },
+        );
 
         return { ...context, loadedModules: [] };
       }

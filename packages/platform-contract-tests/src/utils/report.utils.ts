@@ -46,7 +46,7 @@ export function buildConformanceSummary(
  * Builds machine-readable module conformance report.
  */
 export function buildConformanceReport(
-  params: Omit<IModuleContractConformanceReport, 'summary'>
+  params: Omit<IModuleContractConformanceReport, 'summary'>,
 ): IModuleContractConformanceReport {
   return {
     moduleId: params.moduleId,
@@ -61,6 +61,8 @@ export function buildConformanceReport(
  * @alpha
  * Serializes report in deterministic JSON format for CI consumers.
  */
-export function toConformanceReportJson(report: IModuleContractConformanceReport): string {
+export function toConformanceReportJson(
+  report: IModuleContractConformanceReport,
+): string {
   return `${JSON.stringify(report, null, 2)}\n`;
 }

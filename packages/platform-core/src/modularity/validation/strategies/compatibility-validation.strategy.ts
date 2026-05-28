@@ -7,9 +7,7 @@ import {
   PlatformModuleCompatibilityValidator,
 } from '@prosto/platform-sdk';
 import { RuntimeErrorCodes } from '@/common/index.js';
-import {
-  ModuleValidationBaseStrategy,
-} from './module-validation.base-strategy.js';
+import { ModuleValidationBaseStrategy } from './module-validation.base-strategy.js';
 
 /**
  * @alpha
@@ -45,7 +43,8 @@ export class CompatibilityValidationStrategy extends ModuleValidationBaseStrateg
     return this.failure({
       errorCode: RuntimeErrorCodes.CompatibilityMismatch,
       message: `Compatibility validation failed for module ${input.artifact.moduleId}: ${issueMessages.join('; ')}`,
-      remediationHint: 'Adjust module sdkVersion/nodeVersion ranges or runtime versions to satisfy compatibility constraints.',
+      remediationHint:
+        'Adjust module sdkVersion/nodeVersion ranges or runtime versions to satisfy compatibility constraints.',
     });
   }
 }

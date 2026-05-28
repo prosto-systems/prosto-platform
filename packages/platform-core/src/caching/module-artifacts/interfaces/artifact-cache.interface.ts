@@ -1,6 +1,4 @@
-import type {
-  IArtifactCacheEntryMetadata,
-} from './artifact-cache-entry-metadata.interface.js';
+import type { IArtifactCacheEntryMetadata } from './artifact-cache-entry-metadata.interface.js';
 
 /**
  * @alpha
@@ -8,7 +6,11 @@ import type {
  */
 export interface IArtifactCache {
   get(key: string): Promise<Buffer | null>;
-  set(key: string, data: Buffer, metadata: IArtifactCacheEntryMetadata): Promise<void>;
+  set(
+    key: string,
+    data: Buffer,
+    metadata: IArtifactCacheEntryMetadata,
+  ): Promise<void>;
   has(key: string): Promise<boolean>;
   evict(key: string): Promise<void>;
   clear(): Promise<void>;

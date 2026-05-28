@@ -30,13 +30,16 @@ import { ArtifactBaseSource } from './artifact.base-source.js';
 
 interface INpmPackageMetadata {
   readonly name: string;
-  readonly versions: Record<string, {
-    readonly dist: {
-      readonly tarball: string;
-      readonly integrity?: string;
-      readonly shasum?: string;
-    };
-  }>;
+  readonly versions: Record<
+    string,
+    {
+      readonly dist: {
+        readonly tarball: string;
+        readonly integrity?: string;
+        readonly shasum?: string;
+      };
+    }
+  >;
 }
 
 /**
@@ -53,13 +56,18 @@ export class RegistrySource extends ArtifactBaseSource {
   }
 
   override validate(): ArtifactSourceValidationResultType {
-    if (!this._descriptor.packageName.trim() || !this._descriptor.version.trim()) {
+    if (
+      !this._descriptor.packageName.trim() ||
+      !this._descriptor.version.trim()
+    ) {
       return {
         ok: false,
         error: {
           reasonCode: RuntimeErrorCodes.SourceDescriptorInvalid,
-          message: 'Registry source requires non-empty packageName and version.',
-          remediationHint: 'Provide registry package coordinates for registry source.',
+          message:
+            'Registry source requires non-empty packageName and version.',
+          remediationHint:
+            'Provide registry package coordinates for registry source.',
         },
       };
     }
@@ -67,21 +75,25 @@ export class RegistrySource extends ArtifactBaseSource {
     return { ok: true };
   }
 
-  override async load(): Promise<IModuleCandidateArtifact | IRejectedModuleArtifact> {
+  override async load(): Promise<
+    IModuleCandidateArtifact | IRejectedModuleArtifact
+  > {
     const validation = this.validate();
 
     if (!validation.ok) {
       return this.createRejected('discover', validation.error);
     }
 
-    const registryUrl = this._descriptor.registryUrl ?? 'https://registry.npmjs.org';
+    const registryUrl =
+      this._descriptor.registryUrl ?? 'https://registry.npmjs.org';
     const metadata = await this._fetchPackageMetadata(registryUrl);
 
     if (!metadata) {
       return this.createRejected('discover', {
         reasonCode: RuntimeErrorCodes.SourceFetchFailed,
         message: `Package "${this._descriptor.packageName}@${this._descriptor.version}" not found.`,
-        remediationHint: 'Verify package name and version exist in the registry.',
+        remediationHint:
+          'Verify package name and version exist in the registry.',
       });
     }
 
@@ -103,7 +115,8 @@ export class RegistrySource extends ArtifactBaseSource {
     }
 
     const registryIntegrity = versionData.dist.integrity;
-    const expectedChecksum = this._descriptor.integrity?.checksum ?? registryIntegrity;
+    const expectedChecksum =
+      this._descriptor.integrity?.checksum ?? registryIntegrity;
 
     if (expectedChecksum) {
       const verified = this._verifyChecksum(artifact, expectedChecksum);
@@ -112,7 +125,8 @@ export class RegistrySource extends ArtifactBaseSource {
         return this.createRejected('validate', {
           reasonCode: RuntimeErrorCodes.SourceIntegrityMismatch,
           message: 'Registry artifact integrity verification failed.',
-          remediationHint: 'Checksum mismatch — artifact may have been tampered with.',
+          remediationHint:
+            'Checksum mismatch — artifact may have been tampered with.',
         });
       }
     }
@@ -124,7 +138,9 @@ export class RegistrySource extends ArtifactBaseSource {
     }
 
     try {
-      const entryPath = await this.resolveEntryPath(extractionResult.extractPath);
+      const entryPath = await this.resolveEntryPath(
+        extractionResult.extractPath,
+      );
       const module = await DynamicModuleLoader.loadModuleEntry(entryPath);
       const registryRef = `${this._descriptor.packageName}@${this._descriptor.version}`;
 
@@ -156,18 +172,22 @@ export class RegistrySource extends ArtifactBaseSource {
     return `${this._descriptor.packageName}@${this._descriptor.version}`;
   }
 
-  private async _fetchPackageMetadata(registryUrl: string): Promise<INpmPackageMetadata | null> {
+  private async _fetchPackageMetadata(
+    registryUrl: string,
+  ): Promise<INpmPackageMetadata | null> {
     const metadataUrl = `${registryUrl.replace(/\/$/, '')}/${this._descriptor.packageName}`;
 
     try {
       const response = await this._httpClient.fetch(metadataUrl, {
-        headers: { 'Accept': 'application/json' },
+        headers: { Accept: 'application/json' },
         authType: this._descriptor.authType,
         authToken: this._descriptor.authToken,
         timeoutMs: 15_000,
       });
 
-      const metadata: INpmPackageMetadata = JSON.parse(response.toString('utf8'));
+      const metadata: INpmPackageMetadata = JSON.parse(
+        response.toString('utf8'),
+      );
 
       return metadata;
     } catch {
@@ -192,13 +212,16 @@ export class RegistrySource extends ArtifactBaseSource {
     };
   }
 
-  private async _getArtifact(tarballUrl: string): Promise<Buffer | {
-    error: {
-      reasonCode: RuntimeErrorCodes;
-      message: string;
-      remediationHint: string;
-    }
-  }> {
+  private async _getArtifact(tarballUrl: string): Promise<
+    | Buffer
+    | {
+        error: {
+          reasonCode: RuntimeErrorCodes;
+          message: string;
+          remediationHint: string;
+        };
+      }
+  > {
     const cacheKey = ArtifactCacheKeyGenerator.forRegistry(this._descriptor);
     const cached = await this._cache.get(cacheKey);
     let payload: Buffer;
@@ -208,7 +231,11 @@ export class RegistrySource extends ArtifactBaseSource {
     } else {
       try {
         payload = await this._fetchTarball(tarballUrl);
-        await this._cache.set(cacheKey, payload, this._buildCacheMetadata(payload));
+        await this._cache.set(
+          cacheKey,
+          payload,
+          this._buildCacheMetadata(payload),
+        );
       } catch (error) {
         return {
           error: {
@@ -216,7 +243,8 @@ export class RegistrySource extends ArtifactBaseSource {
             message: `Failed to fetch tarball from "${tarballUrl}": ${
               error instanceof Error ? error.message : 'unknown'
             }`,
-            remediationHint: 'Ensure registry is accessible and runtime has network permissions.',
+            remediationHint:
+              'Ensure registry is accessible and runtime has network permissions.',
           },
         };
       }
@@ -244,17 +272,20 @@ export class RegistrySource extends ArtifactBaseSource {
     return false;
   }
 
-  private async _extract(artifact: Buffer): Promise<{
-    packaging: `${ModuleArtifactPackaging}`;
-    tempDir: string;
-    extractPath: string;
-  } | {
-    error: {
-      reasonCode: RuntimeErrorCodes;
-      message: string;
-      remediationHint: string;
-    }
-  }> {
+  private async _extract(artifact: Buffer): Promise<
+    | {
+        packaging: `${ModuleArtifactPackaging}`;
+        tempDir: string;
+        extractPath: string;
+      }
+    | {
+        error: {
+          reasonCode: RuntimeErrorCodes;
+          message: string;
+          remediationHint: string;
+        };
+      }
+  > {
     const tempDir = await createTempDir('prosto-registry');
     const tempFilePath = join(tempDir, 'package.tgz');
     const extractPath = join(tempDir, 'extracted');

@@ -23,7 +23,11 @@ describe('ConfigurationBuilder', () => {
       .addInMemoryCollection({ key: 'second', extra: 'added' })
       .build();
 
-    expect(config).toEqual({ key: 'second', shared: 'from-first', extra: 'added' });
+    expect(config).toEqual({
+      key: 'second',
+      shared: 'from-first',
+      extra: 'added',
+    });
   });
 
   it('deep merges nested objects from multiple providers', () => {
@@ -99,8 +103,9 @@ describe('ConfigurationBuilder', () => {
   });
 
   it('provider instances are isolated between builds', () => {
-    const builder = new ConfigurationBuilder()
-      .addInMemoryCollection({ key: 'value' });
+    const builder = new ConfigurationBuilder().addInMemoryCollection({
+      key: 'value',
+    });
 
     const first = builder.build();
     const second = builder.build();

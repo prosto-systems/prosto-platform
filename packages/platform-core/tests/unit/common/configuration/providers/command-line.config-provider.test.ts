@@ -3,14 +3,19 @@ import { CommandLineConfigurationProvider } from '@/common/index.js';
 
 describe('CommandLineConfigProvider', () => {
   it('parses --key=value format', () => {
-    const provider = new CommandLineConfigurationProvider(['--logging:level=debug']);
+    const provider = new CommandLineConfigurationProvider([
+      '--logging:level=debug',
+    ]);
     const config = provider.load();
 
     expect(config).toEqual({ logging: { level: 'debug' } });
   });
 
   it('parses --key value format', () => {
-    const provider = new CommandLineConfigurationProvider(['--logging:level', 'debug']);
+    const provider = new CommandLineConfigurationProvider([
+      '--logging:level',
+      'debug',
+    ]);
     const config = provider.load();
 
     expect(config).toEqual({ logging: { level: 'debug' } });
@@ -48,14 +53,19 @@ describe('CommandLineConfigProvider', () => {
   });
 
   it('coerces numeric values', () => {
-    const provider = new CommandLineConfigurationProvider(['--runtime:shutdownTimeoutMs=60000']);
+    const provider = new CommandLineConfigurationProvider([
+      '--runtime:shutdownTimeoutMs=60000',
+    ]);
     const config = provider.load();
 
     expect(config).toEqual({ runtime: { shutdownTimeoutMs: 60000 } });
   });
 
   it('coerces boolean values', () => {
-    const provider = new CommandLineConfigurationProvider(['--feature:enabled=true', '--feature:active=false']);
+    const provider = new CommandLineConfigurationProvider([
+      '--feature:enabled=true',
+      '--feature:active=false',
+    ]);
     const config = provider.load();
 
     expect(config).toEqual({

@@ -54,7 +54,10 @@ export class ArtifactFetcher implements IModuleArtifactHttpClient {
     this._retryDelayMs = options?.retryDelayMs ?? 1_000;
   }
 
-  async fetch(url: string, options?: IArtifactFetchRequestOptions): Promise<Buffer> {
+  async fetch(
+    url: string,
+    options?: IArtifactFetchRequestOptions,
+  ): Promise<Buffer> {
     const timeout = options?.timeoutMs ?? this._defaultTimeoutMs;
     let lastError: Error | null = null;
 
@@ -89,7 +92,9 @@ export class ArtifactFetcher implements IModuleArtifactHttpClient {
     throw lastError ?? new Error('Fetch failed');
   }
 
-  private _buildHeaders(options?: IArtifactFetchRequestOptions): Record<string, string> {
+  private _buildHeaders(
+    options?: IArtifactFetchRequestOptions,
+  ): Record<string, string> {
     const headers: Record<string, string> = options?.headers ?? {};
 
     if (!headers['Authorization'] && options?.authToken) {
@@ -101,6 +106,6 @@ export class ArtifactFetcher implements IModuleArtifactHttpClient {
   }
 
   private _delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

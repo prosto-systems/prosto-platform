@@ -1,1 +1,1 @@
-export * from './manifest.schema.js'
+export * from './manifest.schema.js';

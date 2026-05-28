@@ -9,7 +9,10 @@ import type { IDependencyGraph, IGraphNode } from './interfaces/index.js';
  * Implementation of IDependencyGraph for module dependency management.
  */
 export class DependencyGraph implements IDependencyGraph {
-  private readonly _nodes = new Map<IPlatformModuleManifest['id'], IGraphNode>();
+  private readonly _nodes = new Map<
+    IPlatformModuleManifest['id'],
+    IGraphNode
+  >();
 
   constructor(modules: readonly IPlatformModule[]) {
     const sorted = [...modules].sort((left, right) =>
@@ -107,7 +110,9 @@ export class DependencyGraph implements IDependencyGraph {
    * Gets all module IDs in the graph.
    */
   getModuleIds(): readonly string[] {
-    return [...this._nodes.keys()].sort((left, right) => left.localeCompare(right));
+    return [...this._nodes.keys()].sort((left, right) =>
+      left.localeCompare(right),
+    );
   }
 
   /**

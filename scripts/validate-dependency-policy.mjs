@@ -37,19 +37,27 @@ for (const packageDir of WORKSPACE_PACKAGE_DIRS) {
     }
 
     if (!allowed.has(depName)) {
-      throw new Error(`Dependency policy violation: ${packageName} cannot depend on ${depName}.`);
+      throw new Error(
+        `Dependency policy violation: ${packageName} cannot depend on ${depName}.`,
+      );
     }
   }
 }
 
-const rootManifest = JSON.parse(await readFile(path.resolve('package.json'), 'utf8'));
+const rootManifest = JSON.parse(
+  await readFile(path.resolve('package.json'), 'utf8'),
+);
 const rootDeps = Object.keys(rootManifest.dependencies ?? {});
 const forbiddenRootDeps = ['cookie-parser', 'cors', 'helmet', 'node-fetch'];
 
 for (const forbidden of forbiddenRootDeps) {
   if (rootDeps.includes(forbidden)) {
-    throw new Error(`Root dependency policy violation: ${forbidden} must be owned by adapter packages.`);
+    throw new Error(
+      `Root dependency policy violation: ${forbidden} must be owned by adapter packages.`,
+    );
   }
 }
 
-console.log('validate:dependency-policy passed: internal dependency rules and adapter dependency ownership are valid.');
+console.log(
+  'validate:dependency-policy passed: internal dependency rules and adapter dependency ownership are valid.',
+);

@@ -6,7 +6,12 @@ describe('DependencyGraph', () => {
   it('creates graph from modules', () => {
     const modules = [
       { manifest: { id: 'a', dependencies: [] } },
-      { manifest: { id: 'b', dependencies: [{ id: 'a', version: '^1.0.0', optional: false }] } },
+      {
+        manifest: {
+          id: 'b',
+          dependencies: [{ id: 'a', version: '^1.0.0', optional: false }],
+        },
+      },
     ] as unknown as readonly IPlatformModule[];
 
     const graph = new DependencyGraph(modules);
@@ -19,7 +24,12 @@ describe('DependencyGraph', () => {
   it('returns dependencies for a module', () => {
     const modules = [
       { manifest: { id: 'a', dependencies: [] } },
-      { manifest: { id: 'b', dependencies: [{ id: 'a', version: '^1.0.0', optional: false }] } },
+      {
+        manifest: {
+          id: 'b',
+          dependencies: [{ id: 'a', version: '^1.0.0', optional: false }],
+        },
+      },
     ] as unknown as readonly IPlatformModule[];
 
     const graph = new DependencyGraph(modules);
@@ -31,8 +41,18 @@ describe('DependencyGraph', () => {
   it('returns dependents for a module', () => {
     const modules = [
       { manifest: { id: 'a', dependencies: [] } },
-      { manifest: { id: 'b', dependencies: [{ id: 'a', version: '^1.0.0', optional: false }] } },
-      { manifest: { id: 'c', dependencies: [{ id: 'a', version: '^1.0.0', optional: false }] } },
+      {
+        manifest: {
+          id: 'b',
+          dependencies: [{ id: 'a', version: '^1.0.0', optional: false }],
+        },
+      },
+      {
+        manifest: {
+          id: 'c',
+          dependencies: [{ id: 'a', version: '^1.0.0', optional: false }],
+        },
+      },
     ] as unknown as readonly IPlatformModule[];
 
     const graph = new DependencyGraph(modules);
@@ -62,7 +82,9 @@ describe('DependencyGraph', () => {
 
     expect(graph.size).toBe(1);
 
-    graph.addModule({ manifest: { id: 'b', dependencies: [] } } as unknown as IPlatformModule);
+    graph.addModule({
+      manifest: { id: 'b', dependencies: [] },
+    } as unknown as IPlatformModule);
     expect(graph.size).toBe(2);
 
     graph.removeModule('a');
@@ -86,7 +108,12 @@ describe('CycleDetector', () => {
   it('detects no cycle in acyclic graph', () => {
     const modules = [
       { manifest: { id: 'a', dependencies: [] } },
-      { manifest: { id: 'b', dependencies: [{ id: 'a', version: '^1.0.0', optional: false }] } },
+      {
+        manifest: {
+          id: 'b',
+          dependencies: [{ id: 'a', version: '^1.0.0', optional: false }],
+        },
+      },
     ] as unknown as readonly IPlatformModule[];
 
     const graph = new DependencyGraph(modules);
@@ -99,8 +126,18 @@ describe('CycleDetector', () => {
 
   it('detects cycle in dependency graph', () => {
     const modules = [
-      { manifest: { id: 'a', dependencies: [{ id: 'b', version: '^1.0.0', optional: false }] } },
-      { manifest: { id: 'b', dependencies: [{ id: 'a', version: '^1.0.0', optional: false }] } },
+      {
+        manifest: {
+          id: 'a',
+          dependencies: [{ id: 'b', version: '^1.0.0', optional: false }],
+        },
+      },
+      {
+        manifest: {
+          id: 'b',
+          dependencies: [{ id: 'a', version: '^1.0.0', optional: false }],
+        },
+      },
     ] as unknown as readonly IPlatformModule[];
 
     const graph = new DependencyGraph(modules);

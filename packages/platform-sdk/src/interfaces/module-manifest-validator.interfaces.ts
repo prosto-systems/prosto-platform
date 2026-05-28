@@ -1,7 +1,5 @@
 import type { ManifestValidationError } from '../errors/index.js';
-import type {
-  IPlatformModuleManifest,
-} from './platform-module-manifest.interfaces.js';
+import type { IPlatformModuleManifest } from './platform-module-manifest.interfaces.js';
 
 /**
  * @alpha

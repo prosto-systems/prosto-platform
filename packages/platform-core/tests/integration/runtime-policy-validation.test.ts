@@ -28,7 +28,10 @@ describe('runtime policy diagnostics validation', () => {
       modules: { artifactCache: { enabled: false } },
     } as IPlatformConfig;
 
-    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+    writeFileSync(
+      join(tempDir, 'app_settings.json'),
+      JSON.stringify(baseConfig),
+    );
 
     const moduleA = new TestModule(createManifest({ id: 'module-a' }));
 
@@ -38,7 +41,9 @@ describe('runtime policy diagnostics validation', () => {
       configDir: tempDir,
     });
 
-    expect(() => validateOperationalReportsSchema(runtime.reports)).not.toThrow();
+    expect(() =>
+      validateOperationalReportsSchema(runtime.reports),
+    ).not.toThrow();
     expect(runtime.reports.startup?.correlationId).toBe('rt-validation-test');
     expect(runtime.reports.startup?.policyMode).toBe('strict');
 
@@ -64,7 +69,10 @@ describe('config access policy validation', () => {
         modules: { artifactCache: { enabled: false } },
       } as IPlatformConfig;
 
-      writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+      writeFileSync(
+        join(tempDir, 'app_settings.json'),
+        JSON.stringify(baseConfig),
+      );
 
       // Module with wildcard capability that should be denied
       const moduleWithWildcard = new TestModule(
@@ -81,12 +89,18 @@ describe('config access policy validation', () => {
       });
 
       // Verify that diagnostics are produced with proper structure
-      expect(() => validateOperationalReportsSchema(runtime.reports)).not.toThrow();
+      expect(() =>
+        validateOperationalReportsSchema(runtime.reports),
+      ).not.toThrow();
 
       // Verify that wildcard capability triggers specific error code
       const hasWildcardError =
-        runtime.reports.startup?.failedModules.some(f => f.message.includes('wildcard_config_capability_forbidden')) ||
-        runtime.reports.startup?.skippedModules.some(s => s.reason.message.includes('wildcard_config_capability_forbidden'));
+        runtime.reports.startup?.failedModules.some((f) =>
+          f.message.includes('wildcard_config_capability_forbidden'),
+        ) ||
+        runtime.reports.startup?.skippedModules.some((s) =>
+          s.reason.message.includes('wildcard_config_capability_forbidden'),
+        );
 
       expect(hasWildcardError).toBe(true);
 
@@ -101,7 +115,10 @@ describe('config access policy validation', () => {
         modules: { artifactCache: { enabled: false } },
       } as IPlatformConfig;
 
-      writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+      writeFileSync(
+        join(tempDir, 'app_settings.json'),
+        JSON.stringify(baseConfig),
+      );
 
       // Third-party reviewed module with global config access capability
       const thirdPartyModule = new TestModule(
@@ -127,7 +144,8 @@ describe('config access policy validation', () => {
         ) ||
         runtime.reports.startup?.skippedModules.some(
           (skipped) =>
-            skipped.reason.errorCode === RuntimeErrorCodes.ConfigSectionNotAllowlisted,
+            skipped.reason.errorCode ===
+            RuntimeErrorCodes.ConfigSectionNotAllowlisted,
         );
 
       expect(hasRestriction).toBe(true);
@@ -141,7 +159,10 @@ describe('config access policy validation', () => {
         modules: { artifactCache: { enabled: false } },
       } as IPlatformConfig;
 
-      writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+      writeFileSync(
+        join(tempDir, 'app_settings.json'),
+        JSON.stringify(baseConfig),
+      );
 
       // Trusted module with global config access capability
       const trustedModule = new TestModule(
@@ -159,7 +180,9 @@ describe('config access policy validation', () => {
       });
 
       // Verify diagnostics schema passes
-      expect(() => validateOperationalReportsSchema(runtime.reports)).not.toThrow();
+      expect(() =>
+        validateOperationalReportsSchema(runtime.reports),
+      ).not.toThrow();
 
       expect(runtime.reports.startup?.failedModules.length === 0).toBe(true);
       expect(runtime.reports.startup?.skippedModules.length === 0).toBe(true);

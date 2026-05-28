@@ -39,7 +39,8 @@ export interface IModuleDependency {
  * @alpha
  * Canonical SDK manifest contract for executable modules.
  */
-export interface IPlatformModuleManifest extends IModuleIdentity, IModuleCompatibility {
+export interface IPlatformModuleManifest
+  extends IModuleIdentity, IModuleCompatibility {
   readonly criticality: ModuleCriticalityType;
   readonly securityClass: ModuleSecurityClassType;
   readonly capabilities: readonly ModuleCapabilityType[];

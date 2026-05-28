@@ -1,1 +1,1 @@
-export * from './redactors/index.js'
+export * from './redactors/index.js';

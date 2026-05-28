@@ -4,15 +4,9 @@ import type {
   ModuleArtifactPackaging,
   ModuleArtifactSource,
 } from '../constants/index.js';
-import type {
-  IModuleArtifactIntegrity,
-} from './module-artifact-integrity.interface.js';
-import type {
-  IModuleCandidateArtifact,
-} from './module-candidate-artifact.interface.js';
-import type {
-  IRejectedModuleArtifact,
-} from './rejected-module-artifact.interface.js';
+import type { IModuleArtifactIntegrity } from './module-artifact-integrity.interface.js';
+import type { IModuleCandidateArtifact } from './module-candidate-artifact.interface.js';
+import type { IRejectedModuleArtifact } from './rejected-module-artifact.interface.js';
 
 /**
  * @alpha
@@ -81,13 +75,13 @@ export type ModuleArtifactSourceDescriptorType =
 export type ArtifactSourceValidationResultType =
   | { ok: true }
   | {
-  ok: false;
-  error: {
-    reasonCode: RuntimeErrorCodes;
-    message: string;
-    remediationHint: string
-  }
-};
+      ok: false;
+      error: {
+        reasonCode: RuntimeErrorCodes;
+        message: string;
+        remediationHint: string;
+      };
+    };
 
 /**
  * @alpha

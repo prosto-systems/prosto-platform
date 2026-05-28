@@ -20,8 +20,7 @@ export class ArtifactSourceFactory implements IArtifactSourceFactory {
   constructor(
     private readonly _httpClient?: IModuleArtifactHttpClient,
     private readonly _artifactCache?: IArtifactCache,
-  ) {
-  }
+  ) {}
 
   create(descriptor: ModuleArtifactSourceDescriptorType): IArtifactSource {
     switch (descriptor.type) {
@@ -35,7 +34,11 @@ export class ArtifactSourceFactory implements IArtifactSourceFactory {
         return new UrlSource(descriptor, this._httpClient, this._artifactCache);
 
       case 'registry':
-        return new RegistrySource(descriptor, this._httpClient, this._artifactCache);
+        return new RegistrySource(
+          descriptor,
+          this._httpClient,
+          this._artifactCache,
+        );
 
       default: {
         const _exhaustiveCheck: never = descriptor;

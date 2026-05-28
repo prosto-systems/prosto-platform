@@ -8,7 +8,10 @@ describe('ModuleLoader', () => {
 
   it('loads memory candidates', async () => {
     const result = await loader.load([
-      { type: 'memory', module: new TestModule(createManifest({ id: 'module-a' })) },
+      {
+        type: 'memory',
+        module: new TestModule(createManifest({ id: 'module-a' })),
+      },
     ]);
 
     expect(result.loaded).toHaveLength(1);
@@ -27,7 +30,9 @@ describe('ModuleLoader', () => {
 
     expect(result.loaded).toEqual([]);
     expect(result.rejected).toHaveLength(1);
-    expect(result.rejected[0]?.reasonCode).toBe(RuntimeErrorCodes.SourceFetchFailed);
+    expect(result.rejected[0]?.reasonCode).toBe(
+      RuntimeErrorCodes.SourceFetchFailed,
+    );
     expect(result.rejected[0]?.phase).toBe('discover');
   });
 
@@ -42,7 +47,9 @@ describe('ModuleLoader', () => {
 
     expect(result.loaded).toEqual([]);
     expect(result.rejected).toHaveLength(1);
-    expect(result.rejected[0]?.reasonCode).toBe(RuntimeErrorCodes.SourceUrlInvalid);
+    expect(result.rejected[0]?.reasonCode).toBe(
+      RuntimeErrorCodes.SourceUrlInvalid,
+    );
     expect(result.rejected[0]?.phase).toBe('discover');
   });
 });

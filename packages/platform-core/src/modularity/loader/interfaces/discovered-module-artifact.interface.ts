@@ -3,9 +3,7 @@ import type {
   ModuleArtifactPackaging,
   ModuleArtifactSource,
 } from '../constants/index.js';
-import type {
-  IModuleArtifactIntegrity,
-} from './module-artifact-integrity.interface.js';
+import type { IModuleArtifactIntegrity } from './module-artifact-integrity.interface.js';
 
 /**
  * @alpha

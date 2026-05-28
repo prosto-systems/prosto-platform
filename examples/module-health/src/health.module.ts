@@ -22,7 +22,8 @@ export class HealthModule implements IPlatformModule {
       'obs.metrics',
     ],
     dependencies: [],
-    checksum: 'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    checksum:
+      'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
   };
 
   register(_ctx: IModuleContext): void {

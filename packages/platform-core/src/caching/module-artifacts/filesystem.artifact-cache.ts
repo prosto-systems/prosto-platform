@@ -52,7 +52,11 @@ export class FileSystemArtifactCache implements IArtifactCache {
     }
   }
 
-  async set(key: string, data: Buffer, metadata: IArtifactCacheEntryMetadata): Promise<void> {
+  async set(
+    key: string,
+    data: Buffer,
+    metadata: IArtifactCacheEntryMetadata,
+  ): Promise<void> {
     const dataPath = this._dataPath(key);
     const metaPath = this._metaPath(key);
 

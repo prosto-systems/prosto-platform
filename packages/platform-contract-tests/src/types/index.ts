@@ -86,7 +86,7 @@ export interface IModuleLifecycleContextFactory {
  */
 export interface IModuleContractTestInput {
   module: IPlatformModule;
-  manifestValidator?: IModuleManifestValidator,
+  manifestValidator?: IModuleManifestValidator;
   moduleLifecycleContextFactory?: IModuleLifecycleContextFactory;
   now?: () => string;
 }

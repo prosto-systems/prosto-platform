@@ -1,1 +1,1 @@
-export * from './config.utils.js'
+export * from './config.utils.js';

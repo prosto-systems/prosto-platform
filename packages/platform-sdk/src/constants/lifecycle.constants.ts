@@ -2,7 +2,12 @@
  * @alpha
  * Ordered lifecycle stages executed by the runtime kernel.
  */
-export const MODULE_LIFECYCLE_STAGES = ['register', 'init', 'start', 'stop'] as const;
+export const MODULE_LIFECYCLE_STAGES = [
+  'register',
+  'init',
+  'start',
+  'stop',
+] as const;
 
 /**
  * @alpha

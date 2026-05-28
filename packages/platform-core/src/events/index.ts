@@ -1,1 +1,1 @@
-export * from './in-memory.event-bus.js'
+export * from './in-memory.event-bus.js';

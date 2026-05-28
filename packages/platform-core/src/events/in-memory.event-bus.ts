@@ -7,8 +7,10 @@ import type {
 } from '@prosto/platform-sdk';
 
 export class InMemoryEventBus implements IEventBus {
-  private readonly _handlersByToken =
-    new Map<EventTokenType<unknown>, Set<EventHandlerType<unknown>>>();
+  private readonly _handlersByToken = new Map<
+    EventTokenType<unknown>,
+    Set<EventHandlerType<unknown>>
+  >();
 
   async publish<TPayload>(
     token: EventTokenType<TPayload>,

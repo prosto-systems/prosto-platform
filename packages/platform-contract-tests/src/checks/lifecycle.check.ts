@@ -8,7 +8,7 @@ import {
   type IModuleLifecycleContextFactory,
 } from '../types/index.js';
 
-export const LIFECYCLE_CHECK_RESULT_ID = 'lifecycle-conformance'
+export const LIFECYCLE_CHECK_RESULT_ID = 'lifecycle-conformance';
 
 /**
  * beta

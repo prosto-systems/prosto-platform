@@ -11,10 +11,7 @@ import type {
  * Bootstrap coordinator that orchestrates the module bootstrap pipeline.
  */
 export class BootstrapCoordinator implements IBootstrapCoordinator {
-  constructor(
-    private readonly _pipeline: IBootstrapPipeline,
-  ) {
-  }
+  constructor(private readonly _pipeline: IBootstrapPipeline) {}
 
   /**
    * Coordinate the bootstrap process for the given input.
@@ -45,8 +42,9 @@ export class BootstrapCoordinator implements IBootstrapCoordinator {
       loadedModules: result.loadedModules,
       stageOutcomes: result.stageOutcomes,
       failedDiagnostics: result.failedDiagnostics,
-      skippedModuleIds: [...result.skippedModuleIds]
-        .sort((left, right) => left.localeCompare(right)),
+      skippedModuleIds: [...result.skippedModuleIds].sort((left, right) =>
+        left.localeCompare(right),
+      ),
     };
   }
 }

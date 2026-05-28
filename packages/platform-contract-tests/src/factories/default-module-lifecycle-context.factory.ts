@@ -13,24 +13,40 @@ import type {
 import type { IModuleLifecycleContextFactory } from '../types/index.js';
 
 class MockLogger implements IModuleLogger {
-  debug(_: string, __?: Readonly<Record<string, unknown>>): void { /* empty */ };
-  info(_: string, __?: Readonly<Record<string, unknown>>): void { /* empty */ };
-  warn(_: string, __?: Readonly<Record<string, unknown>>): void { /* empty */ };
-  error(_: string, __?: Readonly<Record<string, unknown>>): void { /* empty */ };
+  debug(_: string, __?: Readonly<Record<string, unknown>>): void {
+    /* empty */
+  }
+  info(_: string, __?: Readonly<Record<string, unknown>>): void {
+    /* empty */
+  }
+  warn(_: string, __?: Readonly<Record<string, unknown>>): void {
+    /* empty */
+  }
+  error(_: string, __?: Readonly<Record<string, unknown>>): void {
+    /* empty */
+  }
 }
 
 class MockServiceRegistry implements IServiceRegistry {
   private readonly _registry = new Map<symbol, unknown>();
 
-  register<TService>(token: ServiceTokenType<TService>, service: NoInfer<TService>): void {
+  register<TService>(
+    token: ServiceTokenType<TService>,
+    service: NoInfer<TService>,
+  ): void {
     if (this._registry.has(token)) {
-      throw new Error(`Service with token ${token.toString()} already registered.`);
+      throw new Error(
+        `Service with token ${token.toString()} already registered.`,
+      );
     }
 
     this._registry.set(token, service);
   }
 
-  override<TService>(token: ServiceTokenType<TService>, service: NoInfer<TService>): void {
+  override<TService>(
+    token: ServiceTokenType<TService>,
+    service: NoInfer<TService>,
+  ): void {
     if (!this._registry.has(token)) {
       throw new Error(`Service with token ${token.toString()} not found.`);
     }
@@ -52,7 +68,10 @@ class MockServiceRegistry implements IServiceRegistry {
 }
 
 class MockEventBus implements IEventBus {
-  private readonly _handlers = new Map<symbol, Set<EventHandlerType<unknown>> | undefined>();
+  private readonly _handlers = new Map<
+    symbol,
+    Set<EventHandlerType<unknown>> | undefined
+  >();
 
   async publish<TPayload>(
     token: EventTokenType<TPayload>,
@@ -80,13 +99,19 @@ class MockEventBus implements IEventBus {
     }
   }
 
-  subscribe<TPayload>(token: EventTokenType<TPayload>, handler: EventHandlerType<TPayload>): void {
+  subscribe<TPayload>(
+    token: EventTokenType<TPayload>,
+    handler: EventHandlerType<TPayload>,
+  ): void {
     const handlers = this._handlers.get(token) ?? new Set();
     handlers.add(handler as EventHandlerType<unknown>);
     this._handlers.set(token, handlers);
   }
 
-  unsubscribe<TPayload>(token: EventTokenType<TPayload>, handler: EventHandlerType<TPayload>): void {
+  unsubscribe<TPayload>(
+    token: EventTokenType<TPayload>,
+    handler: EventHandlerType<TPayload>,
+  ): void {
     const handlers = this._handlers.get(token);
 
     if (!handlers) {

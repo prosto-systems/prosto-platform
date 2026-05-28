@@ -3,9 +3,7 @@ import type {
   ModuleValidationResultType,
 } from '../interfaces/index.js';
 import { RuntimeErrorCodes } from '@/common/index.js';
-import {
-  ModuleValidationBaseStrategy,
-} from './module-validation.base-strategy.js';
+import { ModuleValidationBaseStrategy } from './module-validation.base-strategy.js';
 
 /**
  * @alpha
@@ -24,7 +22,8 @@ export class IntegrityValidationStrategy extends ModuleValidationBaseStrategy {
       return this.failure({
         errorCode: RuntimeErrorCodes.IntegrityCheckFailed,
         message: `Module ${input.artifact.moduleId} has no integrity evidence: neither checksum nor signature is present in manifest.`,
-        remediationHint: 'Provide checksum and/or signature for module artifact integrity evidence.',
+        remediationHint:
+          'Provide checksum and/or signature for module artifact integrity evidence.',
       });
     }
 

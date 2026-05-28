@@ -26,7 +26,10 @@ describe('runtime bootstrap (strict)', () => {
       modules: { artifactCache: { enabled: false } },
     } as IPlatformConfig;
 
-    writeFileSync(join(tempDir, 'app_settings.json'), JSON.stringify(baseConfig));
+    writeFileSync(
+      join(tempDir, 'app_settings.json'),
+      JSON.stringify(baseConfig),
+    );
 
     const moduleA = new TestModule(createManifest({ id: 'module-a' }));
     const moduleB = new TestModule(
@@ -48,8 +51,16 @@ describe('runtime bootstrap (strict)', () => {
     expect(runtime.reports.startup?.status).toBe('failed');
     expect(runtime.reports.startup?.degraded).toBe(true);
     expect(runtime.startedModuleIds).toEqual([]);
-    expect(runtime.reports.startup?.skippedModules.some((item) => item.moduleId === 'module-b')).toBe(true);
-    expect(runtime.reports.startup?.failedModules.some((item) => item.moduleId === 'module-b')).toBe(true);
+    expect(
+      runtime.reports.startup?.skippedModules.some(
+        (item) => item.moduleId === 'module-b',
+      ),
+    ).toBe(true);
+    expect(
+      runtime.reports.startup?.failedModules.some(
+        (item) => item.moduleId === 'module-b',
+      ),
+    ).toBe(true);
 
     await runtime.stop();
   });

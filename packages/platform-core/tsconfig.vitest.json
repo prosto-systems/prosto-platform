@@ -7,11 +7,7 @@
       "@/tests/fixtures/*": ["./tests/fixtures/*"],
       "@/*": ["./src/*"]
     },
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
-  "include": [
-    "tests/**/*.ts"
-  ]
+  "include": ["tests/**/*.ts"]
 }

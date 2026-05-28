@@ -23,7 +23,9 @@ export abstract class BootstrapBaseStage implements IBootstrapStage {
    * @param context - The current bootstrap context
    * @returns Updated context after stage execution
    */
-  abstract execute(context: IBootstrapStageContext): Promise<IBootstrapStageContext>;
+  abstract execute(
+    context: IBootstrapStageContext,
+  ): Promise<IBootstrapStageContext>;
 
   /**
    * Helper method to add a stage outcome to the context.
@@ -82,7 +84,9 @@ export abstract class BootstrapBaseStage implements IBootstrapStage {
   /**
    * Helper method to stop the pipeline execution.
    */
-  protected stopPipeline(context: IBootstrapStageContext): IBootstrapStageContext {
+  protected stopPipeline(
+    context: IBootstrapStageContext,
+  ): IBootstrapStageContext {
     context.abort = true;
 
     return context;

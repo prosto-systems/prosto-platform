@@ -22,17 +22,31 @@ const validManifest: IPlatformModuleManifest = {
   sdkVersion: '^0.1.0',
   criticality: 'normal',
   securityClass: 'internal',
-  capabilities: ['lifecycle.register', 'lifecycle.start', 'obs.metrics', 'feature.health'],
+  capabilities: [
+    'lifecycle.register',
+    'lifecycle.start',
+    'obs.metrics',
+    'feature.health',
+  ],
   dependencies: [],
-  checksum: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  checksum:
+    'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
 };
 
 class ValidModule implements IPlatformModule {
   readonly manifest = validManifest;
-  register(_ctx: IModuleContext): void { /* empty */ }
-  init(_ctx: IModuleContext): void { /* empty */ }
-  start(_ctx: IModuleContext): void { /* empty */ }
-  stop(_ctx: IModuleContext): void { /* empty */ }
+  register(_ctx: IModuleContext): void {
+    /* empty */
+  }
+  init(_ctx: IModuleContext): void {
+    /* empty */
+  }
+  start(_ctx: IModuleContext): void {
+    /* empty */
+  }
+  stop(_ctx: IModuleContext): void {
+    /* empty */
+  }
 }
 
 class BrokenModuleMissingCapability extends ValidModule {
@@ -82,9 +96,9 @@ describe('module contract conformance', () => {
     expect(report.summary.result).toBe('fail');
     expect(report.summary.failedMandatoryChecks).toBe(1);
 
-    const capabilityCheck = report
-      .checks
-      .find((check) => check.id === CAPABILITY_CHECK_RESULT_ID);
+    const capabilityCheck = report.checks.find(
+      (check) => check.id === CAPABILITY_CHECK_RESULT_ID,
+    );
 
     expect(capabilityCheck?.passed).toBe(false);
     expect(capabilityCheck?.code).toBe(ContractFailureCodes.CapabilityMissing);
@@ -95,12 +109,14 @@ describe('module contract conformance', () => {
       module: new BrokenModuleLifecycleFailure(),
     });
 
-    const lifecycleCheck = report
-      .checks
-      .find((check) => check.id === LIFECYCLE_CHECK_RESULT_ID);
+    const lifecycleCheck = report.checks.find(
+      (check) => check.id === LIFECYCLE_CHECK_RESULT_ID,
+    );
 
     expect(lifecycleCheck?.passed).toBe(false);
-    expect(lifecycleCheck?.code).toBe(ContractFailureCodes.LifecycleMethodFailed);
+    expect(lifecycleCheck?.code).toBe(
+      ContractFailureCodes.LifecycleMethodFailed,
+    );
     expect(report.summary.result).toBe('fail');
   });
 
@@ -109,13 +125,15 @@ describe('module contract conformance', () => {
       module: new BrokenModuleNoObservability(),
     });
 
-    const observabilityCheck = report
-      .checks
-      .find((check) => check.id === OBSERVABILITY_CHECK_RESULT_ID);
+    const observabilityCheck = report.checks.find(
+      (check) => check.id === OBSERVABILITY_CHECK_RESULT_ID,
+    );
 
     expect(observabilityCheck?.passed).toBe(false);
     expect(observabilityCheck?.severity).toBe('advisory');
-    expect(observabilityCheck?.code).toBe(ContractFailureCodes.ObservabilityCapabilityMissing);
+    expect(observabilityCheck?.code).toBe(
+      ContractFailureCodes.ObservabilityCapabilityMissing,
+    );
     expect(report.summary.failedMandatoryChecks).toBe(0);
     expect(report.summary.failedAdvisoryChecks).toBe(1);
     expect(report.summary.result).toBe('pass');

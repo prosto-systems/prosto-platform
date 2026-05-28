@@ -15,8 +15,8 @@ describe('MemorySource', () => {
 
     if ('reasonCode' in result) {
       throw new Error(
-        'Expected load to succeed, but it failed with reason: '
-        + result.reasonCode,
+        'Expected load to succeed, but it failed with reason: ' +
+          result.reasonCode,
       );
     }
 
