@@ -16,8 +16,8 @@
 
 ```typescript
 // ✅ Step 1: Define contract in platform-sdk
-// packages/platform-sdk/src/types/manifest.types.ts
-export interface IModuleManifest {
+// packages/platform-sdk/src/interfaces/platform-module-manifest.interfaces.ts
+export interface IPlatformModuleManifest {
   id: string;
   version: string;
   platformVersion: string;
@@ -32,7 +32,7 @@ export interface IModuleManifest {
 // ✅ Step 2: Define lifecycle interface
 // packages/platform-sdk/src/interfaces/platform-module.interface.ts
 export interface IPlatformModule {
-  readonly manifest: IModuleManifest;
+  readonly manifest: IPlatformModuleManifest;
   
   // Lifecycle phases (in order)
   register(ctx: IModuleContext): Promise<void>;
@@ -194,7 +194,7 @@ export function createLifecycleContractTests(module: IPlatformModule): void {
 ```typescript
 // Module repository test
 import { createModuleContractTests } from '@prosto/platform-contract-tests';
-import { HealthModule } from '../src/health.module';
+import { HealthModule } from '../../src/health.module';
 
 describe('HealthModule Contract Compliance', () => {
   createModuleContractTests(new HealthModule());
@@ -295,6 +295,6 @@ class ModuleLoader {
 
 ## Related Documents
 
-- [ADR-0002 SDK Contract And Semver Governance](../.context/02-architecture-design/adr/ADR-0002-sdk-contract-and-semver-governance.md)
-- [03 Phase - SDK Contract Baseline](../.context/04-implementation-plan/03-phase.md)
-- [04 Phase - Contract Conformance](../.context/04-implementation-plan/04-phase.md)
+- [ADR-0002 SDK Contract And Semver Governance](../../.context/02-architecture-design/adr/ADR-0002-sdk-contract-and-semver-governance.md)
+- [03 Phase - SDK Contract Baseline](../../.context/04-implementation-plan/03-phase.md)
+- [04 Phase - Contract Conformance](../../.context/04-implementation-plan/04-phase.md)

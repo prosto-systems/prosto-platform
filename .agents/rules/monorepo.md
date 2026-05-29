@@ -82,8 +82,8 @@ import { PlatformModule, LifecyclePhase } from '@prosto/platform-sdk';
 import { ServiceRegistry } from '@prosto/platform-core';
 
 // 5. Same-package imports (relative)
-import { UserService } from './services/user.service';
 import { User } from '../types/user.types';
+import { UserService } from './services/user.service';
 ```
 
 ---
@@ -135,37 +135,25 @@ npm run validate:public-api-boundary
 
 ## Workspace Configuration
 
-### Root package.json
+### Turborepo Configuration
 
-```json
-{
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "build:sdk": "npm run build --workspace=@prosto/platform-sdk",
-    "build:core": "npm run build --workspace=@prosto/platform-core",
-    "test": "npm run test --workspaces --if-present",
-    "lint": "eslint packages/*/src/**/*.ts",
-    "typecheck": "tsc --noEmit --project packages/*/tsconfig.json"
-  }
-}
-```
+The project uses Turborepo for monorepo task orchestration.
 
-### Package tsconfig.json
+**Pipeline Tasks** (defined in `turbo.json`):
+- `build` - Builds publishable packages with Vite 8 and emits declarations via `vite-plugin-dts` (depends on `^build` for dependency order)
+- `typecheck` - Type checking (depends on `^build`)
+- `test` - Runs test suites (depends on `^build`)
+- `test:types`, `test:unit`, `test:contracts` - Specific test types
+- `lint` / `lint:fix` - ESLint checks (runs in parallel)
+- `dev` - Development mode (no cache, persistent)
 
-```json
-{
-  "extends": "../../tools/tsconfig/base.json",
-  "compilerOptions": {
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts"]
-}
+**Common Commands**:
+```bash
+turbo build          # Build all packages with dependency ordering
+turbo test           # Run tests across all packages
+turbo typecheck      # Type check all packages
+turbo dev            # Start dev mode in all packages
+turbo build --filter=@prosto/platform-sdk  # Build specific package
 ```
 
 ---
@@ -231,6 +219,6 @@ Modules are independently versioned with compatibility metadata:
 
 ## Related Documents
 
-- [ADR-0001 Micro-Core Kernel Boundary](../.context/02-architecture-design/adr/ADR-0001-micro-core-kernel-boundary.md)
-- [ADR-0002 SDK Contract And Semver Governance](../.context/02-architecture-design/adr/ADR-0002-sdk-contract-and-semver-governance.md)
-- [04 Package Structure Blueprint](../.context/02-architecture-design/04-package-structure-blueprint.md)
+- [ADR-0001 Micro-Core Kernel Boundary](../../.context/02-architecture-design/adr/ADR-0001-micro-core-kernel-boundary.md)
+- [ADR-0002 SDK Contract And Semver Governance](../../.context/02-architecture-design/adr/ADR-0002-sdk-contract-and-semver-governance.md)
+- [04 Package Structure Blueprint](../../.context/02-architecture-design/04-package-structure-blueprint.md)
