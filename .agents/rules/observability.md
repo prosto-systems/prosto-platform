@@ -120,7 +120,7 @@ interface IStartupReport {
 interface IModuleSummary {
   id: string;
   version: string;
-  securityClass: TSecurityClass;
+  securityClass: SecurityClassType;
   criticality: 'critical' | 'normal' | 'optional';
   loadDuration: number;
 }
@@ -140,54 +140,6 @@ interface IFailedModule {
 }
 ```
 
-### Example: Startup Report Generation
-
-```typescript
-class DiagnosticsReporter {
-  generateStartupReport(): IStartupReport {
-    const loadedModules = this.registry.getLoadedModules();
-    const skippedModules = this.registry.getSkippedModules();
-    const failedModules = this.registry.getFailedModules();
-
-    const criticalModulesLoaded = loadedModules
-      .filter(m => m.criticality === 'critical')
-      .length === this.expectedCriticalModules;
-
-    return {
-      timestamp: new Date().toISOString(),
-      duration: this.startupDuration,
-      platformVersion: this.platformVersion,
-      modules: {
-        loaded: loadedModules.map(m => ({
-          id: m.manifest.id,
-          version: m.manifest.version,
-          securityClass: m.manifest.securityClass,
-          criticality: m.manifest.criticality,
-          loadDuration: m.loadDuration
-        })),
-        skipped: skippedModules.map(s => ({
-          id: s.id,
-          reason: s.skipReason,
-          details: s.details
-        })),
-        failed: failedModules.map(f => ({
-          id: f.moduleId,
-          phase: f.failedPhase,
-          errorCode: f.errorCode,
-          errorMessage: f.message,
-          remediationHint: f.remediationHint
-        }))
-      },
-      health: {
-        status: this.determineHealthStatus(loadedModules, failedModules),
-        criticalModulesLoaded,
-        optionalModulesFailed: failedModules.filter(m => m.criticality === 'optional').length
-      }
-    };
-  }
-}
-```
-
 ---
 
 ## Error Model
@@ -195,7 +147,6 @@ class DiagnosticsReporter {
 ### Structured Error Codes
 
 ```typescript
-// Standardized error codes
 const ErrorCodes = {
   // Module loading
   MODULE_NOT_FOUND: 'MODULE_NOT_FOUND',
@@ -264,7 +215,6 @@ throw new ModuleLoadError(
 **Provided by adapter layer:**
 
 ```typescript
-// HTTP adapter health endpoint
 interface IHealthResponse {
   status: 'healthy' | 'degraded' | 'unhealthy';
   version: string;
@@ -277,7 +227,6 @@ interface IHealthResponse {
   }[];
 }
 
-// Example implementation
 async function getHealthStatus(): Promise<IHealthResponse> {
   const loadedModules = registry.getLoadedModules();
   const failedModules = registry.getFailedModules();
@@ -320,7 +269,6 @@ interface IReadinessResponse {
   };
 }
 
-// Readiness: all critical modules must be started
 function getReadinessStatus(): IReadinessResponse {
   const reasons: string[] = [];
   
@@ -395,7 +343,6 @@ interface IStartupMetrics {
   dependencyResolutionTime: number;
 }
 
-// Track metrics
 class MetricsCollector {
   private phaseTimings = new Map<string, number>();
   private moduleTimings = new Map<string, number>();
@@ -440,6 +387,6 @@ interface IModuleMetrics {
 
 ## Related Documents
 
-- [ADR-0007 Observability And Operability Baseline](../.context/02-architecture-design/adr/ADR-0007-observability-and-operability-baseline.md)
-- [SEQ-03 Graceful Shutdown](../.context/02-architecture-design/sequence/03-graceful-shutdown.md)
-- [10 Phase - Internal MVP Validation](../.context/04-implementation-plan/10-phase.md)
+- [ADR-0007 Observability And Operability Baseline](../../.context/02-architecture-design/adr/ADR-0007-observability-and-operability-baseline.md)
+- [SEQ-03 Graceful Shutdown](../../.context/02-architecture-design/sequence/03-graceful-shutdown.md)
+- [10 Phase - Internal MVP Validation](../../.context/04-implementation-plan/10-phase.md)

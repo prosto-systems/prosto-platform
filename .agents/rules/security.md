@@ -14,9 +14,9 @@
 ### Security Classification
 
 ```typescript
-type TSecurityClass = 
-  | 'trusted'              // Core platform modules, full access
-  | 'internal'             // Internal team modules, standard access
+type SecurityClassType = 
+  | 'trusted'               // Core platform modules, full access
+  | 'internal'              // Internal team modules, standard access
   | 'third-party-reviewed'; // External modules, reviewed and approved
 ```
 
@@ -29,7 +29,7 @@ interface IModuleManifest {
   platformVersion: string;
   
   // Security classification (MANDATORY)
-  securityClass: TSecurityClass;
+  securityClass: SecurityClassType;
   
   // Criticality for startup policy
   criticality: 'critical' | 'normal' | 'optional';
@@ -364,6 +364,6 @@ logger.warn({
 
 ## Related Documents
 
-- [ADR-0003 Module Loading Security](../.context/02-architecture-design/adr/ADR-0003-module-loading-security-allowlist-integrity.md)
-- [06 Phase - Security Controls](../.context/04-implementation-plan/06-phase.md)
-- [05 Quality Security Performance](../.context/01-research/05-quality-security-performance.md)
+- [ADR-0003 Module Loading Security](../../.context/02-architecture-design/adr/ADR-0003-module-loading-security-allowlist-integrity.md)
+- [06 Phase - Security Controls](../../.context/04-implementation-plan/06-phase.md)
+- [05 Quality Security Performance](../../.context/01-research/05-quality-security-performance.md)
