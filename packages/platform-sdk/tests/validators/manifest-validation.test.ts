@@ -9,7 +9,7 @@ const validManifest: IPlatformModuleManifest = {
   id: 'module-health',
   version: '1.2.3',
   sdkVersion: '^0.1.0',
-  criticality: 'normal',
+  criticality: 'standard',
   securityClass: 'internal',
   capabilities: ['feature.health', 'obs.metrics'],
   dependencies: [{ id: 'module-auth', version: '^1.0.0' }],

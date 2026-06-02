@@ -25,4 +25,4 @@ export const MODULE_SECURITY_CLASSES = [
  * @alpha
  * Lifecycle criticality levels used by startup policy.
  */
-export const MODULE_CRITICALITY_LEVELS = ['normal', 'critical'] as const;
+export const MODULE_CRITICALITY_LEVELS = ['standard', 'critical'] as const;

@@ -40,7 +40,7 @@ classDiagram
     +id: string
     +version: string
     +platformVersion: string
-    +criticality: normal|critical
+    +criticality: standard|critical
     +capabilities: string[]
     +dependencies: ModuleDependency[]
     +securityClass: trusted|internal|third-party-reviewed

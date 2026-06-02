@@ -491,7 +491,7 @@ my-module/
   "id": "prosto-module-health",
   "version": "1.0.0",
   "platformVersion": "^0.x",
-  "criticality": "normal",
+  "criticality": "standard",
   "securityClass": "internal",
   "capabilities": [
     "transport.http",

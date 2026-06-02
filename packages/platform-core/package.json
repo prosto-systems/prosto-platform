@@ -21,7 +21,10 @@
   "scripts": {
     "build": "vite build",
     "typecheck": "tsc -p tsconfig.package.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "bench": "vitest bench --run",
+    "bench:startup": "vitest bench bench/startup.bench.ts --run --outputJson=../../bench-reports/startup.json",
+    "bench:events": "vitest bench bench/events.bench.ts --run --outputJson=../../bench-reports/events.json"
   },
   "dependencies": {
     "@prosto/platform-sdk": "0.0.0",

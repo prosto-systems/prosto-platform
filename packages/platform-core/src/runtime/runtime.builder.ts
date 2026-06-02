@@ -32,6 +32,7 @@ import {
   type IModuleContextFactory,
   type IModuleLifecycleOrchestrator,
   type IModuleLoader,
+  IntegrityValidationStrategy,
   ManifestValidationStrategy,
   ModuleContextFactory,
   ModuleLifecycleOrchestrator,
@@ -193,8 +194,8 @@ export class RuntimeBuilder implements IRuntimeBuilder {
         new DiscoverStage(moduleLoader),
         new ValidateStage([
           new ManifestValidationStrategy(),
+          new IntegrityValidationStrategy(),
           new CompatibilityValidationStrategy(),
-          // new IntegrityValidationStrategy(),
           new ConfigAccessValidationStrategy(config, isProductionEnvironment),
         ]),
         new ResolveDependenciesStage(startupPolicyEvaluator),

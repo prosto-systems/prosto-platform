@@ -4,18 +4,9 @@ the project purpose, architecture, constraints, dependencies, and the exact scop
 
 Implement `{phase}` completely and only within its defined scope, ensuring every
 requirement in that phase is addressed with production-quality code that is consistent
-with existing patterns and architecture decisions. As you implement, preserve backward
-compatibility unless `{phase}` explicitly requires a change, avoid unrelated refactors,
+with existing patterns and architecture decisions. Avoid unrelated refactors
 and keep changes minimal, coherent, and traceable to `{phase}` requirements.
 
 After coding, perform a rigorous verification pass: confirm each `{phase}` task is finished,
 validate behavior end-to-end, run all relevant tests/lint/type checks, and add or adjust tests
 where coverage is missing for new or changed behavior.
-
-Then conduct a self-audit
-against the project’s purpose, architecture, and implementation plan to ensure alignment
-and detect any gaps or regressions.
-
-Finally, update all necessary documentation to reflect the completed `{phase}` work
-(including technical docs and any plan/status references that should now change),
-and ensure the repository is left in a clean, consistent, review-ready state.

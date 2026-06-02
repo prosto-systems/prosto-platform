@@ -44,6 +44,10 @@
     "test": "turbo test",
     "test:contracts": "turbo test:contracts",
     "test:lifecycle-determinism": "node ./scripts/test-lifecycle-determinism.mjs",
+    "bench:startup": "npm run bench:startup --workspace=@prosto/platform-core",
+    "bench:events": "npm run bench:events --workspace=@prosto/platform-core",
+    "bench:regression": "node ./scripts/check-bench-regression.mjs",
+    "bench:calibrate": "node ./scripts/calibrate-bench-baseline.mjs",
     "release:evidence": "node ./scripts/generate-release-evidence.mjs",
     "prepare": "husky"
   },

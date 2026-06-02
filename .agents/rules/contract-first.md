@@ -21,7 +21,7 @@ export interface IPlatformModuleManifest {
   id: string;
   version: string;
   platformVersion: string;
-  criticality: 'critical' | 'normal' | 'optional';
+  criticality: 'critical' | 'standard' | 'optional';
   securityClass: 'trusted' | 'internal' | 'third-party-reviewed';
   capabilities: string[];
   dependencies: string[];
@@ -85,7 +85,7 @@ interface IModuleManifest {
 }
 
 // ✅ Non-breaking: Extend union type
-type TCriticality = 'critical' | 'normal' | 'optional' | 'experimental'; // Added 'experimental'
+type TCriticality = 'critical' | 'standard' | 'optional' | 'experimental'; // Added 'experimental'
 ```
 
 ### Deprecation Process
@@ -260,7 +260,7 @@ export const ModuleManifestSchema = z.object({
   id: z.string().regex(/^[a-z][a-z0-9-]*$/),
   version: z.string().regex(/^\d+\.\d+\.\d+$/),
   platformVersion: z.string(),
-  criticality: z.enum(['critical', 'normal', 'optional']),
+  criticality: z.enum(['critical', 'standard', 'optional']),
   securityClass: z.enum(['trusted', 'internal', 'third-party-reviewed']),
   capabilities: z.array(z.string()),
   dependencies: z.array(z.string()),

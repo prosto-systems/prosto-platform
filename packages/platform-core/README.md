@@ -212,7 +212,7 @@ Current validation stage composition in runtime bootstrap:
 - `CompatibilityValidationStrategy`
 - `ConfigAccessValidationStrategy`
 
-`IntegrityValidationStrategy` remains in Phase 06 hardening scope.
+`IntegrityValidationStrategy` was in Phase 06 hardening scope and is now implemented.
 
 ### Secret Redaction
 

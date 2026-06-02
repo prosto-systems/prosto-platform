@@ -10,10 +10,10 @@ Priority label uses impact over effort ratio:
 
 Effort values below represent execution effort for implementation work and governance rollout.
 
-## Status Sync (2026-04-23)
-- Phases 01-05 are completed, including architecture gates, contract conformance suite, and runtime lifecycle foundation.
+## Status Sync (2026-06-02)
+- Phases 01-06 are completed, including architecture gates, contract conformance suite, runtime lifecycle foundation, and security/performance hardening.
 - `MT-01` and `MT-02` are now satisfied in repository reality.
-- Remaining execution-critical items center on Phase 06 security/performance hardening and Phase 07-09 admin enablement stream.
+- Remaining execution-critical items center on Phase 07-09 admin enablement stream and Phase 10 internal MVP validation.
 
 ## Quick Wins
 
@@ -78,8 +78,8 @@ Effort values below represent execution effort for implementation work and gover
 ## MT-02 Implement runtime policy engine for strict and best-effort behavior
 - Area: reliability, operability
 - Status: Completed in Phase 05.
-- Problem: lifecycle policy baseline is implemented but now requires Phase 06 hardening controls around module trust and integrity.
-- Recommendation: extend deterministic lifecycle orchestration with security policy enforcement and stronger diagnostics governance.
+- Problem: lifecycle policy baseline is implemented and hardened in Phase 06.
+- Recommendation: proceed with admin enablement contracts and BFF stream (Phases 07-08).
 - Expected effect: reliable startup behavior and incident triage quality.
 - Impact: 5
 - Effort: 3

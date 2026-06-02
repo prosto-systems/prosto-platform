@@ -121,7 +121,7 @@ interface IModuleSummary {
   id: string;
   version: string;
   securityClass: SecurityClassType;
-  criticality: 'critical' | 'normal' | 'optional';
+  criticality: 'critical' | 'standard' | 'optional';
   loadDuration: number;
 }
 

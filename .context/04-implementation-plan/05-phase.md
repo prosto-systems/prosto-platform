@@ -82,7 +82,7 @@ flowchart TD
 
   A --> B
   B -->|critical| C
-  B -->|normal| D
+  B -->|standard| D
   D -->|strict| E
   D -->|best effort| F --> G
 ```
