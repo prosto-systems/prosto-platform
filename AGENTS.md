@@ -6,7 +6,7 @@
 
 ## ⚠️ Current Project Status
 
-**IMPORTANT**: Phase 01 through Phase 04 are fully implemented. Phase 05 (core runtime foundation) is partially implemented. Phase 06 (security and performance hardening) is the **active implementation window**.
+**IMPORTANT**: Phase 01 through Phase 06 are fully implemented. Phase 07 (admin contracts and UI plugin manifests) is the **active implementation window**.
 
 ### Current Tooling Availability
 - Phase 01 governance workflows are active under `.github/workflows/`
@@ -134,11 +134,16 @@ turbo test           # Run tests across all packages
 turbo typecheck      # Type check all packages
 turbo dev            # Start dev mode in all packages
 
-npm run lint:architecture       # Verify module import rules (ADR-0001)
-npm run validate:dependency-policy  # Enforce dependency layering
-npm run validate:module-graph   # Check module dependency tree
-npm run validate:public-api-boundary # Verify SDK public API contracts
-npm run validate:runtime-policy # Check runtime module loading policies
+npm run lint:architecture             # Verify module import rules (ADR-0001)
+npm run validate:dependency-policy    # Enforce dependency layering
+npm run validate:module-graph         # Check module dependency tree
+npm run validate:public-api-boundary  # Verify SDK public API contracts
+npm run validate:runtime-policy       # Check runtime module loading policies
+
+npm run bench:startup      # Run startup-sequence benchmark, JSON report -> bench-reports/startup.json
+npm run bench:events       # Run event-dispatch benchmark, JSON report -> bench-reports/events.json
+npm run bench:regression   # Compare latest bench reports against baseline (15% fail / 20% alert)
+npm run bench:calibrate    # Recompute baseline.json from a fresh bench run (review the diff!)
 ```
 
 ### Architecture & Dependency Validation
@@ -148,6 +153,12 @@ These checks are enforced in CI via `.github/workflows/` gates and must pass bef
 - `validate:module-graph`: Module interdependencies form a valid DAG
 - `validate:public-api-boundary`: SDK public exports match API_REPORT.md
 - `validate:runtime-policy`: Module manifests, security classes, startup policies
+- `bench-regression` (job `FF-06 perf-regression` in `.github/workflows/quality-gates.yml`): fails when startup P95 or event-dispatch P95 drift > 15% vs `packages/platform-core/bench/baseline.json`
+
+### Performance Regression Baseline
+- The committed baseline lives in [`packages/platform-core/bench/baseline.json`](packages/platform-core/bench/baseline.json:1).
+- The warmup/iteration counts live in [`packages/platform-core/bench/regression-budget.config.ts`](packages/platform-core/bench/regression-budget.config.ts:1).
+- Use `npm run bench:calibrate` on the canonical CI runner when intentionally bumping the baseline. Always include the diff in a dedicated PR and link to the relevant risk-to-control evidence in `docs/security/risk-control-matrix.md` or `docs/performance/risk-control-matrix.md`.
 
 ## Additional Resources
 
@@ -158,5 +169,5 @@ These checks are enforced in CI via `.github/workflows/` gates and must pass bef
 
 ---
 
-**Last Updated**: 2026-05-29
-**Version**: 0.2.0
+**Last Updated**: 2026-06-02
+**Version**: 0.3.0

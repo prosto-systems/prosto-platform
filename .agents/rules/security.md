@@ -32,7 +32,7 @@ interface IModuleManifest {
   securityClass: SecurityClassType;
   
   // Criticality for startup policy
-  criticality: 'critical' | 'normal' | 'optional';
+  criticality: 'critical' | 'standard' | 'optional';
   
   // Integrity metadata
   checksum?: string;        // SHA-256 of artifact

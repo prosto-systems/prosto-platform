@@ -4,7 +4,7 @@ This is a TypeScript-based headless platform following modern development practi
 
 ## Project Status
 
-Current repository state (as of 2026-05-15): **Phase 05 partially completed (core runtime foundation with lifecycle, bootstrap, diagnostics, loader, graph, policy, events, and services subsystems), with Phase 06 (security and performance hardening) as the active implementation window**.
+Current repository state (as of 2026-06-02): **Phase 06 (security and performance hardening) completed. Phase 07 (admin contracts and UI plugin manifests) is the active implementation window**.
 
 What this means right now:
 - Phase 01 governance workflows and required-check policy are in place under [`.github/workflows/`](.github/workflows/) and [`docs/governance/`](docs/governance/).
@@ -16,7 +16,12 @@ What this means right now:
 - Phase 04 contract conformance gate is active via `test:contracts`, backed by `@prosto/platform-contract-tests` and reference modules in `examples/`.
 - Phase 05 runtime policy and lifecycle determinism checks are active via `validate:runtime-policy` and `test:lifecycle-determinism`.
 - Phase 05 core runtime subsystems implemented: bootstrap pipeline, module lifecycle orchestrator, startup policy evaluator, dependency graph with topological sorting, module loader with integrity checks, event bus, service registry, diagnostics reports, and validation strategies.
-- Phase 06 is the active implementation window — security controls (allowlist loading, full integrity enforcement) and performance regression gates.
+- Phase 06 (security and performance hardening) is completed:
+  - Secret redaction layer integrated into logging, diagnostics, and configuration validation.
+  - Checksum-based integrity checks implemented in module artifact source loaders.
+  - CI policy gates active for architecture and runtime policy.
+  - Performance regression gate with baseline and drift enforcement (15% fail / 20% alert).
+  - Risk-to-control evidence published for security and performance risks.
   - **Config Access Policy** is fully implemented with:
     - Error taxonomy (`CONFIG_ACCESS_DENIED`, `CONFIG_CAPABILITY_INVALID`, `CONFIG_SECTION_NOT_ALLOWLISTED`, `CONFIG_WILDCARD_FORBIDDEN`)
     - Secret redaction in logs and diagnostics
@@ -29,7 +34,7 @@ What this means right now:
 - Workspace monorepo baseline with package entry points and strict TypeScript configuration.
 - Primary operational policy for AI agents: [`AGENTS.md`](AGENTS.md).
 - Architecture intent and roadmap are documented under `.context/`.
-- Runtime baseline is implemented in `@prosto/platform-core` (Phase 05 — 13 subsystems active), with security and performance hardening planned in Phase 06.
+- Runtime baseline is implemented in `@prosto/platform-core` (Phase 05 — 13 subsystems active), with security and performance hardening completed in Phase 06.
 
 ### Target State (design intent)
 - Monorepo with `platform-sdk`, `platform-core`, `platform-contract-tests`, adapters, and CLI packages.
@@ -56,7 +61,7 @@ Target-state details are documented in the architecture pack [`README.md`](.cont
 ## Immediate Priorities
 
 Current next priorities:
-1. Implement security controls for runtime and CI: allowlist-only module loading in production, integrity checksum verification enforcement, secret redaction from logs/diagnostics (Phase 06).
-2. Implement performance regression gates: startup time benchmarks, memory consumption baselines, CI performance regression detection (Phase 06).
-3. Implement admin enablement contracts and BFF stream (Phases 07-08).
-4. Prepare internal MVP validation pathway prerequisites (Phases 09-10).
+1. Implement admin contracts and UI plugin manifests: `@prosto/platform-admin-contracts` with versioned schemas for plugin manifests, discovery payloads, permissions, and compatibility (Phase 07).
+2. Implement admin BFF adapter and discovery pipeline (Phase 08).
+3. Deliver admin shell integration with plugin runtime (Phase 09).
+4. Run internal MVP validation and operability readiness (Phase 10).

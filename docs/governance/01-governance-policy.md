@@ -61,7 +61,7 @@ Each PR to protected branches must contain evidence links in PR description:
 - Phase 02 package boundary checks are implemented and enforced.
 - Phase 03 SDK contract baseline is completed and now part of release evidence context.
 - FF-05 contracts gate is implemented in Phase 04 with conformance suite execution against reference modules.
-- FF-03 and FF-04 are active in CI; governance expansion is in progress for Phase 06 (security and performance controls).
+- FF-03 and FF-04 are active in CI; Phase 06 security and performance controls are completed.
 
 ## 5) Audit Trail Requirements
 - Retain workflow logs and artifacts for minimum 30 days.

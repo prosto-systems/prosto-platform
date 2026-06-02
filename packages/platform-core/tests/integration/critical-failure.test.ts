@@ -39,7 +39,9 @@ describe('runtime bootstrap critical failure', () => {
       { failOnStart: true },
     );
 
-    const nonCritical = new TestModule(createManifest({ id: 'module-normal' }));
+    const nonCritical = new TestModule(
+      createManifest({ id: 'module-standard' }),
+    );
 
     const runtime = await createRuntime({
       modules: [

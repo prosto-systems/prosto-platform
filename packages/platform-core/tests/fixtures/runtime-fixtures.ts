@@ -26,7 +26,7 @@ export function createManifest(
     version: input.version ?? SDK_CONTRACT_VERSION,
     sdkVersion: input.sdkVersion ?? '^0.0.0',
     nodeVersion: input.nodeVersion,
-    criticality: input.criticality ?? 'normal',
+    criticality: input.criticality ?? 'standard',
     securityClass: input.securityClass ?? 'internal',
     capabilities: input.capabilities ?? [
       'lifecycle.register',

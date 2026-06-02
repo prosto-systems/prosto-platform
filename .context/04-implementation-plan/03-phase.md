@@ -96,7 +96,7 @@ export const PlatformModuleManifestSchema = z.object({
   id: z.string().min(3),
   version: z.string(),
   sdkVersion: z.string(),
-  criticality: z.enum(['normal', 'critical']),
+  criticality: z.enum(['standard', 'critical']),
   securityClass: z.enum(['trusted', 'internal', 'third-party-reviewed']),
   capabilities: z.array(z.string()).min(1)
 });

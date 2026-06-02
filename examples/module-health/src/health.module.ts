@@ -13,7 +13,7 @@ export class HealthModule implements IPlatformModule {
     id: 'module-health',
     version: '1.0.0',
     sdkVersion: '^0.1.0',
-    criticality: 'normal',
+    criticality: 'standard',
     securityClass: 'internal',
     capabilities: [
       'lifecycle.register',

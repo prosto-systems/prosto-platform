@@ -75,7 +75,7 @@ export interface PlatformModuleManifest {
   dependencies?: TModuleDependency[];
   authors?: (string|TModuleAuthor)[];
   owners?: (string|TModuleOwner)[];
-  criticality?: 'normal' | 'critical';
+  criticality?: 'standard' | 'critical';
 }
 
 export interface PlatformModule {
