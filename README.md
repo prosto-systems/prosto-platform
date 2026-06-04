@@ -17,6 +17,7 @@ A TypeScript-based **headless platform** built on a micro-core architecture with
 |---------|---------|
 | [`@prosto/platform-sdk`](packages/platform-sdk) | Contract authority — schemas, validators, lifecycle interfaces, typed tokens |
 | [`@prosto/platform-core`](packages/platform-core) | Minimal runtime kernel — bootstrap, modularity, events, security, caching, diagnostics |
+| [`@prosto/platform-admin-contracts`](packages/platform-admin-contracts) | Admin integration contracts — UI plugin manifests, discovery payloads, permissions, compatibility |
 | [`@prosto/platform-cli`](packages/platform-cli) | CLI scaffolding and validation utilities |
 | [`@prosto/platform-adapter-http`](packages/platform-adapter-http) | HTTP transport adapter |
 | [`@prosto/platform-contract-tests`](packages/platform-contract-tests) | Reusable contract conformance tests for modules |
@@ -82,7 +83,7 @@ Full architecture diagrams (C4, DFD, sequence) are in [`.context/02-architecture
 
 ## Project Status
 
-**Phase 06 completed. Phase 07 (admin contracts and UI plugin manifests) is active.**
+**Phase 07 completed. Phase 08 (admin BFF adapter and discovery pipeline) is active.**
 
 Completed phases:
 - **Phase 01** — Governance workflows and CI required-check policy
@@ -91,6 +92,7 @@ Completed phases:
 - **Phase 04** — Contract conformance gate (`test:contracts`)
 - **Phase 05** — Core runtime subsystems (bootstrap, module loader, event bus, service registry, diagnostics)
 - **Phase 06** — Security hardening (secret redaction, integrity checks, config access policy, performance regression gates)
+- **Phase 07** — Admin contract authority (`@prosto/platform-admin-contracts`) with UI plugin manifests, discovery payloads, permissions, compatibility rules, public exports, and validation tests
 
 See the [implementation roadmap](.context/04-implementation-plan/) for full phase details.
 
