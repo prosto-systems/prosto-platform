@@ -5,6 +5,7 @@ const ROOT_PACKAGE_JSON = path.resolve('package.json');
 const REQUIRED_WORKSPACE_GLOB = 'packages/*';
 const REQUIRED_PACKAGE_DIRS = [
   'platform-sdk',
+  'platform-admin-contracts',
   'platform-core',
   'platform-contract-tests',
   'platform-cli',
@@ -28,7 +29,7 @@ for (const packageDir of REQUIRED_PACKAGE_DIRS) {
     await readFile(packageJsonPath, 'utf8');
   } catch {
     throw new Error(
-      `Missing required Phase 02 package manifest: ${packageJsonPath}`,
+      `Missing required platform package manifest: ${packageJsonPath}`,
     );
   }
 }

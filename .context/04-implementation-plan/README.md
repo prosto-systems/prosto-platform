@@ -4,19 +4,20 @@ This index consolidates the execution-ready implementation plan for `prosto-plat
 
 ## Planning Baseline
 - Repository has completed Phase 01 governance activation, Phase 02 workspace/package baseline setup, Phase 03 SDK contract baseline delivery, Phase 04 contract conformance delivery, Phase 05 core runtime foundation, and Phase 06 security and performance hardening.
-- Phase 07 admin contracts and UI plugin manifests is the current execution focus.
+- Phase 07 admin contracts and UI plugin manifests is completed; Phase 08 admin BFF adapter and discovery pipeline is the current execution focus.
 - Architecture intent emphasizes micro-core boundaries, contract-first delivery, deterministic lifecycle, security-first module loading, and hybrid admin model with shell plus UI plugins.
 - This plan is sequenced to reduce early architecture drift and keep risk controls enforceable from the first implementation increment.
 
-## Execution Status (As of 2026-06-02, post-Phase 06 completion)
+## Execution Status (As of 2026-06-04, post-Phase 07 completion)
 - `Phase 01`: Completed (governance workflows, required checks documentation, PR template, release evidence script).
 - `Phase 02`: Completed (workspace packages, TypeScript baseline, dependency and public API boundary checks, dependency map).
 - `Phase 03`: Completed (SDK contracts, manifest schema/semantic validation, typed tokens, validation errors, unit and type-level tests).
 - `Phase 04`: Completed (contract conformance package implementation, failure taxonomy, reference module validation, compatibility matrix baseline).
 - `Phase 05`: Completed (core runtime foundation, deterministic lifecycle orchestration, active FF-03/FF-04 scripts).
 - `Phase 06`: Completed (security controls and performance regression gates — secret redaction, integrity checks, CI policy gates, performance baseline and drift enforcement, risk-to-control evidence).
-- `Current active phase`: Phase 07 (admin contracts and UI plugin manifests).
-- `Phases 08-10`: Planned.
+- `Phase 07`: Completed (`@prosto/platform-admin-contracts`, UI plugin manifest contracts, discovery payload contracts, permission and policy contracts, compatibility rules, public exports, validation tests).
+- `Current active phase`: Phase 08 (admin BFF adapter and discovery pipeline).
+- `Phases 09-10`: Planned.
 
 ## Phase Order
 1. [Phase 01 - Governance Activation and Delivery Guardrails](./01-phase.md)
@@ -80,7 +81,8 @@ Current dependency fulfillment:
 - Phase 04: completed and validated.
 - Phase 05: completed and validated.
 - Phase 06: completed and validated.
-- Phases 07-10: pending implementation (Phase 07 is current active phase).
+- Phase 07: completed and validated.
+- Phases 08-10: pending implementation (Phase 08 is current active phase).
 
 ## Milestones and Stage Gates
 ### M1 Governance Gate Active

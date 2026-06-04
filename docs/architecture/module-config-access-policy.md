@@ -199,7 +199,7 @@ const redactor = new SecretsRedactor({
 ```
 
 ## Evidence Linkage
-- Hardening completed: `AGENTS.md` (Phase 06 completed).
+- Hardening completed: `AGENTS.md`.
 - Runtime enforcement integration points: `packages/platform-core/src/modularity/policy/`.
 - Context shaping integration point: `packages/platform-core/src/modularity/context/factories/module-context.factory.ts`.
 - Diagnostics validation: `packages/platform-core/src/diagnostics/diagnostics-reports.schema.ts`.

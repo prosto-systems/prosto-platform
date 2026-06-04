@@ -3,6 +3,7 @@ import path from 'node:path';
 
 const PACKAGE_DIRS = [
   'platform-sdk',
+  'platform-admin-contracts',
   'platform-core',
   'platform-contract-tests',
   'platform-cli',
@@ -25,7 +26,7 @@ for (const packageDir of PACKAGE_DIRS) {
 
   if (exportKeys.length !== 1 || exportKeys[0] !== '.') {
     throw new Error(
-      `Public API boundary violation: ${packageName} exports must be restricted to "." during Phase 02.`,
+      `Public API boundary violation: ${packageName} exports must be restricted to ".".`,
     );
   }
 

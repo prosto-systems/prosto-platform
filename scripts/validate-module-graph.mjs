@@ -3,6 +3,7 @@ import path from 'node:path';
 
 const PACKAGE_DIRS = [
   'platform-sdk',
+  'platform-admin-contracts',
   'platform-core',
   'platform-contract-tests',
   'platform-cli',

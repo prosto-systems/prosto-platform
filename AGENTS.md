@@ -6,11 +6,13 @@
 
 ## ⚠️ Current Project Status
 
-**IMPORTANT**: Phase 01 through Phase 06 are fully implemented. Phase 07 (admin contracts and UI plugin manifests) is the **active implementation window**.
+**IMPORTANT**: Phase 01 through Phase 07 are fully implemented. Phase 08 (admin BFF adapter and discovery pipeline) is the **active implementation window**. Phase 07 delivered `@prosto/platform-admin-contracts` with UI plugin manifest contracts, manifest schema validators, admin discovery payload contracts, permission and policy contracts, compatibility rules, public exports, and validation tests.
 
 ### Current Tooling Availability
 - Phase 01 governance workflows are active under `.github/workflows/`
 - Phase 02 workspace baseline: `@prosto/platform-sdk`, `@prosto/platform-core`, `@prosto/platform-contract-tests`, `@prosto/platform-cli`, `@prosto/platform-adapter-http`
+- Phase 07 admin contracts baseline: `@prosto/platform-admin-contracts`
+- Phase 08 admin BFF adapter: planned next package `@prosto/platform-adapter-admin-bff`
 - Root/package TypeScript baselines: `packages/platform-utils/tsconfig/base.json`, `packages/*/tsconfig.json`
 - Build: Vite 8 (`vite.config.ts`) with `vite-plugin-dts`
 - Governance scripts in root `package.json`: `lint`, `lint:fix`, `lint:architecture`, `validate:dependency-policy`, `validate:module-graph`, `validate:public-api-boundary`, `validate:runtime-policy`, `test:contracts`, `test:lifecycle-determinism`, `release:evidence`
@@ -169,5 +171,5 @@ These checks are enforced in CI via `.github/workflows/` gates and must pass bef
 
 ---
 
-**Last Updated**: 2026-06-02
-**Version**: 0.3.0
+**Last Updated**: 2026-06-04
+**Version**: 0.3.3

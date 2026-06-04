@@ -1,9 +1,9 @@
 # 00 Assumptions and Deep Audit Findings
 
-## Status Update (2026-06-02)
+## Status Update (2026-06-04)
 - Repository reality has progressed since this audit baseline.
-- Phase 01 governance assets, Phase 02 workspace/package baseline, Phase 03 SDK contract baseline, Phase 04 contract conformance package, Phase 05 runtime foundation, and Phase 06 security and performance hardening are completed.
-- Current active implementation phase is Phase 07 (admin contracts and UI plugin manifests).
+- Phase 01 governance assets, Phase 02 workspace/package baseline, Phase 03 SDK contract baseline, Phase 04 contract conformance package, Phase 05 runtime foundation, Phase 06 security and performance hardening, and Phase 07 admin contracts are completed.
+- Current active implementation phase is Phase 08 (admin BFF adapter and discovery pipeline).
 - Treat findings below as a pre-Phase-05 audit snapshot unless explicitly updated by newer phase artifacts.
 
 ## 1. Key Assumptions
