@@ -21,6 +21,10 @@ Scaffold, diagnostics, validation commands"]
 HTTP transport, middleware, health/readiness"]
     ContractTests["Container: @prosto/platform-contract-tests
 Shared contract compliance tests"]
+    AdminContracts["Container: @prosto/platform-admin-contracts
+UI plugin manifest, discovery payload, permission, and policy contracts"]
+    AdminBFF["Container: @prosto/platform-adapter-admin-bff
+Policy-aware admin APIs, discovery aggregation, permission mapping, diagnostics"]
   end
 
   subgraph RuntimeNode["Deployment Runtime Node"]
@@ -37,6 +41,8 @@ Independent repositories"] --> KernelProcess
   HTTP --> KernelProcess
   CLI -->|"validate manifests, run diagnostics"| Core
   ContractTests -->|"used in module CI"| ModulePkg
+  AdminContracts --> AdminBFF
+  AdminBFF -->|"admin API + discovery"| KernelProcess
 ```
 
 ## Container Responsibilities
@@ -47,6 +53,8 @@ Independent repositories"] --> KernelProcess
 | `@prosto/platform-core` | Bootstrapping, loading, compatibility, lifecycle orchestration, registry/event bus | HTTP framework specifics, ORM specifics, domain modules |
 | `@prosto/platform-cli` | Scaffolding, preflight checks, config/module diagnostics | Runtime hosting logic |
 | `@prosto/http-fastify` (optional) | Request routing, middleware, auth hooks, health surfaces | Kernel lifecycle ownership |
+| `@prosto/platform-admin-contracts` | UI plugin manifest schemas, discovery payload contracts, permission and policy contracts, compatibility rules | Runtime behavior, framework code |
+| `@prosto/platform-adapter-admin-bff` | Policy-aware admin APIs, discovery aggregation pipeline, permission mapping, diagnostics, observability | Domain logic, kernel lifecycle, shell rendering |
 | External Modules | Feature and integration logic, capability implementations | Kernel orchestration concerns |
 | Contract Test Package | Contract conformance suite reusable in CI | Production runtime behavior |
 
@@ -61,6 +69,9 @@ Independent repositories"] --> KernelProcess
 - Modules depend on SDK (peer dependency), not on core internals.
 - Adapter depends on SDK and core extension points.
 - Contract tests depend on SDK contract fixtures and target core compatibility matrix.
+- Admin BFF depends on admin-contracts for plugin manifest schemas and policy contracts.
+- Admin BFF integrates with kernel via route handlers, not by importing core internals.
+- Admin shell consumes only contract-defined discovery payloads from admin BFF.
 
 ## Linked Views
 - Components in core: [C4-03 Core Component View](./03-component-view-kernel.md)

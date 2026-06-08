@@ -1,5 +1,7 @@
 # Phase 08 - Admin BFF Adapter and Discovery Pipeline
 
+**Status**: Completed (2026-06-08)
+
 ## Phase Objective
 Implement `@prosto/platform-adapter-admin-bff` to provide policy-aware admin APIs, UI plugin discovery aggregation, compatibility filtering, and diagnostics required by hybrid admin model.
 
