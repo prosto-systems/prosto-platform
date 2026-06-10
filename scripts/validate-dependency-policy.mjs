@@ -3,22 +3,26 @@ import path from 'node:path';
 
 const WORKSPACE_PACKAGE_DIRS = [
   'platform-sdk',
-  'platform-admin-contracts',
   'platform-core',
   'platform-contract-tests',
   'platform-cli',
   'platform-adapter-http',
+  'platform-admin-contracts',
+  'platform-adapter-admin-bff',
+  'platform-admin-shell',
 ];
 
 const INTERNAL_PREFIX = '@prosto/';
 
 const allowedInternalDeps = new Map([
   ['@prosto/platform-sdk', []],
-  ['@prosto/platform-admin-contracts', []],
   ['@prosto/platform-core', ['@prosto/platform-sdk']],
   ['@prosto/platform-contract-tests', ['@prosto/platform-sdk']],
   ['@prosto/platform-cli', ['@prosto/platform-sdk']],
   ['@prosto/platform-adapter-http', ['@prosto/platform-sdk']],
+  ['@prosto/platform-admin-contracts', []],
+  ['@prosto/platform-adapter-admin-bff', ['@prosto/platform-admin-contracts']],
+  ['@prosto/platform-admin-shell', ['@prosto/platform-admin-contracts']],
 ]);
 
 for (const packageDir of WORKSPACE_PACKAGE_DIRS) {

@@ -1,6 +1,8 @@
 dist
 artifacts
 node_modules
+coverage
+package-lock.json
 .context
 .git
 .github
@@ -11,4 +13,3 @@ node_modules
 *.md
 *.svg
 *.snap
-coverage

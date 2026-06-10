@@ -1,11 +1,11 @@
 # Phase 09 - Admin Shell Integration and Plugin Runtime
 
 ## Phase Objective
-Deliver integration of separate `admin-shell` runtime with platform contracts and admin BFF so UI plugins can be discovered, validated, and rendered through policy-gated extension points.
+Deliver integration of `@prosto/platform-admin-shell` (Vue 3 SPA) with platform contracts and admin BFF so UI plugins can be discovered, validated, and rendered through policy-gated extension points.
 
 ## Scope Boundaries
 ### In Scope
-- Separate `admin-shell` repository setup and integration contracts.
+- `platform-admin-shell` package setup within monorepo and integration contracts.
 - Plugin runtime registry in shell for navigation, pages, widgets, and actions.
 - Shell-side compatibility handling and degraded rendering behavior.
 - Contract-driven plugin loading lifecycle and error surfacing.
@@ -25,7 +25,7 @@ Deliver integration of separate `admin-shell` runtime with platform contracts an
   - `.context/02-architecture-design/adr/ADR-0009-admin-ui-hybrid-shell-plugin-model.md`
 
 ## Detailed Ordered Implementation Steps
-1. Create separate `admin-shell` repository with workspace conventions aligned to platform contracts.
+1. Create `platform-admin-shell` package in monorepo with Vue 3, Vite, and workspace conventions aligned to platform contracts.
 2. Implement shell contract client for discovery payload retrieval from admin BFF.
 3. Implement shell plugin registry:
    - register extension points by manifest type
@@ -79,13 +79,18 @@ try {
 - `.context/04-implementation-plan/README.md`
 
 ### New files expected
-- `admin-shell/package.json`
-- `admin-shell/src/bootstrap/*.ts`
-- `admin-shell/src/plugins/*.ts`
-- `admin-shell/src/compatibility/*.ts`
-- `admin-shell/src/permissions/*.ts`
-- `admin-shell/src/diagnostics/*.ts`
-- `admin-shell/test/integration/*.test.ts`
+- `packages/platform-admin-shell/package.json`
+- `packages/platform-admin-shell/vite.config.ts`
+- `packages/platform-admin-shell/src/main.ts`
+- `packages/platform-admin-shell/src/App.vue`
+- `packages/platform-admin-shell/src/router/index.ts`
+- `packages/platform-admin-shell/src/store/plugins.ts`
+- `packages/platform-admin-shell/src/plugins/*.ts`
+- `packages/platform-admin-shell/src/permissions/*.ts`
+- `packages/platform-admin-shell/src/contracts/*.ts`
+- `packages/platform-admin-shell/src/views/*.vue`
+- `packages/platform-admin-shell/src/components/*.vue`
+- `packages/platform-admin-shell/tests/**/*.ts`
 - `docs/admin-shell/integration-guide.md`
 
 ## Validation and Testing Approach
@@ -111,7 +116,7 @@ try {
 - Preserve plugin rejection diagnostics for rapid remediation.
 
 ## Completion Criteria
-- `admin-shell` repository integrates with admin BFF discovery payload.
+- `platform-admin-shell` package integrates with admin BFF discovery payload.
 - Plugin runtime supports contract-driven extension points with compatibility gating.
 - Permission-aware rendering and degraded behavior are validated.
 - End-to-end integration tests pass with diagnostics and telemetry evidence.

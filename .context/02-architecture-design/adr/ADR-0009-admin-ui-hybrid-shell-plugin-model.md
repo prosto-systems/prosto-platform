@@ -8,7 +8,7 @@ Status: Draft
 
 ## Decision
 Adopt a **hybrid admin model**:
-- Admin UI runtime is delivered as a separate `admin-shell` application.
+- Admin UI runtime is delivered as the `@prosto/platform-admin-shell` package within the monorepo. It is a Vue 3 SPA built with Vite.
 - Module-driven admin extensibility is provided through versioned UI plugin manifests and discovery contracts.
 - Policy-aware aggregation for admin operations and plugin discovery is provided by `platform-adapter-admin-bff`.
 - Contracts for admin discovery, plugin manifest schemas, permissions, and compatibility are owned by `platform-admin-contracts`.
@@ -16,7 +16,7 @@ Adopt a **hybrid admin model**:
 ## Boundary Rules
 - `platform-core` must not depend on admin shell runtime or frontend framework packages.
 - UI plugin loading must be allowlist-based with integrity and compatibility validation.
-- Admin shell consumes only contract-defined discovery payloads.
+- Admin shell consumes only contract-defined discovery payloads via workspace reference to `platform-admin-contracts`.
 - Feature modules may contribute UI plugins only through `platform-admin-contracts` manifests.
 
 ## Security and Governance
@@ -27,7 +27,8 @@ Adopt a **hybrid admin model**:
 ## Consequences
 ### Positive
 - Preserves micro-core purity.
-- Enables independent release cadence for admin shell.
+- Centralized development workflow with unified build, test, and lint commands.
+- Atomic cross-package changes for contracts, BFF, and shell.
 - Scales module ecosystem UI contributions with policy control.
 
 ### Trade-offs
@@ -36,6 +37,7 @@ Adopt a **hybrid admin model**:
 
 ## Implementation Notes
 - Add `platform-admin-contracts` and `platform-adapter-admin-bff` to package blueprint.
+- Add `platform-admin-shell` (Vue 3 SPA) to package blueprint.
 - Update C4 context to include Admin Shell, Admin BFF, and UI Plugin Registry.
 - Extend implementation roadmap with an Admin Enablement stream after contract baseline phases.
 

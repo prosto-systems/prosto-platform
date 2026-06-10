@@ -24,6 +24,7 @@ export function loadJsonFileSync<T extends object = Record<string, unknown>>(
       `Failed to parse file "${filePath}": ${
         error instanceof Error ? error.message : String(error)
       }`,
+      { cause: error },
     );
   }
 }

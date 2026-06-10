@@ -14,6 +14,9 @@
       <excludeFolder url="file://$MODULE_DIR$/examples/module-auth/artifacts" />
       <excludeFolder url="file://$MODULE_DIR$/examples/module-health/artifacts" />
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-core/.cache" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-adapter-admin-bff/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-admin-contracts/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-admin-shell/.turbo" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

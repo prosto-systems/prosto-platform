@@ -102,7 +102,7 @@ export class ResolveDependenciesStage extends BootstrapBaseStage {
 
       this.stopPipeline(context);
 
-      return { ...context, loadedModules: [] };
+      // return { ...context, loadedModules: [] };
     }
 
     return { ...context, loadedModules: orderedModules };

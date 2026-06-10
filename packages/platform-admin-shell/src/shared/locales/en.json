@@ -1,0 +1,22 @@
+{
+  "app": {
+    "title": "Prosto Platform"
+  },
+  "dashboard": {
+    "title": "Control Panel",
+    "noPlugins": "No plugins loaded"
+  },
+  "diagnostics": {
+    "title": "Diagnostics",
+    "noRejected": "No rejected plugins"
+  },
+  "diagnostics_panel": {
+    "title": "Rejected Plugins",
+    "degradedMode": "Shell is running in degraded mode",
+    "clear": "Clear"
+  },
+  "degraded_banner": {
+    "title": "Degraded Mode",
+    "viewDiagnostics": "View Diagnostics"
+  }
+}

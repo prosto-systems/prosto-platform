@@ -7,6 +7,16 @@ Contract authority for Prosto platform module manifests, lifecycle interfaces, t
 - Phase 04 contract conformance validation is active via `@prosto/platform-contract-tests` and `npm run test:contracts`
 - All exported contracts are marked `@alpha`
 
+## Relationship to Admin Contracts
+
+`@prosto/platform-admin-contracts` is a separate contract authority package for admin shell and UI plugin integration. It defines:
+- UI plugin manifests
+- Discovery payloads
+- Permission policies
+- Compatibility rules
+
+Both packages follow the same contract-first methodology and stability levels.
+
 ## Public API
 
 ### Constants
