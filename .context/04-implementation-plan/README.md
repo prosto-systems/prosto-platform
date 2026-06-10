@@ -3,12 +3,12 @@
 This index consolidates the execution-ready implementation plan for `prosto-platform` based on the current repository state and architecture artifacts in `.context/02-architecture-design` and `.context/03-work-plan`.
 
 ## Planning Baseline
-- Repository has completed Phase 01 governance activation, Phase 02 workspace/package baseline setup, Phase 03 SDK contract baseline delivery, Phase 04 contract conformance delivery, Phase 05 core runtime foundation, Phase 06 security and performance hardening, Phase 07 admin contracts and UI plugin manifests, and Phase 08 admin BFF adapter and discovery pipeline.
-- Phase 09 admin shell integration and plugin runtime is the next planned phase.
+- Repository has completed Phase 01 governance activation, Phase 02 workspace/package baseline setup, Phase 03 SDK contract baseline delivery, Phase 04 contract conformance delivery, Phase 05 core runtime foundation, Phase 06 security and performance hardening, Phase 07 admin contracts and UI plugin manifests, Phase 08 admin BFF adapter and discovery pipeline, and Phase 09 admin shell integration and plugin runtime.
+- Phase 10 internal MVP validation and operability readiness is the next planned phase.
 - Architecture intent emphasizes micro-core boundaries, contract-first delivery, deterministic lifecycle, security-first module loading, and hybrid admin model with shell plus UI plugins.
 - This plan is sequenced to reduce early architecture drift and keep risk controls enforceable from the first implementation increment.
 
-## Execution Status (As of 2026-06-08, post-Phase 08 completion)
+## Execution Status (As of 2026-07-23, post-Phase 09 completion)
 - `Phase 01`: Completed (governance workflows, required checks documentation, PR template, release evidence script).
 - `Phase 02`: Completed (workspace packages, TypeScript baseline, dependency and public API boundary checks, dependency map).
 - `Phase 03`: Completed (SDK contracts, manifest schema/semantic validation, typed tokens, validation errors, unit and type-level tests).
@@ -17,7 +17,7 @@ This index consolidates the execution-ready implementation plan for `prosto-plat
 - `Phase 06`: Completed (security controls and performance regression gates — secret redaction, integrity checks, CI policy gates, performance baseline and drift enforcement, risk-to-control evidence).
 - `Phase 07`: Completed (`@prosto/platform-admin-contracts`, UI plugin manifest contracts, discovery payload contracts, permission and policy contracts, compatibility rules, public exports, validation tests).
 - `Phase 08`: Completed (`@prosto/platform-adapter-admin-bff`, policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, observability instrumentation).
-- `Phase 09`: Planned (admin shell integration and plugin runtime).
+- `Phase 09`: Completed (`@prosto/platform-admin-shell`, Vue 3 SPA with plugin runtime, policy-gated rendering, degraded-mode diagnostics, observability instrumentation).
 - `Phase 10`: Planned (internal MVP validation and operability readiness).
 
 ## Phase Order
@@ -58,7 +58,7 @@ Implements `platform-admin-contracts` with versioned UI plugin manifest, discove
 Implements `platform-adapter-admin-bff` with policy-aware discovery aggregation, permission mapping, and admin diagnostics.
 
 ### 09
-Delivers separate admin shell integration with plugin runtime, contract-driven rendering registry, and compatibility-gated extension loading.
+Delivers `platform-admin-shell` (Vue 3 SPA) integration with plugin runtime, contract-driven rendering registry, and compatibility-gated extension loading.
 
 ### 10
 Runs internal production-like MVP validation, proves KPI and SLO trends, and issues formal go or no-go outcome for external expansion.
@@ -84,7 +84,8 @@ Current dependency fulfillment:
 - Phase 06: completed and validated.
 - Phase 07: completed and validated.
 - Phase 08: completed and validated.
-- Phases 09-10: pending implementation.
+- Phase 09: completed and validated.
+- Phase 10: pending implementation.
 
 ## Milestones and Stage Gates
 ### M1 Governance Gate Active
@@ -106,7 +107,7 @@ Current dependency fulfillment:
 ### M5 Admin Enablement Stream
 - Introduce `platform-admin-contracts` after contract baseline is available.
 - Introduce `platform-adapter-admin-bff` after runtime baseline is available.
-- Keep `admin-shell` in a separate repository and integrate only via versioned contracts and discovery payloads.
+- Introduce `platform-admin-shell` (Vue 3 SPA) in monorepo and integrate via workspace reference to contracts.
 - Enforce allowlist, trust class, integrity, and compatibility checks for UI plugins before internal MVP gate.
 
 ### M6 Internal MVP Go or No-Go Decision

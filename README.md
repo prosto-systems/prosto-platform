@@ -17,8 +17,9 @@ A TypeScript-based **headless platform** built on a micro-core architecture with
 |---------|---------|
 | [`@prosto/platform-sdk`](packages/platform-sdk) | Contract authority — schemas, validators, lifecycle interfaces, typed tokens |
 | [`@prosto/platform-core`](packages/platform-core) | Minimal runtime kernel — bootstrap, modularity, events, security, caching, diagnostics |
-| [`@prosto/platform-admin-contracts`](packages/platform-admin-contracts) | Admin integration contracts — UI plugin manifests, discovery payloads, permissions, compatibility |
-| [`@prosto/platform-adapter-admin-bff`](packages/platform-adapter-admin-bff) | Admin BFF adapter — policy-aware APIs, discovery aggregation, permission mapping, diagnostics |
+| [`@prosto/platform-admin-contracts`](packages/platform-admin-contracts) | Admin contract authority — UI plugin manifests, discovery payloads, permissions, compatibility rules |
+| [`@prosto/platform-adapter-admin-bff`](packages/platform-adapter-admin-bff) | Admin BFF adapter — policy-aware APIs, discovery aggregation, permission mapping, compatibility filtering, diagnostics, observability |
+| [`@prosto/platform-admin-shell`](packages/platform-admin-shell) | Admin UI runtime — Vue 3 SPA, plugin runtime, permission guards, degraded mode |
 | [`@prosto/platform-cli`](packages/platform-cli) | CLI scaffolding and validation utilities |
 | [`@prosto/platform-adapter-http`](packages/platform-adapter-http) | HTTP transport adapter |
 | [`@prosto/platform-contract-tests`](packages/platform-contract-tests) | Reusable contract conformance tests for modules |
@@ -78,13 +79,14 @@ Key architectural decisions are documented as ADRs in [`.context/02-architecture
 - **ADR-0002** — SDK contract and semver governance
 - **ADR-0003** — Module loading security (allowlist + integrity)
 - **ADR-0004** — Lifecycle orchestration and startup policies
+- **ADR-0007** — Observability (Pino logging, structured logs, metrics)
 - **ADR-0009** — Admin UI hybrid shell plugin model
 
 Full architecture diagrams (C4, DFD, sequence) are in [`.context/02-architecture-design/`](.context/02-architecture-design/).
 
 ## Project Status
 
-**Phase 08 completed. Phase 09 (admin shell integration and plugin runtime) is next.**
+**Phase 01 through Phase 09 are fully implemented.**
 
 Completed phases:
 - **Phase 01** — Governance workflows and CI required-check policy
@@ -94,7 +96,8 @@ Completed phases:
 - **Phase 05** — Core runtime subsystems (bootstrap, module loader, event bus, service registry, diagnostics)
 - **Phase 06** — Security hardening (secret redaction, integrity checks, config access policy, performance regression gates)
 - **Phase 07** — Admin contract authority (`@prosto/platform-admin-contracts`) with UI plugin manifests, discovery payloads, permissions, compatibility rules, public exports, and validation tests
-- **Phase 08** — Admin BFF adapter (`@prosto/platform-adapter-admin-bff`) with policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, and observability
+- **Phase 08** — Admin BFF adapter (`@prosto/platform-adapter-admin-bff`) with policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, and observability instrumentation
+- **Phase 09** — Admin shell integration and plugin runtime (`@prosto/platform-admin-shell`) with Vue 3 SPA, plugin runtime, policy-gated rendering, degraded-mode diagnostics, and observability instrumentation
 
 See the [implementation roadmap](.context/04-implementation-plan/) for full phase details.
 

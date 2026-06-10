@@ -1,13 +1,28 @@
 import js from '@eslint/js';
-import prettierConfig from 'eslint-config-prettier';
+import vuePrettierConfig from '@vue/eslint-config-prettier';
+import {
+  defineConfigWithVueTs,
+  vueTsConfigs,
+} from '@vue/eslint-config-typescript';
+import boundaries from 'eslint-plugin-boundaries';
+import pluginVue from 'eslint-plugin-vue';
 import globals from 'globals';
-import tseslint from 'typescript-eslint';
+import tsEslint from 'typescript-eslint';
 
-export default tseslint.config(
+export default tsEslint.config(
   {
-    ignores: ['**/dist/**', '**/node_modules/**'],
+    name: 'app/files-to-ignore',
+    ignores: [
+      'public/**',
+      '**/dist/**',
+      '**/dist-ssr/**',
+      '**/coverage/**',
+      '**/node_modules/**',
+      '**/.idea/**',
+    ],
   },
   {
+    name: 'app/js-files',
     files: ['**/*.{js,mjs,cjs}'],
     extends: [js.configs.recommended],
     languageOptions: {
@@ -19,11 +34,12 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.{ts,tsx,mts,cts}'],
+    name: 'app/ts-vue-files',
+    files: ['**/*.{ts,tsx,mts,cts,vue}'],
     extends: [
       js.configs.recommended,
-      ...tseslint.configs.strict,
-      ...tseslint.configs.stylistic,
+      ...tsEslint.configs.strict,
+      ...tsEslint.configs.stylistic,
     ],
     languageOptions: {
       ecmaVersion: 'latest',
@@ -32,8 +48,15 @@ export default tseslint.config(
         ...globals.node,
       },
     },
+  },
+  ...defineConfigWithVueTs(
+    pluginVue.configs['flat/recommended'],
+    vueTsConfigs.recommended,
+    vuePrettierConfig,
+  ),
+  {
+    name: 'app/override-rules',
     rules: {
-      'no-unused-vars': 'off',
       '@typescript-eslint/consistent-type-imports': [
         'warn',
         { disallowTypeAnnotations: false },
@@ -52,6 +75,7 @@ export default tseslint.config(
       ],
       '@typescript-eslint/no-extraneous-class': 'off',
       // '@typescript-eslint/no-inferrable-types': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'warn',
       '@typescript-eslint/no-shadow': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -62,6 +86,7 @@ export default tseslint.config(
       ],
       curly: ['warn', 'multi-line', 'consistent'],
       'no-shadow': 'off', // See: https://typescript-eslint.io/rules/no-shadow/#how-to-use
+      'no-unused-vars': 'off',
       'prefer-rest-params': 'warn',
       'spaced-comment': [
         'warn',
@@ -91,5 +116,175 @@ export default tseslint.config(
       ],
     },
   },
-  prettierConfig,
+  {
+    name: 'platform-admin-shell/boundaries',
+    files: ['packages/platform-admin-shell/src/**/*.{ts,vue}'],
+    plugins: {
+      boundaries,
+    },
+    settings: {
+      'boundaries/elements': [
+        {
+          type: 'shared',
+          pattern: 'packages/platform-admin-shell/src/shared/**/*',
+        },
+        {
+          type: 'entities',
+          pattern: 'packages/platform-admin-shell/src/entities/**/*',
+        },
+        {
+          type: 'features',
+          pattern: 'packages/platform-admin-shell/src/features/**/*',
+        },
+        {
+          type: 'processes',
+          pattern: 'packages/platform-admin-shell/src/processes/**/*',
+        },
+        {
+          type: 'widgets',
+          pattern: 'packages/platform-admin-shell/src/widgets/**/*',
+        },
+        {
+          type: 'pages',
+          pattern: 'packages/platform-admin-shell/src/pages/**/*',
+        },
+        { type: 'app', pattern: 'packages/platform-admin-shell/src/app/**/*' },
+      ],
+      'boundaries/ignore': [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/coverage/**',
+      ],
+      'import/resolver': {
+        typescript: {
+          project: 'packages/platform-admin-shell/tsconfig.json',
+        },
+      },
+    },
+    rules: {
+      'boundaries/dependencies': [
+        'error',
+        {
+          default: 'disallow',
+          checkInternals: true,
+          policies: [
+            {
+              from: { element: { type: 'entities' } },
+              allow: {
+                to: { element: { types: { anyOf: ['shared', 'entities'] } } },
+              },
+            },
+            {
+              from: { element: { type: 'features' } },
+              allow: {
+                to: {
+                  element: {
+                    types: { anyOf: ['entities', 'shared', 'features'] },
+                  },
+                },
+              },
+            },
+            {
+              from: { element: { type: 'processes' } },
+              allow: {
+                to: {
+                  element: {
+                    types: {
+                      anyOf: ['features', 'entities', 'shared', 'processes'],
+                    },
+                  },
+                },
+              },
+            },
+            {
+              from: { element: { type: 'widgets' } },
+              allow: {
+                to: {
+                  element: {
+                    types: {
+                      anyOf: ['features', 'entities', 'shared', 'widgets'],
+                    },
+                  },
+                },
+              },
+            },
+            {
+              from: { element: { type: 'pages' } },
+              allow: {
+                to: {
+                  element: {
+                    types: {
+                      anyOf: [
+                        'widgets',
+                        'features',
+                        'entities',
+                        'shared',
+                        'pages',
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+            {
+              from: { element: { type: 'app' } },
+              allow: {
+                to: {
+                  element: {
+                    types: {
+                      anyOf: [
+                        'pages',
+                        'widgets',
+                        'processes',
+                        'features',
+                        'entities',
+                        'shared',
+                        'app',
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+            {
+              from: { element: { type: 'shared' } },
+              allow: {
+                to: { element: { types: { anyOf: ['shared'] } } },
+              },
+            },
+            {
+              from: {
+                element: { type: 'features', fileInternalPath: '**/model/**' },
+              },
+              disallow: [
+                { module: { origin: 'external', source: 'vue' } },
+                { module: { origin: 'external', source: 'pinia' } },
+                { module: { origin: 'external', source: 'vuetify' } },
+              ],
+            },
+            {
+              from: {
+                element: { type: 'shared', fileInternalPath: '**/api/**' },
+              },
+              disallow: [
+                { module: { origin: 'external', source: 'vue' } },
+                { module: { origin: 'external', source: 'pinia' } },
+                { module: { origin: 'external', source: 'vuetify' } },
+              ],
+            },
+            {
+              from: {
+                element: { type: 'entities', fileInternalPath: '**/model/**' },
+              },
+              disallow: [
+                { module: { origin: 'external', source: 'vue' } },
+                { module: { origin: 'external', source: 'pinia' } },
+                { module: { origin: 'external', source: 'vuetify' } },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
 );

@@ -2,7 +2,6 @@
   "extends": "@internal/tsconfig/base.json",
   "compilerOptions": {
     "noEmit": true,
-    "baseUrl": ".",
     "paths": {
       "@/tests/fixtures/*": ["./tests/fixtures/*"],
       "@/bench/*": ["./bench/*"],

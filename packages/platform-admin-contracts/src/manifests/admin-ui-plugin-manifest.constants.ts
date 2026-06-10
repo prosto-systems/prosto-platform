@@ -56,3 +56,24 @@ export const ADMIN_UI_PLUGIN_REVIEW_STATUSES = [
   'rejected',
   'revoked',
 ] as const;
+
+/**
+ * @alpha
+ * Metadata key used by discovery extension descriptors to declare
+ * per-extension permission requirements as a JSON-encoded string array.
+ */
+export const PERMISSION_METADATA_KEY = 'requiredPermissions';
+
+/**
+ * @alpha
+ * Metadata key used by discovery extension descriptors to declare
+ * the match strategy for evaluating permission requirements.
+ */
+export const PERMISSION_MATCH_METADATA_KEY = 'permissionMatchStrategy';
+
+/**
+ * @alpha
+ * Metadata key used by discovery extension descriptors to declare
+ * per-extension capability requirements as a JSON-encoded string array.
+ */
+export const CAPABILITY_METADATA_KEY = 'requiredCapabilities';

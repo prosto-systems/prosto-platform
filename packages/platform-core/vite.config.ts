@@ -18,10 +18,11 @@ function isExternalDependency(id: string): boolean {
 }
 
 function hasDtsDiagnostics(diagnostics: readonly Diagnostic[]): void {
-  if (diagnostics.length > 0)
+  if (diagnostics.length > 0) {
     throw new Error(
       `vite-plugin-dts emitted ${diagnostics.length.toString()} diagnostic(s).`,
     );
+  }
 }
 
 export default defineConfig({

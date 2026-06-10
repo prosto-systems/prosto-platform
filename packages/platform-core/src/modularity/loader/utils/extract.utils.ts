@@ -135,10 +135,17 @@ export class ArtifactExtractor {
   }
 
   private static _isPathSafe(entryName: string, destDir: string): boolean {
-    if (entryName.includes('..')) return false;
-    if (entryName.startsWith('/') || /^[a-zA-Z]:\\/.test(entryName))
+    if (entryName.includes('..')) {
       return false;
-    if (entryName.includes('\\') && entryName.includes('/')) return false;
+    }
+
+    if (entryName.startsWith('/') || /^[a-zA-Z]:\\/.test(entryName)) {
+      return false;
+    }
+
+    if (entryName.includes('\\') && entryName.includes('/')) {
+      return false;
+    }
 
     const resolved = resolve(destDir, entryName);
     const resolvedDest = resolve(destDir);

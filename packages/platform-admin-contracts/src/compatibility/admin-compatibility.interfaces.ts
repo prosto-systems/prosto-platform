@@ -10,7 +10,9 @@ import type {
  */
 export interface IAdminPluginCompatibilityInput {
   readonly shellVersion: string;
-  readonly supportedContractVersion: AdminCompatibilityContractVersionType;
+  readonly supportedContractVersion:
+    | AdminCompatibilityContractVersionType
+    | string;
   readonly pluginContractVersion: AdminCompatibilityContractVersionType;
   readonly manifest: IAdminUIPluginManifest;
 }
