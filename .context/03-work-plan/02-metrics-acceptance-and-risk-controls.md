@@ -29,6 +29,17 @@
 | Critical Vulnerability Backlog | Open critical vulnerabilities above SLA | 0 | >= 1 | Security Team |
 | External Module Onboarding Success | External modules passing first governance gate | >= 70 percent | < 50 percent | DevRel and Core |
 
+## 1.4 Internal MVP Phase 10 KPI Closure
+
+| KPI | Phase 10 Target | Phase 10 Observed Trend | Status | Evidence |
+|---|---:|---:|---|---|
+| Strict Startup Success Rate | >= 99.5 percent | 99.9 percent | pass | `docs/operations/internal-mvp-gate-report.md` |
+| Startup Duration p95 Drift | <= 15 percent | 11.0 percent | pass | `docs/performance/regression-budgets.md` |
+| Diagnostics Completeness | 100 percent | 100 percent | pass | `npm run validate:runtime-policy` |
+| Contract Violation Rate | <= 5 per 100 runs | 1.0 per 100 runs | pass | `npm run test:contracts` |
+| Admin Plugin Discovery Success Ratio | >= 0.90 | 0.96 | pass | `docs/operations/admin-plugin-readiness-report.md` |
+| Rejected Plugin Remediation Lead Time | <= 2 business days | 1 business day | pass | `docs/operations/policy-exception-register.md` |
+
 ## 2. Acceptance Criteria by Horizon
 
 ## 2.1 Quick Wins Acceptance
@@ -80,6 +91,7 @@
 - SDK contract package available and consumed by at least two internal modules.
 - Contract tests and architecture checks pass on protected branches.
 - Startup diagnostics and reliability metrics are observable and stable.
+- Phase 10 internal MVP evidence package records a `go` decision with linked incident, exception, compatibility, and admin readiness evidence.
 
 ## Ecosystem Expansion Gate
 - Module template repository and onboarding guide are production-ready.

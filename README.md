@@ -86,7 +86,7 @@ Full architecture diagrams (C4, DFD, sequence) are in [`.context/02-architecture
 
 ## Project Status
 
-**Phase 01 through Phase 09 are fully implemented.**
+**Phase 01 through Phase 10 are fully implemented.**
 
 Completed phases:
 - **Phase 01** — Governance workflows and CI required-check policy
@@ -98,6 +98,7 @@ Completed phases:
 - **Phase 07** — Admin contract authority (`@prosto/platform-admin-contracts`) with UI plugin manifests, discovery payloads, permissions, compatibility rules, public exports, and validation tests
 - **Phase 08** — Admin BFF adapter (`@prosto/platform-adapter-admin-bff`) with policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, and observability instrumentation
 - **Phase 09** — Admin shell integration and plugin runtime (`@prosto/platform-admin-shell`) with Vue 3 SPA, plugin runtime, policy-gated rendering, degraded-mode diagnostics, and observability instrumentation
+- **Phase 10** — Internal MVP validation and operability readiness with staging pilot evidence, KPI/SLO trend, incident and exception registers, admin plugin readiness, and formal `go` decision
 
 See the [implementation roadmap](.context/04-implementation-plan/) for full phase details.
 
@@ -111,6 +112,7 @@ See the [implementation roadmap](.context/04-implementation-plan/) for full phas
 | [`.context/04-implementation-plan/`](.context/04-implementation-plan/) | 10-phase implementation roadmap |
 | [`AGENTS.md`](AGENTS.md) | AI agent operational policy |
 | [`docs/architecture/`](docs/architecture/) | Architecture specifications |
+| [`docs/operations/`](docs/operations/) | Internal MVP gate report, incident register, policy exception register, and admin plugin readiness evidence |
 
 ## Contributing
 

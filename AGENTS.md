@@ -6,7 +6,7 @@
 
 ## ⚠️ Current Project Status
 
-**IMPORTANT**: Phase 01 through Phase 09 are fully implemented. Phase 09 delivered `@prosto/platform-admin-shell` as the admin UI runtime with plugin runtime, policy-gated rendering, and degraded-mode diagnostics. Phase 08 delivered `@prosto/platform-adapter-admin-bff` with policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, and observability instrumentation.
+**IMPORTANT**: Phase 01 through Phase 10 are fully implemented. Phase 10 delivered internal MVP validation and operability readiness evidence with staging pilot KPI/SLO trend, incident and exception registers, admin plugin readiness, and a formal `go` decision. Phase 09 delivered `@prosto/platform-admin-shell` as the admin UI runtime with plugin runtime, policy-gated rendering, and degraded-mode diagnostics. Phase 08 delivered `@prosto/platform-adapter-admin-bff` with policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, and observability instrumentation.
 
 ### Current Tooling Availability
 - Phase 01 governance workflows are active under `.github/workflows/`
@@ -14,6 +14,7 @@
 - Phase 07 admin contracts baseline: `@prosto/platform-admin-contracts`
 - Phase 08 admin BFF adapter: `@prosto/platform-adapter-admin-bff` (discovery, permissions, diagnostics, observability)
 - Phase 09 admin shell runtime: `@prosto/platform-admin-shell` (Vue 3 SPA, plugin runtime, permission guards, degraded mode)
+- Phase 10 operations evidence: `docs/operations/internal-mvp-gate-report.md`, `docs/operations/incident-register.md`, `docs/operations/policy-exception-register.md`, `docs/operations/admin-plugin-readiness-report.md`
 - Root/package TypeScript baselines: `packages/platform-utils/tsconfig/base.json`, `packages/*/tsconfig.json`
 - Build: Vite 8 (`vite.config.ts`) with `vite-plugin-dts`
 - Governance scripts in root `package.json`: `lint`, `lint:fix`, `lint:architecture`, `validate:dependency-policy`, `validate:module-graph`, `validate:public-api-boundary`, `validate:runtime-policy`, `test:contracts`, `test:lifecycle-determinism`, `release:evidence`

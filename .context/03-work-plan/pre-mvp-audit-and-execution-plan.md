@@ -74,6 +74,12 @@ Deliverables:
 - incident and exceptions register
 - transition recommendation for ecosystem stage
 
+Phase 10 closure evidence:
+- `docs/operations/internal-mvp-gate-report.md`
+- `docs/operations/incident-register.md`
+- `docs/operations/policy-exception-register.md`
+- `docs/operations/admin-plugin-readiness-report.md`
+
 ## Impact and Effort Backlog for Pre-MVP
 
 | Item | Impact | Effort | Priority |
@@ -96,6 +102,8 @@ All conditions below must be true:
 4. Allowlist and integrity checks are enforced in staging pipeline.
 5. Startup diagnostics completeness is 100 percent for required fields.
 
+Phase 10 result: all conditions are met with a formal `go` decision documented in `docs/operations/internal-mvp-gate-report.md`.
+
 ## Principal Risks During Pre-MVP and Mitigations
 
 | Risk | Mitigation |
@@ -110,3 +118,5 @@ All conditions below must be true:
 At pre-MVP end, choose one path:
 1. Proceed to ecosystem expansion readiness if all gate criteria are met.
 2. Continue hardening cycle if any critical reliability, security, or contract gate fails.
+
+Current Phase 10 decision: proceed to ecosystem expansion readiness. No critical or high-severity incident remains open, no policy exception is expired or open-ended, and admin plugin readiness is documented as `go`.
