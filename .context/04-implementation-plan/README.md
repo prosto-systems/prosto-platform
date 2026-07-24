@@ -3,12 +3,12 @@
 This index consolidates the execution-ready implementation plan for `prosto-platform` based on the current repository state and architecture artifacts in `.context/02-architecture-design` and `.context/03-work-plan`.
 
 ## Planning Baseline
-- Repository has completed Phase 01 governance activation, Phase 02 workspace/package baseline setup, Phase 03 SDK contract baseline delivery, Phase 04 contract conformance delivery, Phase 05 core runtime foundation, Phase 06 security and performance hardening, Phase 07 admin contracts and UI plugin manifests, Phase 08 admin BFF adapter and discovery pipeline, and Phase 09 admin shell integration and plugin runtime.
-- Phase 10 internal MVP validation and operability readiness is the next planned phase.
+- Repository has completed Phase 01 governance activation, Phase 02 workspace/package baseline setup, Phase 03 SDK contract baseline delivery, Phase 04 contract conformance delivery, Phase 05 core runtime foundation, Phase 06 security and performance hardening, Phase 07 admin contracts and UI plugin manifests, Phase 08 admin BFF adapter and discovery pipeline, Phase 09 admin shell integration and plugin runtime, and Phase 10 internal MVP validation and operability readiness.
+- Phase 10 issued a documented internal MVP `go` decision for ecosystem expansion readiness.
 - Architecture intent emphasizes micro-core boundaries, contract-first delivery, deterministic lifecycle, security-first module loading, and hybrid admin model with shell plus UI plugins.
 - This plan is sequenced to reduce early architecture drift and keep risk controls enforceable from the first implementation increment.
 
-## Execution Status (As of 2026-07-23, post-Phase 09 completion)
+## Execution Status (As of 2026-07-24, post-Phase 10 completion)
 - `Phase 01`: Completed (governance workflows, required checks documentation, PR template, release evidence script).
 - `Phase 02`: Completed (workspace packages, TypeScript baseline, dependency and public API boundary checks, dependency map).
 - `Phase 03`: Completed (SDK contracts, manifest schema/semantic validation, typed tokens, validation errors, unit and type-level tests).
@@ -18,7 +18,7 @@ This index consolidates the execution-ready implementation plan for `prosto-plat
 - `Phase 07`: Completed (`@prosto/platform-admin-contracts`, UI plugin manifest contracts, discovery payload contracts, permission and policy contracts, compatibility rules, public exports, validation tests).
 - `Phase 08`: Completed (`@prosto/platform-adapter-admin-bff`, policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, observability instrumentation).
 - `Phase 09`: Completed (`@prosto/platform-admin-shell`, Vue 3 SPA with plugin runtime, policy-gated rendering, degraded-mode diagnostics, observability instrumentation).
-- `Phase 10`: Planned (internal MVP validation and operability readiness).
+- `Phase 10`: Completed (production-like internal MVP pilot, KPI/SLO evidence, incident and exception registers, admin plugin readiness report, go decision).
 
 ## Phase Order
 1. [Phase 01 - Governance Activation and Delivery Guardrails](./01-phase.md)
@@ -85,7 +85,7 @@ Current dependency fulfillment:
 - Phase 07: completed and validated.
 - Phase 08: completed and validated.
 - Phase 09: completed and validated.
-- Phase 10: pending implementation.
+- Phase 10: completed and validated.
 
 ## Milestones and Stage Gates
 ### M1 Governance Gate Active
