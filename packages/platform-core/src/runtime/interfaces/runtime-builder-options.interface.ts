@@ -8,7 +8,7 @@ export interface IRuntimeBuilderOptions {
   /**
    * List of modules to load
    */
-  readonly modules: readonly ModuleArtifactSourceDescriptorType[];
+  readonly modules?: readonly ModuleArtifactSourceDescriptorType[];
   /**
    * Environment name for loading environment-specific config
    * @default process.env.NODE_ENV || 'production'
