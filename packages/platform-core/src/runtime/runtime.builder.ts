@@ -88,7 +88,7 @@ export class RuntimeBuilder implements IRuntimeBuilder {
     );
 
     return new PlatformRuntime(
-      options.modules,
+      options.modules ?? [],
       config,
       diagnosticsReporter,
       bootstrapCoordinator,
