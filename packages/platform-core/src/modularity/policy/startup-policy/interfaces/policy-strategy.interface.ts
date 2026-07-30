@@ -1,11 +1,11 @@
-import type { StartupPolicyType } from '@prosto/platform-sdk';
+import type { PlatformStartupPolicyType } from '@prosto/platform-sdk';
 
 /**
  * @alpha
  * Input for policy evaluation.
  */
 export interface IPolicyEvaluationInput {
-  readonly policyMode: StartupPolicyType;
+  readonly policyMode: PlatformStartupPolicyType;
   readonly moduleId: string;
   readonly critical?: boolean;
 }
@@ -27,7 +27,7 @@ export interface IPolicyStrategy {
   /**
    * The policy mode this strategy handles.
    */
-  readonly policyMode: StartupPolicyType;
+  readonly policyMode: PlatformStartupPolicyType;
 
   /**
    * Evaluate the policy for the given input.

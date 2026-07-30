@@ -1,8 +1,8 @@
+import type { PlatformModuleLifecycleStageType } from '@prosto/platform-sdk';
 import type {
-  IPlatformModule,
-  ModuleLifecycleStageType,
-} from '@prosto/platform-sdk';
-import type { IModuleContextFactory } from '@/modularity/index.js';
+  IModuleContextFactory,
+  IModuleEnvelope,
+} from '@/modularity/index.js';
 import type {
   IModuleLifecycleContext,
   IModuleLifecycleExecutionIssue,
@@ -14,8 +14,11 @@ import type {
   IModulesStartupResult,
   ModuleStartupStagesType,
 } from './interfaces/index.js';
-import { executeWithTimeout } from '@/common/index.js';
-import { RuntimeErrorCodes, RuntimeStage } from '@/common/index.js';
+import {
+  executeWithTimeout,
+  RuntimeErrorCodes,
+  RuntimeStage,
+} from '@/common/index.js';
 import { ShutdownTimeoutError } from './module-lifecycle.errors.js';
 
 /**
@@ -30,25 +33,27 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
    * Executes register -> init -> start stages in order.
    */
   async startup(
-    loadedModules: readonly IPlatformModule[],
+    loadedModules: readonly IModuleEnvelope[],
     options: IModuleLifecycleStartupOptions,
   ): Promise<IModulesStartupResult> {
-    const startedModules: IPlatformModule[] = [];
+    const startedModules: IModuleEnvelope[] = [];
     const issues: IModuleLifecycleExecutionIssue[] = [];
 
-    for (const module of loadedModules) {
+    for (const moduleEnvelope of loadedModules) {
       const failedStage: ModuleStartupStagesType | null =
-        await this.runModuleStartup(module, {
+        await this.runModuleStartup(moduleEnvelope, {
           startupPolicy: options.startupPolicy,
           sdkVersion: options.sdkVersion,
         });
 
       if (failedStage) {
-        issues.push(this.createStartupIssue(module.manifest.id, failedStage));
+        issues.push(
+          this.createStartupIssue(moduleEnvelope.manifest.id, failedStage),
+        );
         continue;
       }
 
-      startedModules.push(module);
+      startedModules.push(moduleEnvelope);
     }
 
     return { startedModules, issues };
@@ -59,18 +64,18 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
    * Executes stop stage in reverse order with timeout.
    */
   async shutdown(
-    startedModules: readonly IPlatformModule[],
+    startedModules: readonly IModuleEnvelope[],
     options: IModuleLifecycleShutdownOptions,
   ): Promise<IModulesShutdownResult> {
     const stopModules = [...startedModules].reverse();
     const issues: IModuleLifecycleShutdownIssue[] = [];
 
-    for (const module of stopModules) {
-      const moduleId = module.manifest.id;
+    for (const moduleEnvelope of stopModules) {
+      const moduleId = moduleEnvelope.manifest.id;
 
       try {
         await executeWithTimeout(
-          this.executeModuleStage(module, 'stop', {
+          this.executeModuleStage(moduleEnvelope, 'stop', {
             startupPolicy: options.startupPolicy,
             sdkVersion: options.sdkVersion,
           }),
@@ -102,32 +107,35 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
   }
 
   private async executeModuleStage(
-    module: IPlatformModule,
-    stage: ModuleLifecycleStageType,
+    moduleEnvelope: IModuleEnvelope,
+    stage: PlatformModuleLifecycleStageType,
     lifecycleContext: IModuleLifecycleContext,
   ): Promise<void> {
     const context = this._moduleContextFactory.create({
       startupPolicy: lifecycleContext.startupPolicy,
       sdkVersion: lifecycleContext.sdkVersion,
-      moduleManifest: module.manifest,
+      moduleManifest: moduleEnvelope.manifest,
     });
 
-    await module[stage](context);
+    await moduleEnvelope.module[stage](context);
   }
 
   private async runModuleStartup(
-    module: IPlatformModule,
+    moduleEnvelope: IModuleEnvelope,
     lifecycleContext: IModuleLifecycleContext,
   ): Promise<ModuleStartupStagesType | null> {
     const startupStageTypes: ModuleStartupStagesType[] = [
-      /* 1 */ 'register',
-      /* 2 */ 'init',
-      /* 3 */ 'start',
+      /* 1 */ 'init',
+      /* 2 */ 'start',
     ];
 
     for (const stageType of startupStageTypes) {
       try {
-        await this.executeModuleStage(module, stageType, lifecycleContext);
+        await this.executeModuleStage(
+          moduleEnvelope,
+          stageType,
+          lifecycleContext,
+        );
       } catch {
         return /* failure */ stageType;
       }
@@ -141,7 +149,6 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
     stage: ModuleStartupStagesType,
   ): IModuleLifecycleExecutionIssue {
     const reasonCodeMap: Record<ModuleStartupStagesType, RuntimeErrorCodes> = {
-      register: RuntimeErrorCodes.LifecycleRegisterFailed,
       init: RuntimeErrorCodes.LifecycleInitFailed,
       start: RuntimeErrorCodes.LifecycleStartFailed,
     };

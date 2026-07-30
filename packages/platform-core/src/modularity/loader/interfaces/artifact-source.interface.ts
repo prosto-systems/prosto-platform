@@ -1,4 +1,7 @@
-import type { IPlatformModule } from '@prosto/platform-sdk';
+import type {
+  IPlatformModule,
+  IPlatformModuleManifest,
+} from '@prosto/platform-sdk';
 import type { RuntimeErrorCodes } from '@/common/index.js';
 import type {
   ModuleArtifactPackaging,
@@ -15,6 +18,7 @@ import type { IRejectedModuleArtifact } from './rejected-module-artifact.interfa
 export interface IModuleMemoryArtifactSource {
   readonly type: 'memory';
   readonly module: IPlatformModule;
+  readonly manifest: IPlatformModuleManifest;
   readonly moduleIdHint?: string;
 }
 

@@ -10,7 +10,6 @@ import { InMemoryEventBus } from '@/events/index.js';
 import { ConsoleModuleLoggerFactory } from '@/logging/index.js';
 import {
   BestEffortPolicyStrategy,
-  CompatibilityValidationStrategy,
   ManifestValidationStrategy,
   ModuleContextFactory,
   ModuleLifecycleOrchestrator,
@@ -25,7 +24,8 @@ import { describe, expect, it } from 'vitest';
 
 describe('BootstrapCoordinator', () => {
   it('coordinates discover -> validate -> resolve -> lifecycle and starts modules', async () => {
-    const module = new TestModule(createManifest({ id: 'module-a' }));
+    const manifest = createManifest({ id: 'module-a' });
+    const module = new TestModule();
 
     const moduleLoader = new ModuleLoader();
 
@@ -51,11 +51,7 @@ describe('BootstrapCoordinator', () => {
     const bootstrapCoordinator = new BootstrapCoordinator(
       BootstrapPipeline.create([
         new DiscoverStage(moduleLoader),
-        new ValidateStage([
-          new ManifestValidationStrategy(),
-          new CompatibilityValidationStrategy(),
-          // new IntegrityValidationStrategy(),
-        ]),
+        new ValidateStage([new ManifestValidationStrategy()]),
         new ResolveDependenciesStage(startupPolicyEvaluator),
         new ModuleLifecycleStage(
           startupPolicyEvaluator,
@@ -70,7 +66,7 @@ describe('BootstrapCoordinator', () => {
         sdkVersion: '0.0.0',
         nodeVersion: process.versions.node,
       },
-      modules: [{ type: 'memory', module }],
+      modules: [{ type: 'memory', manifest, module }],
       correlationId: 'cid',
       startupStartedAt: '2026-01-01T00:00:00.000Z',
     });

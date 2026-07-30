@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { IPlatformModule } from '@prosto/platform-sdk';
-import { CycleDetector, DependencyGraph } from '@/modularity/index.js';
+import {
+  CycleDetector,
+  DependencyGraph,
+  type IModuleEnvelope,
+} from '@/modularity/index.js';
 
 describe('DependencyGraph', () => {
   it('creates graph from modules', () => {
@@ -12,7 +15,7 @@ describe('DependencyGraph', () => {
           dependencies: [{ id: 'a', version: '^1.0.0', optional: false }],
         },
       },
-    ] as unknown as readonly IPlatformModule[];
+    ] as unknown as readonly IModuleEnvelope[];
 
     const graph = new DependencyGraph(modules);
 
@@ -30,7 +33,7 @@ describe('DependencyGraph', () => {
           dependencies: [{ id: 'a', version: '^1.0.0', optional: false }],
         },
       },
-    ] as unknown as readonly IPlatformModule[];
+    ] as unknown as readonly IModuleEnvelope[];
 
     const graph = new DependencyGraph(modules);
 
@@ -53,7 +56,7 @@ describe('DependencyGraph', () => {
           dependencies: [{ id: 'a', version: '^1.0.0', optional: false }],
         },
       },
-    ] as unknown as readonly IPlatformModule[];
+    ] as unknown as readonly IModuleEnvelope[];
 
     const graph = new DependencyGraph(modules);
 
@@ -65,7 +68,7 @@ describe('DependencyGraph', () => {
   it('checks if module exists', () => {
     const modules = [
       { manifest: { id: 'a', dependencies: [] } },
-    ] as unknown as readonly IPlatformModule[];
+    ] as unknown as readonly IModuleEnvelope[];
 
     const graph = new DependencyGraph(modules);
 
@@ -76,7 +79,7 @@ describe('DependencyGraph', () => {
   it('adds and removes modules', () => {
     const modules = [
       { manifest: { id: 'a', dependencies: [] } },
-    ] as unknown as readonly IPlatformModule[];
+    ] as unknown as readonly IModuleEnvelope[];
 
     const graph = new DependencyGraph(modules);
 
@@ -84,7 +87,7 @@ describe('DependencyGraph', () => {
 
     graph.addModule({
       manifest: { id: 'b', dependencies: [] },
-    } as unknown as IPlatformModule);
+    } as unknown as IModuleEnvelope);
     expect(graph.size).toBe(2);
 
     graph.removeModule('a');
@@ -95,7 +98,7 @@ describe('DependencyGraph', () => {
   it('creates graph using static factory method', () => {
     const modules = [
       { manifest: { id: 'a', dependencies: [] } },
-    ] as unknown as readonly IPlatformModule[];
+    ] as unknown as readonly IModuleEnvelope[];
 
     const graph = DependencyGraph.create(modules);
 
@@ -114,7 +117,7 @@ describe('CycleDetector', () => {
           dependencies: [{ id: 'a', version: '^1.0.0', optional: false }],
         },
       },
-    ] as unknown as readonly IPlatformModule[];
+    ] as unknown as readonly IModuleEnvelope[];
 
     const graph = new DependencyGraph(modules);
     const detector = new CycleDetector();
@@ -138,7 +141,7 @@ describe('CycleDetector', () => {
           dependencies: [{ id: 'a', version: '^1.0.0', optional: false }],
         },
       },
-    ] as unknown as readonly IPlatformModule[];
+    ] as unknown as readonly IModuleEnvelope[];
 
     const graph = new DependencyGraph(modules);
     const detector = new CycleDetector();

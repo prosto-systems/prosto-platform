@@ -1,7 +1,8 @@
 import type { IPlatformModuleManifest } from '@prosto/platform-sdk';
-import type {
-  IModuleLifecycleOrchestrator,
-  IStartupPolicyEvaluator,
+import {
+  type IModuleLifecycleOrchestrator,
+  isModuleCritical,
+  type IStartupPolicyEvaluator,
 } from '@/modularity/index.js';
 import type { IBootstrapStageContext } from '../interfaces/index.js';
 import { BootstrapStage } from '../constants/index.js';
@@ -61,7 +62,7 @@ export class ModuleLifecycleStage extends BootstrapBaseStage {
       const policy = this._startupPolicyEvaluator.evaluate({
         moduleId,
         policyMode: context.policyMode,
-        critical: moduleManifest?.criticality === 'critical',
+        critical: !moduleManifest || isModuleCritical(moduleManifest),
       });
 
       if (policy.action === 'abort') {

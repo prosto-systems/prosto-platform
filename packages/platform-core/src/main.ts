@@ -1,44 +1,50 @@
 import type {
-  IModuleContext,
+  IPlatformModuleContext,
   IPlatformModule,
   IPlatformModuleManifest,
 } from '@prosto/platform-sdk';
 import { RuntimeBuilder } from '@/runtime/runtime.builder.js';
 import Fastify from 'fastify';
 
+const demoModuleManifest: IPlatformModuleManifest = {
+  id: 'demo-module',
+  version: '1.0.0',
+  sdkVersion: '^0.0.0',
+  title: 'Demo',
+  dependencies: [],
+};
+
 class DemoModule implements IPlatformModule {
-  readonly manifest: IPlatformModuleManifest = {
-    id: 'demo-module',
-    version: '1.0.0',
-    sdkVersion: '^0.0.0',
-    criticality: 'standard',
-    securityClass: 'internal',
-    capabilities: ['feature.demo'],
-    dependencies: [],
-    checksum:
-      'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-  };
-
-  register(_ctx: IModuleContext): void {
-    console.log('[demo] registered');
-  }
-
-  init(_ctx: IModuleContext): void {
+  init(_ctx: IPlatformModuleContext): void {
     console.log('[demo] initialized');
   }
 
-  start(_ctx: IModuleContext): void {
+  start(_ctx: IPlatformModuleContext): void {
     console.log('[demo] started');
   }
 
-  stop(_ctx: IModuleContext): void {
+  stop(_ctx: IPlatformModuleContext): void {
     console.log('[demo] stopped');
   }
 }
 
 async function main(): Promise<void> {
   const runtime = new RuntimeBuilder().build({
-    modules: [{ type: 'memory', module: new DemoModule() }],
+    modules: [
+      {
+        type: 'memory',
+        manifest: demoModuleManifest,
+        module: new DemoModule(),
+      },
+      {
+        type: 'path',
+        path: '../../examples/module-auth/artifacts/module-auth-0.0.0.zip',
+      },
+      {
+        type: 'path',
+        path: '../../examples/module-health/artifacts/module-health-0.0.0.zip',
+      },
+    ],
     environment: process.env.NODE_ENV || 'development',
   });
 

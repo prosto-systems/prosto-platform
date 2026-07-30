@@ -1,12 +1,10 @@
 import pkg from '../package.json' with { type: 'json' };
 
-export * from './constants/index.js';
 export * from './errors/index.js';
-export * from './interfaces/index.js';
-export * from './schemas/index.js';
-export * from './types/index.js';
+export * from './events/index.js';
+export * from './modularity/index.js';
+export * from './services/index.js';
 export * from './utils/index.js';
-export * from './validators/index.js';
 
 /**
  * @alpha

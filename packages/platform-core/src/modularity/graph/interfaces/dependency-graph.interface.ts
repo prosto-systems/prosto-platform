@@ -1,11 +1,11 @@
-import type { IPlatformModule } from '@prosto/platform-sdk';
+import type { IModuleEnvelope } from '@/modularity/index.js';
 
 /**
  * @alpha
  * Graph node representing a module and its dependencies.
  */
 export interface IGraphNode {
-  readonly module: IPlatformModule;
+  readonly moduleEnvelope: IModuleEnvelope;
   readonly dependencyIds: readonly string[];
 }
 
@@ -14,13 +14,13 @@ export interface IGraphNode {
  * Dependency graph contract for module dependency management.
  */
 export interface IDependencyGraph {
-  readonly modules: readonly IPlatformModule[];
+  readonly modules: readonly IModuleEnvelope[];
   readonly size: number;
-  addModule(module: IPlatformModule): void;
+  addModule(moduleEnvelope: IModuleEnvelope): void;
   removeModule(moduleId: string): void;
   getDependencies(moduleId: string): readonly string[];
   getDependents(moduleId: string): readonly string[];
   hasModule(moduleId: string): boolean;
-  getModule(moduleId: string): IPlatformModule | undefined;
+  getModule(moduleId: string): IModuleEnvelope | undefined;
   getModuleIds(): readonly string[];
 }

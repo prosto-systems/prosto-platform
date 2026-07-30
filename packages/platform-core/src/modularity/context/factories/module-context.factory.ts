@@ -1,6 +1,6 @@
 import type {
   IEventBus,
-  IModuleContext,
+  IPlatformModuleContext,
   IPlatformModuleManifest,
   IServiceRegistry,
 } from '@prosto/platform-sdk';
@@ -29,7 +29,7 @@ export class ModuleContextFactory implements IModuleContextFactory {
     private readonly _configAccessPolicyEvaluator: IConfigAccessPolicyEvaluator = new ConfigAccessPolicyEvaluator(),
   ) {}
 
-  create(options: ICreateModuleContextOptions): IModuleContext {
+  create(options: ICreateModuleContextOptions): IPlatformModuleContext {
     const { startupPolicy, sdkVersion, moduleManifest } = options;
 
     const moduleId = moduleManifest.id;
@@ -56,14 +56,8 @@ export class ModuleContextFactory implements IModuleContextFactory {
   ): Record<string, unknown> {
     const moduleId = moduleManifest.id;
 
-    const configCapabilities = moduleManifest.capabilities.filter(
-      (capability) => capability.startsWith('config.'),
-    );
-
     const configAccessEvalInput: IConfigAccessEvaluationInput = {
       moduleId,
-      configCapabilities,
-      securityClass: moduleManifest.securityClass,
       isProduction: this._environment === 'production',
     };
 
@@ -86,13 +80,7 @@ export class ModuleContextFactory implements IModuleContextFactory {
 
   private _createDefaultConfigAccessPolicy(): IConfigAccessPolicy {
     return {
-      sectionAllowlistBySecurityClass: {
-        trusted: [],
-        internal: [],
-        'third-party-reviewed': [],
-      },
       productionStrictMode: true,
-      denyOnUnknownCapability: true,
     };
   }
 }

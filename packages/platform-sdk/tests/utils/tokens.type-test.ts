@@ -3,7 +3,7 @@ import {
   createServiceToken,
   type EventTokenType,
   type IEventBus,
-  type IModuleLogger,
+  type IPlatformModuleLogger,
   type IServiceRegistry,
   type ServiceTokenType,
 } from '@/index.js';
@@ -24,7 +24,7 @@ interface IHealthEventPayload {
   status: 'ok' | 'failed';
 }
 
-declare const logger: IModuleLogger;
+declare const logger: IPlatformModuleLogger;
 declare const eventBus: IEventBus;
 declare const serviceRegistry: IServiceRegistry;
 

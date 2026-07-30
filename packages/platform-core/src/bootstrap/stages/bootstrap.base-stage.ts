@@ -1,5 +1,5 @@
-import type { IPlatformModule } from '@prosto/platform-sdk';
 import type { IRuntimeFailureDiagnostic } from '@/diagnostics/index.js';
+import type { IModuleEnvelope } from '@/modularity/index.js';
 import type { BootstrapStage } from '../constants/index.js';
 import type {
   IBootstrapStage,
@@ -74,9 +74,9 @@ export abstract class BootstrapBaseStage implements IBootstrapStage {
    */
   protected addValidatedModule(
     context: IBootstrapStageContext,
-    module: IPlatformModule,
+    moduleEnvelope: IModuleEnvelope,
   ): IBootstrapStageContext {
-    context.validatedModules.push(module);
+    context.validatedModules.push(moduleEnvelope);
 
     return context;
   }

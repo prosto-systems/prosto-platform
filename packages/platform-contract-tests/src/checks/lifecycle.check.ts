@@ -4,6 +4,7 @@ import type {
 } from '@/interfaces/index.js';
 import {
   type IPlatformModule,
+  type IPlatformModuleManifest,
   MODULE_LIFECYCLE_STAGES,
 } from '@prosto/platform-sdk';
 import { ContractFailureCodes } from '@/constants/index.js';
@@ -11,11 +12,12 @@ import { ContractFailureCodes } from '@/constants/index.js';
 export const LIFECYCLE_CHECK_RESULT_ID = 'lifecycle-conformance';
 
 /**
- * beta
+ * @alpha
  * Verifies lifecycle method presence and successful execution.
  */
 export async function runLifecycleConformanceCheck(params: {
   module: IPlatformModule;
+  manifest: IPlatformModuleManifest;
   moduleLifecycleContextFactory: IModuleLifecycleContextFactory;
 }): Promise<IContractCheckResult> {
   for (const methodName of MODULE_LIFECYCLE_STAGES) {
@@ -33,7 +35,7 @@ export async function runLifecycleConformanceCheck(params: {
     }
   }
 
-  const context = params.moduleLifecycleContextFactory.create(params.module);
+  const context = params.moduleLifecycleContextFactory.create(params.manifest);
 
   for (const methodName of MODULE_LIFECYCLE_STAGES) {
     try {

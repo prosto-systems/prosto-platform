@@ -1,11 +1,11 @@
 import type {
-  IPlatformModule,
   IPlatformRuntimeVersionContext,
-  StartupPolicyType,
+  PlatformStartupPolicyType,
 } from '@prosto/platform-sdk';
 import type { IRuntimeFailureDiagnostic } from '@/diagnostics/index.js';
 import type {
   IModuleCandidateArtifact,
+  IModuleEnvelope,
   IRejectedModuleArtifact,
   ModuleArtifactSourceDescriptorType,
 } from '@/modularity/index.js';
@@ -26,13 +26,13 @@ export interface IBootstrapStageOutcome {
  * Context passed through the bootstrap pipeline stages.
  */
 export interface IBootstrapStageContext {
-  readonly policyMode: StartupPolicyType;
+  readonly policyMode: PlatformStartupPolicyType;
   readonly correlationId: string;
   readonly startupStartedAt: string;
   readonly runtimeVersion: IPlatformRuntimeVersionContext;
   readonly stageOutcomes: IBootstrapStageOutcome[];
-  readonly validatedModules: IPlatformModule[];
-  readonly loadedModules: IPlatformModule[];
+  readonly validatedModules: IModuleEnvelope[];
+  readonly loadedModules: IModuleEnvelope[];
   readonly failedDiagnostics: IRuntimeFailureDiagnostic[];
   readonly moduleSources: readonly ModuleArtifactSourceDescriptorType[];
   readonly preRejectedArtifacts: readonly IRejectedModuleArtifact[];

@@ -1,5 +1,5 @@
 import type {
-  IModuleManifestValidator,
+  IPlatformModuleManifestValidator,
   IPlatformModuleManifest,
 } from '@prosto/platform-sdk';
 import type { IContractCheckResult } from '@/interfaces/index.js';
@@ -13,7 +13,7 @@ export const MANIFEST_CHECK_RESULT_ID = 'manifest-conformance';
  */
 export function runManifestConformanceCheck(params: {
   manifest: IPlatformModuleManifest;
-  manifestValidator: IModuleManifestValidator;
+  manifestValidator: IPlatformModuleManifestValidator;
 }): IContractCheckResult {
   const result = params.manifestValidator.validate(params.manifest);
 

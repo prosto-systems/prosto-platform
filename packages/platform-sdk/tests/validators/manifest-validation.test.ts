@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   type IPlatformModuleManifest,
-  ManifestValidationError,
+  PlatformModuleManifestValidationError,
   PlatformModuleManifestValidator,
 } from '@/index.js';
 
@@ -9,10 +9,10 @@ const validManifest: IPlatformModuleManifest = {
   id: 'module-health',
   version: '1.2.3',
   sdkVersion: '^0.1.0',
-  criticality: 'standard',
-  securityClass: 'internal',
-  capabilities: ['feature.health', 'obs.metrics'],
+  title: 'Health Module',
   dependencies: [{ id: 'module-auth', version: '^1.0.0' }],
+  optional: true,
+  groups: ['Group 1'],
 };
 
 describe('manifest validation', () => {
@@ -28,7 +28,7 @@ describe('manifest validation', () => {
   it('returns failure for schema violations', () => {
     const result = manifestValidator.validate({
       ...validManifest,
-      capabilities: [],
+      groups: 'Group 1',
     });
 
     expect(result.success).toBe(false);
@@ -37,16 +37,16 @@ describe('manifest validation', () => {
       throw new Error('Expected validation failure.');
     }
 
-    expect(result.error).toBeInstanceOf(ManifestValidationError);
-    expect(
-      result.error.issues.some((issue) => issue.path === 'capabilities'),
-    ).toBe(true);
+    expect(result.error).toBeInstanceOf(PlatformModuleManifestValidationError);
+    expect(result.error.issues.some((issue) => issue.path === 'groups')).toBe(
+      true,
+    );
   });
 
-  it('returns failure for duplicate capabilities', () => {
+  it('returns failure for duplicate groups', () => {
     const result = manifestValidator.validate({
       ...validManifest,
-      capabilities: ['feature.health', 'feature.health'],
+      groups: ['health', 'health'],
     });
 
     expect(result.success).toBe(false);
@@ -56,9 +56,7 @@ describe('manifest validation', () => {
     }
 
     expect(
-      result.error.issues.some(
-        (issue) => issue.code === 'duplicate_capability',
-      ),
+      result.error.issues.some((issue) => issue.code === 'duplicate_group'),
     ).toBe(true);
   });
 });

@@ -1,4 +1,4 @@
-import type { StartupPolicyType } from '@prosto/platform-sdk';
+import type { PlatformStartupPolicyType } from '@prosto/platform-sdk';
 import type { IModuleLifecycleShutdownIssue } from '@/modularity/index.js';
 import type { IRuntimeFailureDiagnostic } from './runtime-failure-diagnostic.interface.js';
 import type { IRuntimeLoadedModuleDiagnostic } from './runtime-loaded-module-diagnostic.interface.js';
@@ -11,7 +11,7 @@ import type { IRuntimeStartupReport } from './runtime-startup-report.interface.j
  * Input context for building a startup report.
  */
 export interface IStartupReportBuildContext {
-  readonly policyMode: StartupPolicyType;
+  readonly policyMode: PlatformStartupPolicyType;
   readonly correlationId: string;
   readonly startedAt: string;
   readonly loadedModules: readonly IRuntimeLoadedModuleDiagnostic[];

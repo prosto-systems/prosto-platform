@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { IPlatformModule } from '@prosto/platform-sdk';
 import {
   DependencyCycleError,
   DependencyGraph,
+  type IModuleEnvelope,
   TopologicalSorter,
 } from '@/modularity/index.js';
 
@@ -24,7 +24,7 @@ describe('TopologicalSorter', () => {
           dependencies: [{ id: 'a', version: '^1.0.0', optional: false }],
         },
       },
-    ] as unknown as readonly IPlatformModule[];
+    ] as unknown as readonly IModuleEnvelope[];
 
     const graph = new DependencyGraph(modules);
     const result = topologicalSorter.sort(graph);
@@ -42,7 +42,7 @@ describe('TopologicalSorter', () => {
           dependencies: [{ id: 'missing', version: '^1.0.0', optional: false }],
         },
       },
-    ] as unknown as readonly IPlatformModule[];
+    ] as unknown as readonly IModuleEnvelope[];
 
     const graph = new DependencyGraph(modules);
     const result = topologicalSorter.sort(graph);
@@ -67,7 +67,7 @@ describe('TopologicalSorter', () => {
           dependencies: [{ id: 'a', version: '^1.0.0', optional: false }],
         },
       },
-    ] as unknown as readonly IPlatformModule[];
+    ] as unknown as readonly IModuleEnvelope[];
 
     const graph = new DependencyGraph(modules);
     expect(() => topologicalSorter.sort(graph)).toThrow(DependencyCycleError);

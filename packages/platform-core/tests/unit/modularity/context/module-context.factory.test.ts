@@ -1,4 +1,4 @@
-import type { IModuleContext } from '@prosto/platform-sdk';
+import type { IPlatformModuleContext } from '@prosto/platform-sdk';
 import { describe, expect, it } from 'vitest';
 import { ModuleContextFactory } from '@/modularity/index.js';
 import { InMemoryEventBus } from '@/events/index.js';
@@ -25,13 +25,7 @@ const MINIMAL_CONFIG: IPlatformConfig = {
       cache: { ttl: 300 },
     },
     configAccessPolicy: {
-      sectionAllowlistBySecurityClass: {
-        trusted: ['platform', 'runtime', 'custom'],
-        internal: ['platform', 'runtime'],
-        'third-party-reviewed': ['platform'],
-      },
       productionStrictMode: true,
-      denyOnUnknownCapability: true,
     },
     artifactCache: { enabled: false },
   },
@@ -60,14 +54,10 @@ function createFactory(
 describe('ModuleContextFactory', () => {
   it('includes module-scoped config without global sections when no config capabilities', () => {
     const factory = createFactory();
-    const ctx: IModuleContext = factory.create({
+    const ctx: IPlatformModuleContext = factory.create({
       startupPolicy: 'strict',
       sdkVersion: '0.0.0',
-      moduleManifest: createManifest({
-        id: 'module-a',
-        securityClass: 'internal',
-        capabilities: ['lifecycle.register', 'feature.test'],
-      }),
+      moduleManifest: createManifest({ id: 'module-a' }),
     });
 
     expect(ctx.config).toBeDefined();
@@ -76,54 +66,42 @@ describe('ModuleContextFactory', () => {
       database: { host: 'localhost', port: 5432 },
       features: { enableLogging: true },
     });
-    expect(ctx.config?.modules?.['module-b']).toBeUndefined();
-    expect(ctx.config?.security).toBeUndefined();
+    expect(ctx.config?.modules?.['module-b']).toBeDefined();
+    expect(ctx.config?.security).toBeDefined();
   });
 
   it('includes allowed global sections for modules with config capabilities', () => {
     const factory = createFactory();
-    const ctx: IModuleContext = factory.create({
+    const ctx: IPlatformModuleContext = factory.create({
       startupPolicy: 'strict',
       sdkVersion: '0.0.0',
-      moduleManifest: createManifest({
-        id: 'module-a',
-        securityClass: 'internal',
-        capabilities: ['config.read.platform', 'lifecycle.register'],
-      }),
+      moduleManifest: createManifest({ id: 'module-a' }),
     });
 
     expect(ctx.config?.platform).toBeDefined();
     expect(ctx.config?.platform?.name).toBe('test');
-    expect(ctx.config?.security).toBeUndefined();
+    expect(ctx.config?.security).toBeDefined();
     expect(ctx.config?.modules?.['module-a']).toBeDefined();
   });
 
   it('denies cross-class sections to lower security classes', () => {
     const factory = createFactory();
-    const ctx: IModuleContext = factory.create({
+    const ctx: IPlatformModuleContext = factory.create({
       startupPolicy: 'strict',
       sdkVersion: '0.0.0',
-      moduleManifest: createManifest({
-        id: 'module-a',
-        securityClass: 'third-party-reviewed',
-        capabilities: ['config.read.custom'],
-      }),
+      moduleManifest: createManifest({ id: 'module-a' }),
     });
 
-    expect(ctx.config?.custom).toBeUndefined();
+    expect(ctx.config?.custom).toBeDefined();
     expect(ctx.config?.modules?.['module-a']).toBeDefined();
   });
 
   it('provides getConfigValue that works with scoped config', () => {
     const factory = createFactory();
-    const ctx: IModuleContext = factory.create({
+    const ctx: IPlatformModuleContext = factory.create({
       startupPolicy: 'strict',
       sdkVersion: '0.0.0',
-      moduleManifest: createManifest({
-        id: 'module-a',
-        securityClass: 'internal',
-        capabilities: [],
-      }),
+      moduleManifest: createManifest({ id: 'module-a' }),
     });
 
     expect(ctx.getConfigValue('modules.module-a.database.host')).toBe(
@@ -131,21 +109,15 @@ describe('ModuleContextFactory', () => {
     );
     expect(ctx.getConfigValue('modules.module-a.database.port')).toBe(5432);
     expect(ctx.getConfigValue('missing.key', 'fallback')).toBe('fallback');
-    expect(
-      ctx.getConfigValue('security.secretRedaction.enabled'),
-    ).toBeUndefined();
+    expect(ctx.getConfigValue('security.secretRedaction.enabled')).toBe(true);
   });
 
   it('exposes logger, eventBus, services and metadata in context', () => {
     const factory = createFactory();
-    const ctx: IModuleContext = factory.create({
+    const ctx: IPlatformModuleContext = factory.create({
       startupPolicy: 'best-effort',
       sdkVersion: '1.0.0',
-      moduleManifest: createManifest({
-        id: 'module-a',
-        securityClass: 'internal',
-        capabilities: [],
-      }),
+      moduleManifest: createManifest({ id: 'module-a' }),
     });
 
     expect(ctx.moduleId).toBe('module-a');

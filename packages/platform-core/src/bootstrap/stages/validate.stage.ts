@@ -57,7 +57,7 @@ export class ValidateStage extends BootstrapBaseStage {
         }
       }
 
-      this.addValidatedModule(context, artifact.module);
+      this.addValidatedModule(context, artifact.moduleEnvelope);
     }
 
     const validateFailuresCount = context.failedDiagnostics.filter(

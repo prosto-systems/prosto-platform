@@ -58,9 +58,7 @@ Only explicit capability-to-section bindings are valid.
 ## Policy Data Model (Target)
 Runtime policy model expected by evaluator:
 
-- `sectionAllowlistBySecurityClass`: allowlist per security class
 - `productionStrictMode`: boolean (must be true for production)
-- `denyOnUnknownCapability`: boolean (must be true)
 
 ## Security Class Constraints
 Security classes used by policy checks:

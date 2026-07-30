@@ -15,6 +15,9 @@ describe('platformConfigSchema', () => {
         correlationId: 'test-correlation-id',
       },
       modules: {
+        configAccessPolicy: {
+          productionStrictMode: true,
+        },
         artifactCache: {
           enabled: true,
           path: './custom-cache',

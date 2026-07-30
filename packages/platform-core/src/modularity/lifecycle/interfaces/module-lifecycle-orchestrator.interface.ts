@@ -1,8 +1,8 @@
 import type {
-  IPlatformModule,
   IPlatformModuleManifest,
-  StartupPolicyType,
+  PlatformStartupPolicyType,
 } from '@prosto/platform-sdk';
+import type { IModuleEnvelope } from '../../loader/index.js';
 import type { IModuleLifecycleExecutionIssue } from './module-lifecycle-execution-issue.interface.js';
 import type { IModuleLifecycleShutdownIssue } from './module-lifecycle-shutdown-issue.interface.js';
 
@@ -11,7 +11,7 @@ import type { IModuleLifecycleShutdownIssue } from './module-lifecycle-shutdown-
  * Options for module lifecycle startup.
  */
 export interface IModuleLifecycleStartupOptions {
-  startupPolicy: StartupPolicyType;
+  startupPolicy: PlatformStartupPolicyType;
   sdkVersion: string;
 }
 
@@ -20,7 +20,7 @@ export interface IModuleLifecycleStartupOptions {
  * Options for module lifecycle shutdown.
  */
 export interface IModuleLifecycleShutdownOptions {
-  startupPolicy: StartupPolicyType;
+  startupPolicy: PlatformStartupPolicyType;
   sdkVersion: string;
   timeoutMs: number;
 }
@@ -30,7 +30,7 @@ export interface IModuleLifecycleShutdownOptions {
  * Result of modules startup.
  */
 export interface IModulesStartupResult {
-  readonly startedModules: readonly IPlatformModule[];
+  readonly startedModules: readonly IModuleEnvelope[];
   readonly issues: readonly IModuleLifecycleExecutionIssue[];
 }
 
@@ -49,12 +49,12 @@ export interface IModulesShutdownResult {
  */
 export interface IModuleLifecycleOrchestrator {
   startup(
-    loadedModules: readonly IPlatformModule[],
+    loadedModules: readonly IModuleEnvelope[],
     options: IModuleLifecycleStartupOptions,
   ): Promise<IModulesStartupResult>;
 
   shutdown(
-    startedModules: readonly IPlatformModule[],
+    startedModules: readonly IModuleEnvelope[],
     options: IModuleLifecycleShutdownOptions,
   ): Promise<IModulesShutdownResult>;
 }

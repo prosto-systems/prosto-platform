@@ -1,10 +1,11 @@
-import type { IStartupPolicyEvaluator } from '@/modularity/index.js';
 import {
   DependencyCycleError,
   DependencyGraph,
+  type IModuleEnvelope,
+  isModuleCritical,
+  type IStartupPolicyEvaluator,
   TopologicalSorter,
 } from '@/modularity/index.js';
-import type { IPlatformModule } from '@prosto/platform-sdk';
 import type { IBootstrapStageContext } from '../interfaces/index.js';
 import { RuntimeErrorCodes } from '@/common/index.js';
 import { BootstrapStage } from '../constants/index.js';
@@ -36,7 +37,7 @@ export class ResolveDependenciesStage extends BootstrapBaseStage {
     const dependencyGraph = DependencyGraph.create(validatedModules);
     const topologicalSorter = TopologicalSorter.create();
 
-    let orderedModules: IPlatformModule[] = [];
+    let orderedModules: IModuleEnvelope[] = [];
 
     try {
       const topologicalSortResult = topologicalSorter.sort(dependencyGraph);
@@ -55,11 +56,12 @@ export class ResolveDependenciesStage extends BootstrapBaseStage {
             'Ensure all required dependencies are discoverable by runtime.',
         });
 
-        const module = dependencyGraph.getModule(moduleId);
+        const moduleEnvelope = dependencyGraph.getModule(moduleId);
         const policy = this._startupPolicyEvaluator.evaluate({
           moduleId,
           policyMode: context.policyMode,
-          critical: module?.manifest.criticality === 'critical',
+          critical:
+            !moduleEnvelope || isModuleCritical(moduleEnvelope.manifest),
         });
 
         if (policy.action === 'abort') {

@@ -1,4 +1,4 @@
-import type { IModuleLogger } from '@prosto/platform-sdk';
+import type { IPlatformModuleLogger } from '@prosto/platform-sdk';
 import { type ISecretsRedactor, SecretsRedactor } from '@/security/index.js';
 
 /**
@@ -7,7 +7,7 @@ import { type ISecretsRedactor, SecretsRedactor } from '@/security/index.js';
  * All log messages and context values are automatically redacted to prevent
  * sensitive data leakage in production and staging environments.
  */
-export class ConsoleModuleLogger implements IModuleLogger {
+export class ConsoleModuleLogger implements IPlatformModuleLogger {
   constructor(
     private readonly _moduleId: string,
     private readonly _secretsRedactor: ISecretsRedactor = new SecretsRedactor(),

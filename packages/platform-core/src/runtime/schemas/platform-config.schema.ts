@@ -29,27 +29,10 @@ export const platformConfigSchema: ZodType<IPlatformConfig> = z.object({
     .object({
       configAccessPolicy: z
         .object({
-          sectionAllowlistBySecurityClass: z
-            .record(
-              z.literal(['trusted', 'internal', 'third-party-reviewed']),
-              z.array(z.string()),
-            )
-            .default({
-              trusted: [],
-              internal: [],
-              'third-party-reviewed': [],
-            }),
           productionStrictMode: z.boolean().default(true),
-          denyOnUnknownCapability: z.boolean().default(true),
         })
         .default({
-          sectionAllowlistBySecurityClass: {
-            trusted: [],
-            internal: [],
-            'third-party-reviewed': [],
-          },
           productionStrictMode: true,
-          denyOnUnknownCapability: true,
         }),
       artifactCache: z
         .object({
@@ -64,13 +47,7 @@ export const platformConfigSchema: ZodType<IPlatformConfig> = z.object({
     })
     .default({
       configAccessPolicy: {
-        sectionAllowlistBySecurityClass: {
-          trusted: [],
-          internal: [],
-          'third-party-reviewed': [],
-        },
         productionStrictMode: true,
-        denyOnUnknownCapability: true,
       },
       artifactCache: {
         enabled: false,

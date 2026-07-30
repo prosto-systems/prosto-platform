@@ -30,54 +30,51 @@ Both packages follow the same contract-first methodology and stability levels.
 - `EVENT_TOKEN_NAME_PREFIX`
 
 ### Types
-- `ModuleLifecycleStageType`
-- `StartupPolicyType`
-- `ModuleLifecycleResultType`
+- `PlatformModuleLifecycleStageType`
+- `PlatformStartupPolicyType`
+- `PlatformModuleLifecycleResultType`
 - `ModuleIdentifierType`
 - `SemverVersionType`
 - `SemverRangeType`
 - `ModuleSecurityClassType`
 - `ModuleCriticalityType`
 - `ModuleCapabilityType`
-- `TokenNameType`
 - `ServiceTokenType<TService>`
 - `EventTokenType<TPayload>`
 - `EventHandlerType<TPayload>`
-- `ModuleManifestValidationResultType`
-- `ModuleCompatibilityValidationResultType`
+- `PlatformModuleManifestValidationResultType`
+- `PlatformModuleCompatibilityValidationResultType`
 - `PlatformModuleManifestInputType`
 - `PlatformModuleManifestOutputType`
-- `PlatformSdkErrorCodeType`
-- `CompatibilityIssueCodeType`
-- `CompatibilityFieldType`
+- `PlatformModuleCompatibilityIssueCodeType`
 
 ### Interfaces
 - `IServiceRegistry`
 - `IEventBus`
 - `IEventMetadata`
 - `IEventEnvelope<TPayload>`
-- `IModuleLogger`
-- `IModuleContext`
+- `IPlatformModuleLogger`
+- `IPlatformModuleContext`
 - `IPlatformModule`
-- `IModuleIdentity`
-- `IModuleCompatibility`
-- `IModuleDependency`
+- `IPlatformModuleIdentity`
+- `IPlatformModuleCompatibility`
+- `IPlatformModuleDependency`
 - `IPlatformModuleManifest`
 - `IPlatformRuntimeVersionContext`
-- `IManifestValidationIssue`
-- `IModuleManifestValidationSuccess`
-- `IModuleManifestValidationFailure`
-- `ICompatibilityValidationIssue`
-- `IModuleCompatibilityValidationSuccess`
-- `IModuleCompatibilityValidationFailure`
-- `IModuleManifestValidator`
-- `IModuleCompatibilityValidator`
+- `IPlatformModuleManifestValidationIssue`
+- `IPlatformModuleManifestValidationSuccess`
+- `IPlatformModuleManifestValidationFailure`
+- `IPlatformModuleCompatibilityValidationIssue`
+- `IPlatformModuleCompatibilityValidationSuccess`
+- `IPlatformModuleCompatibilityValidationFailure`
+- `IPlatformModuleManifestValidator`
+- `IPlatformModuleCompatibilityValidator`
 
 ### Schemas
 - `SemverVersionSchema`
 - `SemverRangeSchema`
 - `CapabilitySchema`
-- `ModuleDependencySchema`
+- `PlatformModuleDependencySchema`
 - `PlatformModuleManifestSchema`
 
 ### Utilities
@@ -95,8 +92,8 @@ Both packages follow the same contract-first methodology and stability levels.
 
 ### Errors
 - `PlatformSdkError`
-- `ManifestValidationError`
-- `CompatibilityValidationError`
+- `PlatformModuleManifestValidationError`
+- `PlatformModuleCompatibilityValidationError`
 
 ## Usage
 

@@ -31,23 +31,19 @@ describe('runtime bootstrap (best-effort)', () => {
       JSON.stringify(baseConfig),
     );
 
-    const moduleA = new TestModule(
-      createManifest({
-        id: 'module-a',
-      }),
-    );
-    const moduleB = new TestModule(
-      createManifest({
-        id: 'module-b',
-        dependencies: [{ id: 'module-a', version: '^1.0.0' }],
-      }),
-      { failOnStart: true },
-    );
+    const manifestA = createManifest({ id: 'module-a' });
+    const manifestB = createManifest({
+      id: 'module-b',
+      dependencies: [{ id: 'module-a', version: '^1.0.0' }],
+      optional: true,
+    });
+    const moduleA = new TestModule();
+    const moduleB = new TestModule({ failOnStart: true });
 
     const runtime = await createRuntime({
       modules: [
-        { module: moduleB, type: 'memory' },
-        { module: moduleA, type: 'memory' },
+        { manifest: manifestB, module: moduleB, type: 'memory' },
+        { manifest: manifestA, module: moduleA, type: 'memory' },
       ],
       configDir: tempDir,
     });

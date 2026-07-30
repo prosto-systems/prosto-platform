@@ -1,4 +1,4 @@
-import type { StartupPolicyType } from '@prosto/platform-sdk';
+import type { PlatformStartupPolicyType } from '@prosto/platform-sdk';
 import type {
   IPolicyEvaluationInput,
   IPolicyEvaluationResult,
@@ -16,7 +16,10 @@ import {
  * Manages policy strategies and evaluates startup policies.
  */
 export class StartupPolicyEvaluator implements IStartupPolicyEvaluator {
-  private readonly _strategies = new Map<StartupPolicyType, IPolicyStrategy>();
+  private readonly _strategies = new Map<
+    PlatformStartupPolicyType,
+    IPolicyStrategy
+  >();
 
   constructor(
     policyStrategies: IPolicyStrategy[] = [
@@ -49,7 +52,9 @@ export class StartupPolicyEvaluator implements IStartupPolicyEvaluator {
   /**
    * Get the strategy for the given policy mode.
    */
-  getStrategy(policyMode: StartupPolicyType): IPolicyStrategy | undefined {
+  getStrategy(
+    policyMode: PlatformStartupPolicyType,
+  ): IPolicyStrategy | undefined {
     return this._strategies.get(policyMode);
   }
 

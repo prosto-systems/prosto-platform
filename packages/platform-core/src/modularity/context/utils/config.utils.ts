@@ -76,14 +76,14 @@ export function buildScopedConfigProjection(
     };
   }
 
-  return createReadonlyConfig(projection);
+  return createReadonlyObject(projection);
 }
 
 /**
  * Create a read-only wrapper around a configuration object.
  * Prevents accidental mutation of the original config.
  */
-export function createReadonlyConfig(
+export function createReadonlyObject(
   config: Record<string, unknown>,
 ): Readonly<Record<string, unknown>> {
   return Object.freeze(structuredClone(config));

@@ -1,5 +1,5 @@
 import type {
-  IModuleContext,
+  IPlatformModuleContext,
   IPlatformModule,
   IPlatformModuleManifest,
 } from '@prosto/platform-sdk';
@@ -22,23 +22,12 @@ export function createManifest(
   input: Partial<IPlatformModuleManifest> & Pick<IPlatformModuleManifest, 'id'>,
 ): IPlatformModuleManifest {
   return {
-    id: input.id,
     version: input.version ?? SDK_CONTRACT_VERSION,
     sdkVersion: input.sdkVersion ?? '^0.0.0',
     nodeVersion: input.nodeVersion,
-    criticality: input.criticality ?? 'standard',
-    securityClass: input.securityClass ?? 'internal',
-    capabilities: input.capabilities ?? [
-      'lifecycle.register',
-      'lifecycle.start',
-      'feature.test',
-    ],
+    title: input.title ?? 'Test Module',
     dependencies: input.dependencies ?? [],
-    checksum:
-      input.checksum ??
-      'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    signature: input.signature,
-    metadata: input.metadata,
+    ...input,
   };
 }
 
@@ -50,19 +39,14 @@ export interface ITestModuleBehavior {
 }
 
 export class TestModule implements IPlatformModule {
-  readonly manifest: IPlatformModuleManifest;
   readonly calls: string[] = [];
   private readonly _behavior: ITestModuleBehavior;
 
-  constructor(
-    manifest: IPlatformModuleManifest,
-    behavior: ITestModuleBehavior = {},
-  ) {
-    this.manifest = manifest;
+  constructor(behavior: ITestModuleBehavior = {}) {
     this._behavior = behavior;
   }
 
-  register(_ctx: IModuleContext): void {
+  register(_ctx: IPlatformModuleContext): void {
     this.calls.push('register');
 
     if (this._behavior.failOnRegister) {
@@ -70,7 +54,7 @@ export class TestModule implements IPlatformModule {
     }
   }
 
-  init(_ctx: IModuleContext): void {
+  init(_ctx: IPlatformModuleContext): void {
     this.calls.push('init');
 
     if (this._behavior.failOnInit) {
@@ -78,7 +62,7 @@ export class TestModule implements IPlatformModule {
     }
   }
 
-  start(_ctx: IModuleContext): void {
+  start(_ctx: IPlatformModuleContext): void {
     this.calls.push('start');
 
     if (this._behavior.failOnStart) {
@@ -86,7 +70,7 @@ export class TestModule implements IPlatformModule {
     }
   }
 
-  async stop(_ctx: IModuleContext): Promise<void> {
+  async stop(_ctx: IPlatformModuleContext): Promise<void> {
     this.calls.push('stop');
 
     if (this._behavior.stopDelayMs && this._behavior.stopDelayMs > 0) {

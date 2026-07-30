@@ -5,6 +5,7 @@ import { join } from 'node:path';
 
 const moduleRoot = process.cwd();
 const packageJsonPath = join(moduleRoot, 'package.json');
+const manifestJsonPath = join(moduleRoot, 'manifest.json');
 const artifactsDir = join(moduleRoot, 'artifacts');
 const distDir = join(moduleRoot, 'dist');
 
@@ -17,8 +18,9 @@ const zipFilePath = join(artifactsDir, zipFileName);
 
 const zip = new AdmZip();
 
-zip.addLocalFolder(distDir, 'dist');
 zip.addLocalFile(packageJsonPath, '');
+zip.addLocalFile(manifestJsonPath, '');
+zip.addLocalFolder(distDir, 'dist');
 
 zip.writeZip(zipFilePath);
 

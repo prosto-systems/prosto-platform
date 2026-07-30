@@ -1,4 +1,4 @@
-import type { IModuleLogger } from '@prosto/platform-sdk';
+import type { IPlatformModuleLogger } from '@prosto/platform-sdk';
 
 /**
  * @alpha
@@ -13,5 +13,5 @@ export interface ICreateModuleLoggerOptions {
  * Factory interface for creating module loggers.
  */
 export interface IModuleLoggerFactory {
-  create(options: ICreateModuleLoggerOptions): IModuleLogger;
+  create(options: ICreateModuleLoggerOptions): IPlatformModuleLogger;
 }

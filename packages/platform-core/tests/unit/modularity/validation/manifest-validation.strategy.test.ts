@@ -3,19 +3,26 @@ import {
   ManifestValidationStrategy,
   ModuleArtifactPackaging,
   ModuleArtifactSource,
+  ModuleState,
 } from '@/modularity/index.js';
 import { createManifest, TestModule } from '@/tests/fixtures/index.js';
 
 describe('ManifestValidationStrategy', () => {
   it('passes valid manifest', () => {
     const strategy = new ManifestValidationStrategy();
-    const module = new TestModule(createManifest({ id: 'module-a' }));
+    const manifest = createManifest({ id: 'module-a' });
+    const module = new TestModule();
 
     const result = strategy.validate({
       artifact: {
-        module,
-        moduleId: module.manifest.id,
-        moduleVersion: module.manifest.version,
+        moduleId: manifest.id,
+        moduleVersion: manifest.version,
+        moduleEnvelope: {
+          manifest,
+          module,
+          fullPhysicalPath: '',
+          state: ModuleState.ReadyForInitialization,
+        },
         orderingKey: 'memory:module-a@1.0.0',
         sourceType: ModuleArtifactSource.Memory,
         sourceRef: 'memory:module-a@1.0.0',
@@ -32,13 +39,19 @@ describe('ManifestValidationStrategy', () => {
 
   it('fails invalid manifest', () => {
     const strategy = new ManifestValidationStrategy();
-    const module = new TestModule(createManifest({ id: 'INVALID_ID' }));
+    const manifest = createManifest({ id: 'INVALID_ID' });
+    const module = new TestModule();
 
     const result = strategy.validate({
       artifact: {
-        module,
-        moduleId: module.manifest.id,
-        moduleVersion: module.manifest.version,
+        moduleId: manifest.id,
+        moduleVersion: manifest.version,
+        moduleEnvelope: {
+          manifest,
+          module,
+          fullPhysicalPath: '',
+          state: ModuleState.ReadyForInitialization,
+        },
         orderingKey: 'memory:INVALID_ID@1.0.0',
         sourceType: ModuleArtifactSource.Memory,
         sourceRef: 'memory:INVALID_ID@1.0.0',

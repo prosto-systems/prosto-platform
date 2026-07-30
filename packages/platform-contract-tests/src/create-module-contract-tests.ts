@@ -5,16 +5,10 @@ import type {
 } from '@/interfaces/index.js';
 import { PlatformModuleManifestValidator } from '@prosto/platform-sdk';
 import {
-  CAPABILITY_CHECK_RESULT_ID,
   LIFECYCLE_CHECK_RESULT_ID,
   MANIFEST_CHECK_RESULT_ID,
-  OBSERVABILITY_CHECK_RESULT_ID,
-  runCapabilityConformanceCheck,
   runLifecycleConformanceCheck,
   runManifestConformanceCheck,
-  runObservabilityConformanceCheck,
-  runSecurityMetadataConformanceCheck,
-  SECURITY_CHECK_RESULT_ID,
 } from '@/checks/index.js';
 import { DefaultModuleLifecycleContextFactory } from '@/factories/index.js';
 import { buildConformanceReport } from '@/utils/index.js';
@@ -27,24 +21,22 @@ export async function runModuleContractConformance(
   input: IModuleContractTestInput,
 ): Promise<IModuleContractConformanceReport> {
   return buildConformanceReport({
-    moduleId: input.module.manifest.id,
-    moduleVersion: input.module.manifest.version,
+    moduleId: input.manifest.id,
+    moduleVersion: input.manifest.version,
     generatedAt: input.now?.() ?? new Date().toISOString(),
     checks: [
       runManifestConformanceCheck({
-        manifest: input.module.manifest,
+        manifest: input.manifest,
         manifestValidator:
           input.manifestValidator ?? new PlatformModuleManifestValidator(),
       }),
       await runLifecycleConformanceCheck({
         module: input.module,
+        manifest: input.manifest,
         moduleLifecycleContextFactory:
           input.moduleLifecycleContextFactory ??
           new DefaultModuleLifecycleContextFactory(),
       }),
-      runCapabilityConformanceCheck(input.module.manifest),
-      runSecurityMetadataConformanceCheck(input.module.manifest),
-      runObservabilityConformanceCheck(input.module.manifest),
     ],
   });
 }
@@ -85,37 +77,5 @@ export function createModuleContractTests(
         }
       },
     );
-  });
-
-  runner.describe('capabilities', () => {
-    runner.it('should satisfy capability declaration integrity', async () => {
-      const check = (await checksMapPromise).get(CAPABILITY_CHECK_RESULT_ID);
-
-      if (!check?.passed) {
-        throw new Error(
-          check?.details ?? 'Capability conformance check failed.',
-        );
-      }
-    });
-  });
-
-  runner.describe('security metadata', () => {
-    runner.it('should include required security metadata', async () => {
-      const check = (await checksMapPromise).get(SECURITY_CHECK_RESULT_ID);
-
-      if (!check?.passed && check?.severity === 'mandatory') {
-        throw new Error(check.details);
-      }
-    });
-  });
-
-  runner.describe('observability metadata', () => {
-    runner.it('should satisfy minimum observability contract', async () => {
-      const check = (await checksMapPromise).get(OBSERVABILITY_CHECK_RESULT_ID);
-
-      if (!check?.passed && check?.severity === 'mandatory') {
-        throw new Error(check.details);
-      }
-    });
   });
 }
