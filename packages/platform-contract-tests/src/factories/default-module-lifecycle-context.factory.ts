@@ -4,15 +4,15 @@ import type {
   IEventBus,
   IEventEnvelope,
   IEventMetadata,
-  IModuleContext,
-  IModuleLogger,
-  IPlatformModule,
+  IPlatformModuleContext,
+  IPlatformModuleLogger,
+  IPlatformModuleManifest,
   IServiceRegistry,
   ServiceTokenType,
 } from '@prosto/platform-sdk';
 import type { IModuleLifecycleContextFactory } from '@/interfaces/index.js';
 
-class MockLogger implements IModuleLogger {
+class MockLogger implements IPlatformModuleLogger {
   debug(_: string, __?: Readonly<Record<string, unknown>>): void {
     /* empty */
   }
@@ -54,8 +54,12 @@ class MockServiceRegistry implements IServiceRegistry {
     this._registry.set(token, service);
   }
 
-  resolve<TService>(token: ServiceTokenType<TService>): TService | undefined {
-    return this._registry.get(token) as TService | undefined;
+  resolve<TService>(token: ServiceTokenType<TService>): TService {
+    if (!this._registry.has(token)) {
+      throw new Error(`Service with token ${token.toString()} not found.`);
+    }
+
+    return this._registry.get(token) as TService;
   }
 
   has<TService>(token: ServiceTokenType<TService>): boolean {
@@ -131,13 +135,13 @@ class MockEventBus implements IEventBus {
  * Default lifecycle context factory for contract execution.
  */
 export class DefaultModuleLifecycleContextFactory implements IModuleLifecycleContextFactory {
-  create(module: IPlatformModule): IModuleContext {
+  create(moduleManifest: IPlatformModuleManifest): IPlatformModuleContext {
     return {
       environment: 'test',
       config: {},
-      moduleId: module.manifest.id,
+      moduleId: moduleManifest.id,
       startupPolicy: 'best-effort',
-      sdkVersion: module.manifest.sdkVersion,
+      sdkVersion: moduleManifest.sdkVersion,
       logger: new MockLogger(),
       services: new MockServiceRegistry(),
       eventBus: new MockEventBus(),

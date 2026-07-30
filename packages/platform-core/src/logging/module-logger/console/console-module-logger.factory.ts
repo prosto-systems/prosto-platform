@@ -1,4 +1,4 @@
-import type { IModuleLogger } from '@prosto/platform-sdk';
+import type { IPlatformModuleLogger } from '@prosto/platform-sdk';
 import type { ISecretsRedactor } from '@/security/index.js';
 import type {
   ICreateModuleLoggerOptions,
@@ -9,7 +9,7 @@ import { ConsoleModuleLogger } from './console-module-logger.js';
 export class ConsoleModuleLoggerFactory implements IModuleLoggerFactory {
   constructor(private readonly _secretsRedactor?: ISecretsRedactor) {}
 
-  create(options: ICreateModuleLoggerOptions): IModuleLogger {
+  create(options: ICreateModuleLoggerOptions): IPlatformModuleLogger {
     return new ConsoleModuleLogger(options.moduleId, this._secretsRedactor);
   }
 }

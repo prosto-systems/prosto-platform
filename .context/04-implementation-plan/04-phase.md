@@ -8,9 +8,6 @@
   - `packages/platform-contract-tests/src/create-module-contract-tests.ts`
   - `packages/platform-contract-tests/src/checks/manifest.check.ts`
   - `packages/platform-contract-tests/src/checks/lifecycle.check.ts`
-  - `packages/platform-contract-tests/src/checks/capability.check.ts`
-  - `packages/platform-contract-tests/src/checks/security.check.ts`
-  - `packages/platform-contract-tests/src/checks/observability.check.ts`
   - `packages/platform-contract-tests/src/types/index.ts`
   - `packages/platform-contract-tests/src/utils/report.utils.ts`
   - `packages/platform-contract-tests/tests/module-contract-conformance.test.ts`

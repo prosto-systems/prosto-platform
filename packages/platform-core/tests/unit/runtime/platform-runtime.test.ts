@@ -10,7 +10,10 @@ import type {
   IStartupReportInput,
 } from '@/diagnostics/index.js';
 import { RuntimeStartupStatus } from '@/diagnostics/index.js';
-import type { IModuleLifecycleOrchestrator } from '@/modularity/index.js';
+import {
+  type IModuleLifecycleOrchestrator,
+  ModuleState,
+} from '@/modularity/index.js';
 import { createManifest, TestModule } from '@/tests/fixtures/index.js';
 
 class TestDiagnosticsReporter implements IDiagnosticsReporter {
@@ -43,13 +46,21 @@ class TestDiagnosticsReporter implements IDiagnosticsReporter {
 
 describe('PlatformRuntime', () => {
   it('starts and stops runtime via injected collaborators', async () => {
-    const module = new TestModule(createManifest({ id: 'module-a' }));
+    const manifest = createManifest({ id: 'module-a' });
+    const module = new TestModule();
 
     const bootstrapCoordinator: IBootstrapCoordinator = {
       async coordinate() {
         return {
           policyMode: 'strict',
-          loadedModules: [module],
+          loadedModules: [
+            {
+              manifest,
+              module,
+              fullPhysicalPath: '',
+              state: ModuleState.ReadyForInitialization,
+            },
+          ],
           skippedModuleIds: [],
           failedDiagnostics: [],
           stageOutcomes: [],
@@ -70,7 +81,7 @@ describe('PlatformRuntime', () => {
     };
 
     const runtime = new PlatformRuntime(
-      [{ type: 'memory', module }],
+      [{ type: 'memory', manifest, module }],
       {
         platform: { startupPolicy: 'strict' },
         modules: { artifactCache: { enabled: false } },

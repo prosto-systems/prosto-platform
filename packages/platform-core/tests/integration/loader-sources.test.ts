@@ -34,10 +34,11 @@ describe('runtime loader sources', () => {
       JSON.stringify(baseConfig),
     );
 
-    const moduleA = new TestModule(createManifest({ id: 'module-a' }));
+    const manifestA = createManifest({ id: 'module-a' });
+    const moduleA = new TestModule();
 
     const runtime = await createRuntime({
-      modules: [{ module: moduleA, type: 'memory' }],
+      modules: [{ manifest: manifestA, module: moduleA, type: 'memory' }],
       configDir: tempDir,
     });
 
@@ -58,11 +59,12 @@ describe('runtime loader sources', () => {
       JSON.stringify(baseConfig),
     );
 
-    const moduleA = new TestModule(createManifest({ id: 'module-a' }));
+    const manifestA = createManifest({ id: 'module-a' });
+    const moduleA = new TestModule();
 
     const runtime = await createRuntime({
       modules: [
-        { module: moduleA, type: 'memory' },
+        { manifest: manifestA, module: moduleA, type: 'memory' },
         {
           moduleIdHint: 'module-url',
           type: 'url',

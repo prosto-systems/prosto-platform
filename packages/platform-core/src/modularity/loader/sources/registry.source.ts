@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import {
   ModuleArtifactPackaging,
   ModuleArtifactSource,
+  ModuleState,
 } from '../constants/index.js';
 import type {
   ArtifactSourceValidationResultType,
@@ -138,21 +139,34 @@ export class RegistrySource extends ArtifactBaseSource {
     }
 
     try {
+      const manifestPath = await this.resolveManifestPath(
+        extractionResult.extractPath,
+      );
       const entryPath = await this.resolveEntryPath(
         extractionResult.extractPath,
       );
-      const module = await DynamicModuleLoader.loadModuleEntry(entryPath);
+      const [manifest, module] = await Promise.all([
+        await DynamicModuleLoader.loadModuleManifest(manifestPath),
+        await DynamicModuleLoader.loadModuleEntry(entryPath),
+      ]);
       const registryRef = `${this._descriptor.packageName}@${this._descriptor.version}`;
 
-      return {
-        module,
-        moduleId: module.manifest.id,
-        moduleVersion: module.manifest.version,
+      const candidateArtifact: IModuleCandidateArtifact = {
+        moduleId: manifest.id,
+        moduleVersion: manifest.version,
+        moduleEnvelope: {
+          module,
+          manifest,
+          fullPhysicalPath: extractionResult.extractPath,
+          state: ModuleState.ReadyForInitialization,
+        },
         orderingKey: `registry:${registryRef}`,
         sourceType: ModuleArtifactSource.Registry,
         sourceRef: registryRef,
         packaging: extractionResult.packaging,
       };
+
+      return candidateArtifact;
     } catch (error) {
       return this.createRejected('discover', {
         reasonCode: RuntimeErrorCodes.SourceEntryResolveFailed,

@@ -132,19 +132,14 @@ const runtime = new RuntimeBuilder().build({
 When no overrides are provided, the builder seeds these defaults before applying JSON/env/CLI sources:
 
 - `platform.startupPolicy`: `strict`
-- `modules.configAccessPolicy.sectionAllowlistBySecurityClass`:
-  - `trusted`: `['platform', 'runtime', 'modules', 'security', 'logging', 'custom']`
-  - `internal`: `['platform', 'runtime', 'security', 'logging', 'custom']`
-  - `third-party-reviewed`: `['platform', 'logging', 'custom']`
 - `modules.configAccessPolicy.productionStrictMode`: `true`
-- `modules.configAccessPolicy.denyOnUnknownCapability`: `true`
 - `modules.artifactCache.enabled`: `false`
 - `security.secretRedaction.enabled`: `true`
 - `security.secretRedaction.patterns`: `['key', 'token', 'secret', 'password', 'passphrase']`
 
 If `modules.artifactCache.enabled` is set to `true` and `modules.artifactCache.path` is omitted, cache files are stored under `.cache/module-artifacts` resolved from `platform.basePath`.
 
-Modules access config via `IModuleContext`:
+Modules access config via `IPlatformModuleContext`:
 
 ```typescript
 const fullConfig = ctx.config;

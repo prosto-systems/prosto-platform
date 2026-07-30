@@ -29,8 +29,12 @@ export class InMemoryServiceRegistry implements IServiceRegistry {
     this._registry.set(token, service);
   }
 
-  resolve<TService>(token: ServiceTokenType<TService>): TService | undefined {
-    return this._registry.get(token) as TService | undefined;
+  resolve<TService>(token: ServiceTokenType<TService>): TService {
+    if (!this._registry.has(token)) {
+      throw new ServiceNotFoundError(token.toString());
+    }
+
+    return this._registry.get(token) as TService;
   }
 
   has<TService>(token: ServiceTokenType<TService>): boolean {

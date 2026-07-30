@@ -6,6 +6,7 @@ import type {
 } from '@/diagnostics/index.js';
 import { RuntimeStartupStatus } from '@/diagnostics/index.js';
 import type {
+  IModuleEnvelope,
   IModuleLifecycleOrchestrator,
   ModuleArtifactSourceDescriptorType,
 } from '@/modularity/index.js';
@@ -15,9 +16,8 @@ import type {
   IRuntimeOptions,
 } from './interfaces/index.js';
 import {
-  type IPlatformModule,
+  type PlatformStartupPolicyType,
   SDK_CONTRACT_VERSION,
-  type StartupPolicyType,
 } from '@prosto/platform-sdk';
 import { assert, dateNowIso } from '@/common/index.js';
 
@@ -27,10 +27,10 @@ import { assert, dateNowIso } from '@/common/index.js';
  * the bootstrapping process and modules lifecycle.
  */
 export class PlatformRuntime implements IPlatformRuntime {
-  private _startedModules: readonly IPlatformModule[] = [];
+  private _startedModules: readonly IModuleEnvelope[] = [];
   private _stoppingPromise: Promise<void> | null = null;
 
-  private readonly _startupPolicy: StartupPolicyType;
+  private readonly _startupPolicy: PlatformStartupPolicyType;
   private readonly _correlationId: string;
 
   constructor(
@@ -48,7 +48,9 @@ export class PlatformRuntime implements IPlatformRuntime {
   }
 
   get startedModuleIds(): readonly string[] {
-    return this._startedModules.map((module) => module.manifest.id);
+    return this._startedModules.map(
+      (moduleEnvelope) => moduleEnvelope.manifest.id,
+    );
   }
 
   private _started = false;
@@ -107,9 +109,9 @@ export class PlatformRuntime implements IPlatformRuntime {
       startedAt: startupStartedAt,
       correlationId: this._correlationId,
       failedModules: bootstrapContext.failedDiagnostics,
-      loadedModules: bootstrapContext.loadedModules.map((module) => ({
-        moduleId: module.manifest.id,
-        version: module.manifest.version,
+      loadedModules: bootstrapContext.loadedModules.map((moduleEnvelope) => ({
+        moduleId: moduleEnvelope.manifest.id,
+        version: moduleEnvelope.manifest.version,
       })),
       skippedModules: bootstrapContext.skippedModuleIds.map((moduleId) => {
         const reason = failedDiagnosticsByModuleId.get(moduleId);

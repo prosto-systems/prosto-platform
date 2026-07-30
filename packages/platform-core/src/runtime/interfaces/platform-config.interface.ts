@@ -1,4 +1,4 @@
-import type { StartupPolicyType } from '@prosto/platform-sdk';
+import type { PlatformStartupPolicyType } from '@prosto/platform-sdk';
 import type { IConfigAccessPolicy } from '@/modularity/index.js';
 
 /**
@@ -12,7 +12,7 @@ export interface IPlatformConfig extends Record<string, unknown> {
     /** @default process.cwd() */
     basePath: string;
     /** @default 'strict' */
-    startupPolicy: StartupPolicyType;
+    startupPolicy: PlatformStartupPolicyType;
   };
   runtime: {
     /** @default 60 seconds for production, 30 seconds for development */

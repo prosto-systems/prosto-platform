@@ -1,14 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type {
-  IModuleContext,
   IPlatformModule,
+  IPlatformModuleContext,
   IPlatformModuleManifest,
 } from '@prosto/platform-sdk';
 import {
-  CAPABILITY_CHECK_RESULT_ID,
   ContractFailureCodes,
   LIFECYCLE_CHECK_RESULT_ID,
-  OBSERVABILITY_CHECK_RESULT_ID,
+  MANIFEST_CHECK_RESULT_ID,
   runModuleContractConformance,
   toConformanceReportJson,
 } from '@/index.js';
@@ -17,65 +16,36 @@ const validManifest: IPlatformModuleManifest = {
   id: 'module-health',
   version: '1.0.0',
   sdkVersion: '^0.1.0',
-  criticality: 'standard',
-  securityClass: 'internal',
-  capabilities: [
-    'lifecycle.register',
-    'lifecycle.start',
-    'obs.metrics',
-    'feature.health',
-  ],
+  title: 'Health',
   dependencies: [],
-  checksum:
-    'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  optional: false,
+  groups: ['Group 1'],
 };
 
 class ValidModule implements IPlatformModule {
-  readonly manifest = validManifest;
-  register(_ctx: IModuleContext): void {
+  init(_ctx: IPlatformModuleContext): void {
     /* empty */
   }
-  init(_ctx: IModuleContext): void {
-    /* empty */
-  }
-  start(_ctx: IModuleContext): void {
-    /* empty */
-  }
-  stop(_ctx: IModuleContext): void {
-    /* empty */
-  }
-}
 
-class BrokenModuleMissingCapability extends ValidModule {
-  override readonly manifest: IPlatformModuleManifest = {
-    ...validManifest,
-    id: 'module-broken-capability',
-    capabilities: ['lifecycle.register', 'obs.metrics'],
-  };
+  start(_ctx: IPlatformModuleContext): void {
+    /* empty */
+  }
+
+  stop(_ctx: IPlatformModuleContext): void {
+    /* empty */
+  }
 }
 
 class BrokenModuleLifecycleFailure extends ValidModule {
-  override readonly manifest: IPlatformModuleManifest = {
-    ...validManifest,
-    id: 'module-broken-lifecycle',
-  };
-
-  override start(_ctx: IModuleContext): void {
+  override start(_ctx: IPlatformModuleContext): void {
     throw new Error('start failed');
   }
-}
-
-class BrokenModuleNoObservability extends ValidModule {
-  override readonly manifest: IPlatformModuleManifest = {
-    ...validManifest,
-    id: 'module-broken-observability',
-    capabilities: ['lifecycle.register', 'lifecycle.start', 'feature.auth'],
-  };
 }
 
 describe('module contract conformance', () => {
   it('returns pass summary for a valid module', async () => {
     const report = await runModuleContractConformance({
+      manifest: validManifest,
       module: new ValidModule(),
       now: () => '2026-03-31T00:00:00.000Z',
     });
@@ -85,24 +55,32 @@ describe('module contract conformance', () => {
     expect(report.moduleId).toBe('module-health');
   });
 
-  it('returns fail summary when mandatory capability check fails', async () => {
+  it('returns fail summary for a invalid module title', async () => {
     const report = await runModuleContractConformance({
-      module: new BrokenModuleMissingCapability(),
+      manifest: {
+        ...validManifest,
+        id: 'module-broken-title',
+        title: '',
+      },
+      module: new ValidModule(),
     });
 
-    expect(report.summary.result).toBe('fail');
-    expect(report.summary.failedMandatoryChecks).toBe(1);
-
-    const capabilityCheck = report.checks.find(
-      (check) => check.id === CAPABILITY_CHECK_RESULT_ID,
+    const groupsCheck = report.checks.find(
+      (check) => check.id === MANIFEST_CHECK_RESULT_ID,
     );
 
-    expect(capabilityCheck?.passed).toBe(false);
-    expect(capabilityCheck?.code).toBe(ContractFailureCodes.CapabilityMissing);
+    expect(groupsCheck?.passed).toBe(false);
+    expect(groupsCheck?.code).toBe(ContractFailureCodes.ManifestSchemaInvalid);
+    expect(groupsCheck?.details).toContain('Module title must not be empty.');
+    expect(report.summary.result).toBe('fail');
   });
 
   it('returns lifecycle failure code on lifecycle method exception', async () => {
     const report = await runModuleContractConformance({
+      manifest: {
+        ...validManifest,
+        id: 'module-broken-lifecycle',
+      },
       module: new BrokenModuleLifecycleFailure(),
     });
 
@@ -117,27 +95,33 @@ describe('module contract conformance', () => {
     expect(report.summary.result).toBe('fail');
   });
 
-  it('marks observability absence as advisory warning without failing mandatory gate', async () => {
+  it('marks the duplication of groups', async () => {
     const report = await runModuleContractConformance({
-      module: new BrokenModuleNoObservability(),
+      manifest: {
+        ...validManifest,
+        id: 'module-broken-groups',
+        groups: ['Group 1', 'Group 1'],
+      },
+      module: new ValidModule(),
     });
 
-    const observabilityCheck = report.checks.find(
-      (check) => check.id === OBSERVABILITY_CHECK_RESULT_ID,
+    const groupsCheck = report.checks.find(
+      (check) => check.id === MANIFEST_CHECK_RESULT_ID,
     );
 
-    expect(observabilityCheck?.passed).toBe(false);
-    expect(observabilityCheck?.severity).toBe('advisory');
-    expect(observabilityCheck?.code).toBe(
-      ContractFailureCodes.ObservabilityCapabilityMissing,
+    expect(groupsCheck?.passed).toBe(false);
+    expect(groupsCheck?.severity).toBe('mandatory');
+    expect(groupsCheck?.code).toBe(
+      ContractFailureCodes.ManifestSemanticInvalid,
     );
-    expect(report.summary.failedMandatoryChecks).toBe(0);
-    expect(report.summary.failedAdvisoryChecks).toBe(1);
-    expect(report.summary.result).toBe('pass');
+    expect(report.summary.failedMandatoryChecks).toBe(1);
+    expect(report.summary.failedAdvisoryChecks).toBe(0);
+    expect(report.summary.result).toBe('fail');
   });
 
   it('serializes machine-readable report as deterministic JSON', async () => {
     const report = await runModuleContractConformance({
+      manifest: validManifest,
       module: new ValidModule(),
       now: () => '2026-03-31T00:00:00.000Z',
     });

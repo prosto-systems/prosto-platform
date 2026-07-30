@@ -1,5 +1,6 @@
-import type { IPlatformModule, StartupPolicyType } from '@prosto/platform-sdk';
+import type { PlatformStartupPolicyType } from '@prosto/platform-sdk';
 import type { IRuntimeFailureDiagnostic } from '@/diagnostics/index.js';
+import type { IModuleEnvelope } from '@/modularity/index.js';
 import type { IBootstrapStageOutcome } from './bootstrap-stage-context.interface.js';
 
 /**
@@ -7,8 +8,8 @@ import type { IBootstrapStageOutcome } from './bootstrap-stage-context.interface
  * Output context from the bootstrap coordinator after processing all stages.
  */
 export interface IBootstrapContext {
-  readonly policyMode: StartupPolicyType;
-  readonly loadedModules: readonly IPlatformModule[];
+  readonly policyMode: PlatformStartupPolicyType;
+  readonly loadedModules: readonly IModuleEnvelope[];
   readonly skippedModuleIds: readonly string[];
   readonly failedDiagnostics: readonly IRuntimeFailureDiagnostic[];
   readonly stageOutcomes: readonly IBootstrapStageOutcome[];

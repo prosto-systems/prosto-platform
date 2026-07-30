@@ -17,6 +17,7 @@ import { RuntimeErrorCodes } from '@/common/index.js';
 import {
   ModuleArtifactPackaging,
   ModuleArtifactSource,
+  ModuleState,
 } from '../constants/index.js';
 import {
   ArtifactExtractor,
@@ -85,20 +86,33 @@ export class PathSource extends ArtifactBaseSource {
     }
 
     try {
+      const manifestPath = await this.resolveManifestPath(
+        extractionResult.extractPath,
+      );
       const entryPath = await this.resolveEntryPath(
         extractionResult.extractPath,
       );
-      const module = await DynamicModuleLoader.loadModuleEntry(entryPath);
+      const [manifest, module] = await Promise.all([
+        await DynamicModuleLoader.loadModuleManifest(manifestPath),
+        await DynamicModuleLoader.loadModuleEntry(entryPath),
+      ]);
 
-      return {
-        module,
-        moduleId: module.manifest.id,
-        moduleVersion: module.manifest.version,
+      const candidateArtifact: IModuleCandidateArtifact = {
+        moduleId: manifest.id,
+        moduleVersion: manifest.version,
+        moduleEnvelope: {
+          module,
+          manifest,
+          fullPhysicalPath: extractionResult.extractPath,
+          state: ModuleState.ReadyForInitialization,
+        },
         orderingKey: `path:${this._descriptor.path}`,
         sourceType: ModuleArtifactSource.Path,
         sourceRef: this._descriptor.path,
         packaging: extractionResult.packaging,
       };
+
+      return candidateArtifact;
     } catch (error) {
       return this.createRejected('discover', {
         reasonCode: RuntimeErrorCodes.SourceEntryResolveFailed,

@@ -1,7 +1,3 @@
-import type {
-  ModuleCapabilityType,
-  ModuleSecurityClassType,
-} from '@prosto/platform-sdk';
 import type { RuntimeErrorCodes } from '@/common/index.js';
 import type { IPlatformConfig } from '@/runtime/index.js';
 import type { IConfigAccessPolicy } from './config-access-policy.interfaces.js';
@@ -15,16 +11,6 @@ export interface IConfigAccessEvaluationInput {
    * Module identifier for diagnostics.
    */
   readonly moduleId: string;
-
-  /**
-   * Module security class.
-   */
-  readonly securityClass: ModuleSecurityClassType;
-
-  /**
-   * Configuration capabilities declared by the module.
-   */
-  readonly configCapabilities: readonly ModuleCapabilityType[];
 
   /**
    * Whether running in production environment.

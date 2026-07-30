@@ -31,22 +31,19 @@ describe('runtime bootstrap critical failure', () => {
       JSON.stringify(baseConfig),
     );
 
-    const critical = new TestModule(
-      createManifest({
-        id: 'module-critical',
-        criticality: 'critical',
-      }),
-      { failOnStart: true },
-    );
+    const criticalManifest = createManifest({ id: 'module-critical' });
+    const critical = new TestModule({ failOnStart: true });
 
-    const nonCritical = new TestModule(
-      createManifest({ id: 'module-standard' }),
-    );
+    const nonCriticalManifest = createManifest({
+      id: 'module-standard',
+      optional: true,
+    });
+    const nonCritical = new TestModule();
 
     const runtime = await createRuntime({
       modules: [
-        { module: nonCritical, type: 'memory' },
-        { module: critical, type: 'memory' },
+        { manifest: nonCriticalManifest, module: nonCritical, type: 'memory' },
+        { manifest: criticalManifest, module: critical, type: 'memory' },
       ],
       configDir: tempDir,
     });

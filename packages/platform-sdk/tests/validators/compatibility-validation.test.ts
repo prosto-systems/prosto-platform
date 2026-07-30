@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  CompatibilityValidationError,
+  PlatformModuleCompatibilityValidationError,
   type IPlatformModuleManifest,
   PlatformModuleCompatibilityValidator,
   PlatformModuleManifestValidator,
@@ -10,9 +10,7 @@ const validManifest: IPlatformModuleManifest = {
   id: 'module-health',
   version: '1.2.3',
   sdkVersion: '^0.1.0',
-  criticality: 'standard',
-  securityClass: 'internal',
-  capabilities: ['feature.health', 'obs.metrics'],
+  title: 'Health Module',
   dependencies: [{ id: 'module-auth', version: '^1.0.0' }],
 };
 
@@ -52,6 +50,6 @@ describe('compatibility validation', () => {
       compatibilityValidator.assert(manifest, {
         sdkVersion: '1.2.0',
       }),
-    ).toThrow(CompatibilityValidationError);
+    ).toThrow(PlatformModuleCompatibilityValidationError);
   });
 });

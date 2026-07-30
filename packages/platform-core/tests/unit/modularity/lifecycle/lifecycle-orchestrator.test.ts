@@ -6,16 +6,17 @@ import { ConsoleModuleLoggerFactory } from '@/logging/index.js';
 import {
   ModuleContextFactory,
   ModuleLifecycleOrchestrator,
+  ModuleState,
 } from '@/modularity/index.js';
 import { InMemoryServiceRegistry } from '@/services/index.js';
 import { createManifest, TestModule } from '@/tests/fixtures/index.js';
 
 describe('ModuleLifecycleOrchestrator', () => {
   it('collects startup issues when module stage fails', async () => {
-    const moduleA = new TestModule(createManifest({ id: 'module-a' }));
-    const moduleB = new TestModule(createManifest({ id: 'module-b' }), {
-      failOnStart: true,
-    });
+    const manifestA = createManifest({ id: 'module-a' });
+    const manifestB = createManifest({ id: 'module-b' });
+    const moduleA = new TestModule();
+    const moduleB = new TestModule({ failOnStart: true });
 
     const serviceRegistry = new InMemoryServiceRegistry();
     const eventBus = new InMemoryEventBus();
@@ -31,7 +32,20 @@ describe('ModuleLifecycleOrchestrator', () => {
       contextFactory,
     );
     const result = await moduleLifecycleOrchestrator.startup(
-      [moduleA, moduleB],
+      [
+        {
+          manifest: manifestA,
+          module: moduleA,
+          fullPhysicalPath: '',
+          state: ModuleState.ReadyForInitialization,
+        },
+        {
+          manifest: manifestB,
+          module: moduleB,
+          fullPhysicalPath: '',
+          state: ModuleState.ReadyForInitialization,
+        },
+      ],
       {
         startupPolicy: 'strict',
         sdkVersion: '0.0.0',
@@ -48,9 +62,8 @@ describe('ModuleLifecycleOrchestrator', () => {
   });
 
   it('reports shutdown timeout issue', async () => {
-    const slowModule = new TestModule(createManifest({ id: 'module-slow' }), {
-      stopDelayMs: 50,
-    });
+    const manifest = createManifest({ id: 'module-slow' });
+    const slowModule = new TestModule({ stopDelayMs: 50 });
 
     const serviceRegistry = new InMemoryServiceRegistry();
     const eventBus = new InMemoryEventBus();
@@ -65,11 +78,21 @@ describe('ModuleLifecycleOrchestrator', () => {
     const moduleLifecycleOrchestrator = new ModuleLifecycleOrchestrator(
       contextFactory,
     );
-    const result = await moduleLifecycleOrchestrator.shutdown([slowModule], {
-      startupPolicy: 'strict',
-      sdkVersion: '0.0.0',
-      timeoutMs: 10,
-    });
+    const result = await moduleLifecycleOrchestrator.shutdown(
+      [
+        {
+          manifest,
+          module: slowModule,
+          fullPhysicalPath: '',
+          state: ModuleState.ReadyForInitialization,
+        },
+      ],
+      {
+        startupPolicy: 'strict',
+        sdkVersion: '0.0.0',
+        timeoutMs: 10,
+      },
+    );
 
     expect(result.stopOrder).toEqual(['module-slow']);
     expect(result.issues).toHaveLength(1);

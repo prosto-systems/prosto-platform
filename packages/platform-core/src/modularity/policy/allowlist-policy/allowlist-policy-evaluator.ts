@@ -1,8 +1,4 @@
-import {
-  type IPlatformModuleManifest,
-  MODULE_SECURITY_CLASSES,
-  type ModuleSecurityClassType,
-} from '@prosto/platform-sdk';
+import { type IPlatformModuleManifest } from '@prosto/platform-sdk';
 
 /**
  * Environment tier for policy enforcement.
@@ -72,10 +68,6 @@ export interface IAllowlistEntry {
    * Allowed version range (semver pattern).
    */
   readonly versionPattern?: string;
-  /**
-   * Required security classification.
-   */
-  readonly requiredSecurityClass?: ModuleSecurityClassType;
 }
 
 /**
@@ -94,10 +86,6 @@ export interface IAllowlistPolicyConfig {
    * Whether to require allowlist matching (true for production).
    */
   readonly requireAllowlist?: boolean;
-  /**
-   * Blocked security classes for this environment.
-   */
-  readonly blockedSecurityClasses?: ModuleSecurityClassType[];
 }
 
 /**
@@ -107,21 +95,10 @@ export interface IAllowlistPolicyConfig {
  */
 export class AllowlistPolicyEvaluator {
   private readonly _config: IAllowlistPolicyConfig;
-  private readonly _defaultBlockedClasses: Record<
-    ModuleLoadingEnvironmentType,
-    ModuleSecurityClassType[]
-  > = {
-    production: [],
-    development: [],
-    test: [],
-  };
 
   constructor(config: IAllowlistPolicyConfig) {
     this._config = {
       requireAllowlist: config.environment === 'production',
-      blockedSecurityClasses:
-        config.blockedSecurityClasses ??
-        this._defaultBlockedClasses[config.environment],
       ...config,
     };
   }
@@ -130,30 +107,6 @@ export class AllowlistPolicyEvaluator {
    * Evaluate whether a module should be allowed to load.
    */
   evaluate(module: IPlatformModuleManifest): IModulePolicyDecision {
-    // Check for required security metadata
-    // Map securityClass from SDK to our classification system
-    const securityClass = this._mapSecurityClass(module.securityClass);
-
-    if (!securityClass) {
-      return {
-        allowed: false,
-        reasonCode: ModulePolicyReasonCode.MissingSecurityMetadata,
-        message: `Module "${module.id}" is missing valid security classification in manifest.`,
-        remediationHint:
-          'Add valid "securityClass" field to module manifest with value: trusted | internal | third-party-reviewed.',
-      };
-    }
-
-    // Check if security class is blocked
-    if (this._config.blockedSecurityClasses?.includes(securityClass) ?? false) {
-      return {
-        allowed: false,
-        reasonCode: ModulePolicyReasonCode.SecurityClassBlocked,
-        message: `Module "${module.id}" has blocked security class "${securityClass}" for ${this._config.environment} environment.`,
-        remediationHint: `Use a module with security class other than: ${this._config.blockedSecurityClasses?.join(', ')}.`,
-      };
-    }
-
     // Check allowlist if required
     if (this._config.requireAllowlist) {
       const match = this._findAllowlistMatch(module);
@@ -220,33 +173,7 @@ export class AllowlistPolicyEvaluator {
         }
       }
 
-      // Check security class if specified
-      if (
-        entry.requiredSecurityClass &&
-        module.securityClass !== entry.requiredSecurityClass
-      ) {
-        continue;
-      }
-
       return entry;
-    }
-
-    return null;
-  }
-
-  /**
-   * Map SDK securityClass to ModuleSecurityClass.
-   * Note: 'unreviewed' is a valid classification but blocked in production.
-   */
-  private _mapSecurityClass(
-    securityClass: string | undefined,
-  ): ModuleSecurityClassType | null {
-    if (!securityClass) return null;
-
-    if (
-      MODULE_SECURITY_CLASSES.includes(securityClass as ModuleSecurityClassType)
-    ) {
-      return securityClass as ModuleSecurityClassType;
     }
 
     return null;

@@ -31,18 +31,18 @@ describe('runtime shutdown', () => {
       JSON.stringify(baseConfig),
     );
 
-    const moduleA = new TestModule(createManifest({ id: 'module-a' }));
-    const moduleB = new TestModule(
-      createManifest({
-        id: 'module-b',
-        dependencies: [{ id: 'module-a', version: '^1.0.0' }],
-      }),
-    );
+    const manifestA = createManifest({ id: 'module-a' });
+    const manifestB = createManifest({
+      id: 'module-b',
+      dependencies: [{ id: 'module-a', version: '^1.0.0' }],
+    });
+    const moduleA = new TestModule();
+    const moduleB = new TestModule();
 
     const runtime = await createRuntime({
       modules: [
-        { module: moduleB, type: 'memory' },
-        { module: moduleA, type: 'memory' },
+        { manifest: manifestB, module: moduleB, type: 'memory' },
+        { manifest: manifestA, module: moduleA, type: 'memory' },
       ],
       configDir: tempDir,
     });

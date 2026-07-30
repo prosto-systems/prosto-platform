@@ -1,10 +1,10 @@
-import type { IPlatformModule } from '@prosto/platform-sdk';
 import type {
   IDependencyGraph,
   ITopologicalSorter,
   ITopologicalSortResult,
 } from './interfaces/index.js';
 import { DependencyCycleError } from './dependency-graph.errors.js';
+import type { IModuleEnvelope } from '@/modularity/index.js';
 
 /**
  * @alpha
@@ -107,18 +107,18 @@ export class TopologicalSorter implements ITopologicalSorter {
     }
 
     // Build the ordered modules list
-    const orderedModules: IPlatformModule[] = [];
+    const orderedModules: IModuleEnvelope[] = [];
 
     for (const moduleId of orderedIds) {
-      const module = graph.getModule(moduleId);
+      const moduleEnvelope = graph.getModule(moduleId);
 
-      if (!module) {
+      if (!moduleEnvelope) {
         throw new Error(
           `Resolved module "${moduleId}" is missing from dependency graph.`,
         );
       }
 
-      orderedModules.push(module);
+      orderedModules.push(moduleEnvelope);
     }
 
     return {

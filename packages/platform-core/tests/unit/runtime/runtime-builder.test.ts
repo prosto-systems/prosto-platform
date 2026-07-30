@@ -9,7 +9,8 @@ describe('RuntimeBuilder', () => {
       modules: [
         {
           type: 'memory',
-          module: new TestModule(createManifest({ id: 'module-a' })),
+          manifest: createManifest({ id: 'module-a' }),
+          module: new TestModule(),
         },
       ],
     });

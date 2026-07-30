@@ -1,7 +1,6 @@
 import type {
-  IModuleContext,
   IPlatformModule,
-  IPlatformModuleManifest,
+  IPlatformModuleContext,
 } from '@prosto/platform-sdk';
 
 /**
@@ -9,36 +8,15 @@ import type {
  * Reference module used to validate contract conformance.
  */
 export class HealthModule implements IPlatformModule {
-  readonly manifest: IPlatformModuleManifest = {
-    id: 'module-health',
-    version: '1.0.0',
-    sdkVersion: '^0.1.0',
-    criticality: 'standard',
-    securityClass: 'internal',
-    capabilities: [
-      'lifecycle.register',
-      'lifecycle.start',
-      'feature.health',
-      'obs.metrics',
-    ],
-    dependencies: [],
-    checksum:
-      'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-  };
-
-  register(_ctx: IModuleContext): void {
-    console.log('Health module registered.');
-  }
-
-  init(_ctx: IModuleContext): void {
+  init(_ctx: IPlatformModuleContext): void {
     console.log('Health module initialized.');
   }
 
-  start(_ctx: IModuleContext): void {
+  start(_ctx: IPlatformModuleContext): void {
     console.log('Health module started.');
   }
 
-  stop(_ctx: IModuleContext): void {
+  stop(_ctx: IPlatformModuleContext): void {
     console.log('Health module stopped.');
   }
 }

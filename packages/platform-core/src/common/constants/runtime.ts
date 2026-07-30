@@ -31,7 +31,6 @@ export enum RuntimeErrorCodes {
   DependencyCycleDetected = 'DEPENDENCY_CYCLE_DETECTED',
   DependencyMissing = 'DEPENDENCY_MISSING',
   DependencyFailed = 'DEPENDENCY_FAILED',
-  LifecycleRegisterFailed = 'LIFECYCLE_REGISTER_FAILED',
   LifecycleInitFailed = 'LIFECYCLE_INIT_FAILED',
   LifecycleStartFailed = 'LIFECYCLE_START_FAILED',
   ShutdownTimeout = 'SHUTDOWN_TIMEOUT',

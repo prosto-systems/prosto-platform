@@ -1,4 +1,4 @@
-import type { StartupPolicyType } from '@prosto/platform-sdk';
+import type { PlatformStartupPolicyType } from '@prosto/platform-sdk';
 import type {
   IPolicyEvaluationInput,
   IPolicyEvaluationResult,
@@ -14,7 +14,7 @@ export abstract class PolicyBaseStrategy implements IPolicyStrategy {
   /**
    * The policy mode this strategy handles.
    */
-  abstract readonly policyMode: StartupPolicyType;
+  abstract readonly policyMode: PlatformStartupPolicyType;
 
   /**
    * Evaluate the policy for the given input.

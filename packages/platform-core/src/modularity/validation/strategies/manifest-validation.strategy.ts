@@ -3,7 +3,7 @@ import type {
   ModuleValidationResultType,
 } from '../interfaces/index.js';
 import {
-  type IModuleManifestValidator,
+  type IPlatformModuleManifestValidator,
   PlatformModuleManifestValidator,
 } from '@prosto/platform-sdk';
 import { RuntimeErrorCodes } from '@/common/index.js';
@@ -19,7 +19,7 @@ export class ManifestValidationStrategy extends ModuleValidationBaseStrategy {
   readonly name = 'manifest' as const;
 
   constructor(
-    private readonly _validator: IModuleManifestValidator = new PlatformModuleManifestValidator(),
+    private readonly _validator: IPlatformModuleManifestValidator = new PlatformModuleManifestValidator(),
   ) {
     super();
   }
@@ -27,7 +27,9 @@ export class ManifestValidationStrategy extends ModuleValidationBaseStrategy {
   override validate(
     input: IModuleValidationStrategyInput,
   ): ModuleValidationResultType {
-    const result = this._validator.validate(input.artifact.module.manifest);
+    const result = this._validator.validate(
+      input.artifact.moduleEnvelope.manifest,
+    );
 
     if (result.success === true) {
       return this.success();

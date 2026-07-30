@@ -1,12 +1,12 @@
-import type { IPlatformModule } from '@prosto/platform-sdk';
 import type { IDependencyGraph } from './dependency-graph.interface.js';
+import type { IModuleEnvelope } from '../../loader/index.js';
 
 /**
  * @alpha
  * Result of topological sort operation.
  */
 export interface ITopologicalSortResult {
-  readonly orderedModules: readonly IPlatformModule[];
+  readonly orderedModules: readonly IModuleEnvelope[];
   readonly missingDependencies: ReadonlyMap<string, readonly string[]>;
 }
 

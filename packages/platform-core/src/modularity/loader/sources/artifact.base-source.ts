@@ -97,18 +97,19 @@ export abstract class ArtifactBaseSource implements IArtifactSource {
     return null;
   }
 
-  protected async resolveEntryPath(packageDir: string): Promise<string> {
-    const manifestPath = join(packageDir, 'manifest.json');
+  protected async resolveManifestPath(packageDir: string): Promise<string> {
+    for (const candidate of ['manifest.json', 'dist/manifest.json']) {
+      const candidatePath = join(packageDir, candidate);
 
-    if (await fileExists(manifestPath)) {
-      const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
-      const entry = manifest.main || manifest.module;
-
-      if (entry) {
-        return join(packageDir, entry);
+      if (await fileExists(candidatePath)) {
+        return candidatePath;
       }
     }
 
+    throw new Error('Manifest was not found in artifact');
+  }
+
+  protected async resolveEntryPath(packageDir: string): Promise<string> {
     const pkgPath = join(packageDir, 'package.json');
 
     if (await fileExists(pkgPath)) {

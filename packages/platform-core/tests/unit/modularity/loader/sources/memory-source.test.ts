@@ -6,7 +6,8 @@ describe('MemorySource', () => {
   it('validates and loads in-memory module artifact', async () => {
     const source = new MemorySource({
       type: 'memory',
-      module: new TestModule(createManifest({ id: 'module-a' })),
+      manifest: createManifest({ id: 'module-a' }),
+      module: new TestModule(),
     });
 
     expect(source.validate()).toEqual({ ok: true });

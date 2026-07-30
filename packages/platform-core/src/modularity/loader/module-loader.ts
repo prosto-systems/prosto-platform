@@ -27,7 +27,7 @@ export class ModuleLoader implements IModuleLoader {
       const source = this._artifactSourceFactory.create(sourceDescriptor);
       const result = await source.load();
 
-      if (this.isRejectedArtifact(result)) {
+      if (this._isRejectedArtifact(result)) {
         rejected.push(result);
       } else {
         loaded.push(result);
@@ -49,7 +49,7 @@ export class ModuleLoader implements IModuleLoader {
     return { loaded, rejected };
   }
 
-  protected isRejectedArtifact(
+  protected _isRejectedArtifact(
     artifact: IModuleCandidateArtifact | IRejectedModuleArtifact,
   ): artifact is IRejectedModuleArtifact {
     return 'reasonCode' in artifact;

@@ -8,6 +8,7 @@ import { RuntimeErrorCodes } from '@/common/index.js';
 import {
   ModuleArtifactPackaging,
   ModuleArtifactSource,
+  ModuleState,
 } from '../constants/index.js';
 import { ArtifactBaseSource } from './artifact.base-source.js';
 
@@ -50,32 +51,33 @@ export class MemorySource extends ArtifactBaseSource {
       return this.createRejected('discover', validation.error);
     }
 
-    const module = this._descriptor.module;
+    const { module, manifest } = this._descriptor;
+    const fullPath = this.getSourceRef();
 
-    const artifact: IModuleCandidateArtifact = {
-      module,
-      moduleId: module.manifest.id,
-      moduleVersion: module.manifest.version,
-      orderingKey: `memory:${module.manifest.id}@${module.manifest.version}`,
+    const candidateArtifact: IModuleCandidateArtifact = {
+      moduleId: manifest.id,
+      moduleVersion: manifest.version,
+      moduleEnvelope: {
+        module,
+        manifest,
+        fullPhysicalPath: fullPath,
+        state: ModuleState.ReadyForInitialization,
+      },
+      orderingKey: fullPath,
       sourceType: ModuleArtifactSource.Memory,
-      sourceRef: `memory:${module.manifest.id}@${module.manifest.version}`,
+      sourceRef: fullPath,
       packaging: ModuleArtifactPackaging.Esm,
     };
 
-    return artifact;
+    return candidateArtifact;
   }
 
   protected override getModuleIdHint(): string | undefined {
-    return (
-      this._descriptor.module?.manifest.id ?? this._descriptor.moduleIdHint
-    );
+    return this._descriptor.manifest.id ?? this._descriptor.moduleIdHint;
   }
 
   protected override getSourceRef(): string {
-    const module = this._descriptor.module;
-
-    return module
-      ? `memory:${module.manifest.id}@${module.manifest.version}`
-      : 'memory:unknown';
+    const manifest = this._descriptor.manifest;
+    return `memory:${manifest.id}@${manifest.version}`;
   }
 }

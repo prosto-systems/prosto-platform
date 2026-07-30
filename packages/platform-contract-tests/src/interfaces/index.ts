@@ -1,7 +1,8 @@
 import type {
-  IModuleContext,
-  IModuleManifestValidator,
+  IPlatformModuleContext,
+  IPlatformModuleManifestValidator,
   IPlatformModule,
+  IPlatformModuleManifest,
 } from '@prosto/platform-sdk';
 import type { ContractFailureCodes } from '@/constants/index.js';
 
@@ -61,7 +62,7 @@ export interface IModuleContractConformanceReport {
  * Runtime context for module lifecycle checks.
  */
 export interface IModuleLifecycleContextFactory {
-  create(module: IPlatformModule): IModuleContext;
+  create(moduleManifest: IPlatformModuleManifest): IPlatformModuleContext;
 }
 
 /**
@@ -70,7 +71,8 @@ export interface IModuleLifecycleContextFactory {
  */
 export interface IModuleContractTestInput {
   module: IPlatformModule;
-  manifestValidator?: IModuleManifestValidator;
+  manifest: IPlatformModuleManifest;
+  manifestValidator?: IPlatformModuleManifestValidator;
   moduleLifecycleContextFactory?: IModuleLifecycleContextFactory;
   now?: () => string;
 }

@@ -1,5 +1,8 @@
 import { pathToFileURL } from 'node:url';
-import type { IPlatformModule } from '@prosto/platform-sdk';
+import type {
+  IPlatformModule,
+  IPlatformModuleManifest,
+} from '@prosto/platform-sdk';
 
 type UnknownFunctionType = (...args: unknown[]) => unknown;
 type UnknownConstructorType = new (...args: unknown[]) => unknown;
@@ -9,19 +12,40 @@ type UnknownConstructorType = new (...args: unknown[]) => unknown;
  * ESM module loading with multi-format export resolution.
  */
 export class DynamicModuleLoader {
+  static async loadModuleManifest(manifestPath: string) {
+    const nameSpace = await import(pathToFileURL(manifestPath).href);
+
+    const defaultResult = this._tryResolveManifestDefaultExport(nameSpace);
+    if (defaultResult) return defaultResult;
+
+    throw new Error('No valid IPlatformModuleManifest export found');
+  }
+
   static async loadModuleEntry(entryPath: string): Promise<IPlatformModule> {
     const nameSpace = await import(pathToFileURL(entryPath).href);
 
-    const defaultResult = this._tryResolveDefaultExport(nameSpace);
+    const defaultResult = this._tryResolveModuleDefaultExport(nameSpace);
     if (defaultResult) return defaultResult;
 
-    const namedResult = this._tryResolveNamedExports(nameSpace);
+    const namedResult = this._tryResolveModuleNamedExports(nameSpace);
     if (namedResult) return namedResult;
 
     throw new Error('No valid IPlatformModule export found');
   }
 
-  private static _tryResolveDefaultExport(
+  private static _tryResolveManifestDefaultExport(
+    nameSpace: Record<string, unknown>,
+  ): IPlatformModuleManifest | null {
+    const defaultExport = nameSpace.default;
+
+    if (!defaultExport) return null;
+
+    if (this._isPlatformModuleManifest(defaultExport)) return defaultExport;
+
+    return null;
+  }
+
+  private static _tryResolveModuleDefaultExport(
     nameSpace: Record<string, unknown>,
   ): IPlatformModule | null {
     const defaultExport = nameSpace.default;
@@ -35,7 +59,7 @@ export class DynamicModuleLoader {
     return null;
   }
 
-  private static _tryResolveNamedExports(
+  private static _tryResolveModuleNamedExports(
     nameSpace: Record<string, unknown>,
   ): IPlatformModule | null {
     for (const key of Object.keys(nameSpace)) {
@@ -57,16 +81,23 @@ export class DynamicModuleLoader {
     return null;
   }
 
+  private static _isPlatformModuleManifest(
+    obj: unknown,
+  ): obj is IPlatformModuleManifest {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      'id' in obj &&
+      'sdkVersion' in obj &&
+      'dependencies' in obj &&
+      Array.isArray(obj.dependencies)
+    );
+  }
+
   private static _isPlatformModule(obj: unknown): obj is IPlatformModule {
     return (
       typeof obj === 'object' &&
       obj !== null &&
-      'manifest' in obj &&
-      typeof obj.manifest === 'object' &&
-      obj.manifest !== null &&
-      'id' in obj.manifest &&
-      'register' in obj &&
-      typeof obj.register === 'function' &&
       'init' in obj &&
       typeof obj.init === 'function' &&
       'start' in obj &&
@@ -86,8 +117,6 @@ export class DynamicModuleLoader {
     if (!proto || typeof proto !== 'object') return false;
 
     return (
-      'register' in proto &&
-      typeof proto.register === 'function' &&
       'init' in proto &&
       typeof proto.init === 'function' &&
       'start' in proto &&

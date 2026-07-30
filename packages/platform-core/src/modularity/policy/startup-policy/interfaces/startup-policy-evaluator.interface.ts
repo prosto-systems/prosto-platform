@@ -1,4 +1,4 @@
-import type { StartupPolicyType } from '@prosto/platform-sdk';
+import type { PlatformStartupPolicyType } from '@prosto/platform-sdk';
 import type {
   IPolicyEvaluationInput,
   IPolicyEvaluationResult,
@@ -18,5 +18,7 @@ export interface IStartupPolicyEvaluator {
   /**
    * Get the strategy for the given policy mode.
    */
-  getStrategy(policyMode: StartupPolicyType): IPolicyStrategy | undefined;
+  getStrategy(
+    policyMode: PlatformStartupPolicyType,
+  ): IPolicyStrategy | undefined;
 }

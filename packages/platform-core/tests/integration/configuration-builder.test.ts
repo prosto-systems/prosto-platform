@@ -29,7 +29,12 @@ describe('Config Integration', () => {
         startupPolicy: 'strict',
       },
       runtime: { shutdownTimeoutMs: 30000 },
-      modules: { artifactCache: { enabled: false, path: './.cache' } },
+      modules: {
+        configAccessPolicy: {
+          productionStrictMode: true,
+        },
+        artifactCache: { enabled: false, path: './.cache' },
+      },
       security: { secretRedaction: { enabled: true, patterns: ['password'] } },
       logging: { level: 'info', format: 'text' },
       custom: {},
@@ -71,7 +76,12 @@ describe('Config Integration', () => {
         startupPolicy: 'strict',
       },
       runtime: { shutdownTimeoutMs: 5000 },
-      modules: { artifactCache: { enabled: false, path: './.cache' } },
+      modules: {
+        configAccessPolicy: {
+          productionStrictMode: true,
+        },
+        artifactCache: { enabled: false, path: './.cache' },
+      },
       security: { secretRedaction: { enabled: true, patterns: [] } },
       logging: { level: 'info', format: 'text' },
       custom: {},
@@ -98,7 +108,12 @@ describe('Config Integration', () => {
         startupPolicy: 'strict',
       },
       runtime: { shutdownTimeoutMs: 5000 },
-      modules: { artifactCache: { enabled: false, path: './.cache' } },
+      modules: {
+        configAccessPolicy: {
+          productionStrictMode: true,
+        },
+        artifactCache: { enabled: false, path: './.cache' },
+      },
       security: { secretRedaction: { enabled: true, patterns: [] } },
       logging: { level: 'info', format: 'text' },
       custom: {},
@@ -131,7 +146,12 @@ describe('Config Integration', () => {
         startupPolicy: 'strict',
       },
       runtime: { shutdownTimeoutMs: 5000 },
-      modules: { artifactCache: { enabled: false, path: './.cache' } },
+      modules: {
+        configAccessPolicy: {
+          productionStrictMode: true,
+        },
+        artifactCache: { enabled: false, path: './.cache' },
+      },
       security: { secretRedaction: { enabled: true, patterns: [] } },
       logging: { level: 'info', format: 'text' },
       custom: {},

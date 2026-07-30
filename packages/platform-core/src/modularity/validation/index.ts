@@ -1,3 +1,2 @@
 export type * from './interfaces/index.js';
 export * from './strategies/index.js';
-export * from './metadata.validator.js';

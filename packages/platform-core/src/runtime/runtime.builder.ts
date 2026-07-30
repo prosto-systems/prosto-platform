@@ -27,12 +27,9 @@ import { ConsoleModuleLoggerFactory } from '@/logging/index.js';
 import {
   ArtifactFetcher,
   ArtifactSourceFactory,
-  CompatibilityValidationStrategy,
-  ConfigAccessValidationStrategy,
   type IModuleContextFactory,
   type IModuleLifecycleOrchestrator,
   type IModuleLoader,
-  IntegrityValidationStrategy,
   ManifestValidationStrategy,
   ModuleContextFactory,
   ModuleLifecycleOrchestrator,
@@ -82,7 +79,6 @@ export class RuntimeBuilder implements IRuntimeBuilder {
     );
 
     const bootstrapCoordinator = this._createBootstrapCoordinator(
-      environment,
       config,
       moduleLifecycleOrchestrator,
     );
@@ -121,20 +117,7 @@ export class RuntimeBuilder implements IRuntimeBuilder {
       },
       modules: {
         configAccessPolicy: {
-          sectionAllowlistBySecurityClass: {
-            trusted: [
-              'platform',
-              'runtime',
-              'modules',
-              'security',
-              'logging',
-              'custom',
-            ],
-            internal: ['platform', 'runtime', 'security', 'logging', 'custom'],
-            'third-party-reviewed': ['platform', 'logging', 'custom'],
-          },
           productionStrictMode: true,
-          denyOnUnknownCapability: true,
         },
         artifactCache: {
           enabled: false,
@@ -181,23 +164,16 @@ export class RuntimeBuilder implements IRuntimeBuilder {
   }
 
   protected _createBootstrapCoordinator(
-    environment: string,
     config: IPlatformConfig,
     moduleLifecycleOrchestrator: IModuleLifecycleOrchestrator,
   ): IBootstrapCoordinator {
-    const isProductionEnvironment = environment === 'production';
     const moduleLoader = this._createModuleLoader(config);
     const startupPolicyEvaluator = new StartupPolicyEvaluator();
 
     return new BootstrapCoordinator(
       BootstrapPipeline.create([
         new DiscoverStage(moduleLoader),
-        new ValidateStage([
-          new ManifestValidationStrategy(),
-          new IntegrityValidationStrategy(),
-          new CompatibilityValidationStrategy(),
-          new ConfigAccessValidationStrategy(config, isProductionEnvironment),
-        ]),
+        new ValidateStage([new ManifestValidationStrategy()]),
         new ResolveDependenciesStage(startupPolicyEvaluator),
         new ModuleLifecycleStage(
           startupPolicyEvaluator,

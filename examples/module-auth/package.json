@@ -4,6 +4,10 @@
   "private": true,
   "type": "module",
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "manifest.json"
+  ],
   "scripts": {
     "test:contracts": "vitest run",
     "package:inner-artifact": "tsc -p tsconfig.json && node ../../scripts/package-artifact.mjs"
