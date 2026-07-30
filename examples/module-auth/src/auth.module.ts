@@ -9,14 +9,14 @@ import type {
  */
 export class AuthModule implements IPlatformModule {
   init(_ctx: IPlatformModuleContext): void {
-    console.log('Auth module initialized.');
+    console.log('[auth module] initialized.');
   }
 
   start(_ctx: IPlatformModuleContext): void {
-    console.log('Auth module started.');
+    console.log('[auth module] started.');
   }
 
   stop(_ctx: IPlatformModuleContext): void {
-    console.log('Auth module stopped.');
+    console.log('[auth module] stopped.');
   }
 }

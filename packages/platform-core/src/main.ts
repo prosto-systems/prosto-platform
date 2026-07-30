@@ -16,15 +16,15 @@ const demoModuleManifest: IPlatformModuleManifest = {
 
 class DemoModule implements IPlatformModule {
   init(_ctx: IPlatformModuleContext): void {
-    console.log('[demo] initialized');
+    console.log('[demo module] initialized');
   }
 
   start(_ctx: IPlatformModuleContext): void {
-    console.log('[demo] started');
+    console.log('[demo module] started');
   }
 
   stop(_ctx: IPlatformModuleContext): void {
-    console.log('[demo] stopped');
+    console.log('[demo module] stopped');
   }
 }
 

@@ -9,14 +9,14 @@ import type {
  */
 export class HealthModule implements IPlatformModule {
   init(_ctx: IPlatformModuleContext): void {
-    console.log('Health module initialized.');
+    console.log('[health module] initialized.');
   }
 
   start(_ctx: IPlatformModuleContext): void {
-    console.log('Health module started.');
+    console.log('[health module] started.');
   }
 
   stop(_ctx: IPlatformModuleContext): void {
-    console.log('Health module stopped.');
+    console.log('[health module] stopped.');
   }
 }
