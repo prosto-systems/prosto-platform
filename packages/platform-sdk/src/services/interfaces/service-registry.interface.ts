@@ -21,7 +21,8 @@ export interface IServiceRegistry {
     token: ServiceTokenType<TService>,
     service: NoInfer<TService>,
   ): void;
-  resolve<TService>(token: ServiceTokenType<TService>): TService;
+  resolve<TService>(token: ServiceTokenType<TService>): TService | undefined;
+  resolveRequired<TService>(token: ServiceTokenType<TService>): TService;
   has<TService>(token: ServiceTokenType<TService>): boolean;
   unregister<TService>(token: ServiceTokenType<TService>): void;
 }

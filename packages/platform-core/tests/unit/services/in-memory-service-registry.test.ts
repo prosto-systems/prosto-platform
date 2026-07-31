@@ -48,7 +48,15 @@ describe('InMemoryServiceRegistry', () => {
   it('returns undefined for unregistered token', () => {
     const registry = new InMemoryServiceRegistry();
 
-    expect(() => registry.resolve(TOKEN_A)).toThrow(ServiceNotFoundError);
+    expect(registry.resolve(TOKEN_A)).toBeUndefined();
+  });
+
+  it('returns ServiceNotFoundError for unregistered token', () => {
+    const registry = new InMemoryServiceRegistry();
+
+    expect(() => registry.resolveRequired(TOKEN_A)).toThrow(
+      ServiceNotFoundError,
+    );
   });
 
   it('checks token existence', () => {
