@@ -1,10 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { ModuleLoader } from '@/modularity/index.js';
+import type {
+  IModuleArtifactHttpClient,
+  IArtifactSourceFactory,
+} from '@/modularity/index.js';
+import { ArtifactSourceFactory, ModuleLoader } from '@/modularity/index.js';
 import { RuntimeErrorCodes } from '@/common/index.js';
 import { createManifest, TestModule } from '@/tests/fixtures/index.js';
 
 describe('ModuleLoader', () => {
-  const loader = new ModuleLoader();
+  const httpClient: IModuleArtifactHttpClient = {
+    fetch: async () => {
+      throw new Error('Network unavailable');
+    },
+  };
+  const artifactSourceFactory: IArtifactSourceFactory =
+    new ArtifactSourceFactory(httpClient);
+  const loader = new ModuleLoader(artifactSourceFactory);
 
   it('loads memory candidates', async () => {
     const result = await loader.load([

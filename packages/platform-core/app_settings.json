@@ -6,6 +6,15 @@
   "runtime": {
     "shutdownTimeoutMs": 30000
   },
+  "persistence": {
+    "typeorm": {
+      "enabled": false,
+      "synchronize": false,
+      "migrationsRun": true,
+      "migrationTransactionMode": "each",
+      "migrationLockTimeoutMs": 60000
+    }
+  },
   "modules": {
     "artifactCache": {
       "enabled": false,
@@ -15,7 +24,15 @@
   "security": {
     "secretRedaction": {
       "enabled": true,
-      "patterns": ["key", "token", "secret", "password", "passphrase"]
+      "patterns": [
+        "key",
+        "token",
+        "secret",
+        "password",
+        "passphrase",
+        "url",
+        "connectionString"
+      ]
     }
   },
   "logging": {

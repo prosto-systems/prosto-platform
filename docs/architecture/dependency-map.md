@@ -1,10 +1,10 @@
-﻿# Package Dependency Map (Phase 09)
+﻿# Package Dependency Map (Phase 10)
 
 ## Purpose
-This document captures the enforceable package dependency boundaries through Phase 09 implementation.
+This document captures the enforceable package dependency boundaries through Phase 10 implementation.
 
 ## Status
-- Phase 09 baseline is completed and active in repository validation scripts.
+- Phase 10 baseline is completed and active in repository validation scripts.
 
 ## Sources
 - `.context/04-implementation-plan/02-phase.md`
@@ -16,6 +16,7 @@ This document captures the enforceable package dependency boundaries through Pha
 ## Workspace Packages
 - `@prosto/platform-sdk`
 - `@prosto/platform-core`
+- `@prosto/platform-adapter-typeorm`
 - `@prosto/platform-contract-tests`
 - `@prosto/platform-cli`
 - `@prosto/platform-adapter-http`
@@ -23,12 +24,13 @@ This document captures the enforceable package dependency boundaries through Pha
 - `@prosto/platform-adapter-admin-bff`
 - `@prosto/platform-admin-shell`
 
-## Allowed Internal Dependencies (Phase 09)
+## Allowed Internal Dependencies (Phase 10)
 
 | Package | Depends On |
 |---------|-----------|
 | `@prosto/platform-sdk` | none |
 | `@prosto/platform-core` | `@prosto/platform-sdk` |
+| `@prosto/platform-adapter-typeorm` | `@prosto/platform-sdk` |
 | `@prosto/platform-contract-tests` | `@prosto/platform-sdk` |
 | `@prosto/platform-cli` | `@prosto/platform-sdk` |
 | `@prosto/platform-adapter-http` | `@prosto/platform-sdk` |
@@ -38,6 +40,7 @@ This document captures the enforceable package dependency boundaries through Pha
 
 ## Ownership Notes
 - HTTP/security middleware dependencies are owned by `@prosto/platform-adapter-http`.
+- TypeORM persistence (shared DataSource, migration locks, descriptor registry) is owned by `@prosto/platform-adapter-typeorm`.
 - Admin UI plugin contracts (manifests, discovery, permissions, compatibility) are owned by `@prosto/platform-admin-contracts`.
 - Admin BFF adapter (discovery aggregation, permission mapping, diagnostics, observability) is owned by `@prosto/platform-adapter-admin-bff`.
 - Admin UI shell runtime (Vue 3 SPA, plugin runtime, permission guards, degraded mode) is owned by `@prosto/platform-admin-shell`.
@@ -46,6 +49,7 @@ This document captures the enforceable package dependency boundaries through Pha
 ## Boundary Rules
 - `@prosto/platform-core` MUST NOT import from adapters or modules.
 - Modules and adapters MUST NOT import from `@prosto/platform-core`.
+- `@prosto/platform-adapter-typeorm` depends only on `platform-sdk` contracts and the TypeORM driver; it does not import `platform-core`.
 - `@prosto/platform-admin-shell` does not import `@prosto/platform-core` or server adapters directly.
 - Framework-agnostic logic in `platform-admin-shell` `features/*/model` and `shared/api` must not import Vue, Pinia, or Vuetify.
 

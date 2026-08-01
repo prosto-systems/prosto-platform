@@ -19,7 +19,7 @@ Implement `@prosto/platform-core` minimal runtime kernel with deterministic life
 
 ## Scope Boundaries
 ### In Scope
-- Bootstrap pipeline in runtime kernel: discover -> validate -> resolve -> lifecycle.
+- Bootstrap pipeline in runtime kernel: discover -> validate -> resolve -> initialize -> persistence -> start.
 - Deterministic dependency graph resolution and stable ordering.
 - Startup policy decision engine for `strict` and `best-effort`.
 - Required diagnostics payload for loaded, skipped, failed modules with reason taxonomy.
@@ -141,7 +141,7 @@ The ordered steps below are preserved as execution traceability for the complete
   - `packages/platform-core/src/bootstrap/bootstrap.coordinator.ts`
   - `packages/platform-core/src/bootstrap/bootstrap.types.ts`
 - Evidence linkage:
-  - Architecture baseline requires controlled pipeline discover validate resolve lifecycle.
+  - Architecture baseline requires controlled pipeline discover validate resolve initialize persistence start.
 - Activation condition:
   - Coordinator accepts config input and emits structured bootstrap context.
 - Acceptance signal:

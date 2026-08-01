@@ -157,7 +157,7 @@ Examples:
 | `core` | `@prosto/platform-core` |
 | `cli` | `@prosto/platform-cli` |
 | `adapter-http` | `@prosto/platform-adapter-http` |
-| `adapter-persistence` | `@prosto/platform-adapter-persistence` |
+| `adapter-typeorm` | `@prosto/platform-adapter-typeorm` |
 | `contract-tests` | `@prosto/platform-contract-tests` |
 | `docs` | Architecture and docs |
 | `ci` | CI workflows |

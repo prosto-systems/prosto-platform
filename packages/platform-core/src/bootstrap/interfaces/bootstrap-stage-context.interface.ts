@@ -1,5 +1,8 @@
 import type {
+  IPersistenceDescriptor,
+  IPersistenceProvider,
   IPlatformRuntimeVersionContext,
+  IServiceRegistry,
   PlatformStartupPolicyType,
 } from '@prosto/platform-sdk';
 import type { IRuntimeFailureDiagnostic } from '@/diagnostics/index.js';
@@ -10,6 +13,7 @@ import type {
   ModuleArtifactSourceDescriptorType,
 } from '@/modularity/index.js';
 import type { BootstrapStage } from '../constants/index.js';
+import type { IPersistencePlatformConfig } from '@/runtime/index.js';
 
 /**
  * @alpha
@@ -38,5 +42,9 @@ export interface IBootstrapStageContext {
   readonly preRejectedArtifacts: readonly IRejectedModuleArtifact[];
   readonly candidates: readonly IModuleCandidateArtifact[];
   readonly skippedModuleIds: Set<string>;
+  readonly persistenceProvider?: IPersistenceProvider;
+  readonly platformPersistenceDescriptor?: IPersistenceDescriptor;
+  readonly persistenceConfiguration: IPersistencePlatformConfig;
+  readonly services: IServiceRegistry;
   abort: boolean;
 }

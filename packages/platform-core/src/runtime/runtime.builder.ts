@@ -1,4 +1,6 @@
 import pkg from '../../package.json' with { type: 'json' };
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 import type { IEventBus, IServiceRegistry } from '@prosto/platform-sdk';
 import type {
   IPlatformConfig,
@@ -6,18 +8,19 @@ import type {
   IRuntimeBuilder,
   IRuntimeBuilderOptions,
 } from './interfaces/index.js';
-import { resolve } from 'node:path';
 import {
   BootstrapCoordinator,
   BootstrapPipeline,
   DiscoverStage,
   type IBootstrapCoordinator,
-  ModuleLifecycleStage,
+  ModulesInitializationStage,
+  ModulesStartStage,
+  PersistenceInitializationStage,
   ResolveDependenciesStage,
   ValidateStage,
 } from '@/bootstrap/index.js';
 import { FileSystemArtifactCache, NoOpArtifactCache } from '@/caching/index.js';
-import { ConfigurationBuilder } from '@/common/index.js';
+import { ConfigurationBuilder, loadJsonFileSync } from '@/common/index.js';
 import {
   DiagnosticReportBuilder,
   DiagnosticsReporter,
@@ -39,7 +42,10 @@ import {
 import { type ISecretsRedactor, SecretsRedactor } from '@/security/index.js';
 import { InMemoryServiceRegistry } from '@/services/index.js';
 import { PlatformRuntime } from './platform-runtime.js';
-import { platformConfigSchema } from './schemas/index.js';
+import {
+  platformConfigSchema,
+  platformLocalPersistenceConfigSchema,
+} from './schemas/index.js';
 
 /**
  * @alpha
@@ -89,8 +95,11 @@ export class RuntimeBuilder implements IRuntimeBuilder {
       diagnosticsReporter,
       bootstrapCoordinator,
       moduleLifecycleOrchestrator,
+      serviceRegistry,
       {
         correlationId: options.correlationId,
+        persistenceProvider: options.persistenceProvider,
+        platformPersistenceDescriptor: options.platformPersistenceDescriptor,
         onStopped: () => {
           serviceRegistry.dispose();
           eventBus.dispose();
@@ -103,7 +112,7 @@ export class RuntimeBuilder implements IRuntimeBuilder {
     options: IRuntimeBuilderOptions,
   ): IPlatformConfig {
     const {
-      configDir = '.',
+      configDir,
       environment = process.env.NODE_ENV || 'production',
       commandLineArgs = process.argv.slice(2),
     } = options;
@@ -126,17 +135,67 @@ export class RuntimeBuilder implements IRuntimeBuilder {
       security: {
         secretRedaction: {
           enabled: true,
-          patterns: ['key', 'token', 'secret', 'password', 'passphrase'],
+          patterns: [
+            'key',
+            'token',
+            'secret',
+            'password',
+            'passphrase',
+            'url',
+            'connectionString',
+          ],
         },
       },
     };
 
+    // Package defaults are always loaded first. Deployment overrides are only
+    // read from an explicit configDir, never from the current working directory.
+    // Resolve the installed package entry point instead of a statically-known
+    // JSON URL. Vite embeds the latter as a data URL in the published bundle.
+    const packageConfigDir = dirname(
+      dirname(fileURLToPath(import.meta.resolve('@prosto/platform-core'))),
+    );
+    const deploymentConfigDir = configDir ? resolve(configDir) : undefined;
+    const packagePaths = new Set([
+      resolve(packageConfigDir, 'app_settings.json'),
+      resolve(packageConfigDir, `app_settings.${environment}.json`),
+    ]);
+
     const configBuilder = new ConfigurationBuilder(platformConfigSchema)
       .addInMemoryCollection(defaultConfig)
-      .addJsonFile(`${configDir}/app_settings.json`, { optional: true })
-      .addJsonFile(`${configDir}/app_settings.${environment}.json`, {
-        optional: true,
-      })
+      .addJsonFile(resolve(packageConfigDir, 'app_settings.json'))
+      .addJsonFile(
+        resolve(packageConfigDir, `app_settings.${environment}.json`),
+        { optional: true },
+      );
+
+    if (deploymentConfigDir) {
+      const deploymentPaths = [
+        'app_settings.json',
+        `app_settings.${environment}.json`,
+      ].map((fileName) => resolve(deploymentConfigDir, fileName));
+
+      for (const filePath of deploymentPaths) {
+        if (!packagePaths.has(filePath)) {
+          configBuilder.addJsonFile(filePath, { optional: true });
+        }
+      }
+
+      const localConfigPath = resolve(
+        deploymentConfigDir,
+        'app_settings.local.json',
+      );
+
+      if (!packagePaths.has(localConfigPath)) {
+        configBuilder.addInMemoryCollection(
+          platformLocalPersistenceConfigSchema.parse(
+            loadJsonFileSync(localConfigPath, true),
+          ),
+        );
+      }
+    }
+
+    configBuilder
       .addEnvironmentVariables({ prefix: 'PROSTO_' })
       .addCommandLine(commandLineArgs);
 
@@ -175,7 +234,12 @@ export class RuntimeBuilder implements IRuntimeBuilder {
         new DiscoverStage(moduleLoader),
         new ValidateStage([new ManifestValidationStrategy()]),
         new ResolveDependenciesStage(startupPolicyEvaluator),
-        new ModuleLifecycleStage(
+        new ModulesInitializationStage(
+          startupPolicyEvaluator,
+          moduleLifecycleOrchestrator,
+        ),
+        new PersistenceInitializationStage(),
+        new ModulesStartStage(
           startupPolicyEvaluator,
           moduleLifecycleOrchestrator,
         ),

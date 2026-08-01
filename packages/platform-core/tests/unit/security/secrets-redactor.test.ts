@@ -55,6 +55,18 @@ describe('SecretsRedactor', () => {
     );
   });
 
+  it('redacts generic URL connection values', () => {
+    expect(
+      redactor.redact('url=postgres://prosto:password@localhost:5432/prosto'),
+    ).toBe('url=[REDACTED]');
+    expect(
+      redactor.redactObject({
+        url: 'postgres://prosto:password@localhost:5432/prosto',
+        connectionString: 'Server=localhost;Password=password',
+      }),
+    ).toEqual({ url: '[REDACTED]', connectionString: '[REDACTED]' });
+  });
+
   it('preserves non-secret text', () => {
     expect(redactor.redact('hello world')).toBe('hello world');
   });

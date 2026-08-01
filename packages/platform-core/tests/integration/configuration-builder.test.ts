@@ -29,6 +29,7 @@ describe('Config Integration', () => {
         startupPolicy: 'strict',
       },
       runtime: { shutdownTimeoutMs: 30000 },
+      persistence: { typeorm: { enabled: false } },
       modules: {
         configAccessPolicy: {
           productionStrictMode: true,
@@ -76,6 +77,7 @@ describe('Config Integration', () => {
         startupPolicy: 'strict',
       },
       runtime: { shutdownTimeoutMs: 5000 },
+      persistence: { typeorm: { enabled: false } },
       modules: {
         configAccessPolicy: {
           productionStrictMode: true,
@@ -108,6 +110,7 @@ describe('Config Integration', () => {
         startupPolicy: 'strict',
       },
       runtime: { shutdownTimeoutMs: 5000 },
+      persistence: { typeorm: { enabled: false } },
       modules: {
         configAccessPolicy: {
           productionStrictMode: true,
@@ -146,6 +149,7 @@ describe('Config Integration', () => {
         startupPolicy: 'strict',
       },
       runtime: { shutdownTimeoutMs: 5000 },
+      persistence: { typeorm: { enabled: false } },
       modules: {
         configAccessPolicy: {
           productionStrictMode: true,

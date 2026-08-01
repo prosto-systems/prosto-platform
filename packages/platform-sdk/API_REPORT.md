@@ -30,6 +30,10 @@ Status context:
 - `ModuleCapabilityType` (`@alpha`)
 - `ServiceTokenType` (`@alpha`)
 - `EventTokenType` (`@alpha`)
+- `PersistenceOwnerType` (`@alpha`)
+- `PersistenceDescriptorPayloadType` (`@alpha`)
+- `PersistenceProviderStateType` (`@alpha`)
+- `PersistenceErrorCodeType` (`@alpha`)
 
 ## Interfaces
 - `IServiceRegistry` (`@alpha`)
@@ -53,6 +57,12 @@ Status context:
 - `PlatformModuleManifestValidationResultType` (`@alpha`)
 - `IPlatformModuleManifestValidator` (`@alpha`)
 - `IPlatformModuleCompatibilityValidator` (`@alpha`)
+- `IPersistenceDescriptor` (`@alpha`)
+- `IPersistenceDescriptorRegistry` (`@alpha`)
+- `IPersistenceInitializationInput` (`@alpha`)
+- `IPersistenceProvider` (`@alpha`)
+- `IPersistenceModuleContext` (`@alpha`)
+- `IPersistenceErrorDetails` (`@alpha`)
 
 ## Errors
 - `PlatformSdkError` (`@alpha`)
@@ -61,6 +71,8 @@ Status context:
 - `PlatformModuleCompatibilityIssueCodeType` (`@alpha`)
 - `IPlatformModuleCompatibilityValidationIssue` (`@alpha`)
 - `PlatformModuleCompatibilityValidationError` (`@alpha`)
+- `PersistenceError` (`@alpha`)
+- `PersistenceNotReadyError` (`@alpha`)
 
 ## Schemas
 - `SemverVersionSchema` (`@alpha`)
@@ -79,7 +91,11 @@ Status context:
 - `getEventTokenKey` (`@alpha`)
 - `createServiceToken` (`@alpha`)
 - `createEventToken` (`@alpha`)
+- `resolveNestedValue` (`@alpha`)
 
 ## Validators
 - `PlatformModuleManifestValidator` (`@alpha`)
 - `PlatformModuleCompatibilityValidator` (`@alpha`)
+
+## Services
+- `PersistenceDescriptorRegistry` (`@alpha`)

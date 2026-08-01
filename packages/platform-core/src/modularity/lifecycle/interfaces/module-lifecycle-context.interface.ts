@@ -1,4 +1,7 @@
-import type { PlatformStartupPolicyType } from '@prosto/platform-sdk';
+import type {
+  IPersistenceProvider,
+  PlatformStartupPolicyType,
+} from '@prosto/platform-sdk';
 
 /**
  * @alpha
@@ -7,4 +10,6 @@ import type { PlatformStartupPolicyType } from '@prosto/platform-sdk';
 export interface IModuleLifecycleContext {
   readonly startupPolicy: PlatformStartupPolicyType;
   readonly sdkVersion: string;
+  readonly persistenceEnabled: boolean;
+  readonly persistenceProvider?: IPersistenceProvider;
 }

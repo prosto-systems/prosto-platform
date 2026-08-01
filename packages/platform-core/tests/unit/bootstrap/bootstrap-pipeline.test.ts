@@ -24,6 +24,25 @@ function createInitialBootstrapStageContext(): IBootstrapStageContext {
     moduleSources: [],
     preRejectedArtifacts: [],
     candidates: [],
+    persistenceConfiguration: { typeorm: { enabled: false } },
+    services: {
+      has: () => false,
+      register: () => {
+        /* noop */
+      },
+      override: () => {
+        /* noop */
+      },
+      resolve: () => {
+        return {} as never;
+      },
+      resolveRequired: () => {
+        return {} as never;
+      },
+      unregister: () => {
+        /* noop */
+      },
+    },
   };
 }
 

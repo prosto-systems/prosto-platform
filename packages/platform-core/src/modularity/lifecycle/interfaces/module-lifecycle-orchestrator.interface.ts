@@ -1,4 +1,5 @@
 import type {
+  IPersistenceProvider,
   IPlatformModuleManifest,
   PlatformStartupPolicyType,
 } from '@prosto/platform-sdk';
@@ -13,6 +14,8 @@ import type { IModuleLifecycleShutdownIssue } from './module-lifecycle-shutdown-
 export interface IModuleLifecycleStartupOptions {
   startupPolicy: PlatformStartupPolicyType;
   sdkVersion: string;
+  persistenceProvider?: IPersistenceProvider;
+  persistenceEnabled?: boolean;
 }
 
 /**
@@ -36,6 +39,15 @@ export interface IModulesStartupResult {
 
 /**
  * @alpha
+ * Result of the module init lifecycle phase.
+ */
+export interface IModulesInitializationResult {
+  readonly initializedModules: readonly IModuleEnvelope[];
+  readonly issues: readonly IModuleLifecycleExecutionIssue[];
+}
+
+/**
+ * @alpha
  * Result of modules shutdown.
  */
 export interface IModulesShutdownResult {
@@ -48,12 +60,17 @@ export interface IModulesShutdownResult {
  * Module lifecycle orchestrator contract for managing module startup and shutdown.
  */
 export interface IModuleLifecycleOrchestrator {
-  startup(
+  initializeModules(
     loadedModules: readonly IModuleEnvelope[],
+    options: IModuleLifecycleStartupOptions,
+  ): Promise<IModulesInitializationResult>;
+
+  startModules(
+    initializedModules: readonly IModuleEnvelope[],
     options: IModuleLifecycleStartupOptions,
   ): Promise<IModulesStartupResult>;
 
-  shutdown(
+  stopModules(
     startedModules: readonly IModuleEnvelope[],
     options: IModuleLifecycleShutdownOptions,
   ): Promise<IModulesShutdownResult>;

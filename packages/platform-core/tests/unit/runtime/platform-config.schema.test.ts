@@ -14,6 +14,11 @@ describe('platformConfigSchema', () => {
         shutdownTimeoutMs: 60000,
         correlationId: 'test-correlation-id',
       },
+      persistence: {
+        typeorm: {
+          enabled: false,
+        },
+      },
       modules: {
         configAccessPolicy: {
           productionStrictMode: true,
@@ -133,5 +138,77 @@ describe('platformConfigSchema', () => {
     expect(result.custom.number).toBe(42);
     expect(result.custom.nested).toEqual({ key: 'value' });
     expect(result.custom.array).toEqual([1, 2, 3]);
+  });
+
+  it('accepts an enabled PostgreSQL persistence configuration', () => {
+    const result = platformConfigSchema.parse({
+      persistence: {
+        typeorm: {
+          enabled: true,
+          type: 'postgres',
+          host: 'localhost',
+          port: 5432,
+          database: 'prosto',
+          username: 'prosto',
+          synchronize: false,
+        },
+      },
+    });
+
+    expect(result.persistence.typeorm).toMatchObject({
+      enabled: true,
+      type: 'postgres',
+      migrationTransactionMode: 'each',
+      migrationLockTimeoutMs: 60000,
+      synchronize: false,
+    });
+  });
+
+  it('rejects MongoDB and URL plus structured settings', () => {
+    expect(() =>
+      platformConfigSchema.parse({
+        persistence: {
+          typeorm: {
+            enabled: true,
+            type: 'mongodb',
+            url: 'mongodb://localhost/prosto',
+          },
+        },
+      }),
+    ).toThrow();
+
+    expect(() =>
+      platformConfigSchema.parse({
+        persistence: {
+          typeorm: {
+            enabled: true,
+            type: 'postgres',
+            url: 'postgres://localhost/prosto',
+            host: 'localhost',
+          },
+        },
+      }),
+    ).toThrow('cannot be combined');
+  });
+
+  it('rejects unsafe SQLite and synchronize settings', () => {
+    expect(() =>
+      platformConfigSchema.parse({
+        persistence: {
+          typeorm: {
+            enabled: true,
+            type: 'sqlite',
+            database: ':memory:',
+            host: 'localhost',
+          },
+        },
+      }),
+    ).toThrow('does not support host');
+
+    expect(() =>
+      platformConfigSchema.parse({
+        persistence: { typeorm: { enabled: false, synchronize: true } },
+      }),
+    ).toThrow();
   });
 });

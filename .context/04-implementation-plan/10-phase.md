@@ -1,7 +1,7 @@
 # Phase 10 - Internal MVP Validation and Operability Readiness
 
 ## Phase Objective
-Validate the platform in production-like staging with internal modules and hybrid admin flow, prove KPI and SLO readiness, and close pre-MVP risks before ecosystem expansion.
+Validate the platform in production-like staging with internal modules and hybrid admin flow, prove KPI and SLO readiness, and close pre-MVP risks before ecosystem expansion. This phase includes the TypeORM persistence adapter as the reference shared-DataSource provider composed at the `RuntimeBuilder` boundary.
 
 ## Scope Boundaries
 ### In Scope
@@ -9,6 +9,7 @@ Validate the platform in production-like staging with internal modules and hybri
 - KPI and SLO measurement against acceptance thresholds.
 - Incident and exception capture with corrective action loop.
 - Go or no-go decision package for next phase.
+- Reference persistence adapter (`@prosto/platform-adapter-typeorm`) validation with shared DataSource lifecycle, migration lock coordination, and descriptor ownership enforcement.
 
 ### Out of Scope
 - Full external module onboarding at scale.
@@ -71,12 +72,21 @@ status: approved-with-mitigation
 - `.context/03-work-plan/02-metrics-acceptance-and-risk-controls.md`
 - `.context/03-work-plan/pre-mvp-audit-and-execution-plan.md`
 - `docs/compatibility/compatibility-matrix.md`
+- `docs/architecture/dependency-map.md`
+- `packages/platform-sdk/README.md`
+- `packages/platform-sdk/API_REPORT.md`
+- `packages/platform-core/README.md`
+- `AGENTS.md`
 
 ### New files expected
 - `docs/operations/internal-mvp-gate-report.md`
 - `docs/operations/incident-register.md`
 - `docs/operations/policy-exception-register.md`
 - `docs/operations/admin-plugin-readiness-report.md`
+- `packages/platform-adapter-typeorm/README.md`
+- `docs/persistence/typeorm-dialect-support.md`
+- `docs/persistence/typeorm-shared-datasource-guide.md`
+- `examples/typeorm-shared-datasource/*`
 
 ## Validation and Testing Approach
 - Repeatability checks across consecutive staging cycles.

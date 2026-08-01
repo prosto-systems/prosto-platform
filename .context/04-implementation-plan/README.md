@@ -8,7 +8,7 @@ This index consolidates the execution-ready implementation plan for `prosto-plat
 - Architecture intent emphasizes micro-core boundaries, contract-first delivery, deterministic lifecycle, security-first module loading, and hybrid admin model with shell plus UI plugins.
 - This plan is sequenced to reduce early architecture drift and keep risk controls enforceable from the first implementation increment.
 
-## Execution Status (As of 2026-07-24, post-Phase 10 completion)
+## Execution Status (As of 2026-08-02, post-Phase 10 completion with persistence adapter)
 - `Phase 01`: Completed (governance workflows, required checks documentation, PR template, release evidence script).
 - `Phase 02`: Completed (workspace packages, TypeScript baseline, dependency and public API boundary checks, dependency map).
 - `Phase 03`: Completed (SDK contracts, manifest schema/semantic validation, typed tokens, validation errors, unit and type-level tests).
@@ -18,7 +18,7 @@ This index consolidates the execution-ready implementation plan for `prosto-plat
 - `Phase 07`: Completed (`@prosto/platform-admin-contracts`, UI plugin manifest contracts, discovery payload contracts, permission and policy contracts, compatibility rules, public exports, validation tests).
 - `Phase 08`: Completed (`@prosto/platform-adapter-admin-bff`, policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, observability instrumentation).
 - `Phase 09`: Completed (`@prosto/platform-admin-shell`, Vue 3 SPA with plugin runtime, policy-gated rendering, degraded-mode diagnostics, observability instrumentation).
-- `Phase 10`: Completed (production-like internal MVP pilot, KPI/SLO evidence, incident and exception registers, admin plugin readiness report, go decision).
+- `Phase 10`: Completed (production-like internal MVP pilot, KPI/SLO evidence, incident and exception registers, admin plugin readiness report, go decision, and reference TypeORM persistence adapter delivered with shared DataSource lifecycle, migration lock coordination, and descriptor ownership enforcement).
 
 ## Phase Order
 1. [Phase 01 - Governance Activation and Delivery Guardrails](./01-phase.md)

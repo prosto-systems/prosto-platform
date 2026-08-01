@@ -14,6 +14,7 @@
 - Phase 07 admin contracts baseline: `@prosto/platform-admin-contracts`
 - Phase 08 admin BFF adapter: `@prosto/platform-adapter-admin-bff` (discovery, permissions, diagnostics, observability)
 - Phase 09 admin shell runtime: `@prosto/platform-admin-shell` (Vue 3 SPA, plugin runtime, permission guards, degraded mode)
+- Persistence adapter: `@prosto/platform-adapter-typeorm` (shared DataSource, migration locks, descriptor registry)
 - Phase 10 operations evidence: `docs/operations/internal-mvp-gate-report.md`, `docs/operations/incident-register.md`, `docs/operations/policy-exception-register.md`, `docs/operations/admin-plugin-readiness-report.md`
 - Root/package TypeScript baselines: `packages/platform-utils/tsconfig/base.json`, `packages/*/tsconfig.json`
 - Build: Vite 8 (`vite.config.ts`) with `vite-plugin-dts`
@@ -174,5 +175,5 @@ These checks are enforced in CI via `.github/workflows/` gates and must pass bef
 
 ---
 
-**Last Updated**: 2026-06-08
+**Last Updated**: 2026-08-02
 **Version**: 0.4.0

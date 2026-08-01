@@ -68,9 +68,11 @@ flowchart LR
 2. Discover allowlisted module artifacts.
 3. Validate manifest schema and integrity.
 4. Check compatibility and dependencies.
-5. Execute lifecycle phases.
-6. Apply policy on failures.
-7. Publish startup report.
+5. Execute module `init()` phases (collect persistence descriptors).
+6. Initialize shared persistence provider, acquire migration locks, run migrations.
+7. Execute module `start()` phases (resolve native persistence service tokens).
+8. Apply policy on failures.
+9. Publish startup report.
 
 Detailed sequence: [SEQ-01 Bootstrap Lifecycle](../sequence/01-bootstrap-lifecycle.md)
 

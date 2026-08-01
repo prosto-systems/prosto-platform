@@ -33,6 +33,12 @@ export class BootstrapCoordinator implements IBootstrapCoordinator {
       startupStartedAt: input.startupStartedAt,
       runtimeVersion: input.runtimeVersion,
       moduleSources: input.modules,
+      persistenceProvider: input.persistenceProvider,
+      platformPersistenceDescriptor: input.platformPersistenceDescriptor,
+      persistenceConfiguration: input.persistenceConfiguration ?? {
+        typeorm: { enabled: false },
+      },
+      services: input.services,
     };
 
     const result = await this._pipeline.execute(initialStageContext);

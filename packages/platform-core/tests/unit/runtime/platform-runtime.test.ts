@@ -69,14 +69,36 @@ describe('PlatformRuntime', () => {
     };
 
     const lifecycleOrchestrator: IModuleLifecycleOrchestrator = {
-      async startup(loadedModules) {
-        return { startedModules: [...loadedModules], issues: [] };
+      async initializeModules(loadedModules) {
+        return { initializedModules: loadedModules, issues: [] };
       },
-      async shutdown(startedModules) {
+      async startModules(initializedModules) {
+        return { startedModules: initializedModules, issues: [] };
+      },
+      async stopModules(startedModules) {
         return {
           stopOrder: startedModules.map((item) => item.manifest.id).reverse(),
           issues: [],
         };
+      },
+    };
+
+    const serviceRegistry = {
+      has: () => false,
+      register: () => {
+        /* noop */
+      },
+      override: () => {
+        /* noop */
+      },
+      resolve: () => {
+        return {} as never;
+      },
+      resolveRequired: () => {
+        return {} as never;
+      },
+      unregister: () => {
+        /* noop */
       },
     };
 
@@ -90,6 +112,7 @@ describe('PlatformRuntime', () => {
       new TestDiagnosticsReporter(),
       bootstrapCoordinator,
       lifecycleOrchestrator,
+      serviceRegistry,
     );
 
     await runtime.start();

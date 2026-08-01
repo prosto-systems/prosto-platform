@@ -2,7 +2,9 @@ import {
   BootstrapCoordinator,
   BootstrapPipeline,
   DiscoverStage,
-  ModuleLifecycleStage,
+  ModulesInitializationStage,
+  ModulesStartStage,
+  PersistenceInitializationStage,
   ResolveDependenciesStage,
   ValidateStage,
 } from '@/bootstrap/index.js';
@@ -53,7 +55,12 @@ describe('BootstrapCoordinator', () => {
         new DiscoverStage(moduleLoader),
         new ValidateStage([new ManifestValidationStrategy()]),
         new ResolveDependenciesStage(startupPolicyEvaluator),
-        new ModuleLifecycleStage(
+        new ModulesInitializationStage(
+          startupPolicyEvaluator,
+          moduleLifecycleOrchestrator,
+        ),
+        new PersistenceInitializationStage(),
+        new ModulesStartStage(
           startupPolicyEvaluator,
           moduleLifecycleOrchestrator,
         ),
@@ -69,12 +76,13 @@ describe('BootstrapCoordinator', () => {
       modules: [{ type: 'memory', manifest, module }],
       correlationId: 'cid',
       startupStartedAt: '2026-01-01T00:00:00.000Z',
+      services: serviceRegistry,
     });
 
     expect(result.loadedModules.map((item) => item.manifest.id)).toEqual([
       'module-a',
     ]);
     expect(result.failedDiagnostics).toEqual([]);
-    expect(result.stageOutcomes).toHaveLength(4);
+    expect(result.stageOutcomes).toHaveLength(6);
   });
 });

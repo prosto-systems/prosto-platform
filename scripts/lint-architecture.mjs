@@ -10,6 +10,7 @@ const REQUIRED_PACKAGE_DIRS = [
   'platform-contract-tests',
   'platform-cli',
   'platform-adapter-http',
+  'platform-adapter-typeorm',
 ];
 
 const rootManifest = JSON.parse(await readFile(ROOT_PACKAGE_JSON, 'utf8'));

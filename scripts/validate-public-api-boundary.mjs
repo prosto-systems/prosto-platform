@@ -8,6 +8,7 @@ const PACKAGE_DIRS = [
   'platform-contract-tests',
   'platform-cli',
   'platform-adapter-http',
+  'platform-adapter-typeorm',
 ];
 
 for (const packageDir of PACKAGE_DIRS) {

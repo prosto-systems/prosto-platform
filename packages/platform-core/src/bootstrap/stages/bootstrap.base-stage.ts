@@ -91,4 +91,17 @@ export abstract class BootstrapBaseStage implements IBootstrapStage {
 
     return context;
   }
+
+  /**
+   * Helper method to check if persistence is enabled.
+   */
+  protected isPersistenceEnabled(context: IBootstrapStageContext): boolean {
+    const typeorm = context.persistenceConfiguration.typeorm;
+
+    return (
+      typeof typeorm === 'object' &&
+      typeorm !== null &&
+      (typeorm as Record<string, unknown>).enabled === true
+    );
+  }
 }

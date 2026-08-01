@@ -10,7 +10,7 @@ export interface ISecretRedactorOptions {
   enabled?: boolean;
   /**
    * Key names to redact in `key=value` patterns.
-   * @default ['password', 'token', 'secret', 'key', 'apiKey', 'passphrase']
+   * @default ['password', 'token', 'secret', 'key', 'apiKey', 'passphrase', 'url', 'connectionString']
    */
   patterns?: string[];
 }
@@ -87,6 +87,11 @@ export class SecretsRedactor implements ISecretsRedactor {
       pattern: /(database[_-]?url\s*[:=]\s*)([^\s,;]+)/gi,
       replacement: '$1[REDACTED]',
     },
+    // Redact generic URLs because database connection URLs may be reported as url.
+    {
+      pattern: /(url\s*[:=]\s*)([^\s,;]+)/gi,
+      replacement: '$1[REDACTED]',
+    },
     // Redact JWT secrets (e.g., "jwtSecret=secret-key-123456789012345...")
     {
       pattern: /(jwt[_-]?secret\s*[:=]\s*)([^\s,;]+)/gi,
@@ -107,6 +112,8 @@ export class SecretsRedactor implements ISecretsRedactor {
       'secret',
       'password',
       'passphrase',
+      'url',
+      'connectionString',
     ];
 
     if (this._patterns.length > 0) {
@@ -212,6 +219,7 @@ export class SecretsRedactor implements ISecretsRedactor {
         /private[_-]?key/i,
         /api[_-]?key/i,
         /database[_-]?url/i,
+        /^url$/i,
         /jwt[_-]?secret/i,
         /encryption[_-]?key/i,
       ]);
