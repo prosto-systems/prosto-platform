@@ -32,6 +32,7 @@ runtime:
   core_package: @prosto/platform-core@0.0.0
   sdk_package: @prosto/platform-sdk@0.0.0
   contract_suite_package: @prosto/platform-contract-tests@0.0.0
+  persistence_adapter_package: @prosto/platform-adapter-typeorm@0.0.0
 modules:
   - id: module-health
     package: @examples/module-health
@@ -69,11 +70,6 @@ Current baseline codes:
 - `CT_MANIFEST_SEMANTIC_INVALID`
 - `CT_LIFECYCLE_METHOD_MISSING`
 - `CT_LIFECYCLE_METHOD_FAILED`
-- `CT_CAPABILITY_MISSING`
-- `CT_CAPABILITY_DUPLICATE`
-- `CT_SECURITY_CLASS_MISSING`
-- `CT_SECURITY_SIGNATURE_OR_CHECKSUM_MISSING`
-- `CT_OBSERVABILITY_CAPABILITY_MISSING`
 
 ## Update Rule
 

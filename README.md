@@ -7,6 +7,7 @@ A TypeScript-based **headless platform** built on a micro-core architecture with
 - **Micro-core architecture** — minimal kernel, everything else is a plug-in module
 - **Contract-first development** — types and interfaces defined in `platform-sdk` before any implementation
 - **Security-first module loading** — checksum integrity verification and secret redaction
+- **Pluggable persistence** — adapter model with shared DataSource and migration lock coordination (TypeORM)
 - **Observability built-in** — structured logging, diagnostics, health/readiness probes, metrics
 - **Policy-as-code** — architecture boundaries, dependency layering, and runtime policies enforced in CI
 - **Performance regression gates** — startup and event-dispatch benchmarks with automatic drift detection
@@ -15,14 +16,15 @@ A TypeScript-based **headless platform** built on a micro-core architecture with
 
 | Package | Purpose |
 |---------|---------|
-| [`@prosto/platform-sdk`](packages/platform-sdk) | Contract authority — schemas, validators, lifecycle interfaces, typed tokens |
+| [`@prosto/platform-sdk`](packages/platform-sdk) | Contract authority — schemas, validators, lifecycle interfaces, typed tokens, persistence contracts |
 | [`@prosto/platform-core`](packages/platform-core) | Minimal runtime kernel — bootstrap, modularity, events, security, caching, diagnostics |
-| [`@prosto/platform-admin-contracts`](packages/platform-admin-contracts) | Admin contract authority — UI plugin manifests, discovery payloads, permissions, compatibility rules |
-| [`@prosto/platform-adapter-admin-bff`](packages/platform-adapter-admin-bff) | Admin BFF adapter — policy-aware APIs, discovery aggregation, permission mapping, compatibility filtering, diagnostics, observability |
-| [`@prosto/platform-admin-shell`](packages/platform-admin-shell) | Admin UI runtime — Vue 3 SPA, plugin runtime, permission guards, degraded mode |
+| [`@prosto/platform-adapter-typeorm`](packages/platform-adapter-typeorm) | TypeORM persistence adapter — shared DataSource, migration locks, descriptor registry |
+| [`@prosto/platform-contract-tests`](packages/platform-contract-tests) | Reusable contract conformance tests for modules |
 | [`@prosto/platform-cli`](packages/platform-cli) | CLI scaffolding and validation utilities |
 | [`@prosto/platform-adapter-http`](packages/platform-adapter-http) | HTTP transport adapter |
-| [`@prosto/platform-contract-tests`](packages/platform-contract-tests) | Reusable contract conformance tests for modules |
+| [`@prosto/platform-admin-contracts`](packages/platform-admin-contracts) | Admin contract authority — UI plugin manifests, discovery payloads, permissions, compatibility rules |
+| [`@prosto/platform-adapter-admin-bff`](packages/platform-adapter-admin-bff) | Admin BFF adapter — policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, observability |
+| [`@prosto/platform-admin-shell`](packages/platform-admin-shell) | Admin UI runtime — Vue 3 SPA, plugin runtime, permission guards, degraded mode |
 
 ## Quick Start
 
@@ -70,7 +72,9 @@ platform-sdk  (innermost — contract authority, zero runtime dependencies)
      ↑
 platform-core (runtime kernel, depends only on sdk)
      ↑
-adapters / CLI / modules (depend on sdk, must NOT import core)
+adapters      (platform-adapter-typeorm, platform-adapter-http, platform-adapter-admin-bff)
+     ↑
+modules / CLI  (depend on sdk and admin-contracts, must NOT import core)
 ```
 
 Key architectural decisions are documented as ADRs in [`.context/02-architecture-design/adr/`](.context/02-architecture-design/adr/):
@@ -99,6 +103,7 @@ Completed phases:
 - **Phase 08** — Admin BFF adapter (`@prosto/platform-adapter-admin-bff`) with policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, and observability instrumentation
 - **Phase 09** — Admin shell integration and plugin runtime (`@prosto/platform-admin-shell`) with Vue 3 SPA, plugin runtime, policy-gated rendering, degraded-mode diagnostics, and observability instrumentation
 - **Phase 10** — Internal MVP validation and operability readiness with staging pilot evidence, KPI/SLO trend, incident and exception registers, admin plugin readiness, and formal `go` decision
+- **Persistence adapter** — `@prosto/platform-adapter-typeorm` with shared DataSource lifecycle, migration lock coordination (SQLite, PostgreSQL, MySQL/MariaDB, SQL Server), and descriptor registry
 
 See the [implementation roadmap](.context/04-implementation-plan/) for full phase details.
 
@@ -113,6 +118,7 @@ See the [implementation roadmap](.context/04-implementation-plan/) for full phas
 | [`AGENTS.md`](AGENTS.md) | AI agent operational policy |
 | [`docs/architecture/`](docs/architecture/) | Architecture specifications |
 | [`docs/operations/`](docs/operations/) | Internal MVP gate report, incident register, policy exception register, and admin plugin readiness evidence |
+| [`docs/persistence/`](docs/persistence/) | TypeORM adapter dialect support and shared DataSource usage guide |
 
 ## Contributing
 

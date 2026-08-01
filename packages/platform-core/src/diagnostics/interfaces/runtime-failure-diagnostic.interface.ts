@@ -1,3 +1,4 @@
+import type { BootstrapStage } from '@/bootstrap/index.js';
 import type { RuntimeErrorCodes, RuntimeStage } from '@/common/index.js';
 
 /**
@@ -6,7 +7,7 @@ import type { RuntimeErrorCodes, RuntimeStage } from '@/common/index.js';
  */
 export interface IRuntimeFailureDiagnostic {
   readonly moduleId: string;
-  readonly phase: `${RuntimeStage}`;
+  readonly phase: `${RuntimeStage}` | `${BootstrapStage}`;
   readonly errorCode: `${RuntimeErrorCodes}`;
   readonly message: string;
   readonly remediationHint: string;

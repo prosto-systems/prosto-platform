@@ -7,6 +7,7 @@ const WORKSPACE_PACKAGE_DIRS = [
   'platform-contract-tests',
   'platform-cli',
   'platform-adapter-http',
+  'platform-adapter-typeorm',
   'platform-admin-contracts',
   'platform-adapter-admin-bff',
   'platform-admin-shell',
@@ -25,6 +26,17 @@ const allowedInternalDeps = new Map([
   ['@prosto/platform-admin-shell', ['@prosto/platform-admin-contracts']],
 ]);
 
+// Reserved for the Phase 3 adapter; declaring it here allows the future
+// adapter-to-SDK edge while keeping core and SDK free of TypeORM.
+allowedInternalDeps.set('@prosto/platform-adapter-typeorm', [
+  '@prosto/platform-sdk',
+]);
+
+const forbiddenPackageDependencies = new Map([
+  ['@prosto/platform-sdk', ['typeorm']],
+  ['@prosto/platform-core', ['typeorm', '@prosto/platform-adapter-typeorm']],
+]);
+
 for (const packageDir of WORKSPACE_PACKAGE_DIRS) {
   const packageJsonPath = path.resolve('packages', packageDir, 'package.json');
   const manifest = JSON.parse(await readFile(packageJsonPath, 'utf8'));
@@ -36,8 +48,17 @@ for (const packageDir of WORKSPACE_PACKAGE_DIRS) {
   };
 
   const allowed = new Set(allowedInternalDeps.get(packageName) ?? []);
+  const forbidden = new Set(
+    forbiddenPackageDependencies.get(packageName) ?? [],
+  );
 
   for (const depName of Object.keys(dependencies)) {
+    if (forbidden.has(depName)) {
+      throw new Error(
+        `Dependency policy violation: ${packageName} cannot depend on ${depName}.`,
+      );
+    }
+
     if (!depName.startsWith(INTERNAL_PREFIX)) {
       continue;
     }

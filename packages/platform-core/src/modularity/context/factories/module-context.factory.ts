@@ -1,5 +1,6 @@
 import type {
   IEventBus,
+  IPersistenceModuleContext,
   IPlatformModuleContext,
   IPlatformModuleManifest,
   IServiceRegistry,
@@ -30,17 +31,29 @@ export class ModuleContextFactory implements IModuleContextFactory {
   ) {}
 
   create(options: ICreateModuleContextOptions): IPlatformModuleContext {
-    const { startupPolicy, sdkVersion, moduleManifest } = options;
-
-    const moduleId = moduleManifest.id;
+    const moduleId = options.moduleManifest.id;
     const logger = this._moduleLoggerFactory.create({ moduleId });
-    const scopedConfig = this._getScopedConfig(moduleManifest);
+    const scopedConfig = this._getScopedConfig(options.moduleManifest);
+
+    const persistence: IPersistenceModuleContext | undefined =
+      options.persistenceEnabled
+        ? {
+            state: options.persistenceProvider?.state ?? 'unavailable',
+            // Descriptors become immutable after init; later phases can only
+            // observe provider state and resolve services published by it.
+            descriptors:
+              options.lifecycleStage === 'init'
+                ? options.persistenceProvider?.descriptors
+                : undefined,
+          }
+        : undefined;
 
     return {
       logger,
       moduleId,
-      startupPolicy,
-      sdkVersion,
+      persistence,
+      startupPolicy: options.startupPolicy,
+      sdkVersion: options.sdkVersion,
       environment: this._environment,
       eventBus: this._eventBus,
       services: this._services,

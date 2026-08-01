@@ -52,7 +52,7 @@ Detailed context: [C4-01 System Context](./c4/01-system-context.md)
 ## 7. Core Principles
 - Keep kernel responsibilities explicit and small.
 - Prefer contracts over conventions.
-- Treat module load as a controlled pipeline: discover -> validate -> resolve -> lifecycle.
+- Treat module load as a controlled pipeline: discover -> validate -> resolve -> initialize -> persistence -> start.
 - Fail fast for security-critical misconfiguration.
 - Keep framework specifics in adapters.
 - Optimize for operability: structured logs, startup report, deterministic shutdown.

@@ -1,4 +1,8 @@
-import type { IPlatformRuntimeVersionContext } from '@prosto/platform-sdk';
+import type {
+  IPersistenceDescriptor,
+  IPersistenceProvider,
+  IPlatformRuntimeVersionContext,
+} from '@prosto/platform-sdk';
 
 /**
  * @alpha
@@ -9,10 +13,22 @@ export interface IRuntimeOptions {
    * Runtime version context
    */
   readonly runtimeVersion?: IPlatformRuntimeVersionContext;
+
   /**
    * Optional correlation ID for tracing
    */
   readonly correlationId?: string;
+
+  /**
+   * Optional persistence provider
+   */
+  readonly persistenceProvider?: IPersistenceProvider;
+
+  /**
+   * Optional platform persistence descriptor
+   */
+  readonly platformPersistenceDescriptor?: IPersistenceDescriptor;
+
   /**
    * Optional callback to execute when the runtime is stopping
    */

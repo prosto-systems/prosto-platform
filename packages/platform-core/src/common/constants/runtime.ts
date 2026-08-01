@@ -7,6 +7,7 @@ export enum RuntimeStage {
   Validate = 'validate',
   Resolve = 'resolve',
   Lifecycle = 'lifecycle',
+  Persistence = 'persistence',
   Shutdown = 'shutdown',
 }
 
@@ -33,6 +34,7 @@ export enum RuntimeErrorCodes {
   DependencyFailed = 'DEPENDENCY_FAILED',
   LifecycleInitFailed = 'LIFECYCLE_INIT_FAILED',
   LifecycleStartFailed = 'LIFECYCLE_START_FAILED',
+  PersistenceFailed = 'PERSISTENCE_FAILED',
   ShutdownTimeout = 'SHUTDOWN_TIMEOUT',
   ShutdownFailed = 'SHUTDOWN_FAILED',
 }

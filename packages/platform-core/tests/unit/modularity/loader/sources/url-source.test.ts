@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { IModuleArtifactHttpClient } from '@/modularity/index.js';
 import { UrlSource } from '@/modularity/index.js';
 import { RuntimeErrorCodes } from '@/common/index.js';
 
@@ -21,11 +22,19 @@ describe('UrlSource', () => {
   });
 
   it('rejects on fetch failure for unreachable URL', async () => {
-    const source = new UrlSource({
-      type: 'url',
-      moduleIdHint: 'module-url',
-      url: 'https://example.invalid/module.zip',
-    });
+    const httpClient: IModuleArtifactHttpClient = {
+      fetch: async () => {
+        throw new Error('Network unavailable');
+      },
+    };
+    const source = new UrlSource(
+      {
+        type: 'url',
+        moduleIdHint: 'module-url',
+        url: 'https://example.invalid/module.zip',
+      },
+      httpClient,
+    );
 
     const result = await source.load();
 

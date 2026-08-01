@@ -153,3 +153,7 @@ bench-reports/
 
 # Other files
 .veai
+.kilo
+
+# Deployment-local persistence credentials
+app_settings.local.json

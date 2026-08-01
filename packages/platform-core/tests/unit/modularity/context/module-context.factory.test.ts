@@ -15,6 +15,7 @@ const MINIMAL_CONFIG: IPlatformConfig = {
     startupPolicy: 'strict',
   },
   runtime: { shutdownTimeoutMs: 10000 },
+  persistence: { typeorm: { enabled: false } },
   logging: { level: 'info', format: 'text' },
   modules: {
     'module-a': {
@@ -58,6 +59,8 @@ describe('ModuleContextFactory', () => {
       startupPolicy: 'strict',
       sdkVersion: '0.0.0',
       moduleManifest: createManifest({ id: 'module-a' }),
+      lifecycleStage: 'init',
+      persistenceEnabled: false,
     });
 
     expect(ctx.config).toBeDefined();
@@ -76,6 +79,8 @@ describe('ModuleContextFactory', () => {
       startupPolicy: 'strict',
       sdkVersion: '0.0.0',
       moduleManifest: createManifest({ id: 'module-a' }),
+      lifecycleStage: 'init',
+      persistenceEnabled: false,
     });
 
     expect(ctx.config?.platform).toBeDefined();
@@ -90,6 +95,8 @@ describe('ModuleContextFactory', () => {
       startupPolicy: 'strict',
       sdkVersion: '0.0.0',
       moduleManifest: createManifest({ id: 'module-a' }),
+      lifecycleStage: 'init',
+      persistenceEnabled: false,
     });
 
     expect(ctx.config?.custom).toBeDefined();
@@ -102,6 +109,8 @@ describe('ModuleContextFactory', () => {
       startupPolicy: 'strict',
       sdkVersion: '0.0.0',
       moduleManifest: createManifest({ id: 'module-a' }),
+      lifecycleStage: 'init',
+      persistenceEnabled: false,
     });
 
     expect(ctx.getConfigValue('modules.module-a.database.host')).toBe(
@@ -118,6 +127,8 @@ describe('ModuleContextFactory', () => {
       startupPolicy: 'best-effort',
       sdkVersion: '1.0.0',
       moduleManifest: createManifest({ id: 'module-a' }),
+      lifecycleStage: 'init',
+      persistenceEnabled: false,
     });
 
     expect(ctx.moduleId).toBe('module-a');

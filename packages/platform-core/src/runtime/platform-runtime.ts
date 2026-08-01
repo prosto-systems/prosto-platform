@@ -8,6 +8,7 @@ import { RuntimeStartupStatus } from '@/diagnostics/index.js';
 import type {
   IModuleEnvelope,
   IModuleLifecycleOrchestrator,
+  IModuleLifecycleShutdownIssue,
   ModuleArtifactSourceDescriptorType,
 } from '@/modularity/index.js';
 import type {
@@ -16,10 +17,16 @@ import type {
   IRuntimeOptions,
 } from './interfaces/index.js';
 import {
+  type IServiceRegistry,
   type PlatformStartupPolicyType,
   SDK_CONTRACT_VERSION,
 } from '@prosto/platform-sdk';
-import { assert, dateNowIso } from '@/common/index.js';
+import {
+  assert,
+  dateNowIso,
+  RuntimeErrorCodes,
+  RuntimeStage,
+} from '@/common/index.js';
 
 /**
  * @alpha
@@ -39,6 +46,7 @@ export class PlatformRuntime implements IPlatformRuntime {
     private readonly _diagnosticsReporter: IDiagnosticsReporter,
     private readonly _bootstrapCoordinator: IBootstrapCoordinator,
     private readonly _moduleLifecycleOrchestrator: IModuleLifecycleOrchestrator,
+    private readonly _services: IServiceRegistry,
     private readonly _options: IRuntimeOptions = {},
   ) {
     this._startupPolicy = this._config.platform.startupPolicy;
@@ -92,6 +100,11 @@ export class PlatformRuntime implements IPlatformRuntime {
         sdkVersion: SDK_CONTRACT_VERSION,
         nodeVersion: process.versions.node,
       },
+      persistenceProvider: this._options.persistenceProvider,
+      platformPersistenceDescriptor:
+        this._options.platformPersistenceDescriptor,
+      persistenceConfiguration: this._config.persistence,
+      services: this._services,
     });
 
     const failedDiagnosticsByModuleId = new Map<
@@ -124,6 +137,10 @@ export class PlatformRuntime implements IPlatformRuntime {
     this._started = startupReport.status !== RuntimeStartupStatus.Failed;
     this._degraded = startupReport.degraded;
     this._startedModules = bootstrapContext.loadedModules;
+
+    if (!this._started && this._isPersistenceEnabled()) {
+      await this._options.persistenceProvider?.dispose();
+    }
   }
 
   async stop(): Promise<void> {
@@ -140,8 +157,9 @@ export class PlatformRuntime implements IPlatformRuntime {
     }
 
     const shutdownStartedAt = dateNowIso();
+    const issues: IModuleLifecycleShutdownIssue[] = [];
 
-    const shutdownResult = await this._moduleLifecycleOrchestrator.shutdown(
+    const shutdownResult = await this._moduleLifecycleOrchestrator.stopModules(
       this._startedModules,
       {
         startupPolicy: this._startupPolicy,
@@ -151,13 +169,39 @@ export class PlatformRuntime implements IPlatformRuntime {
       },
     );
 
-    await this._options.onStopped?.();
+    issues.push(...shutdownResult.issues);
+
+    if (this._isPersistenceEnabled()) {
+      try {
+        await this._options.persistenceProvider?.dispose();
+      } catch {
+        issues.push({
+          moduleId: 'platform',
+          phase: RuntimeStage.Shutdown,
+          errorCode: RuntimeErrorCodes.ShutdownFailed,
+          message: 'Persistence provider disposal failed.',
+          remediationHint: 'Inspect persistence provider shutdown diagnostics.',
+        });
+      }
+    }
+
+    try {
+      await this._options.onStopped?.();
+    } catch {
+      issues.push({
+        moduleId: 'platform',
+        phase: RuntimeStage.Shutdown,
+        errorCode: RuntimeErrorCodes.ShutdownFailed,
+        message: 'Runtime service cleanup failed.',
+        remediationHint: 'Inspect runtime service cleanup diagnostics.',
+      });
+    }
 
     const shutdownReport = this._diagnosticsReporter.createShutdownReport({
       startedAt: shutdownStartedAt,
       correlationId: this._correlationId,
       stopOrder: shutdownResult.stopOrder,
-      issues: shutdownResult.issues,
+      issues,
     });
 
     this._reports = { ...this._reports, shutdown: shutdownReport };
@@ -176,5 +220,9 @@ export class PlatformRuntime implements IPlatformRuntime {
     }
 
     return `rt-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+  }
+
+  private _isPersistenceEnabled(): boolean {
+    return this._config.persistence?.typeorm?.enabled === true;
   }
 }

@@ -20,11 +20,10 @@ prosto-platform/
 ├── packages/
 │   ├── platform-sdk/                    # Contract package (types, interfaces, tokens)
 │   ├── platform-core/                   # Runtime kernel
+│   ├── platform-adapter-typeorm/        # TypeORM persistence adapter (shared DataSource)
 │   ├── platform-contract-tests/         # Shared contract test suite
 │   ├── platform-cli/                    # CLI tooling for module development
 │   ├── platform-adapter-http/           # HTTP adapter (Fastify/Express abstraction)
-│   ├── platform-adapter-persistence/    # Database abstraction layer
-│   ├── platform-adapter-queue/          # Message queue abstraction
 │   ├── platform-adapter-auth/           # Authentication/authorization abstraction
 │   ├── platform-admin-contracts/        # Admin shell and UI plugin contracts
 │   └── platform-adapter-admin-bff/      # Admin BFF adapter for policy-aware aggregation
@@ -345,6 +344,7 @@ Labeling rules:
 |---|---|----------------------------------------------------|
 | `platform-sdk` | Minimal vetted external libs | Other PROSTO runtime packages                      |
 | `platform-core` | `platform-sdk`, vetted runtime libs | Adapters implementations, feature modules, admin shell runtime |
+| `platform-adapter-typeorm` | `platform-sdk`, TypeORM driver libs | `platform-core` internals, other adapter internals |
 | `platform-admin-contracts` | `platform-sdk`, minimal validation libs | `platform-core` internals, frontend runtime frameworks |
 | `platform-contract-tests` | `platform-sdk`, `platform-admin-contracts`, test framework | `platform-core`, adapters implementations          |
 | `platform-cli` | `platform-sdk`, `platform-admin-contracts`, CLI libs | `platform-core` runtime internals                  |

@@ -11,14 +11,28 @@ Reusable Phase 04 contract conformance suite for Prosto modules.
 ## Conformance Checks
 - Manifest conformance (schema + semantic)
 - Lifecycle method behavior (`register/init/start/stop`)
-- Capability declaration integrity
-- Security metadata presence
-- Observability metadata minimum contract
 
 ## Commands
 - `npm run --workspace @prosto/platform-contract-tests build`
 - `npm run --workspace @prosto/platform-contract-tests typecheck`
 - `npm run --workspace @prosto/platform-contract-tests test`
+
+## Public API
+
+### Entry Points
+- `createModuleContractTests` — reusable test-entry helper for module repositories
+- `runModuleContractConformance` — programmatic runner returning a machine-readable report
+
+### Utilities
+- `buildConformanceSummary` — builds deterministic conformance summary from check results
+- `buildConformanceReport` — builds a complete conformance report with summary
+- `toConformanceReportJson` — serializes report in deterministic JSON for CI consumers
+
+### Utilities
+- `DefaultModuleLifecycleContextFactory` — default factory for module lifecycle context in conformance tests
+
+### Constants
+- `ContractFailureCodes` — standardized failure code taxonomy for CI consumers
 
 ## Usage
 ```ts

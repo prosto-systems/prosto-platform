@@ -33,7 +33,7 @@ graph LR
 flowchart TB
   subgraph Process["Single Node.js Process"]
     Kernel["@prosto/platform-core"]
-    Adapters["@prosto/platform-adapter-http<br/>@prosto/platform-adapter-persistence"]
+    Adapters["@prosto/platform-adapter-http<br/>@prosto/platform-adapter-typeorm<br/>@prosto/platform-adapter-admin-bff"]
     Modules["module-health<br/>module-auth<br/>module-content"]
 
     Kernel <--> Adapters

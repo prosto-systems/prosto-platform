@@ -85,6 +85,7 @@ Both packages follow the same contract-first methodology and stability levels.
 - `getEventTokenKey`
 - `createServiceToken`
 - `createEventToken`
+- `resolveNestedValue`
 
 ### Validators
 - `PlatformModuleManifestValidator`
@@ -94,6 +95,18 @@ Both packages follow the same contract-first methodology and stability levels.
 - `PlatformSdkError`
 - `PlatformModuleManifestValidationError`
 - `PlatformModuleCompatibilityValidationError`
+- `PersistenceError`
+- `PersistenceNotReadyError`
+
+### Persistence
+- `PersistenceDescriptorRegistry` — in-memory registry enforcing descriptor ownership and immutability
+- `IPersistenceDescriptor` — generic persistence declaration with owner, ownerId, payload, and required driver capabilities
+- `IPersistenceDescriptorRegistry` — contract for collecting persistence declarations during module init
+- `IPersistenceInitializationInput` — input supplied after descriptor collection is sealed
+- `IPersistenceProvider` — shared persistence adapter lifecycle contract (initialize/dispose/state)
+- `IPersistenceModuleContext` — persistence surface exposed in module context
+- `PersistenceProviderStateType` — lifecycle states: `collecting` | `initializing` | `ready` | `failed` | `disposed`
+- `PersistenceOwnerType` — `platform` | `module`
 
 ## Usage
 
@@ -149,5 +162,6 @@ const healthService = serviceRegistry.resolve(healthServiceToken);
 
 ## Notes
 - This package is contract-only and does not implement runtime module loading.
-- Runtime lifecycle orchestration belongs to `@prosto/platform-core` in later phases.
+- The SDK exposes optional persistence contracts that `platform-core` consumes for the shared persistence adapter lifecycle.
+- Runtime lifecycle orchestration and persistence composition belong to `@prosto/platform-core`.
 - Runtime validation primitives depend only on `zod` and `semver`.

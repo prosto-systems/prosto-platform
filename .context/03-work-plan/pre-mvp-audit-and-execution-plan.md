@@ -11,6 +11,7 @@ Execute a controlled internal MVP that validates core platform value and quality
 - Contract and architecture quality gates
 - Security loading controls baseline
 - Startup diagnostics and reliability baseline
+- Persistence adapter contracts in `@prosto/platform-sdk` (IPersistenceProvider, IPersistenceDescriptor, IPersistenceModuleContext)
 
 ## Phase Plan
 

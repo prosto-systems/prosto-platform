@@ -2,8 +2,8 @@
 
 Phase 05 runtime foundation package for deterministic module lifecycle orchestration.
 
-## Implemented Scope (Phase 05)
-- Bootstrap pipeline: `discover -> validate -> resolve -> lifecycle`
+## Implemented Scope
+- Bootstrap pipeline: `discover -> validate -> resolve -> initialize -> persistence -> start`
 - Deterministic dependency ordering with cycle detection and missing dependency diagnostics
 - Startup policy modes: `strict` and `best-effort`
 - Critical module failure override (always abort startup)
@@ -12,6 +12,7 @@ Phase 05 runtime foundation package for deterministic module lifecycle orchestra
 - Runtime builder composition root with config loading, diagnostics wiring, and lifecycle orchestration dependencies
 - Secrets redaction wired through module logging and diagnostics reporting
 - Optional artifact cache wiring for module source fetchers
+- Shared persistence adapter lifecycle (contract in `@prosto/platform-sdk`) with descriptor collection during `init()`, provider initialization between `init()` and `start()`, and native service token publication after migration locks are acquired
 
 ## Package Structure
 
@@ -30,7 +31,7 @@ Phase 05 runtime foundation package for deterministic module lifecycle orchestra
 
 | Subsystem | Path | Responsibility |
 |-----------|------|----------------|
-| Bootstrap | `bootstrap/` | Bootstrap coordinator, pipeline, and stage definitions |
+| Bootstrap | `bootstrap/` | Bootstrap coordinator, pipeline, and stage definitions (discover, validate, resolve, initialize, persistence, start) |
 | Caching | `caching/` | Module artifact cache (filesystem + noop implementations) |
 | Common | `common/` | Shared utilities, error types, configuration system, assertion helpers |
 | Diagnostics | `diagnostics/` | Operational reports schema validation and reporter |
@@ -124,8 +125,21 @@ const runtime = new RuntimeBuilder().build({
   environment: 'production',
   commandLineArgs: process.argv.slice(2),
   correlationId: 'startup-2026-05-28-01',
+  persistenceProvider: new TypeOrmPersistenceProvider(),
+  platformPersistenceDescriptor,
 });
 ```
+
+### Persistence Integration
+
+`RuntimeBuilder` accepts an optional `persistenceProvider` and `platformPersistenceDescriptor`. When persistence is enabled (`persistence.typeorm.enabled: true` in config), the bootstrap pipeline inserts a `PersistenceInitializationStage` between module `init()` and `start()`:
+
+1. Modules register persistence descriptors from `init()` via `ctx.persistence.descriptors.register()`.
+2. The descriptor registry is sealed after all permitted `init()` calls.
+3. The persistence provider initializes the shared DataSource, acquires a migration lock, runs migrations, and publishes its native service token (e.g. `TYPEORM_DATA_SOURCE_SERVICE_TOKEN`).
+4. Modules resolve the native token in `start()` or later via `ctx.services.resolveRequired(TYPEORM_DATA_SOURCE_SERVICE_TOKEN)` — never during `init()`.
+
+See [`@prosto/platform-adapter-typeorm`](../platform-adapter-typeorm) for the reference TypeORM implementation and [`docs/persistence/typeorm-shared-datasource-guide.md`](../../docs/persistence/typeorm-shared-datasource-guide.md) for ownership conventions and lifecycle restrictions.
 
 ### RuntimeBuilder Defaults
 
@@ -134,8 +148,9 @@ When no overrides are provided, the builder seeds these defaults before applying
 - `platform.startupPolicy`: `strict`
 - `modules.configAccessPolicy.productionStrictMode`: `true`
 - `modules.artifactCache.enabled`: `false`
+- `persistence.typeorm.enabled`: `false`
 - `security.secretRedaction.enabled`: `true`
-- `security.secretRedaction.patterns`: `['key', 'token', 'secret', 'password', 'passphrase']`
+- `security.secretRedaction.patterns`: `['key', 'token', 'secret', 'password', 'passphrase', 'url', 'connectionString']`
 
 If `modules.artifactCache.enabled` is set to `true` and `modules.artifactCache.path` is omitted, cache files are stored under `.cache/module-artifacts` resolved from `platform.basePath`.
 
@@ -145,6 +160,8 @@ Modules access config via `IPlatformModuleContext`:
 const fullConfig = ctx.config;
 const value = ctx.getConfigValue<string>('database.host');
 ```
+
+When persistence is enabled, modules also receive a `ctx.persistence` surface during `init()` that exposes the `PersistenceDescriptorRegistry` for descriptor collection and the provider state. The native DataSource service token is resolved via `ctx.services.resolveRequired()` after provider readiness.
 
 ## Configuration Access Policy
 
@@ -204,10 +221,21 @@ This command runs the full policy validation suite including config access check
 
 Current validation stage composition in runtime bootstrap:
 - `ManifestValidationStrategy`
-- `CompatibilityValidationStrategy`
-- `ConfigAccessValidationStrategy`
 
-`IntegrityValidationStrategy` was in Phase 06 hardening scope and is now implemented.
+Compatibility, config-access, and integrity validation are performed by the SDK contract validators (`PlatformModuleCompatibilityValidator`, `PlatformModuleManifestValidator`) and are invoked through `test:contracts` and `validate:runtime-policy`, not as separate bootstrap strategies.
+
+### Module Lifecycle Ordering
+
+The bootstrap pipeline executes module lifecycle in a strict order with a persistence barrier:
+
+1. **`discover`** — load module artifacts and process pre-rejected artifacts
+2. **`validate`** — validate manifests, integrity, and compatibility
+3. **`resolve`** — build dependency graph and topologically sort modules
+4. **`initialize`** — run module `init()` hooks (modules register persistence descriptors here)
+5. **`persistence`** — seal descriptors, initialize shared persistence provider, acquire migration lock, run migrations, publish native service token
+6. **`start`** — run module `start()` hooks (modules resolve native persistence tokens here)
+
+Persistence failures (descriptor validation, migration lock, driver availability, connection) are fatal in both `strict` and `best-effort` modes and abort startup before any module `start()` runs.
 
 ### Secret Redaction
 

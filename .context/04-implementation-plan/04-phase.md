@@ -8,7 +8,7 @@
   - `packages/platform-contract-tests/src/create-module-contract-tests.ts`
   - `packages/platform-contract-tests/src/checks/manifest.check.ts`
   - `packages/platform-contract-tests/src/checks/lifecycle.check.ts`
-  - `packages/platform-contract-tests/src/types/index.ts`
+  - `packages/platform-contract-tests/src/interfaces/index.ts`
   - `packages/platform-contract-tests/src/utils/report.utils.ts`
   - `packages/platform-contract-tests/tests/module-contract-conformance.test.ts`
   - `examples/module-health/tests/contracts.test.ts`
@@ -38,12 +38,9 @@ Implement `@prosto/platform-contract-tests` as a reusable conformance suite and 
 
 ## Detailed Ordered Implementation Steps
 1. Implement `createModuleContractTests` entry in `platform-contract-tests`.
-2. Add suites for:
-   - manifest conformance
-   - lifecycle method behavior
-   - capability declaration integrity
-   - security metadata presence
-   - observability metadata minimum contract
+ 2. Add suites for:
+    - manifest conformance
+    - lifecycle method behavior
 3. Define standardized failure codes and test output format for CI consumers.
 4. Create two internal reference modules in `examples/`:
    - `module-health`

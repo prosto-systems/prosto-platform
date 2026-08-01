@@ -30,6 +30,7 @@ class DemoModule implements IPlatformModule {
 
 async function main(): Promise<void> {
   const runtime = new RuntimeBuilder().build({
+    environment: process.env.NODE_ENV || 'production',
     modules: [
       {
         type: 'memory',
@@ -45,7 +46,6 @@ async function main(): Promise<void> {
         path: '../../examples/module-health/artifacts/module-health-0.0.0.zip',
       },
     ],
-    environment: process.env.NODE_ENV || 'development',
   });
 
   await runtime.start();
