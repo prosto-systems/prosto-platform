@@ -1,5 +1,6 @@
 import type { IAdminPermissionPolicy } from '@prosto/platform-admin-contracts';
-import type { IAdminOperatorContext } from '@/admin-bff.interfaces.js';
+import { PlatformDelegatedIdentity } from '@prosto/platform-sdk';
+import type { IPlatformDelegatedIdentity } from '@prosto/platform-sdk';
 import { describe, expect, it } from 'vitest';
 import { AdminPermissionMappingService } from '@/permissions/admin-permission-mapping.service.js';
 
@@ -63,15 +64,15 @@ function createTestPolicy(): IAdminPermissionPolicy {
   };
 }
 
-function createOperatorContext(
-  roleIds: string[],
+function createIdentity(
+  roles: string[],
   permissions?: string[],
-): IAdminOperatorContext {
-  return {
-    operatorId: 'test-operator',
-    roleIds,
+): IPlatformDelegatedIdentity {
+  return new PlatformDelegatedIdentity({
+    subjectId: 'test-operator',
+    roles,
     permissions,
-  };
+  });
 }
 
 describe('AdminPermissionMappingService', () => {
@@ -83,7 +84,7 @@ describe('AdminPermissionMappingService', () => {
 
       const result = service.evaluateAction(
         'admin.users.read',
-        createOperatorContext(['viewer']),
+        createIdentity(['viewer']),
       );
 
       expect(result.allowed).toBe(true);
@@ -99,7 +100,7 @@ describe('AdminPermissionMappingService', () => {
 
       const result = service.evaluateAction(
         'admin.users.write',
-        createOperatorContext(['viewer']),
+        createIdentity(['viewer']),
       );
 
       expect(result.allowed).toBe(false);
@@ -115,7 +116,7 @@ describe('AdminPermissionMappingService', () => {
 
       const result = service.evaluateAction(
         'nonexistent.action',
-        createOperatorContext(['admin']),
+        createIdentity(['admin']),
       );
 
       expect(result.allowed).toBe(false);
@@ -133,7 +134,7 @@ describe('AdminPermissionMappingService', () => {
 
       const result = service.evaluateAction(
         'admin.deny-all',
-        createOperatorContext(['admin']),
+        createIdentity(['admin']),
       );
 
       expect(result.allowed).toBe(false);
@@ -164,7 +165,7 @@ describe('AdminPermissionMappingService', () => {
 
       const result = service.evaluateAction(
         'partial.action',
-        createOperatorContext(['operator']),
+        createIdentity(['operator']),
       );
 
       expect(result.allowed).toBe(true);
@@ -177,7 +178,7 @@ describe('AdminPermissionMappingService', () => {
 
       const result = service.evaluateAction(
         'admin.users.read',
-        createOperatorContext([], ['admin:read']),
+        createIdentity([], ['admin:read']),
       );
 
       expect(result.allowed).toBe(true);
@@ -190,7 +191,7 @@ describe('AdminPermissionMappingService', () => {
 
       const result = service.evaluateAction(
         'admin.users.manage',
-        createOperatorContext(['operator'], ['admin:write', 'admin:delete']),
+        createIdentity(['operator'], ['admin:write', 'admin:delete']),
       );
 
       expect(result.allowed).toBe(true);
@@ -205,7 +206,7 @@ describe('AdminPermissionMappingService', () => {
 
       const result = service.hasPermission(
         'admin:read',
-        createOperatorContext(['viewer']),
+        createIdentity(['viewer']),
       );
 
       expect(result).toBe(true);
@@ -218,7 +219,7 @@ describe('AdminPermissionMappingService', () => {
 
       const result = service.hasPermission(
         'admin:delete',
-        createOperatorContext(['viewer']),
+        createIdentity(['viewer']),
       );
 
       expect(result).toBe(false);
@@ -231,7 +232,7 @@ describe('AdminPermissionMappingService', () => {
 
       const result = service.hasPermission(
         'custom:permission',
-        createOperatorContext([], ['custom:permission']),
+        createIdentity([], ['custom:permission']),
       );
 
       expect(result).toBe(true);
@@ -246,7 +247,7 @@ describe('AdminPermissionMappingService', () => {
 
       const result = service.filterPermissions(
         ['admin:read', 'admin:write'],
-        createOperatorContext(['admin']),
+        createIdentity(['admin']),
       );
 
       expect(result.allowed).toBe(true);
@@ -260,7 +261,7 @@ describe('AdminPermissionMappingService', () => {
 
       const result = service.filterPermissions(
         ['admin:read', 'admin:write', 'admin:delete'],
-        createOperatorContext(['viewer']),
+        createIdentity(['viewer']),
       );
 
       expect(result.allowed).toBe(false);
@@ -275,10 +276,7 @@ describe('AdminPermissionMappingService', () => {
         policy: createTestPolicy(),
       });
 
-      const result = service.filterPermissions(
-        [],
-        createOperatorContext(['viewer']),
-      );
+      const result = service.filterPermissions([], createIdentity(['viewer']));
 
       expect(result.allowed).toBe(true);
       expect(result.missingPermissions).toHaveLength(0);
@@ -292,7 +290,7 @@ describe('AdminPermissionMappingService', () => {
       });
 
       const permissions = service.collectGrantedPermissions(
-        createOperatorContext(['admin']),
+        createIdentity(['admin']),
       );
 
       expect(permissions.has('admin:read')).toBe(true);
@@ -306,7 +304,7 @@ describe('AdminPermissionMappingService', () => {
       });
 
       const permissions = service.collectGrantedPermissions(
-        createOperatorContext(['viewer'], ['custom:permission']),
+        createIdentity(['viewer'], ['custom:permission']),
       );
 
       expect(permissions.has('admin:read')).toBe(true);
@@ -319,7 +317,7 @@ describe('AdminPermissionMappingService', () => {
       });
 
       const permissions = service.collectGrantedPermissions(
-        createOperatorContext(['unknown-role'], ['extra:permission']),
+        createIdentity(['unknown-role'], ['extra:permission']),
       );
 
       expect(permissions.has('extra:permission')).toBe(true);

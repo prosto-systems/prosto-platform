@@ -7,6 +7,28 @@ export function isPlainObject(
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+export function freezeRecord(
+  record: Record<string, string>,
+): Readonly<Record<string, string>> {
+  return Object.freeze({ ...record });
+}
+
+export function freezeRecordOfArrays(
+  record: Record<string, readonly string[]>,
+): Readonly<Record<string, readonly string[]>> {
+  const copy: Record<string, readonly string[]> = {};
+
+  for (const [key, value] of Object.entries(record)) {
+    copy[key] = Object.freeze([...value]);
+  }
+
+  return Object.freeze(copy);
+}
+
+export function freezeStringArray(arr: readonly string[]): readonly string[] {
+  return Object.freeze([...arr]);
+}
+
 /**
  * Resolves a nested value from a data object using a dot-separated key.
  */

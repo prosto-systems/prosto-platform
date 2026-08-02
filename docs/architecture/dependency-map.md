@@ -35,11 +35,11 @@ This document captures the enforceable package dependency boundaries through Pha
 | `@prosto/platform-cli` | `@prosto/platform-sdk` |
 | `@prosto/platform-adapter-http` | `@prosto/platform-sdk` |
 | `@prosto/platform-admin-contracts` | `@prosto/platform-sdk` |
-| `@prosto/platform-adapter-admin-bff` | `@prosto/platform-admin-contracts` |
+| `@prosto/platform-adapter-admin-bff` | `@prosto/platform-sdk`, `@prosto/platform-admin-contracts` |
 | `@prosto/platform-admin-shell` | `@prosto/platform-admin-contracts` |
 
 ## Ownership Notes
-- HTTP/security middleware dependencies are owned by `@prosto/platform-adapter-http`.
+- Fastify and HTTP/security middleware dependencies are owned by `@prosto/platform-adapter-http`; its public API remains free of Fastify types.
 - TypeORM persistence (shared DataSource, migration locks, descriptor registry) is owned by `@prosto/platform-adapter-typeorm`.
 - Admin UI plugin contracts (manifests, discovery, permissions, compatibility) are owned by `@prosto/platform-admin-contracts`.
 - Admin BFF adapter (discovery aggregation, permission mapping, diagnostics, observability) is owned by `@prosto/platform-adapter-admin-bff`.

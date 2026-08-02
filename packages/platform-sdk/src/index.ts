@@ -5,6 +5,7 @@ export * from './events/index.js';
 export * from './modularity/index.js';
 export * from './persistence/index.js';
 export * from './services/index.js';
+export * from './transport/index.js';
 export * from './utils/index.js';
 
 /**

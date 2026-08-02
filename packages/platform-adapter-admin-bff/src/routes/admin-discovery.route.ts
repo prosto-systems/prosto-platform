@@ -1,9 +1,10 @@
+import type { IAdminBffRouteContext } from '../admin-bff.interfaces.js';
 import type {
-  IAdminBffRequest,
-  IAdminBffResponse,
-  IAdminBffRouteContext,
-  IAdminBffRouteHandler,
-} from '../admin-bff.interfaces.js';
+  IPlatformHttpRequest,
+  IPlatformHttpResponse,
+  IPlatformHttpRouteHandler,
+} from '@prosto/platform-sdk';
+import { PlatformHttpResponse } from '@prosto/platform-sdk';
 import { AdminBffLogEvents, AdminBffPhase } from '@/observability/index.js';
 import { ADMIN_BFF_ROUTES } from '../admin-bff.constants.js';
 
@@ -17,27 +18,25 @@ import { ADMIN_BFF_ROUTES } from '../admin-bff.constants.js';
  * Observability: logs discovery pipeline timing, accepted/rejected counts,
  * and per-plugin outcomes for operational analysis.
  */
-export class AdminDiscoveryRouteHandler implements IAdminBffRouteHandler {
+export class AdminDiscoveryRouteHandler implements IPlatformHttpRouteHandler<IAdminBffRouteContext> {
   readonly route = ADMIN_BFF_ROUTES.DISCOVERY;
   readonly method = 'GET' as const;
 
   async handle(
-    _request: IAdminBffRequest,
+    _request: IPlatformHttpRequest,
     context: IAdminBffRouteContext,
-  ): Promise<IAdminBffResponse> {
+  ): Promise<IPlatformHttpResponse> {
     const startTime = Date.now();
 
     context.logger.info('Discovery pipeline started', {
       phase: AdminBffPhase.DISCOVERY,
       correlationId: context.correlationId,
       event: AdminBffLogEvents.DISCOVERY_STARTED,
-      operatorId: context.operatorContext.operatorId,
+      subjectId: context.identity.subjectId,
     });
 
     try {
-      const result = await context.discoveryService.discover(
-        context.operatorContext,
-      );
+      const result = await context.discoveryService.discover(context.identity);
 
       const duration = Date.now() - startTime;
 
@@ -74,17 +73,20 @@ export class AdminDiscoveryRouteHandler implements IAdminBffRouteHandler {
         });
       }
 
-      return {
+      return new PlatformHttpResponse({
         status: 200,
         body: {
-          correlationId: context.correlationId,
-          data: result.payload,
-          diagnostics: {
-            ...result.diagnostics,
-            duration,
+          variant: 'json',
+          data: {
+            correlationId: context.correlationId,
+            data: result.payload,
+            diagnostics: {
+              ...result.diagnostics,
+              duration,
+            },
           },
         },
-      };
+      });
     } catch (error) {
       const duration = Date.now() - startTime;
 

@@ -1,8 +1,6 @@
 import type { AdminDiscoveryRejectionReasonCodeType } from '@prosto/platform-admin-contracts';
-import type {
-  IAdminDiscoveryResult,
-  IAdminOperatorContext,
-} from '../admin-bff.interfaces.js';
+import type { IPlatformDelegatedIdentity } from '@prosto/platform-sdk';
+import type { IAdminDiscoveryResult } from '../admin-bff.interfaces.js';
 import type {
   IAdminDiagnosticsPayload,
   IAdminDiagnosticsPluginEntry,
@@ -25,7 +23,7 @@ export interface IAdminDiagnosticsServiceConfig {
  */
 export interface IAdminDiagnosticsRequestContext {
   readonly correlationId: string;
-  readonly operatorContext: IAdminOperatorContext;
+  readonly identity: IPlatformDelegatedIdentity;
   readonly requestPath: string;
   readonly userAgent?: string;
   readonly clientIp?: string;
@@ -58,7 +56,7 @@ export interface IAdminDiagnosticsService {
     message: string | undefined,
     remediationHint: string | undefined,
     correlationId: string,
-    operatorId: string,
+    subjectId: string,
   ): IAdminDiagnosticsPluginEntry;
 
   /**

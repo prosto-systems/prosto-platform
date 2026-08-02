@@ -22,7 +22,7 @@ export interface IAdminDiagnosticsPluginEntry {
   readonly remediationHint?: string;
   readonly timestamp: string;
   readonly correlationId: string;
-  readonly operatorId: string;
+  readonly subjectId: string;
   readonly environment?: string;
   readonly shellVersion?: string;
   readonly discoveryDuration?: number;
@@ -63,8 +63,8 @@ export interface IAdminDiagnosticsPayload {
  * Additional metadata for diagnostics context.
  */
 export interface IAdminDiagnosticsMetadata {
-  readonly operatorId: string;
-  readonly operatorRoles: readonly string[];
+  readonly subjectId: string;
+  readonly roles: readonly string[];
   readonly requestPath: string;
   readonly userAgent?: string;
   readonly clientIp?: string;

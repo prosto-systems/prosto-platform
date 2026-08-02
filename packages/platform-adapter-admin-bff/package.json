@@ -21,7 +21,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@prosto/platform-admin-contracts": "0.0.0"
+    "@prosto/platform-admin-contracts": "0.0.0",
+    "@prosto/platform-sdk": "0.0.0"
   },
   "devDependencies": {
     "@internal/tsconfig": "*",

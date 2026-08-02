@@ -5,10 +5,8 @@ import type {
   IAdminUIPluginManifest,
   IAdminUIPluginManifestValidator,
 } from '@prosto/platform-admin-contracts';
-import type {
-  IAdminOperatorContext,
-  IAdminPluginCatalogSource,
-} from '@/index.js';
+import type { IPlatformDelegatedIdentity } from '@prosto/platform-sdk';
+import type { IAdminPluginCatalogSource } from '@/index.js';
 import { ADMIN_UI_PLUGIN_MANIFEST_SCHEMA_VERSION } from '@prosto/platform-admin-contracts';
 import { describe, expect, it, vi } from 'vitest';
 import { AdminDiscoveryAggregationService } from '@/index.js';
@@ -66,10 +64,11 @@ function createMockCompatibilityEvaluator(
   };
 }
 
-function createMockOperatorContext(): IAdminOperatorContext {
+function createMockDelegatedIdentity(): IPlatformDelegatedIdentity {
   return {
-    operatorId: 'operator-1',
-    roleIds: ['admin'],
+    authenticationType: 'delegated',
+    subjectId: 'operator-1',
+    roles: ['admin'],
     permissions: ['read', 'write'],
   };
 }
@@ -91,7 +90,7 @@ describe('AdminDiscoveryAggregationService', () => {
       },
     );
 
-    const result = await service.discover(createMockOperatorContext());
+    const result = await service.discover(createMockDelegatedIdentity());
 
     expect(result.payload.plugins).toHaveLength(1);
     expect(result.payload.rejected).toHaveLength(0);
@@ -115,7 +114,7 @@ describe('AdminDiscoveryAggregationService', () => {
       },
     );
 
-    const result = await service.discover(createMockOperatorContext());
+    const result = await service.discover(createMockDelegatedIdentity());
 
     expect(result.payload.plugins).toHaveLength(0);
     expect(result.payload.rejected).toHaveLength(0);
@@ -143,7 +142,7 @@ describe('AdminDiscoveryAggregationService', () => {
       },
     );
 
-    const result = await service.discover(createMockOperatorContext());
+    const result = await service.discover(createMockDelegatedIdentity());
 
     expect(result.payload.plugins).toHaveLength(0);
     expect(result.payload.rejected).toHaveLength(1);
@@ -178,7 +177,7 @@ describe('AdminDiscoveryAggregationService', () => {
       },
     );
 
-    const result = await service.discover(createMockOperatorContext());
+    const result = await service.discover(createMockDelegatedIdentity());
 
     expect(result.payload.plugins).toHaveLength(0);
     expect(result.payload.rejected).toHaveLength(1);
@@ -220,7 +219,7 @@ describe('AdminDiscoveryAggregationService', () => {
       },
     );
 
-    const result = await service.discover(createMockOperatorContext());
+    const result = await service.discover(createMockDelegatedIdentity());
 
     expect(result.payload.plugins).toHaveLength(1);
 
@@ -288,7 +287,7 @@ describe('AdminDiscoveryAggregationService', () => {
       },
     );
 
-    const result = await service.discover(createMockOperatorContext());
+    const result = await service.discover(createMockDelegatedIdentity());
 
     expect(result.payload.plugins).toHaveLength(1);
     expect(result.payload.rejected).toHaveLength(1);
@@ -311,7 +310,7 @@ describe('AdminDiscoveryAggregationService', () => {
       },
     );
 
-    await service.discover(createMockOperatorContext());
+    await service.discover(createMockDelegatedIdentity());
 
     expect(catalog.fetchUIPluginManifests).toHaveBeenCalledTimes(1);
   });
@@ -336,7 +335,7 @@ describe('AdminDiscoveryAggregationService', () => {
       },
     );
 
-    await service.discover(createMockOperatorContext());
+    await service.discover(createMockDelegatedIdentity());
 
     expect(validator.validate).toHaveBeenCalledTimes(3);
   });
@@ -360,7 +359,7 @@ describe('AdminDiscoveryAggregationService', () => {
       },
     );
 
-    await service.discover(createMockOperatorContext());
+    await service.discover(createMockDelegatedIdentity());
 
     expect(compatibility.evaluate).toHaveBeenCalledTimes(2);
   });
@@ -388,7 +387,7 @@ describe('AdminDiscoveryAggregationService', () => {
       },
     );
 
-    const result = await service.discover(createMockOperatorContext());
+    const result = await service.discover(createMockDelegatedIdentity());
 
     expect(result.payload.rejected[0]).toMatchObject({
       details: {
@@ -413,7 +412,7 @@ describe('AdminDiscoveryAggregationService', () => {
       },
     );
 
-    const result = await service.discover(createMockOperatorContext());
+    const result = await service.discover(createMockDelegatedIdentity());
 
     expect(result.diagnostics.duration).toBeGreaterThanOrEqual(0);
     expect(typeof result.diagnostics.duration).toBe('number');
@@ -448,7 +447,7 @@ describe('AdminDiscoveryAggregationService', () => {
         { allowlistEvaluator },
       );
 
-      const result = await service.discover(createMockOperatorContext());
+      const result = await service.discover(createMockDelegatedIdentity());
 
       expect(result.payload.plugins).toHaveLength(0);
       expect(result.payload.rejected).toHaveLength(1);
@@ -487,7 +486,7 @@ describe('AdminDiscoveryAggregationService', () => {
         { allowlistEvaluator },
       );
 
-      const result = await service.discover(createMockOperatorContext());
+      const result = await service.discover(createMockDelegatedIdentity());
 
       expect(result.payload.plugins).toHaveLength(1);
       expect(result.payload.rejected).toHaveLength(0);
@@ -525,7 +524,7 @@ describe('AdminDiscoveryAggregationService', () => {
         { trustClassFilter },
       );
 
-      const result = await service.discover(createMockOperatorContext());
+      const result = await service.discover(createMockDelegatedIdentity());
 
       expect(result.payload.plugins).toHaveLength(0);
       expect(result.payload.rejected).toHaveLength(1);
@@ -566,7 +565,7 @@ describe('AdminDiscoveryAggregationService', () => {
         { reviewStatusFilter },
       );
 
-      const result = await service.discover(createMockOperatorContext());
+      const result = await service.discover(createMockDelegatedIdentity());
 
       expect(result.payload.plugins).toHaveLength(0);
       expect(result.payload.rejected).toHaveLength(1);
@@ -606,7 +605,7 @@ describe('AdminDiscoveryAggregationService', () => {
         { allowlistEvaluator, trustClassFilter, reviewStatusFilter },
       );
 
-      const result = await service.discover(createMockOperatorContext());
+      const result = await service.discover(createMockDelegatedIdentity());
 
       expect(result.payload.plugins).toHaveLength(1);
       expect(result.payload.rejected).toHaveLength(0);
@@ -649,7 +648,7 @@ describe('AdminDiscoveryAggregationService', () => {
         { allowlistEvaluator, trustClassFilter, reviewStatusFilter },
       );
 
-      const result = await service.discover(createMockOperatorContext());
+      const result = await service.discover(createMockDelegatedIdentity());
 
       expect(result.payload.plugins).toHaveLength(0);
       expect(result.payload.rejected).toHaveLength(1);
@@ -676,7 +675,7 @@ describe('AdminDiscoveryAggregationService', () => {
         },
       );
 
-      const result = await service.discover(createMockOperatorContext());
+      const result = await service.discover(createMockDelegatedIdentity());
 
       expect(result.payload.plugins).toHaveLength(1);
       expect(result.payload.rejected).toHaveLength(0);
@@ -752,7 +751,7 @@ describe('AdminDiscoveryAggregationService', () => {
         { allowlistEvaluator, trustClassFilter, reviewStatusFilter },
       );
 
-      const result = await service.discover(createMockOperatorContext());
+      const result = await service.discover(createMockDelegatedIdentity());
 
       expect(result.payload.plugins).toHaveLength(1);
       expect(result.payload.rejected).toHaveLength(2);
