@@ -15,10 +15,10 @@ import {
 import type {
   IAdminDiscoveryAggregationService,
   IAdminDiscoveryResult,
-  IAdminOperatorContext,
   IAdminPermissionMappingService,
   IAdminPluginCatalogSource,
 } from '../admin-bff.interfaces.js';
+import type { IPlatformDelegatedIdentity } from '@prosto/platform-sdk';
 import { ADMIN_BFF_REJECTION_REASON_CODES } from '../admin-bff.constants.js';
 import type {
   IAdminPluginAllowlistEvaluator,
@@ -83,7 +83,7 @@ export class AdminDiscoveryAggregationService implements IAdminDiscoveryAggregat
   }
 
   async discover(
-    operatorContext: IAdminOperatorContext,
+    identity: IPlatformDelegatedIdentity,
   ): Promise<IAdminDiscoveryResult> {
     const startTime = Date.now();
 
@@ -147,7 +147,7 @@ export class AdminDiscoveryAggregationService implements IAdminDiscoveryAggregat
 
       const permissionRejection = this._evaluatePermissionChecks(
         manifest,
-        operatorContext,
+        identity,
       );
 
       if (permissionRejection) {
@@ -180,12 +180,12 @@ export class AdminDiscoveryAggregationService implements IAdminDiscoveryAggregat
   }
 
   /**
-   * Evaluates permission requirements against the operator's granted permissions.
-   * Returns rejection metadata if the operator lacks required permissions, or undefined if all pass.
+   * Evaluates permission requirements against the identity's granted permissions.
+   * Returns rejection metadata if the identity lacks required permissions, or undefined if all pass.
    */
   private _evaluatePermissionChecks(
     manifest: IAdminUIPluginManifest,
-    operatorContext: IAdminOperatorContext,
+    identity: IPlatformDelegatedIdentity,
   ): Omit<IAdminRejectedPluginDiagnostic, 'id' | 'version'> | undefined {
     if (!this._permissionService) {
       return undefined;
@@ -198,10 +198,7 @@ export class AdminDiscoveryAggregationService implements IAdminDiscoveryAggregat
     }
 
     const { allowed, missingPermissions } =
-      this._permissionService.filterPermissions(
-        requiredPermissions,
-        operatorContext,
-      );
+      this._permissionService.filterPermissions(requiredPermissions, identity);
 
     if (!allowed) {
       return {

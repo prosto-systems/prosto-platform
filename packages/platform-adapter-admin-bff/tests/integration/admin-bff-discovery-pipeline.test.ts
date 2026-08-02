@@ -9,12 +9,16 @@ import {
   AdminPluginCompatibilityEvaluator,
   AdminUIPluginManifestValidator,
 } from '@prosto/platform-admin-contracts';
-import { describe, expect, it, vi } from 'vitest';
+import {
+  PlatformDelegatedIdentity,
+  PlatformHttpRequest,
+} from '@prosto/platform-sdk';
 import type {
-  IAdminBffRequest,
-  IAdminOperatorContext,
-  IAdminPluginCatalogSource,
-} from '@/admin-bff.interfaces.js';
+  IPlatformDelegatedIdentity,
+  IPlatformHttpRequest,
+} from '@prosto/platform-sdk';
+import { describe, expect, it, vi } from 'vitest';
+import type { IAdminPluginCatalogSource } from '@/admin-bff.interfaces.js';
 import { AdminDiagnosticsService } from '@/diagnostics/index.js';
 import { AdminDiscoveryAggregationService } from '@/discovery/index.js';
 import { AdminPermissionMappingService } from '@/permissions/index.js';
@@ -90,48 +94,27 @@ const DEFAULT_PERMISSION_POLICY: IAdminPermissionPolicy = {
   ],
 };
 
-function createOperatorContext(
-  overrides?: Partial<IAdminOperatorContext>,
-): IAdminOperatorContext {
-  return {
-    operatorId: 'operator-1',
-    roleIds: ['admin'],
-    permissions: [],
-    ...overrides,
-  };
+function createOperatorIdentity(
+  subjectId = 'operator-1',
+  roles: string[] = ['admin'],
+  permissions: string[] = [],
+): IPlatformDelegatedIdentity {
+  return new PlatformDelegatedIdentity({ subjectId, roles, permissions });
 }
 
-function createDiscoveryRequest(): IAdminBffRequest {
-  return {
-    method: 'GET',
-    path: '/admin/api/v1/discovery',
-    params: {},
-    query: {},
-    body: undefined,
-    headers: { 'user-agent': 'test-agent' },
-  };
-}
-
-function createActionRequest(actionId: string): IAdminBffRequest {
-  return {
-    method: 'POST',
-    path: `/admin/api/v1/action/${actionId}`,
-    params: { actionId },
-    query: {},
-    body: undefined,
-    headers: { 'user-agent': 'test-agent' },
-  };
-}
-
-function createDiagnosticsRequest(): IAdminBffRequest {
-  return {
-    method: 'GET',
-    path: '/admin/api/v1/diagnostics',
-    params: {},
-    query: {},
-    body: undefined,
-    headers: { 'user-agent': 'test-agent' },
-  };
+function createSdkRequest(
+  overrides?: Partial<IPlatformHttpRequest>,
+): IPlatformHttpRequest {
+  return new PlatformHttpRequest({
+    method: overrides?.method ?? 'GET',
+    path: overrides?.path ?? '/admin/api/v1/discovery',
+    params: overrides?.params ?? {},
+    query: overrides?.query ?? {},
+    headers: overrides?.headers ?? { 'user-agent': 'test-agent' },
+    body: overrides?.body ?? { variant: 'empty' as const },
+    correlationId: overrides?.correlationId ?? 'test-cid',
+    identity: overrides?.identity ?? createOperatorIdentity(),
+  });
 }
 
 function buildFullPipeline(
@@ -210,14 +193,13 @@ describe('Admin BFF integration: compliant plugin discovery', () => {
     const manifest = createValidManifest();
     const { adapter } = buildFullPipeline([manifest]);
 
-    const request = createDiscoveryRequest();
-    const operator = createOperatorContext();
+    const request = createSdkRequest();
 
-    const response = await adapter.handleRequest(request, operator);
+    const response = await adapter.handleRequest(request);
 
     expect(response.status).toBe(200);
 
-    const body = response.body as {
+    const body = response.body.data as {
       correlationId: string;
       data: {
         schemaVersion: string;
@@ -275,11 +257,10 @@ describe('Admin BFF integration: compliant plugin discovery', () => {
     });
 
     const { adapter } = buildFullPipeline([manifest1, manifest2]);
-    const request = createDiscoveryRequest();
-    const operator = createOperatorContext();
+    const request = createSdkRequest();
 
-    const response = await adapter.handleRequest(request, operator);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       data: {
         plugins: { id: string; version: string }[];
         rejected: unknown[];
@@ -300,11 +281,10 @@ describe('Admin BFF integration: compliant plugin discovery', () => {
     const manifest = createValidManifest();
     const { adapter } = buildFullPipeline([manifest]);
 
-    const request = createDiscoveryRequest();
-    const operator = createOperatorContext();
+    const request = createSdkRequest();
 
-    const response = await adapter.handleRequest(request, operator);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       data: { schemaVersion: string; generatedAt: string };
     };
 
@@ -316,11 +296,10 @@ describe('Admin BFF integration: compliant plugin discovery', () => {
   it('should handle empty catalog and return empty plugins list', async () => {
     const { adapter } = buildFullPipeline([]);
 
-    const request = createDiscoveryRequest();
-    const operator = createOperatorContext();
+    const request = createSdkRequest();
 
-    const response = await adapter.handleRequest(request, operator);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       data: {
         plugins: unknown[];
         rejected: unknown[];
@@ -346,11 +325,10 @@ describe('Admin BFF integration: rejected plugin diagnostics', () => {
 
     const { adapter } = buildFullPipeline([validManifest, invalidManifest]);
 
-    const request = createDiscoveryRequest();
-    const operator = createOperatorContext();
+    const request = createSdkRequest();
 
-    const response = await adapter.handleRequest(request, operator);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       data: {
         plugins: { id: string }[];
         rejected: {
@@ -387,11 +365,10 @@ describe('Admin BFF integration: rejected plugin diagnostics', () => {
 
     const { adapter } = buildFullPipeline([manifest]);
 
-    const request = createDiscoveryRequest();
-    const operator = createOperatorContext();
+    const request = createSdkRequest();
 
-    const response = await adapter.handleRequest(request, operator);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       data: {
         plugins: unknown[];
         rejected: {
@@ -427,11 +404,10 @@ describe('Admin BFF integration: rejected plugin diagnostics', () => {
       allowedTrustClasses: ['trusted', 'internal'],
     });
 
-    const request = createDiscoveryRequest();
-    const operator = createOperatorContext();
+    const request = createSdkRequest();
 
-    const response = await adapter.handleRequest(request, operator);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       data: {
         plugins: unknown[];
         rejected: {
@@ -460,11 +436,10 @@ describe('Admin BFF integration: rejected plugin diagnostics', () => {
       allowedReviewStatuses: ['approved'],
     });
 
-    const request = createDiscoveryRequest();
-    const operator = createOperatorContext();
+    const request = createSdkRequest();
 
-    const response = await adapter.handleRequest(request, operator);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       data: {
         plugins: unknown[];
         rejected: {
@@ -493,11 +468,10 @@ describe('Admin BFF integration: rejected plugin diagnostics', () => {
       ],
     });
 
-    const request = createDiscoveryRequest();
-    const operator = createOperatorContext();
+    const request = createSdkRequest();
 
-    const response = await adapter.handleRequest(request, operator);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       data: {
         plugins: unknown[];
         rejected: {
@@ -522,11 +496,10 @@ describe('Admin BFF integration: rejected plugin diagnostics', () => {
     const invalidManifest = { id: 'broken-plugin' };
 
     const { adapter } = buildFullPipeline([validManifest, invalidManifest]);
-    const request = createDiagnosticsRequest();
-    const operator = createOperatorContext();
+    const request = createSdkRequest({ path: '/admin/api/v1/diagnostics' });
 
-    const response = await adapter.handleRequest(request, operator);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       schemaVersion: string;
       correlationId: string;
       environment: string;
@@ -537,7 +510,7 @@ describe('Admin BFF integration: rejected plugin diagnostics', () => {
         reasonCode?: string;
         remediationHint?: string;
         correlationId: string;
-        operatorId: string;
+        subjectId: string;
       }[];
       summary: {
         acceptedCount: number;
@@ -545,8 +518,8 @@ describe('Admin BFF integration: rejected plugin diagnostics', () => {
         totalCount: number;
       };
       metadata: {
-        operatorId: string;
-        operatorRoles: string[];
+        subjectId: string;
+        roles: string[];
         discoveryPipelineVersion: string;
       };
     };
@@ -572,30 +545,29 @@ describe('Admin BFF integration: rejected plugin diagnostics', () => {
     expect(body.summary.rejectedCount).toBe(1);
     expect(body.summary.totalCount).toBe(2);
 
-    expect(body.metadata.operatorId).toBe('operator-1');
-    expect(body.metadata.operatorRoles).toEqual(['admin']);
+    expect(body.metadata.subjectId).toBe('operator-1');
+    expect(body.metadata.roles).toEqual(['admin']);
     expect(body.metadata.discoveryPipelineVersion).toBe('test-pipeline.v1');
   });
 
   it('should return 404 for unknown route', async () => {
     const { adapter } = buildFullPipeline([]);
-    const request: IAdminBffRequest = {
+    const request = new PlatformHttpRequest({
       method: 'GET',
       path: '/unknown/route',
       params: {},
       query: {},
-      body: undefined,
       headers: {},
-    };
+      body: { variant: 'empty' as const },
+      correlationId: 'test-cid',
+      identity: createOperatorIdentity(),
+    });
 
-    const response = await adapter.handleRequest(
-      request,
-      createOperatorContext(),
-    );
+    const response = await adapter.handleRequest(request);
 
     expect(response.status).toBe(404);
 
-    const body = response.body as { error: { code: string } };
+    const body = response.body.data as { error: { code: string } };
 
     expect(body.error.code).toBe('ROUTE_NOT_FOUND');
   });
@@ -609,14 +581,12 @@ describe('Admin BFF integration: role-based filtering outcomes', () => {
 
     const { adapter } = buildFullPipeline([manifest]);
 
-    const request = createDiscoveryRequest();
-    const adminOperator = createOperatorContext({
-      roleIds: ['admin'],
-      permissions: [],
+    const request = createSdkRequest({
+      identity: createOperatorIdentity('operator-1', ['admin']),
     });
 
-    const response = await adapter.handleRequest(request, adminOperator);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       data: {
         plugins: { id: string }[];
         rejected: unknown[];
@@ -636,14 +606,12 @@ describe('Admin BFF integration: role-based filtering outcomes', () => {
 
     const { adapter } = buildFullPipeline([manifest]);
 
-    const request = createDiscoveryRequest();
-    const viewerOperator = createOperatorContext({
-      roleIds: ['viewer'],
-      permissions: [],
+    const request = createSdkRequest({
+      identity: createOperatorIdentity('viewer-operator', ['viewer']),
     });
 
-    const response = await adapter.handleRequest(request, viewerOperator);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       data: {
         plugins: unknown[];
         rejected: {
@@ -669,14 +637,12 @@ describe('Admin BFF integration: role-based filtering outcomes', () => {
 
     const { adapter } = buildFullPipeline([manifest]);
 
-    const request = createDiscoveryRequest();
-    const operatorCtx = createOperatorContext({
-      roleIds: ['operator'],
-      permissions: [],
+    const request = createSdkRequest({
+      identity: createOperatorIdentity('operator-1', ['operator']),
     });
 
-    const response = await adapter.handleRequest(request, operatorCtx);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       data: {
         plugins: { id: string }[];
         rejected: unknown[];
@@ -695,14 +661,16 @@ describe('Admin BFF integration: role-based filtering outcomes', () => {
 
     const { adapter } = buildFullPipeline([manifest]);
 
-    const request = createDiscoveryRequest();
-    const operatorCtx = createOperatorContext({
-      roleIds: ['operator'],
-      permissions: ['settings.manage'],
+    const request = createSdkRequest({
+      identity: createOperatorIdentity(
+        'operator-1',
+        ['operator'],
+        ['settings.manage'],
+      ),
     });
 
-    const response = await adapter.handleRequest(request, operatorCtx);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       data: {
         plugins: { id: string }[];
         rejected: unknown[];
@@ -717,17 +685,18 @@ describe('Admin BFF integration: role-based filtering outcomes', () => {
   it('should deny action when operator lacks required permissions', async () => {
     const { adapter } = buildFullPipeline([]);
 
-    const request = createActionRequest('settings.reset');
-    const viewerOperator = createOperatorContext({
-      roleIds: ['viewer'],
-      permissions: [],
+    const request = createSdkRequest({
+      method: 'POST',
+      path: '/admin/api/v1/action/settings.reset',
+      params: { actionId: 'settings.reset' },
+      identity: createOperatorIdentity('viewer-operator', ['viewer']),
     });
 
-    const response = await adapter.handleRequest(request, viewerOperator);
+    const response = await adapter.handleRequest(request);
 
     expect(response.status).toBe(403);
 
-    const body = response.body as {
+    const body = response.body.data as {
       error: { code: string; message: string; remediationHint?: string };
     };
 
@@ -739,17 +708,18 @@ describe('Admin BFF integration: role-based filtering outcomes', () => {
   it('should allow action when operator has required permissions', async () => {
     const { adapter } = buildFullPipeline([]);
 
-    const request = createActionRequest('catalog.export');
-    const adminOperator = createOperatorContext({
-      roleIds: ['admin'],
-      permissions: [],
+    const request = createSdkRequest({
+      method: 'POST',
+      path: '/admin/api/v1/action/catalog.export',
+      params: { actionId: 'catalog.export' },
+      identity: createOperatorIdentity('operator-1', ['admin']),
     });
 
-    const response = await adapter.handleRequest(request, adminOperator);
+    const response = await adapter.handleRequest(request);
 
     expect(response.status).toBe(200);
 
-    const body = response.body as {
+    const body = response.body.data as {
       data: { actionId: string; allowed: boolean };
     };
 
@@ -760,14 +730,18 @@ describe('Admin BFF integration: role-based filtering outcomes', () => {
   it('should deny action for unknown actionId', async () => {
     const { adapter } = buildFullPipeline([]);
 
-    const request = createActionRequest('nonexistent.action');
-    const adminOperator = createOperatorContext({ roleIds: ['admin'] });
+    const request = createSdkRequest({
+      method: 'POST',
+      path: '/admin/api/v1/action/nonexistent.action',
+      params: { actionId: 'nonexistent.action' },
+      identity: createOperatorIdentity('operator-1', ['admin']),
+    });
 
-    const response = await adapter.handleRequest(request, adminOperator);
+    const response = await adapter.handleRequest(request);
 
     expect(response.status).toBe(403);
 
-    const body = response.body as {
+    const body = response.body.data as {
       error: { code: string; message: string };
     };
 
@@ -796,14 +770,12 @@ describe('Admin BFF integration: role-based filtering outcomes', () => {
       restrictedManifest,
     ]);
 
-    const request = createDiscoveryRequest();
-    const viewerOperator = createOperatorContext({
-      roleIds: ['viewer'],
-      permissions: [],
+    const request = createSdkRequest({
+      identity: createOperatorIdentity('viewer-operator', ['viewer']),
     });
 
-    const response = await adapter.handleRequest(request, viewerOperator);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       data: {
         plugins: { id: string }[];
         rejected: { id: string; reasonCode: string }[];
@@ -833,30 +805,28 @@ describe('Admin BFF integration: role-based filtering outcomes', () => {
 
     const { adapter } = buildFullPipeline([manifest]);
 
-    const request = createDiagnosticsRequest();
-    const viewerOperator = createOperatorContext({
-      operatorId: 'viewer-jane',
-      roleIds: ['viewer'],
-      permissions: [],
+    const request = createSdkRequest({
+      path: '/admin/api/v1/diagnostics',
+      identity: createOperatorIdentity('viewer-jane', ['viewer']),
     });
 
-    const response = await adapter.handleRequest(request, viewerOperator);
-    const body = response.body as {
+    const response = await adapter.handleRequest(request);
+    const body = response.body.data as {
       metadata: {
-        operatorId: string;
-        operatorRoles: string[];
+        subjectId: string;
+        roles: string[];
       };
       plugins: {
-        operatorId: string;
+        subjectId: string;
       }[];
     };
 
     expect(response.status).toBe(200);
-    expect(body.metadata.operatorId).toBe('viewer-jane');
-    expect(body.metadata.operatorRoles).toEqual(['viewer']);
+    expect(body.metadata.subjectId).toBe('viewer-jane');
+    expect(body.metadata.roles).toEqual(['viewer']);
 
     for (const plugin of body.plugins) {
-      expect(plugin.operatorId).toBe('viewer-jane');
+      expect(plugin.subjectId).toBe('viewer-jane');
     }
   });
 });

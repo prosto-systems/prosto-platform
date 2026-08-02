@@ -1,9 +1,10 @@
+import type { IAdminBffRouteContext } from '../admin-bff.interfaces.js';
 import type {
-  IAdminBffRequest,
-  IAdminBffResponse,
-  IAdminBffRouteContext,
-  IAdminBffRouteHandler,
-} from '../admin-bff.interfaces.js';
+  IPlatformHttpRequest,
+  IPlatformHttpResponse,
+  IPlatformHttpRouteHandler,
+} from '@prosto/platform-sdk';
+import { PlatformHttpResponse } from '@prosto/platform-sdk';
 import {
   AdminBffErrorCodes,
   AdminBffLogEvents,
@@ -20,14 +21,14 @@ import { ADMIN_BFF_ROUTES } from '../admin-bff.constants.js';
  *
  * Observability: logs action evaluation outcomes and permission denials.
  */
-export class AdminActionRouteHandler implements IAdminBffRouteHandler {
+export class AdminActionRouteHandler implements IPlatformHttpRouteHandler<IAdminBffRouteContext> {
   readonly route = ADMIN_BFF_ROUTES.ACTION;
   readonly method = 'POST' as const;
 
   async handle(
-    request: IAdminBffRequest,
+    request: IPlatformHttpRequest,
     context: IAdminBffRouteContext,
-  ): Promise<IAdminBffResponse> {
+  ): Promise<IPlatformHttpResponse> {
     const actionId = request.params['actionId'];
 
     if (!actionId) {
@@ -35,32 +36,35 @@ export class AdminActionRouteHandler implements IAdminBffRouteHandler {
         phase: AdminBffPhase.ACTION_EVALUATION,
         correlationId: context.correlationId,
         errorCode: AdminBffErrorCodes.VALIDATION_FAILED,
-        operatorId: context.operatorContext.operatorId,
+        subjectId: context.identity.subjectId,
       });
 
-      return {
+      return new PlatformHttpResponse({
         status: 400,
         body: {
-          correlationId: context.correlationId,
-          error: {
-            code: 'MISSING_ACTION_ID',
-            message: 'Action ID is required.',
+          variant: 'json',
+          data: {
+            correlationId: context.correlationId,
+            error: {
+              code: 'MISSING_ACTION_ID',
+              message: 'Action ID is required.',
+            },
           },
         },
-      };
+      });
     }
 
     context.logger.debug('Evaluating action gate', {
       phase: AdminBffPhase.ACTION_EVALUATION,
       correlationId: context.correlationId,
       actionId,
-      operatorId: context.operatorContext.operatorId,
-      operatorRoles: context.operatorContext.roleIds,
+      subjectId: context.identity.subjectId,
+      roles: context.identity.roles,
     });
 
     const evaluation = context.permissionService.evaluateAction(
       actionId,
-      context.operatorContext,
+      context.identity,
     );
 
     if (!evaluation.allowed) {
@@ -71,22 +75,25 @@ export class AdminActionRouteHandler implements IAdminBffRouteHandler {
         actionId,
         allowed: false,
         reasonCode: evaluation.reasonCode,
-        operatorId: context.operatorContext.operatorId,
-        operatorRoles: context.operatorContext.roleIds,
+        subjectId: context.identity.subjectId,
+        roles: context.identity.roles,
         errorCode: AdminBffErrorCodes.PERMISSION_DENIED,
       });
 
-      return {
+      return new PlatformHttpResponse({
         status: 403,
         body: {
-          correlationId: context.correlationId,
-          error: {
-            code: evaluation.reasonCode ?? 'ACTION_DENIED',
-            message: `Action "${actionId}" is not permitted.`,
-            remediationHint: evaluation.remediationHint,
+          variant: 'json',
+          data: {
+            correlationId: context.correlationId,
+            error: {
+              code: evaluation.reasonCode ?? 'ACTION_DENIED',
+              message: `Action "${actionId}" is not permitted.`,
+              remediationHint: evaluation.remediationHint,
+            },
           },
         },
-      };
+      });
     }
 
     context.logger.info('Action allowed', {
@@ -95,19 +102,22 @@ export class AdminActionRouteHandler implements IAdminBffRouteHandler {
       event: AdminBffLogEvents.ACTION_EVALUATED,
       actionId,
       allowed: true,
-      operatorId: context.operatorContext.operatorId,
-      operatorRoles: context.operatorContext.roleIds,
+      subjectId: context.identity.subjectId,
+      roles: context.identity.roles,
     });
 
-    return {
+    return new PlatformHttpResponse({
       status: 200,
       body: {
-        correlationId: context.correlationId,
+        variant: 'json',
         data: {
-          actionId: evaluation.actionId,
-          allowed: true,
+          correlationId: context.correlationId,
+          data: {
+            actionId: evaluation.actionId,
+            allowed: true,
+          },
         },
       },
-    };
+    });
   }
 }

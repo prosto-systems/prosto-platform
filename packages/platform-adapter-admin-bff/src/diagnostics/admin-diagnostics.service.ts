@@ -2,11 +2,11 @@ import type {
   AdminDiscoveryRejectionReasonCodeType,
   IAdminRejectedPluginDiagnostic,
 } from '@prosto/platform-admin-contracts';
+import type { IPlatformDelegatedIdentity } from '@prosto/platform-sdk';
 import type {
   IAdminDiscoveryDiagnostics,
   IAdminDiscoveryPayloadResult,
   IAdminDiscoveryResult,
-  IAdminOperatorContext,
 } from '../admin-bff.interfaces.js';
 import type {
   IAdminDiagnosticsMetadata,
@@ -45,12 +45,12 @@ export class AdminDiagnosticsService implements IAdminDiagnosticsService {
     requestContext: IAdminDiagnosticsRequestContext,
   ): IAdminDiagnosticsPayload {
     const { payload, diagnostics } = discoveryResult;
-    const { correlationId, operatorContext } = requestContext;
+    const { correlationId, identity } = requestContext;
 
     const pluginEntries = this._mapDiscoveryPayloadToEntries(
       payload,
       correlationId,
-      operatorContext,
+      identity,
     );
 
     const summary = this._buildSummary(
@@ -81,7 +81,7 @@ export class AdminDiagnosticsService implements IAdminDiagnosticsService {
     message: string | undefined,
     remediationHint: string | undefined,
     correlationId: string,
-    operatorId: string,
+    subjectId: string,
   ): IAdminDiagnosticsPluginEntry {
     return {
       pluginId,
@@ -92,7 +92,7 @@ export class AdminDiagnosticsService implements IAdminDiagnosticsService {
       remediationHint,
       timestamp: new Date().toISOString(),
       correlationId,
-      operatorId,
+      subjectId,
       environment: this._config.environment,
       shellVersion: this._config.shellVersion,
     };
@@ -102,7 +102,7 @@ export class AdminDiagnosticsService implements IAdminDiagnosticsService {
     results: readonly IAdminDiscoveryResult[],
     requestContext: IAdminDiagnosticsRequestContext,
   ): IAdminDiagnosticsPayload {
-    const { correlationId, operatorContext } = requestContext;
+    const { correlationId, identity } = requestContext;
 
     const allPluginEntries: IAdminDiagnosticsPluginEntry[] = [];
     let totalAccepted = 0;
@@ -114,7 +114,7 @@ export class AdminDiagnosticsService implements IAdminDiagnosticsService {
       const entries = this._mapDiscoveryPayloadToEntries(
         result.payload,
         correlationId,
-        operatorContext,
+        identity,
       );
 
       allPluginEntries.push(...entries);
@@ -153,7 +153,7 @@ export class AdminDiagnosticsService implements IAdminDiagnosticsService {
   private _mapDiscoveryPayloadToEntries(
     payload: IAdminDiscoveryPayloadResult,
     correlationId: string,
-    operatorContext: IAdminOperatorContext,
+    identity: IPlatformDelegatedIdentity,
   ): IAdminDiagnosticsPluginEntry[] {
     const entries: IAdminDiagnosticsPluginEntry[] = [];
 
@@ -167,7 +167,7 @@ export class AdminDiagnosticsService implements IAdminDiagnosticsService {
           undefined,
           undefined,
           correlationId,
-          operatorContext.operatorId,
+          identity.subjectId,
         ),
       );
     }
@@ -177,7 +177,7 @@ export class AdminDiagnosticsService implements IAdminDiagnosticsService {
         this._mapRejectedDiagnosticToEntry(
           rejected,
           correlationId,
-          operatorContext.operatorId,
+          identity.subjectId,
         ),
       );
     }
@@ -188,7 +188,7 @@ export class AdminDiagnosticsService implements IAdminDiagnosticsService {
   private _mapRejectedDiagnosticToEntry(
     diagnostic: IAdminRejectedPluginDiagnostic,
     correlationId: string,
-    operatorId: string,
+    subjectId: string,
   ): IAdminDiagnosticsPluginEntry {
     return {
       pluginId: diagnostic.id ?? 'unknown',
@@ -199,7 +199,7 @@ export class AdminDiagnosticsService implements IAdminDiagnosticsService {
       remediationHint: diagnostic.remediationHint,
       timestamp: new Date().toISOString(),
       correlationId,
-      operatorId,
+      subjectId,
       environment: this._config.environment,
       shellVersion: this._config.shellVersion,
     };
@@ -226,8 +226,8 @@ export class AdminDiagnosticsService implements IAdminDiagnosticsService {
     requestContext: IAdminDiagnosticsRequestContext,
   ): IAdminDiagnosticsMetadata {
     return {
-      operatorId: requestContext.operatorContext.operatorId,
-      operatorRoles: [...requestContext.operatorContext.roleIds],
+      subjectId: requestContext.identity.subjectId,
+      roles: [...requestContext.identity.roles],
       requestPath: requestContext.requestPath,
       userAgent: requestContext.userAgent,
       clientIp: requestContext.clientIp,

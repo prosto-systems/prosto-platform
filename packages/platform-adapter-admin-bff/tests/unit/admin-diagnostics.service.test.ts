@@ -6,18 +6,17 @@ import {
   ADMIN_DIAGNOSTICS_SCHEMA_VERSION,
   AdminDiagnosticsService,
 } from '@/diagnostics/index.js';
-import type {
-  IAdminDiscoveryResult,
-  IAdminOperatorContext,
-} from '@/admin-bff.interfaces.js';
+import type { IAdminDiscoveryResult } from '@/admin-bff.interfaces.js';
+import { PlatformDelegatedIdentity } from '@prosto/platform-sdk';
+import type { IPlatformDelegatedIdentity } from '@prosto/platform-sdk';
 import { describe, expect, it } from 'vitest';
 
-function createMockOperatorContext(): IAdminOperatorContext {
-  return {
-    operatorId: 'operator-1',
-    roleIds: ['admin'],
+function createMockIdentity(): IPlatformDelegatedIdentity {
+  return new PlatformDelegatedIdentity({
+    subjectId: 'operator-1',
+    roles: ['admin'],
     permissions: ['read', 'write'],
-  };
+  });
 }
 
 function createMockRequestContext(
@@ -25,7 +24,7 @@ function createMockRequestContext(
 ): IAdminDiagnosticsRequestContext {
   return {
     correlationId: 'test-correlation-123',
-    operatorContext: createMockOperatorContext(),
+    identity: createMockIdentity(),
     requestPath: '/admin/api/v1/discovery',
     userAgent: 'Mozilla/5.0',
     clientIp: '127.0.0.1',
@@ -167,7 +166,7 @@ describe('AdminDiagnosticsService', () => {
       expect(rejectedEntry?.remediationHint).toBe('Add to allowlist');
     });
 
-    it('should include metadata with operator and request info', () => {
+    it('should include metadata with subject and request info', () => {
       const service = new AdminDiagnosticsService(createMockServiceConfig());
       const discoveryResult = createMockDiscoveryResult();
       const requestContext = createMockRequestContext();
@@ -177,8 +176,8 @@ describe('AdminDiagnosticsService', () => {
         requestContext,
       );
 
-      expect(payload.metadata.operatorId).toBe('operator-1');
-      expect(payload.metadata.operatorRoles).toEqual(['admin']);
+      expect(payload.metadata.subjectId).toBe('operator-1');
+      expect(payload.metadata.roles).toEqual(['admin']);
       expect(payload.metadata.requestPath).toBe('/admin/api/v1/discovery');
       expect(payload.metadata.userAgent).toBe('Mozilla/5.0');
       expect(payload.metadata.clientIp).toBe('127.0.0.1');
@@ -249,7 +248,7 @@ describe('AdminDiagnosticsService', () => {
       expect(entry.pluginVersion).toBe('1.0.0');
       expect(entry.status).toBe('accepted');
       expect(entry.correlationId).toBe('corr-123');
-      expect(entry.operatorId).toBe('operator-1');
+      expect(entry.subjectId).toBe('operator-1');
       expect(entry.timestamp).toBeDefined();
     });
 

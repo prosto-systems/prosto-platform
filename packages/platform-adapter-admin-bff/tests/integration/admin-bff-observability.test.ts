@@ -9,13 +9,17 @@ import {
   AdminPluginCompatibilityEvaluator,
   AdminUIPluginManifestValidator,
 } from '@prosto/platform-admin-contracts';
+import {
+  PlatformDelegatedIdentity,
+  PlatformHttpRequest,
+} from '@prosto/platform-sdk';
+import type {
+  IPlatformDelegatedIdentity,
+  IPlatformHttpRequest,
+} from '@prosto/platform-sdk';
 import { describe, expect, it, vi } from 'vitest';
 import { PlatformAdminBffAdapter } from '@/admin-bff.adapter.js';
-import type {
-  IAdminBffRequest,
-  IAdminOperatorContext,
-  IAdminPluginCatalogSource,
-} from '@/admin-bff.interfaces.js';
+import type { IAdminPluginCatalogSource } from '@/admin-bff.interfaces.js';
 import type { IAdminBffLogger } from '@/observability/index.js';
 import { AdminDiagnosticsService } from '@/diagnostics/index.js';
 import { AdminDiscoveryAggregationService } from '@/discovery/index.js';
@@ -79,59 +83,27 @@ const DEFAULT_PERMISSION_POLICY: IAdminPermissionPolicy = {
   ],
 };
 
-function createOperatorContext(
-  overrides?: Partial<IAdminOperatorContext>,
-): IAdminOperatorContext {
-  return {
-    operatorId: 'operator-1',
-    roleIds: ['admin'],
-    permissions: [],
-    ...overrides,
-  };
+function createOperatorIdentity(
+  subjectId = 'operator-1',
+  roles: string[] = ['admin'],
+  permissions: string[] = [],
+): IPlatformDelegatedIdentity {
+  return new PlatformDelegatedIdentity({ subjectId, roles, permissions });
 }
 
-function createDiscoveryRequest(): IAdminBffRequest {
-  return {
-    method: 'GET',
-    path: '/admin/api/v1/discovery',
-    params: {},
-    query: {},
-    body: undefined,
-    headers: { 'user-agent': 'test-agent' },
-  };
-}
-
-function createActionRequest(actionId: string): IAdminBffRequest {
-  return {
-    method: 'POST',
-    path: `/admin/api/v1/action/${actionId}`,
-    params: { actionId },
-    query: {},
-    body: undefined,
-    headers: { 'user-agent': 'test-agent' },
-  };
-}
-
-function createDiagnosticsRequest(): IAdminBffRequest {
-  return {
-    method: 'GET',
-    path: '/admin/api/v1/diagnostics',
-    params: {},
-    query: {},
-    body: undefined,
-    headers: { 'user-agent': 'test-agent' },
-  };
-}
-
-function createHealthRequest(): IAdminBffRequest {
-  return {
-    method: 'GET',
-    path: '/admin/api/v1/health',
-    params: {},
-    query: {},
-    body: undefined,
-    headers: { 'user-agent': 'test-agent' },
-  };
+function createSdkRequest(
+  overrides?: Partial<IPlatformHttpRequest>,
+): IPlatformHttpRequest {
+  return new PlatformHttpRequest({
+    method: overrides?.method ?? 'GET',
+    path: overrides?.path ?? '/admin/api/v1/discovery',
+    params: overrides?.params ?? {},
+    query: overrides?.query ?? {},
+    headers: overrides?.headers ?? { 'user-agent': 'test-agent' },
+    body: overrides?.body ?? { variant: 'empty' as const },
+    correlationId: overrides?.correlationId ?? 'test-cid',
+    identity: overrides?.identity ?? createOperatorIdentity(),
+  });
 }
 
 function createMockLogger(): IAdminBffLogger & {
@@ -242,10 +214,9 @@ describe('Admin BFF observability: adapter request logging', () => {
     const manifest = createValidManifest();
     const { adapter } = buildFullPipeline([manifest], { logger });
 
-    const request = createDiscoveryRequest();
-    const operator = createOperatorContext();
+    const request = createSdkRequest();
 
-    const response = await adapter.handleRequest(request, operator);
+    const response = await adapter.handleRequest(request);
 
     expect(response.status).toBe(200);
 
@@ -261,7 +232,7 @@ describe('Admin BFF observability: adapter request logging', () => {
     expect(received?.context?.correlationId).toBeDefined();
     expect(received?.context?.method).toBe('GET');
     expect(received?.context?.path).toBe('/admin/api/v1/discovery');
-    expect(received?.context?.operatorId).toBe('operator-1');
+    expect(received?.context?.subjectId).toBe('operator-1');
 
     const completed = infoCalls.find((c) => c.message === 'Request completed');
 
@@ -274,19 +245,18 @@ describe('Admin BFF observability: adapter request logging', () => {
     const logger = createMockLogger();
     const { adapter } = buildFullPipeline([], { logger });
 
-    const request: IAdminBffRequest = {
+    const request = new PlatformHttpRequest({
       method: 'GET',
       path: '/unknown/route',
       params: {},
       query: {},
-      body: undefined,
       headers: {},
-    };
+      body: { variant: 'empty' as const },
+      correlationId: 'test-cid',
+      identity: createOperatorIdentity(),
+    });
 
-    const response = await adapter.handleRequest(
-      request,
-      createOperatorContext(),
-    );
+    const response = await adapter.handleRequest(request);
 
     expect(response.status).toBe(404);
 
@@ -300,10 +270,14 @@ describe('Admin BFF observability: adapter request logging', () => {
     const logger = createMockLogger();
     const { adapter } = buildFullPipeline([], { logger });
 
-    const request = createActionRequest('nonexistent.action');
-    const operator = createOperatorContext({ roleIds: ['admin'] });
+    const request = createSdkRequest({
+      method: 'POST',
+      path: '/admin/api/v1/action/nonexistent.action',
+      params: { actionId: 'nonexistent.action' },
+      identity: createOperatorIdentity('operator-1', ['admin']),
+    });
 
-    const response = await adapter.handleRequest(request, operator);
+    const response = await adapter.handleRequest(request);
 
     expect(response.status).toBe(403);
 
@@ -340,10 +314,7 @@ describe('Admin BFF observability: discovery pipeline logging', () => {
     const manifest = createValidManifest();
     const { adapter } = buildFullPipeline([manifest], { logger });
 
-    await adapter.handleRequest(
-      createDiscoveryRequest(),
-      createOperatorContext(),
-    );
+    await adapter.handleRequest(createSdkRequest());
 
     const discoveryStarted = logger.calls.find(
       (c) => c.message === 'Discovery pipeline started',
@@ -369,10 +340,7 @@ describe('Admin BFF observability: discovery pipeline logging', () => {
     const manifest2 = createValidManifest({ id: 'plugin-b', version: '2.0.0' });
     const { adapter } = buildFullPipeline([manifest1, manifest2], { logger });
 
-    await adapter.handleRequest(
-      createDiscoveryRequest(),
-      createOperatorContext(),
-    );
+    await adapter.handleRequest(createSdkRequest());
 
     const acceptedPlugins = logger.calls.filter(
       (c) => c.message === 'Plugin accepted',
@@ -392,10 +360,7 @@ describe('Admin BFF observability: discovery pipeline logging', () => {
       logger,
     });
 
-    await adapter.handleRequest(
-      createDiscoveryRequest(),
-      createOperatorContext(),
-    );
+    await adapter.handleRequest(createSdkRequest());
 
     const rejectedPlugins = logger.calls.filter(
       (c) => c.message === 'Plugin rejected',
@@ -446,9 +411,9 @@ describe('Admin BFF observability: discovery pipeline logging', () => {
       { logger },
     );
 
-    await expect(
-      adapter.handleRequest(createDiscoveryRequest(), createOperatorContext()),
-    ).rejects.toThrow('Catalog unavailable');
+    await expect(adapter.handleRequest(createSdkRequest())).rejects.toThrow(
+      'Catalog unavailable',
+    );
 
     const failedCalls = logger.calls.filter(
       (c) => c.message === 'Discovery pipeline failed',
@@ -468,10 +433,14 @@ describe('Admin BFF observability: action evaluation logging', () => {
     const logger = createMockLogger();
     const { adapter } = buildFullPipeline([], { logger });
 
-    const request = createActionRequest('catalog.export');
-    const operator = createOperatorContext({ roleIds: ['admin'] });
+    const request = createSdkRequest({
+      method: 'POST',
+      path: '/admin/api/v1/action/catalog.export',
+      params: { actionId: 'catalog.export' },
+      identity: createOperatorIdentity('operator-1', ['admin']),
+    });
 
-    await adapter.handleRequest(request, operator);
+    await adapter.handleRequest(request);
 
     const allowedCalls = logger.calls.filter(
       (c) => c.message === 'Action allowed',
@@ -487,10 +456,14 @@ describe('Admin BFF observability: action evaluation logging', () => {
     const logger = createMockLogger();
     const { adapter } = buildFullPipeline([], { logger });
 
-    const request = createActionRequest('catalog.export');
-    const viewerOperator = createOperatorContext({ roleIds: ['viewer'] });
+    const request = createSdkRequest({
+      method: 'POST',
+      path: '/admin/api/v1/action/catalog.export',
+      params: { actionId: 'catalog.export' },
+      identity: createOperatorIdentity('viewer-operator', ['viewer']),
+    });
 
-    await adapter.handleRequest(request, viewerOperator);
+    await adapter.handleRequest(request);
 
     const deniedCalls = logger.calls.filter(
       (c) => c.message === 'Action denied',
@@ -511,16 +484,18 @@ describe('Admin BFF observability: action evaluation logging', () => {
     const logger = createMockLogger();
     const { adapter } = buildFullPipeline([], { logger });
 
-    const request: IAdminBffRequest = {
+    const request = new PlatformHttpRequest({
       method: 'POST',
       path: '/admin/api/v1/action/',
       params: {},
       query: {},
-      body: undefined,
       headers: {},
-    };
+      body: { variant: 'empty' as const },
+      correlationId: 'test-cid',
+      identity: createOperatorIdentity(),
+    });
 
-    await adapter.handleRequest(request, createOperatorContext());
+    await adapter.handleRequest(request);
 
     const warnCalls = logger.calls.filter(
       (c) => c.message === 'Action evaluation requested without actionId',
@@ -539,7 +514,9 @@ describe('Admin BFF observability: health check logging', () => {
     const manifest = createValidManifest();
     const { adapter } = buildFullPipeline([manifest], { logger });
 
-    await adapter.handleRequest(createHealthRequest(), createOperatorContext());
+    await adapter.handleRequest(
+      createSdkRequest({ path: '/admin/api/v1/health' }),
+    );
 
     const started = logger.calls.find(
       (c) => c.message === 'Health check started',
@@ -598,7 +575,9 @@ describe('Admin BFF observability: health check logging', () => {
       { logger },
     );
 
-    await adapter.handleRequest(createHealthRequest(), createOperatorContext());
+    await adapter.handleRequest(
+      createSdkRequest({ path: '/admin/api/v1/health' }),
+    );
 
     const completed = logger.calls.find(
       (c) => c.message === 'Health check completed',
@@ -617,8 +596,7 @@ describe('Admin BFF observability: diagnostics logging', () => {
     const { adapter } = buildFullPipeline([manifest], { logger });
 
     await adapter.handleRequest(
-      createDiagnosticsRequest(),
-      createOperatorContext(),
+      createSdkRequest({ path: '/admin/api/v1/diagnostics' }),
     );
 
     const started = logger.calls.find(
@@ -645,15 +623,13 @@ describe('Admin BFF observability: correlation ID propagation', () => {
     const manifest = createValidManifest();
     const { adapter } = buildFullPipeline([manifest], { logger });
 
-    const response = await adapter.handleRequest(
-      createDiscoveryRequest(),
-      createOperatorContext(),
-      'custom-corr-id',
-    );
+    const request = createSdkRequest({ correlationId: 'custom-corr-id' });
+
+    const response = await adapter.handleRequest(request);
 
     expect(response.status).toBe(200);
 
-    const body = response.body as { correlationId: string };
+    const body = response.body.data as { correlationId: string };
     expect(body.correlationId).toBe('custom-corr-id');
 
     const received = logger.calls.find((c) => c.message === 'Request received');
@@ -666,18 +642,29 @@ describe('Admin BFF observability: correlation ID propagation', () => {
     const manifest = createValidManifest();
     const { adapter } = buildFullPipeline([manifest], { logger });
 
-    const response = await adapter.handleRequest(
-      createDiscoveryRequest(),
-      createOperatorContext(),
+    const request = new PlatformHttpRequest({
+      method: 'GET',
+      path: '/admin/api/v1/discovery',
+      params: {},
+      query: {},
+      headers: { 'user-agent': 'test-agent' },
+      body: { variant: 'empty' as const },
+      identity: createOperatorIdentity(),
+    });
+
+    const response = await adapter.handleRequest(request);
+
+    const body = response.body.data as { correlationId: string };
+
+    expect(body.correlationId).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
     );
-
-    const body = response.body as { correlationId: string };
-
-    expect(body.correlationId).toMatch(/^adm-/);
 
     const received = logger.calls.find((c) => c.message === 'Request received');
 
-    expect(received?.context?.correlationId).toMatch(/^adm-/);
+    expect(received?.context?.correlationId).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+    );
   });
 
   it('should propagate correlation ID across all log entries for a request', async () => {
@@ -686,9 +673,7 @@ describe('Admin BFF observability: correlation ID propagation', () => {
     const { adapter } = buildFullPipeline([manifest], { logger });
 
     await adapter.handleRequest(
-      createDiscoveryRequest(),
-      createOperatorContext(),
-      'trace-001',
+      createSdkRequest({ correlationId: 'trace-001' }),
     );
 
     const allCalls = logger.calls.filter(

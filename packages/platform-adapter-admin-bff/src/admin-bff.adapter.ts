@@ -6,12 +6,8 @@ import {
 } from '@/observability/index.js';
 import type { IAdminDiagnosticsService } from '@/diagnostics/index.js';
 import type {
-  IAdminBffRequest,
-  IAdminBffResponse,
   IAdminBffRouteContext,
-  IAdminBffRouteHandler,
   IAdminDiscoveryAggregationService,
-  IAdminOperatorContext,
   IAdminPermissionMappingService,
 } from './admin-bff.interfaces.js';
 import {
@@ -20,6 +16,17 @@ import {
   AdminDiscoveryRouteHandler,
   AdminHealthRouteHandler,
 } from './routes/index.js';
+import type {
+  IPlatformDelegatedIdentity,
+  IPlatformHttpRequest,
+  IPlatformHttpResponse,
+  IPlatformHttpRouteHandler,
+} from '@prosto/platform-sdk';
+import {
+  isPlatformDelegatedIdentity,
+  PlatformHttpError,
+  PlatformHttpResponse,
+} from '@prosto/platform-sdk';
 
 /**
  * @alpha
@@ -43,7 +50,7 @@ export interface IPlatformAdminBffAdapterConfig {
  * and structured context fields per ADR-0007.
  */
 export class PlatformAdminBffAdapter {
-  private readonly _handlers: readonly IAdminBffRouteHandler[];
+  private readonly _handlers: readonly IPlatformHttpRouteHandler<IAdminBffRouteContext>[];
   private readonly _logger: IAdminBffLogger;
   private readonly _startedAt: number;
 
@@ -72,14 +79,17 @@ export class PlatformAdminBffAdapter {
   /**
    * Returns all registered route handlers.
    */
-  getHandlers(): readonly IAdminBffRouteHandler[] {
+  getHandlers(): readonly IPlatformHttpRouteHandler<IAdminBffRouteContext>[] {
     return this._handlers;
   }
 
   /**
    * Finds a route handler matching the given method and path.
    */
-  findHandler(method: string, path: string): IAdminBffRouteHandler | undefined {
+  findHandler(
+    method: string,
+    path: string,
+  ): IPlatformHttpRouteHandler<IAdminBffRouteContext> | undefined {
     return this._handlers.find(
       (handler) =>
         handler.method === method && this._matchRoute(handler.route, path),
@@ -88,23 +98,36 @@ export class PlatformAdminBffAdapter {
 
   /**
    * Dispatches a request to the matching route handler.
+   *
+   * @param request — SDK-normalized HTTP request with delegated identity.
+   * @param signal — optional abort signal forwarded to the context.
+   * @returns SDK-normalized HTTP response.
+   * @throws PlatformHttpError when identity is not delegated.
    */
   async handleRequest(
-    request: IAdminBffRequest,
-    operatorContext: IAdminOperatorContext,
-    correlationId?: string,
-  ): Promise<IAdminBffResponse> {
-    const resolvedCorrelationId =
-      correlationId ?? this._generateCorrelationId();
+    request: IPlatformHttpRequest,
+    signal?: AbortSignal,
+  ): Promise<IPlatformHttpResponse> {
+    const correlationId = request.correlationId;
     const startTime = Date.now();
+
+    if (!isPlatformDelegatedIdentity(request.identity)) {
+      throw new PlatformHttpError(
+        'HTTP_UNAUTHENTICATED',
+        'Anonymous identity is not allowed for admin BFF routes.',
+        { correlationId },
+      );
+    }
+
+    const identity: IPlatformDelegatedIdentity = request.identity;
 
     this._logger.info('Request received', {
       phase: AdminBffPhase.REQUEST,
-      correlationId: resolvedCorrelationId,
+      correlationId,
       method: request.method,
       path: request.path,
-      operatorId: operatorContext.operatorId,
-      operatorRoles: operatorContext.roleIds,
+      subjectId: identity.subjectId,
+      roles: identity.roles,
     });
 
     const handler = this.findHandler(request.method, request.path);
@@ -112,34 +135,38 @@ export class PlatformAdminBffAdapter {
     if (!handler) {
       this._logger.warn('Route not found', {
         phase: AdminBffPhase.ROUTE_MATCH,
-        correlationId: resolvedCorrelationId,
+        correlationId,
         method: request.method,
         path: request.path,
         errorCode: AdminBffErrorCodes.ROUTE_NOT_FOUND,
       });
 
-      return {
+      return new PlatformHttpResponse({
         status: 404,
         body: {
-          correlationId: resolvedCorrelationId,
-          error: {
-            code: 'ROUTE_NOT_FOUND',
-            message: `No handler found for ${request.method} ${request.path}.`,
+          variant: 'json',
+          data: {
+            correlationId,
+            error: {
+              code: 'ROUTE_NOT_FOUND',
+              message: `No handler found for ${request.method} ${request.path}.`,
+            },
           },
         },
-      };
+      });
     }
 
     this._logger.debug('Route matched', {
       phase: AdminBffPhase.ROUTE_MATCH,
-      correlationId: resolvedCorrelationId,
+      correlationId,
       handlerRoute: handler.route,
       handlerMethod: handler.method,
     });
 
     const context: IAdminBffRouteContext = {
-      correlationId: resolvedCorrelationId,
-      operatorContext,
+      correlationId,
+      identity,
+      signal: signal ?? new AbortController().signal,
       discoveryService: this._discoveryService,
       permissionService: this._permissionService,
       diagnosticsService: this._diagnosticsService,
@@ -148,7 +175,7 @@ export class PlatformAdminBffAdapter {
 
     this._logger.debug('Handler dispatch started', {
       phase: AdminBffPhase.REQUEST,
-      correlationId: resolvedCorrelationId,
+      correlationId,
       route: handler.route,
       method: handler.method,
     });
@@ -160,7 +187,7 @@ export class PlatformAdminBffAdapter {
     if (response.status >= 400) {
       this._logger.warn('Request completed with error status', {
         phase: AdminBffPhase.REQUEST,
-        correlationId: resolvedCorrelationId,
+        correlationId,
         method: request.method,
         path: request.path,
         status: response.status,
@@ -169,7 +196,7 @@ export class PlatformAdminBffAdapter {
     } else {
       this._logger.info('Request completed', {
         phase: AdminBffPhase.REQUEST,
-        correlationId: resolvedCorrelationId,
+        correlationId,
         method: request.method,
         path: request.path,
         status: response.status,
@@ -201,11 +228,5 @@ export class PlatformAdminBffAdapter {
       }
       return part === pathParts[index];
     });
-  }
-
-  protected _generateCorrelationId(): string {
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substring(2, 8);
-    return `adm-${timestamp}-${random}`;
   }
 }

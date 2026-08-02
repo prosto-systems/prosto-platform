@@ -1,9 +1,11 @@
+import type { IAdminBffRouteContext } from '../admin-bff.interfaces.js';
+import type { IAdminDiagnosticsRequestContext } from '@/diagnostics/index.js';
 import type {
-  IAdminBffRequest,
-  IAdminBffResponse,
-  IAdminBffRouteContext,
-  IAdminBffRouteHandler,
-} from '../admin-bff.interfaces.js';
+  IPlatformHttpRequest,
+  IPlatformHttpResponse,
+  IPlatformHttpRouteHandler,
+} from '@prosto/platform-sdk';
+import { PlatformHttpResponse } from '@prosto/platform-sdk';
 import { AdminBffLogEvents, AdminBffPhase } from '@/observability/index.js';
 import { ADMIN_BFF_ROUTES } from '../admin-bff.constants.js';
 
@@ -17,34 +19,37 @@ import { ADMIN_BFF_ROUTES } from '../admin-bff.constants.js';
  *
  * Observability: logs diagnostics generation timing and payload summary.
  */
-export class AdminDiagnosticsRouteHandler implements IAdminBffRouteHandler {
+export class AdminDiagnosticsRouteHandler implements IPlatformHttpRouteHandler<IAdminBffRouteContext> {
   readonly route = ADMIN_BFF_ROUTES.DIAGNOSTICS;
   readonly method = 'GET' as const;
 
   async handle(
-    request: IAdminBffRequest,
+    request: IPlatformHttpRequest,
     context: IAdminBffRouteContext,
-  ): Promise<IAdminBffResponse> {
+  ): Promise<IPlatformHttpResponse> {
     const startTime = Date.now();
 
     context.logger.debug('Diagnostics generation started', {
       phase: AdminBffPhase.DIAGNOSTICS,
       correlationId: context.correlationId,
-      operatorId: context.operatorContext.operatorId,
+      subjectId: context.identity.subjectId,
     });
 
-    const result = await context.discoveryService.discover(
-      context.operatorContext,
-    );
+    const result = await context.discoveryService.discover(context.identity);
+
+    const requestContext: IAdminDiagnosticsRequestContext = {
+      correlationId: context.correlationId,
+      identity: context.identity,
+      requestPath: request.path,
+      userAgent: request.headers['user-agent']?.[0],
+      clientIp: request.headers['x-forwarded-for']?.[0],
+    };
 
     const diagnosticsPayload =
-      context.diagnosticsService.generateDiagnosticsPayload(result, {
-        correlationId: context.correlationId,
-        operatorContext: context.operatorContext,
-        requestPath: request.path,
-        userAgent: request.headers['user-agent'] as string | undefined,
-        clientIp: request.headers['x-forwarded-for'] as string | undefined,
-      });
+      context.diagnosticsService.generateDiagnosticsPayload(
+        result,
+        requestContext,
+      );
 
     const duration = Date.now() - startTime;
 
@@ -58,9 +63,12 @@ export class AdminDiagnosticsRouteHandler implements IAdminBffRouteHandler {
       duration,
     });
 
-    return {
+    return new PlatformHttpResponse({
       status: 200,
-      body: diagnosticsPayload,
-    };
+      body: {
+        variant: 'json',
+        data: diagnosticsPayload,
+      },
+    });
   }
 }

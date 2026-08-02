@@ -7,9 +7,9 @@ import type {
   IAdminActionEvaluationResult,
   IAdminDiscoveryAggregationService,
   IAdminDiscoveryResult,
-  IAdminOperatorContext,
   IAdminPermissionMappingService,
 } from '@/admin-bff.interfaces.js';
+import type { IPlatformDelegatedIdentity } from '@prosto/platform-sdk';
 import { describe, expect, it, vi } from 'vitest';
 import { PlatformAdminBffAdapter } from '@/admin-bff.adapter.js';
 import {
@@ -96,7 +96,7 @@ function createMockDiagnosticsService(): IAdminDiagnosticsService {
               status: 'accepted' as const,
               timestamp: new Date().toISOString(),
               correlationId: ctx.correlationId,
-              operatorId: ctx.operatorContext.operatorId,
+              subjectId: ctx.identity.subjectId,
             })),
             ...result.payload.rejected.map((r) => ({
               pluginId: r.id ?? 'unknown',
@@ -107,7 +107,7 @@ function createMockDiagnosticsService(): IAdminDiagnosticsService {
               remediationHint: r.remediationHint,
               timestamp: new Date().toISOString(),
               correlationId: ctx.correlationId,
-              operatorId: ctx.operatorContext.operatorId,
+              subjectId: ctx.identity.subjectId,
             })),
           ],
           summary: {
@@ -122,8 +122,8 @@ function createMockDiagnosticsService(): IAdminDiagnosticsService {
             correlationId: ctx.correlationId,
           },
           metadata: {
-            operatorId: ctx.operatorContext.operatorId,
-            operatorRoles: [...ctx.operatorContext.roleIds],
+            subjectId: ctx.identity.subjectId,
+            roles: [...ctx.identity.roles],
             requestPath: ctx.requestPath,
             discoveryPipelineVersion: '1.0.0',
           },
@@ -134,10 +134,11 @@ function createMockDiagnosticsService(): IAdminDiagnosticsService {
   };
 }
 
-function createMockOperatorContext(): IAdminOperatorContext {
+function createMockDelegatedIdentity(): IPlatformDelegatedIdentity {
   return {
-    operatorId: 'operator-1',
-    roleIds: ['admin'],
+    authenticationType: 'delegated',
+    subjectId: 'operator-1',
+    roles: ['admin'],
     permissions: ['read', 'write'],
   };
 }
@@ -228,20 +229,19 @@ describe('PlatformAdminBffAdapter', () => {
       createMockDiagnosticsService(),
     );
 
-    const response = await adapter.handleRequest(
-      {
-        method: 'GET',
-        path: '/unknown',
-        params: {},
-        query: {},
-        body: null,
-        headers: {},
-      },
-      createMockOperatorContext(),
-    );
+    const response = await adapter.handleRequest({
+      method: 'GET',
+      path: '/unknown',
+      params: {},
+      query: {},
+      body: null,
+      headers: {},
+      correlationId: 'test-correlation',
+      identity: createMockDelegatedIdentity(),
+    });
 
     expect(response.status).toBe(404);
-    expect(response.body).toMatchObject({
+    expect(response.body.data).toMatchObject({
       error: {
         code: 'ROUTE_NOT_FOUND',
       },
@@ -269,20 +269,19 @@ describe('PlatformAdminBffAdapter', () => {
       createMockDiagnosticsService(),
     );
 
-    const response = await adapter.handleRequest(
-      {
-        method: 'GET',
-        path: '/admin/api/v1/discovery',
-        params: {},
-        query: {},
-        body: null,
-        headers: {},
-      },
-      createMockOperatorContext(),
-    );
+    const response = await adapter.handleRequest({
+      method: 'GET',
+      path: '/admin/api/v1/discovery',
+      params: {},
+      query: {},
+      body: null,
+      headers: {},
+      correlationId: 'test-correlation',
+      identity: createMockDelegatedIdentity(),
+    });
 
     expect(response.status).toBe(200);
-    expect(response.body).toMatchObject({
+    expect(response.body.data).toMatchObject({
       data: {
         plugins: [{ id: 'test-plugin' }],
       },
@@ -306,7 +305,8 @@ describe('AdminDiscoveryRouteHandler', () => {
       },
       {
         correlationId: 'test-correlation',
-        operatorContext: createMockOperatorContext(),
+        identity: createMockDelegatedIdentity(),
+        signal: new AbortController().signal,
         discoveryService: createMockDiscoveryService(discoveryResult),
         permissionService: createMockPermissionService(),
         diagnosticsService: createMockDiagnosticsService(),
@@ -315,7 +315,7 @@ describe('AdminDiscoveryRouteHandler', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.body).toMatchObject({
+    expect(response.body.data).toMatchObject({
       correlationId: 'test-correlation',
     });
   });
@@ -336,7 +336,8 @@ describe('AdminActionRouteHandler', () => {
       },
       {
         correlationId: 'test-correlation',
-        operatorContext: createMockOperatorContext(),
+        identity: createMockDelegatedIdentity(),
+        signal: new AbortController().signal,
         discoveryService: createMockDiscoveryService(),
         permissionService: createMockPermissionService(),
         diagnosticsService: createMockDiagnosticsService(),
@@ -345,7 +346,7 @@ describe('AdminActionRouteHandler', () => {
     );
 
     expect(response.status).toBe(400);
-    expect(response.body).toMatchObject({
+    expect(response.body.data).toMatchObject({
       error: {
         code: 'MISSING_ACTION_ID',
       },
@@ -366,7 +367,8 @@ describe('AdminActionRouteHandler', () => {
       },
       {
         correlationId: 'test-correlation',
-        operatorContext: createMockOperatorContext(),
+        identity: createMockDelegatedIdentity(),
+        signal: new AbortController().signal,
         discoveryService: createMockDiscoveryService(),
         permissionService: createMockPermissionService(),
         diagnosticsService: createMockDiagnosticsService(),
@@ -375,7 +377,7 @@ describe('AdminActionRouteHandler', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.body).toMatchObject({
+    expect(response.body.data).toMatchObject({
       data: {
         actionId: 'test-action',
         allowed: true,
@@ -403,7 +405,8 @@ describe('AdminActionRouteHandler', () => {
       },
       {
         correlationId: 'test-correlation',
-        operatorContext: createMockOperatorContext(),
+        identity: createMockDelegatedIdentity(),
+        signal: new AbortController().signal,
         discoveryService: createMockDiscoveryService(),
         permissionService: createMockPermissionService(deniedEvaluation),
         diagnosticsService: createMockDiagnosticsService(),
@@ -412,7 +415,7 @@ describe('AdminActionRouteHandler', () => {
     );
 
     expect(response.status).toBe(403);
-    expect(response.body).toMatchObject({
+    expect(response.body.data).toMatchObject({
       error: {
         code: 'PERMISSION_REQUIREMENT_NOT_MET',
         remediationHint: 'Request admin role.',
@@ -439,7 +442,8 @@ describe('AdminHealthRouteHandler', () => {
       },
       {
         correlationId: 'test-correlation',
-        operatorContext: createMockOperatorContext(),
+        identity: createMockDelegatedIdentity(),
+        signal: new AbortController().signal,
         discoveryService: createMockDiscoveryService(discoveryResult),
         permissionService: createMockPermissionService(),
         diagnosticsService: createMockDiagnosticsService(),
@@ -448,7 +452,7 @@ describe('AdminHealthRouteHandler', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.body).toMatchObject({
+    expect(response.body.data).toMatchObject({
       status: 'healthy',
       adapter: 'platform-adapter-admin-bff',
     });
@@ -471,7 +475,8 @@ describe('AdminHealthRouteHandler', () => {
       },
       {
         correlationId: 'test-correlation',
-        operatorContext: createMockOperatorContext(),
+        identity: createMockDelegatedIdentity(),
+        signal: new AbortController().signal,
         discoveryService: createMockDiscoveryService(discoveryResult),
         permissionService: createMockPermissionService(),
         diagnosticsService: createMockDiagnosticsService(),
@@ -480,7 +485,7 @@ describe('AdminHealthRouteHandler', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.body).toMatchObject({
+    expect(response.body.data).toMatchObject({
       status: 'degraded',
     });
   });
@@ -518,7 +523,8 @@ describe('AdminDiagnosticsRouteHandler', () => {
       },
       {
         correlationId: 'test-correlation',
-        operatorContext: createMockOperatorContext(),
+        identity: createMockDelegatedIdentity(),
+        signal: new AbortController().signal,
         discoveryService: createMockDiscoveryService(discoveryResult),
         permissionService: createMockPermissionService(),
         diagnosticsService: createMockDiagnosticsService(),
@@ -527,7 +533,7 @@ describe('AdminDiagnosticsRouteHandler', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.body).toMatchObject({
+    expect(response.body.data).toMatchObject({
       schemaVersion: 'admin-diagnostics.v1',
       correlationId: 'test-correlation',
       plugins: [

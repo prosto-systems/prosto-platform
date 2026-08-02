@@ -21,7 +21,7 @@ A TypeScript-based **headless platform** built on a micro-core architecture with
 | [`@prosto/platform-adapter-typeorm`](packages/platform-adapter-typeorm) | TypeORM persistence adapter — shared DataSource, migration locks, descriptor registry |
 | [`@prosto/platform-contract-tests`](packages/platform-contract-tests) | Reusable contract conformance tests for modules |
 | [`@prosto/platform-cli`](packages/platform-cli) | CLI scaffolding and validation utilities |
-| [`@prosto/platform-adapter-http`](packages/platform-adapter-http) | HTTP transport adapter |
+| [`@prosto/platform-adapter-http`](packages/platform-adapter-http) | Fastify HTTP transport adapter — framework-neutral SDK route dispatch, transport security controls, and graceful shutdown |
 | [`@prosto/platform-admin-contracts`](packages/platform-admin-contracts) | Admin contract authority — UI plugin manifests, discovery payloads, permissions, compatibility rules |
 | [`@prosto/platform-adapter-admin-bff`](packages/platform-adapter-admin-bff) | Admin BFF adapter — policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, observability |
 | [`@prosto/platform-admin-shell`](packages/platform-admin-shell) | Admin UI runtime — Vue 3 SPA, plugin runtime, permission guards, degraded mode |

@@ -1,9 +1,10 @@
-# @prosto/platform-sdk API Report (Phase 03)
+# @prosto/platform-sdk API Report
 
 Generated from current exported contract surface in `packages/platform-sdk/src/index.ts`.
 
 Status context:
 - Phase 03: completed (SDK contract baseline)
+- Phase 11: transport HTTP contracts (`@alpha`)
 
 ## Surface Version
 - `SDK_CONTRACT_VERSION` (`@alpha`)
@@ -17,6 +18,9 @@ Status context:
 - `MODULE_CRITICALITY_LEVELS` (`@alpha`)
 - `SERVICE_TOKEN_NAME_PREFIX` (`@alpha`)
 - `EVENT_TOKEN_NAME_PREFIX` (`@alpha`)
+- `ALLOWED_APPLICATION_HTTP_METHODS` (`@alpha`)
+- `ALLOWED_IDENTITY_AUTHENTICATION_TYPES` (`@alpha`)
+- `PLATFORM_RESPONSE_HEADER_NAMES` (`@alpha`)
 
 ## Types
 - `PlatformModuleLifecycleStageType` (`@alpha`)
@@ -34,6 +38,8 @@ Status context:
 - `PersistenceDescriptorPayloadType` (`@alpha`)
 - `PersistenceProviderStateType` (`@alpha`)
 - `PersistenceErrorCodeType` (`@alpha`)
+- `PlatformHttpMethodType` (`@alpha`)
+- `PlatformIdentityAuthenticationTypeType` (`@alpha`)
 
 ## Interfaces
 - `IServiceRegistry` (`@alpha`)
@@ -63,6 +69,29 @@ Status context:
 - `IPersistenceProvider` (`@alpha`)
 - `IPersistenceModuleContext` (`@alpha`)
 - `IPersistenceErrorDetails` (`@alpha`)
+- `IPlatformHttpRequest` (`@alpha`)
+- `IPlatformHttpJsonRequestBody` (`@alpha`)
+- `IPlatformHttpTextRequestBody` (`@alpha`)
+- `IPlatformHttpBinaryRequestBody` (`@alpha`)
+- `IPlatformHttpEmptyRequestBody` (`@alpha`)
+- `PlatformHttpRequestBodyType` (`@alpha`)
+- `IPlatformHttpResponse` (`@alpha`)
+- `IPlatformHttpJsonResponseBody` (`@alpha`)
+- `IPlatformHttpBinaryResponseBody` (`@alpha`)
+- `IPlatformHttpStreamResponseBody` (`@alpha`)
+- `IPlatformHttpEmptyResponseBody` (`@alpha`)
+- `PlatformHttpResponseBodyType` (`@alpha`)
+- `IPlatformHttpRouteHandler` (`@alpha`)
+- `IPlatformHttpRouteContext` (`@alpha`)
+- `IPlatformHttpRouteContextFactoryInput` (`@alpha`)
+- `IPlatformHttpRouteContextFactory` (`@alpha`)
+- `IPlatformHttpRouteRegistration` (`@alpha`)
+- `IPlatformIdentityResolutionRequest` (`@alpha`)
+- `IPlatformAnonymousIdentity` (`@alpha`)
+- `IPlatformDelegatedIdentity` (`@alpha`)
+- `PlatformRequestIdentityType` (`@alpha`)
+- `IPlatformRequestIdentityResolver` (`@alpha`)
+- `IPlatformHttpContentDisposition` (`@alpha`)
 
 ## Errors
 - `PlatformSdkError` (`@alpha`)
@@ -73,6 +102,8 @@ Status context:
 - `PlatformModuleCompatibilityValidationError` (`@alpha`)
 - `PersistenceError` (`@alpha`)
 - `PersistenceNotReadyError` (`@alpha`)
+- `PlatformHttpErrorCodeType` (`@alpha`)
+- `PlatformHttpError` (`@alpha`)
 
 ## Schemas
 - `SemverVersionSchema` (`@alpha`)
@@ -92,6 +123,7 @@ Status context:
 - `createServiceToken` (`@alpha`)
 - `createEventToken` (`@alpha`)
 - `resolveNestedValue` (`@alpha`)
+- `isPlatformDelegatedIdentity` (`@alpha`)
 
 ## Validators
 - `PlatformModuleManifestValidator` (`@alpha`)
@@ -99,3 +131,10 @@ Status context:
 
 ## Services
 - `PersistenceDescriptorRegistry` (`@alpha`)
+- `PlatformHttpRequest` (`@alpha`)
+- `PlatformHttpResponse` (`@alpha`)
+- `PlatformIdentityResolutionRequest` (`@alpha`)
+- `PlatformAnonymousIdentity` (`@alpha`)
+- `PlatformDelegatedIdentity` (`@alpha`)
+- `PlatformHttpRouteRegistration` (`@alpha`)
+- `PlatformHttpContentDisposition` (`@alpha`)

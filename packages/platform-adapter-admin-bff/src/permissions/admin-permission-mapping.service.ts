@@ -6,9 +6,9 @@ import type {
 import { AdminActionGateEvaluator } from '@prosto/platform-admin-contracts';
 import type {
   IAdminActionEvaluationResult,
-  IAdminOperatorContext,
   IAdminPermissionMappingService,
 } from '../admin-bff.interfaces.js';
+import type { IPlatformDelegatedIdentity } from '@prosto/platform-sdk';
 
 /**
  * @alpha
@@ -42,17 +42,17 @@ export class AdminPermissionMappingService implements IAdminPermissionMappingSer
    * Evaluates whether an operator can execute a specific action.
    *
    * @param actionId - The action identifier to evaluate.
-   * @param operatorContext - The operator identity context with roles and permissions.
+   * @param identity - The delegated identity with roles and permissions.
    * @returns Evaluation result with allow/deny decision and remediation metadata.
    */
   evaluateAction(
     actionId: string,
-    operatorContext: IAdminOperatorContext,
+    identity: IPlatformDelegatedIdentity,
   ): IAdminActionEvaluationResult {
     const decision = this._evaluator.evaluate(this._config.policy, {
       actionId,
-      roleIds: operatorContext.roleIds,
-      additionalPermissions: operatorContext.permissions,
+      roleIds: [...identity.roles],
+      additionalPermissions: [...identity.permissions],
     });
 
     return this._mapDecisionToResult(decision);
@@ -64,39 +64,37 @@ export class AdminPermissionMappingService implements IAdminPermissionMappingSer
    */
   evaluate(
     actionId: string,
-    operatorContext: IAdminOperatorContext,
+    identity: IPlatformDelegatedIdentity,
   ): IAdminActionEvaluationResult {
-    return this.evaluateAction(actionId, operatorContext);
+    return this.evaluateAction(actionId, identity);
   }
 
   /**
    * Checks if an operator has a specific permission.
    *
    * @param permission - The permission token to check.
-   * @param operatorContext - The operator identity context.
+   * @param identity - The delegated identity.
    * @returns true if the operator has the permission.
    */
   hasPermission(
     permission: string,
-    operatorContext: IAdminOperatorContext,
+    identity: IPlatformDelegatedIdentity,
   ): boolean {
-    const grantedPermissions = this.collectGrantedPermissions(operatorContext);
+    const grantedPermissions = this.collectGrantedPermissions(identity);
     return grantedPermissions.has(permission);
   }
 
   /**
    * Collects all permissions granted to an operator based on their roles.
    *
-   * @param operatorContext - The operator identity context.
+   * @param identity - The delegated identity.
    * @returns Set of granted permission tokens.
    */
   collectGrantedPermissions(
-    operatorContext: IAdminOperatorContext,
+    identity: IPlatformDelegatedIdentity,
   ): ReadonlySet<string> {
-    const grantedPermissions = new Set<string>(
-      operatorContext.permissions ?? [],
-    );
-    const requestedRoles = new Set(operatorContext.roleIds);
+    const grantedPermissions = new Set<string>([...identity.permissions]);
+    const requestedRoles = new Set(identity.roles);
 
     for (const mapping of this._config.policy.roleMappings) {
       if (!requestedRoles.has(mapping.roleId)) {
@@ -115,17 +113,17 @@ export class AdminPermissionMappingService implements IAdminPermissionMappingSer
    * Filters a list of required permissions against the operator's granted permissions.
    *
    * @param requiredPermissions - Permissions required by a plugin or action.
-   * @param operatorContext - The operator identity context.
+   * @param identity - The delegated identity.
    * @returns Object with allowed flag and list of missing permissions.
    */
   filterPermissions(
     requiredPermissions: readonly string[],
-    operatorContext: IAdminOperatorContext,
+    identity: IPlatformDelegatedIdentity,
   ): {
     readonly allowed: boolean;
     readonly missingPermissions: readonly string[];
   } {
-    const grantedPermissions = this.collectGrantedPermissions(operatorContext);
+    const grantedPermissions = this.collectGrantedPermissions(identity);
     const missingPermissions = requiredPermissions.filter(
       (permission) => !grantedPermissions.has(permission),
     );

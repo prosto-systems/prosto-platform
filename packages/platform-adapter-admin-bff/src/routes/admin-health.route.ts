@@ -1,9 +1,10 @@
+import type { IAdminBffRouteContext } from '../admin-bff.interfaces.js';
 import type {
-  IAdminBffRequest,
-  IAdminBffResponse,
-  IAdminBffRouteContext,
-  IAdminBffRouteHandler,
-} from '../admin-bff.interfaces.js';
+  IPlatformHttpRequest,
+  IPlatformHttpResponse,
+  IPlatformHttpRouteHandler,
+} from '@prosto/platform-sdk';
+import { PlatformHttpResponse } from '@prosto/platform-sdk';
 import { AdminBffLogEvents, AdminBffPhase } from '@/observability/index.js';
 import { ADMIN_BFF_ROUTES } from '../admin-bff.constants.js';
 
@@ -17,14 +18,14 @@ import { ADMIN_BFF_ROUTES } from '../admin-bff.constants.js';
  * Observability: logs health check results with per-check status
  * and discovery statistics for operational monitoring.
  */
-export class AdminHealthRouteHandler implements IAdminBffRouteHandler {
+export class AdminHealthRouteHandler implements IPlatformHttpRouteHandler<IAdminBffRouteContext> {
   readonly route = ADMIN_BFF_ROUTES.HEALTH;
   readonly method = 'GET' as const;
 
   async handle(
-    _request: IAdminBffRequest,
+    _request: IPlatformHttpRequest,
     context: IAdminBffRouteContext,
-  ): Promise<IAdminBffResponse> {
+  ): Promise<IPlatformHttpResponse> {
     const startTime = Date.now();
 
     context.logger.debug('Health check started', {
@@ -33,7 +34,7 @@ export class AdminHealthRouteHandler implements IAdminBffRouteHandler {
     });
 
     const discoveryResult = await context.discoveryService.discover(
-      context.operatorContext,
+      context.identity,
     );
 
     const discoveryDuration = Date.now() - startTime;
@@ -60,20 +61,23 @@ export class AdminHealthRouteHandler implements IAdminBffRouteHandler {
       checks: checks.length,
     });
 
-    return {
+    return new PlatformHttpResponse({
       status: 200,
       body: {
-        status,
-        checks,
-        correlationId: context.correlationId,
-        adapter: 'platform-adapter-admin-bff',
-        version: '0.0.0',
-        timestamp: new Date().toISOString(),
-        discovery: {
-          acceptedPlugins: discoveryResult.diagnostics.acceptedCount,
-          rejectedPlugins: discoveryResult.diagnostics.rejectedCount,
+        variant: 'json',
+        data: {
+          status,
+          checks,
+          correlationId: context.correlationId,
+          adapter: 'platform-adapter-admin-bff',
+          version: '0.0.0',
+          timestamp: new Date().toISOString(),
+          discovery: {
+            acceptedPlugins: discoveryResult.diagnostics.acceptedCount,
+            rejectedPlugins: discoveryResult.diagnostics.rejectedCount,
+          },
         },
       },
-    };
+    });
   }
 }
