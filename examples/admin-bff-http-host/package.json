@@ -5,15 +5,19 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "npm run build && node dist/main.js",
+    "start": "npm run build && node --env-file=.env.example dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
     "@prosto/platform-adapter-admin-bff": "0.0.0",
+    "@prosto/platform-adapter-aes-key-ring": "0.0.0",
+    "@prosto/platform-adapter-auth": "0.0.0",
     "@prosto/platform-adapter-http": "0.0.0",
+    "@prosto/platform-adapter-typeorm": "0.0.0",
     "@prosto/platform-admin-contracts": "0.0.0",
     "@prosto/platform-core": "0.0.0",
+    "@prosto/platform-module-auth-session": "0.0.0",
     "@prosto/platform-sdk": "0.0.0"
   },
   "devDependencies": {

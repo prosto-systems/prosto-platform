@@ -59,6 +59,10 @@ All detailed rules are in `.agents/rules/` directory:
 - **OOP, SOLID, Clean Architecture** for all new code
 - **No `any` type** — use union types and type guards
 
+### Publishable Adapter and Package Layouts
+- Every new publishable adapter or package MUST follow the `packages/platform-adapter-auth` or `packages/platform-core` layouts: root `package.json`, `vite.config.ts`, `vitest.config.ts`, `tsconfig*.json`, root implementation files in `src/`, and `tests/`.
+- Do not place constants, errors, interfaces, or utilities directly in `src/` when creating or modifying a publishable adapter or package.
+
 ### Security
 - **Allowlist-only module loading** in production
 - **Zod validation** at all boundaries
@@ -175,5 +179,5 @@ These checks are enforced in CI via `.github/workflows/` gates and must pass bef
 
 ---
 
-**Last Updated**: 2026-08-02
-**Version**: 0.4.0
+**Last Updated**: 2026-08-06
+**Version**: 0.5.0

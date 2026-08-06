@@ -738,6 +738,196 @@ describe('PlatformHttpServer', (): void => {
     expect(execute).not.toHaveBeenCalled();
   });
 
+  it('preserves resolver authentication failures and emits a bare Bearer challenge', async (): Promise<void> => {
+    // Arrange
+    const execute = vi.fn();
+    const server = new PlatformHttpServer({
+      host: '127.0.0.1',
+      port: 0,
+      identityResolver: {
+        resolve: async (): Promise<never> => {
+          throw new PlatformHttpError(
+            'HTTP_UNAUTHENTICATED',
+            'Bearer credential was rejected.',
+          );
+        },
+      },
+      logger: createLogger(),
+    });
+
+    server.registerRoutes([{ method: 'GET', route: '/secure', execute }]);
+
+    // Act
+    const response = await getFastifyForTest(server).inject({
+      method: 'GET',
+      url: '/secure',
+    });
+
+    // Assert
+    expect(response.statusCode).toBe(401);
+    expect(response.headers['www-authenticate']).toBe('Bearer');
+    expect(response.json()).toEqual({
+      correlationId: expect.any(String),
+      error: {
+        code: 'UNAUTHENTICATED',
+        message: 'Authentication is required for this route.',
+      },
+    });
+    expect(response.body).not.toContain('error_description');
+    expect(execute).not.toHaveBeenCalled();
+  });
+
+  it('preserves a typed resolver availability failure as 503', async (): Promise<void> => {
+    // Arrange
+    const server = new PlatformHttpServer({
+      host: '127.0.0.1',
+      port: 0,
+      identityResolver: {
+        resolve: async (): Promise<never> => {
+          throw new PlatformHttpError(
+            'IDENTITY_RESOLUTION_UNAVAILABLE',
+            'Identity provider outage.',
+          );
+        },
+      },
+      logger: createLogger(),
+    });
+
+    server.registerRoutes([
+      { method: 'GET', route: '/secure', execute: vi.fn() },
+    ]);
+
+    // Act
+    const response = await getFastifyForTest(server).inject({
+      method: 'GET',
+      url: '/secure',
+    });
+
+    // Assert
+    expect(response.statusCode).toBe(503);
+    expect(response.json().error.code).toBe('IDENTITY_RESOLUTION_UNAVAILABLE');
+  });
+
+  it('maps an invalid resolver identity to a safe correlated 503', async (): Promise<void> => {
+    // Arrange
+    const execute = vi.fn();
+    const server = new PlatformHttpServer({
+      host: '127.0.0.1',
+      port: 0,
+      identityResolver: {
+        resolve: async () => ({
+          authenticationType: 'delegated',
+          subjectId: 'operator-42',
+          roles: 'admin' as unknown as string[],
+          permissions: [],
+        }),
+      },
+      logger: createLogger(),
+    });
+
+    server.registerRoutes([{ method: 'GET', route: '/secure', execute }]);
+
+    // Act
+    const response = await getFastifyForTest(server).inject({
+      method: 'GET',
+      url: '/secure',
+    });
+
+    // Assert
+    expect(response.statusCode).toBe(503);
+    expect(response.json().error.code).toBe('IDENTITY_RESOLUTION_UNAVAILABLE');
+    expect(execute).not.toHaveBeenCalled();
+  });
+
+  it('uses the anonymous identity when no resolver is configured', async (): Promise<void> => {
+    // Arrange
+    let authenticationType = '';
+    const server = new PlatformHttpServer({ host: '127.0.0.1', port: 0 });
+    server.registerRoutes([
+      {
+        method: 'GET',
+        route: '/public',
+        execute: async (input) => {
+          authenticationType = input.baseContext.identity.authenticationType;
+          return { status: 204, headers: {}, body: { variant: 'empty' } };
+        },
+      },
+    ]);
+
+    // Act
+    const response = await getFastifyForTest(server).inject({
+      method: 'GET',
+      url: '/public',
+    });
+
+    // Assert
+    expect(response.statusCode).toBe(204);
+    expect(authenticationType).toBe('anonymous');
+  });
+
+  it('maps multiple structured cookies and rejects raw header injection', async (): Promise<void> => {
+    // Arrange
+    const server = new PlatformHttpServer({ host: '127.0.0.1', port: 0 });
+    server.registerRoutes([
+      {
+        method: 'GET',
+        route: '/redirect',
+        execute: async () => ({
+          status: 302,
+          headers: { Location: '/next' },
+          body: { variant: 'empty' },
+          cookies: [
+            {
+              name: '__Host-session',
+              value: 'opaque',
+              path: '/',
+              httpOnly: true,
+              secure: true,
+              sameSite: 'strict' as const,
+            },
+            {
+              name: '__Host-tx',
+              value: '',
+              path: '/',
+              httpOnly: true,
+              secure: true,
+              sameSite: 'lax' as const,
+              maxAge: 0,
+            },
+          ],
+        }),
+      },
+      {
+        method: 'GET',
+        route: '/raw-cookie',
+        execute: async () =>
+          ({
+            status: 200,
+            headers: { 'Set-Cookie': 'session=unsafe' },
+          }) as never,
+      },
+    ]);
+
+    // Act
+    const fastify = getFastifyForTest(server);
+    const redirect = await fastify.inject({ method: 'GET', url: '/redirect' });
+    const injected = await fastify.inject({
+      method: 'GET',
+      url: '/raw-cookie',
+    });
+    const cookies = redirect.headers['set-cookie'];
+
+    // Assert
+    expect(redirect.statusCode).toBe(302);
+    expect(redirect.headers.location).toBe('/next');
+    expect(Array.isArray(cookies) ? cookies : [cookies]).toEqual([
+      '__Host-session=opaque; Path=/; HttpOnly; Secure; SameSite=Strict',
+      '__Host-tx=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax',
+    ]);
+    expect(injected.statusCode).toBe(500);
+    expect(injected.headers['set-cookie']).toBeUndefined();
+  });
+
   it('aborts overdue route work and returns a correlated gateway timeout', async (): Promise<void> => {
     // Arrange
     let wasAborted = false;

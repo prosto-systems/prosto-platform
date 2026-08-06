@@ -8,6 +8,9 @@ const PACKAGE_DIRS = [
   'platform-contract-tests',
   'platform-cli',
   'platform-adapter-http',
+  'platform-adapter-auth',
+  'platform-adapter-aes-key-ring',
+  'platform-adapter-auth-session',
   'platform-adapter-typeorm',
 ];
 

@@ -40,6 +40,9 @@ Status context:
 - `PersistenceErrorCodeType` (`@alpha`)
 - `PlatformHttpMethodType` (`@alpha`)
 - `PlatformIdentityAuthenticationTypeType` (`@alpha`)
+- `PlatformHttpSetCookieInputType` (`@alpha`)
+- `PlatformSecretCipherPurposeType` (`@alpha`)
+- `PlatformSecretCipherErrorCodeType` (`@alpha`)
 
 ## Interfaces
 - `IServiceRegistry` (`@alpha`)
@@ -76,6 +79,7 @@ Status context:
 - `IPlatformHttpEmptyRequestBody` (`@alpha`)
 - `PlatformHttpRequestBodyType` (`@alpha`)
 - `IPlatformHttpResponse` (`@alpha`)
+- `IPlatformHttpSetCookie` (`@alpha`)
 - `IPlatformHttpJsonResponseBody` (`@alpha`)
 - `IPlatformHttpBinaryResponseBody` (`@alpha`)
 - `IPlatformHttpStreamResponseBody` (`@alpha`)
@@ -92,6 +96,12 @@ Status context:
 - `PlatformRequestIdentityType` (`@alpha`)
 - `IPlatformRequestIdentityResolver` (`@alpha`)
 - `IPlatformHttpContentDisposition` (`@alpha`)
+- `IPlatformSecretCipherAad` (`@alpha`)
+- `IPlatformSecretCiphertext` (`@alpha`)
+- `IPlatformSecretCipherEncryptInput` (`@alpha`)
+- `IPlatformSecretCipherDecryptInput` (`@alpha`)
+- `IPlatformSecretCipherDecryptResult` (`@alpha`)
+- `IPlatformSecretCipher` (`@alpha`)
 
 ## Errors
 - `PlatformSdkError` (`@alpha`)
@@ -104,6 +114,7 @@ Status context:
 - `PersistenceNotReadyError` (`@alpha`)
 - `PlatformHttpErrorCodeType` (`@alpha`)
 - `PlatformHttpError` (`@alpha`)
+- `PlatformSecretCipherError` (`@alpha`)
 
 ## Schemas
 - `SemverVersionSchema` (`@alpha`)
@@ -133,6 +144,7 @@ Status context:
 - `PersistenceDescriptorRegistry` (`@alpha`)
 - `PlatformHttpRequest` (`@alpha`)
 - `PlatformHttpResponse` (`@alpha`)
+- `PlatformHttpSetCookie` (`@alpha`)
 - `PlatformIdentityResolutionRequest` (`@alpha`)
 - `PlatformAnonymousIdentity` (`@alpha`)
 - `PlatformDelegatedIdentity` (`@alpha`)
