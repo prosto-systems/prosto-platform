@@ -12,6 +12,7 @@ import {
   type PlatformHttpMethodType,
   PlatformHttpRequest,
   PlatformHttpResponse,
+  PlatformHttpSetCookie,
   PlatformHttpRouteRegistration,
   PlatformIdentityResolutionRequest,
   type PlatformRequestIdentityType,
@@ -399,6 +400,123 @@ describe('PlatformHttpResponse', () => {
           headers: { 'Set-Cookie': 'session=abc' },
         }),
     ).toThrowError(PlatformHttpError);
+  });
+
+  it('creates immutable validated structured cookie instructions', () => {
+    // Arrange
+    const cookies = [
+      {
+        name: '__Host-session',
+        value: 'opaque-session-id',
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict' as const,
+      },
+    ];
+
+    // Act
+    const response = new PlatformHttpResponse({ status: 302, cookies });
+    const originalCookie = cookies[0];
+
+    if (originalCookie === undefined) {
+      throw new Error('Expected the test cookie to be present.');
+    }
+
+    originalCookie.value = 'mutated';
+
+    // Assert
+    expect(response.cookies).toHaveLength(1);
+    expect(response.cookies?.[0]).toBeInstanceOf(PlatformHttpSetCookie);
+    expect(response.cookies?.[0]).toMatchObject({
+      name: '__Host-session',
+      value: 'opaque-session-id',
+      path: '/',
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+    });
+    expect(Object.isFrozen(response.cookies)).toBe(true);
+    expect(Object.isFrozen(response.cookies?.[0])).toBe(true);
+  });
+
+  it.each([
+    {
+      scenario: 'a control character in the name',
+      cookie: { name: 'session\r\n', value: 'opaque' },
+    },
+    {
+      scenario: 'an invalid cookie value',
+      cookie: { name: 'session', value: 'opaque;injected' },
+    },
+    {
+      scenario: 'an invalid path',
+      cookie: { name: 'session', value: 'opaque', path: 'relative' },
+    },
+    {
+      scenario: 'an invalid domain',
+      cookie: { name: 'session', value: 'opaque', domain: '.example.test' },
+    },
+    {
+      scenario: 'a non-finite expiry',
+      cookie: { name: 'session', value: 'opaque', expiresAt: Infinity },
+    },
+    {
+      scenario: 'a fractional max age',
+      cookie: { name: 'session', value: 'opaque', maxAge: 1.5 },
+    },
+    {
+      scenario: 'SameSite=None without Secure',
+      cookie: { name: 'session', value: 'opaque', sameSite: 'none' as const },
+    },
+    {
+      scenario: '__Secure- without Secure',
+      cookie: { name: '__Secure-session', value: 'opaque' },
+    },
+    {
+      scenario: '__Host- without Path=/',
+      cookie: { name: '__Host-session', value: 'opaque', secure: true },
+    },
+  ])('rejects $scenario', ({ cookie }): void => {
+    expect(
+      () =>
+        new PlatformHttpResponse({
+          status: 200,
+          cookies: [cookie],
+        }),
+    ).toThrowError(PlatformHttpError);
+  });
+
+  it('rejects duplicate cookie tuples', () => {
+    expect(
+      () =>
+        new PlatformHttpResponse({
+          status: 200,
+          cookies: [
+            { name: 'session', value: 'first', path: '/' },
+            { name: 'session', value: 'second', path: '/' },
+          ],
+        }),
+    ).toThrowError(PlatformHttpError);
+  });
+
+  it('allows a Secure __Host- clearing instruction', () => {
+    const response = new PlatformHttpResponse({
+      status: 204,
+      cookies: [
+        {
+          name: '__Host-session',
+          value: '',
+          path: '/',
+          maxAge: 0,
+          httpOnly: true,
+          secure: true,
+          sameSite: 'strict',
+        },
+      ],
+    });
+
+    expect(response.cookies?.[0]?.maxAge).toBe(0);
   });
 
   it('rejects Content-Disposition as custom header', () => {

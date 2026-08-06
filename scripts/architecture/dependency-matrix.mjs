@@ -8,6 +8,9 @@ export const ALLOWED_INTERNAL_DEPENDENCIES = new Map([
   ['@prosto/platform-contract-tests', ['@prosto/platform-sdk']],
   ['@prosto/platform-cli', ['@prosto/platform-sdk']],
   ['@prosto/platform-adapter-http', ['@prosto/platform-sdk']],
+  ['@prosto/platform-adapter-auth', ['@prosto/platform-sdk']],
+  ['@prosto/platform-adapter-aes-key-ring', ['@prosto/platform-sdk']],
+  ['@prosto/platform-adapter-auth-session', ['@prosto/platform-sdk']],
   ['@prosto/platform-admin-contracts', ['@prosto/platform-sdk']],
   [
     '@prosto/platform-adapter-admin-bff',
@@ -30,6 +33,9 @@ export const WORKSPACE_PACKAGE_DIRS = [
   'platform-contract-tests',
   'platform-cli',
   'platform-adapter-http',
+  'platform-adapter-auth',
+  'platform-adapter-aes-key-ring',
+  'platform-adapter-auth-session',
   'platform-adapter-typeorm',
   'platform-admin-contracts',
   'platform-adapter-admin-bff',
@@ -58,6 +64,9 @@ export const REQUIRED_PACKAGE_DIRS = [
   'platform-contract-tests',
   'platform-cli',
   'platform-adapter-http',
+  'platform-adapter-auth',
+  'platform-adapter-aes-key-ring',
+  'platform-adapter-auth-session',
   'platform-adapter-typeorm',
 ];
 

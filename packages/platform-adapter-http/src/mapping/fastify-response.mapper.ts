@@ -2,6 +2,8 @@ import { Readable } from 'node:stream';
 import type {
   IPlatformHttpContentDisposition,
   IPlatformHttpResponse,
+  IPlatformHttpSetCookie,
+  PlatformHttpSetCookieInputType,
   PlatformHttpResponseBodyType,
 } from '@prosto/platform-sdk';
 import {
@@ -67,6 +69,18 @@ export class FastifyResponseMapper {
       reply.header(name, value);
     }
 
+    if (
+      normalizedResponse.cookies !== undefined &&
+      normalizedResponse.cookies.length
+    ) {
+      reply.header(
+        'Set-Cookie',
+        normalizedResponse.cookies.map((cookie) =>
+          this._serializeSetCookie(cookie),
+        ),
+      );
+    }
+
     await this._sendBody(normalizedResponse.body, reply, options);
   }
 
@@ -79,12 +93,14 @@ export class FastifyResponseMapper {
     }
 
     const headers = this._normalizeHeaders(response.headers);
+    const cookies = this._normalizeCookies(response.cookies);
     const body = this._normalizeBody(response.body);
 
     try {
       return new PlatformHttpResponse({
         status: response.status as number,
         headers,
+        cookies,
         body,
       });
     } catch (error) {
@@ -132,6 +148,23 @@ export class FastifyResponseMapper {
     }
 
     return normalized;
+  }
+
+  private _normalizeCookies(
+    value: unknown,
+  ): readonly PlatformHttpSetCookieInputType[] | undefined {
+    if (value === undefined) {
+      return undefined;
+    }
+
+    if (!Array.isArray(value)) {
+      throw new PlatformHttpError(
+        'INVALID_COOKIE',
+        'Response cookies must be an array of structured cookie instructions.',
+      );
+    }
+
+    return value as readonly PlatformHttpSetCookieInputType[];
   }
 
   private _normalizeBody(value: unknown): PlatformHttpResponseBodyType {
@@ -391,6 +424,47 @@ export class FastifyResponseMapper {
     }
 
     reply.header('Content-Disposition', value);
+  }
+
+  private _serializeSetCookie(cookie: IPlatformHttpSetCookie): string {
+    let value = `${cookie.name}=${cookie.value}`;
+
+    if (cookie.expiresAt !== undefined) {
+      value += `; Expires=${new Date(cookie.expiresAt).toUTCString()}`;
+    }
+
+    if (cookie.maxAge !== undefined) {
+      value += `; Max-Age=${cookie.maxAge}`;
+    }
+
+    if (cookie.domain !== undefined) {
+      value += `; Domain=${cookie.domain}`;
+    }
+
+    if (cookie.path !== undefined) {
+      value += `; Path=${cookie.path}`;
+    }
+
+    if (cookie.httpOnly === true) {
+      value += '; HttpOnly';
+    }
+
+    if (cookie.secure === true) {
+      value += '; Secure';
+    }
+
+    if (cookie.sameSite !== undefined) {
+      const sameSite =
+        cookie.sameSite === 'strict'
+          ? 'Strict'
+          : cookie.sameSite === 'lax'
+            ? 'Lax'
+            : 'None';
+
+      value += `; SameSite=${sameSite}`;
+    }
+
+    return value;
   }
 
   private async _cancelStream(

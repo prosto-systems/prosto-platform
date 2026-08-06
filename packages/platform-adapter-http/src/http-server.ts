@@ -551,18 +551,44 @@ export class PlatformHttpServer {
       return this._anonymousIdentity;
     }
 
+    let resolvedIdentity: PlatformRequestIdentityType;
+
     try {
-      const resolvedIdentity = await this._config.identityResolver.resolve(
+      resolvedIdentity = await this._config.identityResolver.resolve(
         this._requestMapper.createIdentityResolutionRequest(request),
       );
-
-      return this._normalizeIdentity(resolvedIdentity);
     } catch (error) {
+      if (
+        error instanceof PlatformHttpError &&
+        (error.code === 'HTTP_UNAUTHENTICATED' ||
+          error.code === 'IDENTITY_RESOLUTION_UNAVAILABLE')
+      ) {
+        throw error;
+      }
+
       this._logger.error('HTTP identity resolution failed.', {
         correlationId: request.correlationId,
         errorCode: 'IDENTITY_RESOLUTION_UNAVAILABLE',
         errorName: error instanceof Error ? error.name : 'UnknownError',
       });
+
+      throw new PlatformHttpError(
+        'IDENTITY_RESOLUTION_UNAVAILABLE',
+        'Request identity resolution is unavailable.',
+      );
+    }
+
+    try {
+      return this._normalizeIdentity(resolvedIdentity);
+    } catch (error) {
+      this._logger.error(
+        'HTTP identity resolver returned an invalid identity.',
+        {
+          correlationId: request.correlationId,
+          errorCode: 'IDENTITY_RESOLUTION_UNAVAILABLE',
+          errorName: error instanceof Error ? error.name : 'UnknownError',
+        },
+      );
 
       throw new PlatformHttpError(
         'IDENTITY_RESOLUTION_UNAVAILABLE',
@@ -791,15 +817,19 @@ export class PlatformHttpServer {
   ): void {
     reply
       .code(error.statusCode)
-      .header(this._config.correlationIdHeaderName, correlationId)
-      .type('application/json; charset=utf-8')
-      .send({
-        correlationId,
-        error: {
-          code: error.code,
-          message: error.message,
-        },
-      });
+      .header(this._config.correlationIdHeaderName, correlationId);
+
+    if (error.code === 'UNAUTHENTICATED') {
+      reply.header('WWW-Authenticate', 'Bearer');
+    }
+
+    reply.type('application/json; charset=utf-8').send({
+      correlationId,
+      error: {
+        code: error.code,
+        message: error.message,
+      },
+    });
   }
 
   private async _abortRequestScope(

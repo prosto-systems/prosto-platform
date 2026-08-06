@@ -7,8 +7,17 @@ import {
   type IAdminPermissionPolicy,
   type IAdminUIPluginManifest,
 } from '@prosto/platform-admin-contracts';
-import { PlatformDelegatedIdentity } from '@prosto/platform-sdk';
-import { PlatformAdminBffRuntimeHost } from '@/index.js';
+import {
+  PlatformAnonymousIdentity,
+  PlatformDelegatedIdentity,
+  PlatformHttpResponse,
+  type IPlatformIdentityResolutionRequest,
+  type IPlatformHttpRouteRegistration,
+} from '@prosto/platform-sdk';
+import {
+  CompositeAuthenticationResolver,
+  PlatformAdminBffRuntimeHost,
+} from '@/index.js';
 
 const permissionPolicy: IAdminPermissionPolicy = {
   schemaVersion: ADMIN_PERMISSION_POLICY_SCHEMA_VERSION,
@@ -60,6 +69,20 @@ function createLogger(): IAdminBffLogger {
   return { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
 }
 
+function createIdentityRequest(
+  path: string,
+  authorization?: readonly string[],
+): IPlatformIdentityResolutionRequest {
+  return {
+    correlationId: 'auth-selection-42',
+    method: 'GET',
+    path,
+    headers: authorization === undefined ? {} : { authorization },
+    params: {},
+    query: {},
+  };
+}
+
 describe('RuntimeBuilder Admin BFF HTTP composition root', (): void => {
   const hosts: { stop(): Promise<void> }[] = [];
 
@@ -100,6 +123,16 @@ describe('RuntimeBuilder Admin BFF HTTP composition root', (): void => {
         discoveryPipelineVersion: 'example.v1',
         logger: createLogger(),
       },
+      additionalRouteRegistrations: [
+        {
+          method: 'GET',
+          route: '/auth/test-registration',
+          execute: async () =>
+            new PlatformHttpResponse({
+              status: 204,
+            }),
+        } satisfies IPlatformHttpRouteRegistration,
+      ],
     });
     hosts.push(host);
 
@@ -113,6 +146,7 @@ describe('RuntimeBuilder Admin BFF HTTP composition root', (): void => {
       health,
       readiness,
       anonymous,
+      additionalRoute,
     ] = await Promise.all([
       fetch(`http://127.0.0.1:${port}/admin/api/v1/discovery`, {
         headers: { 'x-correlation-id': 'discovery-42' },
@@ -127,6 +161,7 @@ describe('RuntimeBuilder Admin BFF HTTP composition root', (): void => {
       fetch(`http://127.0.0.1:${port}/platform/health`),
       fetch(`http://127.0.0.1:${port}/platform/ready`),
       fetch(`http://127.0.0.1:${port}/admin/api/v1/health`),
+      fetch(`http://127.0.0.1:${port}/auth/test-registration`),
     ]);
 
     // Assert
@@ -142,9 +177,49 @@ describe('RuntimeBuilder Admin BFF HTTP composition root', (): void => {
     expect(readiness.status).toBe(200);
     expect(anonymous.status).toBe(401);
     expect((await anonymous.json()).error.code).toBe('UNAUTHENTICATED');
+    expect(additionalRoute.status).toBe(204);
     expect(fetchUIPluginManifests).toHaveBeenCalledTimes(3);
 
     await host.stop();
     expect(host.runtime.stopped).toBe(true);
+  });
+});
+
+describe('CompositeAuthenticationResolver', (): void => {
+  it('keeps bearer authoritative and skips session-cookie parsing on broker recovery routes', async (): Promise<void> => {
+    // Arrange
+    const bearerIdentity = new PlatformDelegatedIdentity({
+      subjectId: 'bearer-operator',
+      roles: [],
+      permissions: [],
+    });
+    const sessionIdentity = new PlatformDelegatedIdentity({
+      subjectId: 'session-operator',
+      roles: [],
+      permissions: [],
+    });
+    const bearerResolver = { resolve: vi.fn(async () => bearerIdentity) };
+    const sessionResolver = { resolve: vi.fn(async () => sessionIdentity) };
+    const resolver = new CompositeAuthenticationResolver(
+      bearerResolver,
+      sessionResolver,
+    );
+
+    // Act
+    const [recoveryIdentity, sessionRouteIdentity, bearerRouteIdentity] =
+      await Promise.all([
+        resolver.resolve(createIdentityRequest('/auth/login')),
+        resolver.resolve(createIdentityRequest('/admin/api/v1/discovery')),
+        resolver.resolve(
+          createIdentityRequest('/auth/logout', ['Bearer supplied-token']),
+        ),
+      ]);
+
+    // Assert
+    expect(recoveryIdentity).toBeInstanceOf(PlatformAnonymousIdentity);
+    expect(sessionRouteIdentity).toBe(sessionIdentity);
+    expect(bearerRouteIdentity).toBe(bearerIdentity);
+    expect(sessionResolver.resolve).toHaveBeenCalledTimes(1);
+    expect(bearerResolver.resolve).toHaveBeenCalledTimes(1);
   });
 });

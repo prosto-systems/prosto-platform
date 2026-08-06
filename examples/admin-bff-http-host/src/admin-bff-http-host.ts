@@ -37,6 +37,10 @@ import {
   type IPlatformHttpRouteHandler,
   type IPlatformHttpResponse,
   type IPlatformHttpRouteRegistration,
+  type IPlatformRequestIdentityResolver,
+  type IPlatformIdentityResolutionRequest,
+  PlatformAnonymousIdentity,
+  type PlatformRequestIdentityType,
 } from '@prosto/platform-sdk';
 
 /** Configuration for the BFF services constructed by this composition root. */
@@ -54,7 +58,41 @@ export interface IAdminBffRuntimeHostConfig {
   readonly http: IPlatformHttpServerConfig;
   readonly runtime: IRuntimeBuilderOptions;
   readonly adminBff: IAdminBffHostConfig;
+  /** SDK route registrations supplied by the composition root before startup. */
+  readonly additionalRouteRegistrations?: readonly IPlatformHttpRouteRegistration[];
   readonly runtimeBuilder?: IRuntimeBuilder;
+}
+
+const AUTH_RECOVERY_ROUTES = new Set([
+  '/auth/login',
+  '/auth/callback',
+  '/auth/logout',
+]);
+
+/**
+ * Keeps bearer credentials authoritative while allowing the browser broker to
+ * recover from damaged session cookies on its public routes.
+ * @internal
+ */
+export class CompositeAuthenticationResolver implements IPlatformRequestIdentityResolver {
+  constructor(
+    private readonly _bearerResolver: IPlatformRequestIdentityResolver,
+    private readonly _sessionResolver: IPlatformRequestIdentityResolver,
+  ) {}
+
+  resolve(
+    request: IPlatformIdentityResolutionRequest,
+  ): Promise<PlatformRequestIdentityType> {
+    if (request.headers.authorization !== undefined) {
+      return this._bearerResolver.resolve(request);
+    }
+
+    if (AUTH_RECOVERY_ROUTES.has(request.path)) {
+      return Promise.resolve(new PlatformAnonymousIdentity());
+    }
+
+    return this._sessionResolver.resolve(request);
+  }
 }
 
 class BaseContextFactory implements IPlatformHttpRouteContextFactory<IPlatformHttpRouteContext> {
@@ -172,6 +210,7 @@ export class PlatformAdminBffRuntimeHost {
         ),
       this._createPlatformHealthRegistration(),
       this._createPlatformReadinessRegistration(),
+      ...(config.additionalRouteRegistrations ?? []),
     ]);
   }
 

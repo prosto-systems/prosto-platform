@@ -7,6 +7,7 @@ export * from './platform-http-route-context.interface.js';
 export * from './platform-http-route-context-factory.interface.js';
 export * from './platform-http-route-context-factory-input.interface.js';
 export * from './platform-http-route-registration.interface.js';
+export * from './platform-http-set-cookie.interface.js';
 export * from './platform-identity-resolution-request.interface.js';
 export * from './platform-request-identity.interface.js';
 export * from './platform-request-identity-resolver.interface.js';
