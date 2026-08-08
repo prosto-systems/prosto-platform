@@ -68,7 +68,12 @@ describe('mapInternalImport', () => {
     '@prosto/platform-sdk',
     '@prosto/platform-adapter-admin-bff',
     '@prosto/platform-adapter-http',
+    '@prosto/platform-adapter-auth-oidc',
+    '@prosto/platform-adapter-aes-key-ring',
+    '@prosto/platform-adapter-auth-oidc-session',
+    '@prosto/platform-adapter-typeorm',
     '@prosto/platform-core',
+    '@prosto/platform-module-auth-oidc-session',
   ]);
 
   it('maps root SDK import as non-deep', () => {
@@ -179,6 +184,156 @@ describe('validateImportEdge', () => {
 
     assert.ok(error);
     assert.match(error, /Cross-package relative import/);
+  });
+
+  it('accepts the bearer adapter to SDK edge', async () => {
+    const source = await fixture('allowed-auth-to-sdk.ts');
+    const [specifier] = extractStaticImports(source);
+    const mapped = mapInternalImport(
+      specifier,
+      new Set(['@prosto/platform-sdk', '@prosto/platform-adapter-auth-oidc']),
+    );
+
+    assert.deepEqual(mapped, {
+      packageName: '@prosto/platform-sdk',
+      isDeep: false,
+    });
+    assert.equal(
+      validateImportEdge(
+        {
+          fromPackage: '@prosto/platform-adapter-auth-oidc',
+          toPackage: mapped.packageName,
+          specifier,
+          filePath: 'fixtures/allowed-auth-to-sdk.ts',
+          line: 1,
+          isDeep: mapped.isDeep,
+          isRelativeCrossPackage: false,
+        },
+        matrix,
+      ),
+      null,
+    );
+  });
+
+  it('accepts the session module to session adapter edge', async () => {
+    const source = await fixture('allowed-auth-session-module-to-session.ts');
+    const [specifier] = extractStaticImports(source);
+    const mapped = mapInternalImport(
+      specifier,
+      new Set([
+        '@prosto/platform-adapter-auth-oidc-session',
+        '@prosto/platform-module-auth-oidc-session',
+      ]),
+    );
+
+    assert.deepEqual(mapped, {
+      packageName: '@prosto/platform-adapter-auth-oidc-session',
+      isDeep: false,
+    });
+    assert.equal(
+      validateImportEdge(
+        {
+          fromPackage: '@prosto/platform-module-auth-oidc-session',
+          toPackage: mapped.packageName,
+          specifier,
+          filePath: 'fixtures/allowed-auth-session-module-to-session.ts',
+          line: 1,
+          isDeep: mapped.isDeep,
+          isRelativeCrossPackage: false,
+        },
+        matrix,
+      ),
+      null,
+    );
+  });
+
+  it('rejects bearer adapter to session adapter imports', async () => {
+    const source = await fixture('forbidden-bearer-to-session.ts');
+    const [specifier] = extractStaticImports(source);
+    const mapped = mapInternalImport(
+      specifier,
+      new Set([
+        '@prosto/platform-adapter-auth-oidc',
+        '@prosto/platform-adapter-auth-oidc-session',
+      ]),
+    );
+
+    assert.ok(mapped);
+    const error = validateImportEdge(
+      {
+        fromPackage: '@prosto/platform-adapter-auth-oidc',
+        toPackage: mapped.packageName,
+        specifier,
+        filePath: 'fixtures/forbidden-bearer-to-session.ts',
+        line: 1,
+        isDeep: mapped.isDeep,
+        isRelativeCrossPackage: false,
+      },
+      matrix,
+    );
+
+    assert.ok(error);
+    assert.match(error, /Architecture boundary violation/);
+  });
+});
+
+describe('auth package dependency regression', () => {
+  const expectedDependencies = new Map([
+    ['@prosto/platform-adapter-auth-oidc', ['@prosto/platform-sdk']],
+    ['@prosto/platform-adapter-aes-key-ring', ['@prosto/platform-sdk']],
+    ['@prosto/platform-adapter-auth-oidc-session', ['@prosto/platform-sdk']],
+    [
+      '@prosto/platform-module-auth-oidc-session',
+      [
+        '@prosto/platform-sdk',
+        '@prosto/platform-adapter-auth-oidc-session',
+        '@prosto/platform-adapter-typeorm',
+      ],
+    ],
+    [
+      '@prosto/platform-module-auth-local-session',
+      [
+        '@prosto/platform-sdk',
+        '@prosto/platform-adapter-auth-local',
+        '@prosto/platform-adapter-typeorm',
+      ],
+    ],
+  ]);
+
+  it('permits only the documented auth adapter and module edges', () => {
+    for (const [packageName, expected] of expectedDependencies) {
+      assert.deepEqual(
+        ALLOWED_INTERNAL_DEPENDENCIES.get(packageName),
+        expected,
+        `${packageName} has an unexpected internal dependency allowance.`,
+      );
+    }
+  });
+
+  it('allows the complete auth composition only in the example host', async () => {
+    const manifest = JSON.parse(
+      await readFile(
+        path.resolve('examples/admin-bff-http-host/package.json'),
+        'utf8',
+      ),
+    );
+    const dependencies = new Set(Object.keys(manifest.dependencies ?? {}));
+    const required = [
+      '@prosto/platform-adapter-admin-bff',
+      '@prosto/platform-adapter-aes-key-ring',
+      '@prosto/platform-adapter-auth-oidc',
+      '@prosto/platform-adapter-http',
+      '@prosto/platform-core',
+      '@prosto/platform-module-auth-oidc-session',
+    ];
+
+    for (const packageName of required) {
+      assert.equal(
+        dependencies.has(packageName),
+        true,
+        `The admin BFF composition host must depend on ${packageName}.`,
+      );
+    }
   });
 });
 

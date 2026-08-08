@@ -32,7 +32,6 @@ export class AdminDiscoveryRouteHandler implements IPlatformHttpRouteHandler<IAd
       phase: AdminBffPhase.DISCOVERY,
       correlationId: context.correlationId,
       event: AdminBffLogEvents.DISCOVERY_STARTED,
-      subjectId: context.identity.subjectId,
     });
 
     try {

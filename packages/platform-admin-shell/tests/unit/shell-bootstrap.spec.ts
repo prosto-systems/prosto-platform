@@ -49,7 +49,12 @@ function createMockDiscoveryClient(
 }
 
 function createFailingDiscoveryClient(
-  reason: 'NETWORK_ERROR' | 'TIMEOUT' | 'HTTP_ERROR' | 'VALIDATION_FAILED',
+  reason:
+    | 'NETWORK_ERROR'
+    | 'TIMEOUT'
+    | 'HTTP_ERROR'
+    | 'UNAUTHENTICATED'
+    | 'VALIDATION_FAILED',
   message: string,
 ) {
   if (reason === 'VALIDATION_FAILED') {
@@ -68,6 +73,7 @@ function createFailingDiscoveryClient(
       reason,
       message,
       ...(reason === 'HTTP_ERROR' ? { statusCode: 500 } : {}),
+      ...(reason === 'UNAUTHENTICATED' ? { statusCode: 401 } : {}),
     }),
   };
 }
@@ -105,6 +111,7 @@ describe('shellBootstrap', () => {
       }),
       pluginStore: usePluginStore(),
       diagnosticsStore: useDiagnosticsStore(),
+      navigateToLogin: vi.fn(),
     };
 
     const result = await shellBootstrap(options);
@@ -130,6 +137,7 @@ describe('shellBootstrap', () => {
       }),
       pluginStore: usePluginStore(),
       diagnosticsStore: useDiagnosticsStore(),
+      navigateToLogin: vi.fn(),
     };
 
     const result = await shellBootstrap(options);
@@ -154,6 +162,7 @@ describe('shellBootstrap', () => {
       }),
       pluginStore: usePluginStore(),
       diagnosticsStore: useDiagnosticsStore(),
+      navigateToLogin: vi.fn(),
     };
 
     const result = await shellBootstrap(options);
@@ -176,6 +185,7 @@ describe('shellBootstrap', () => {
       }),
       pluginStore: usePluginStore(),
       diagnosticsStore: useDiagnosticsStore(),
+      navigateToLogin: vi.fn(),
     };
 
     const result = await shellBootstrap(options);
@@ -199,6 +209,7 @@ describe('shellBootstrap', () => {
       }),
       pluginStore: usePluginStore(),
       diagnosticsStore: useDiagnosticsStore(),
+      navigateToLogin: vi.fn(),
     };
 
     const result = await shellBootstrap(options);
@@ -219,6 +230,7 @@ describe('shellBootstrap', () => {
       pluginRuntime: createMockPluginRuntime(),
       pluginStore: usePluginStore(),
       diagnosticsStore: useDiagnosticsStore(),
+      navigateToLogin: vi.fn(),
     };
 
     const result = await shellBootstrap(options);
@@ -243,6 +255,7 @@ describe('shellBootstrap', () => {
       pluginRuntime: createMockPluginRuntime(),
       pluginStore: usePluginStore(),
       diagnosticsStore: useDiagnosticsStore(),
+      navigateToLogin: vi.fn(),
     };
 
     const result = await shellBootstrap(options);
@@ -263,6 +276,7 @@ describe('shellBootstrap', () => {
       pluginRuntime: createMockPluginRuntime(),
       pluginStore: usePluginStore(),
       diagnosticsStore: useDiagnosticsStore(),
+      navigateToLogin: vi.fn(),
     };
 
     const result = await shellBootstrap(options);
@@ -272,5 +286,34 @@ describe('shellBootstrap', () => {
     const diagStore = useDiagnosticsStore();
 
     expect(diagStore.degradedMode.reason).toBe('DISCOVERY_HTTP_ERROR');
+  });
+
+  it('should redirect once without degraded mode when unauthenticated', async () => {
+    const navigateToLogin = vi.fn();
+    const pluginRuntime = createMockPluginRuntime();
+    const diagnosticsStore = useDiagnosticsStore();
+    const options: IShellBootstrapOptions = {
+      discoveryClient: createFailingDiscoveryClient(
+        'UNAUTHENTICATED',
+        'Authentication is required.',
+      ),
+      pluginRuntime,
+      pluginStore: usePluginStore(),
+      diagnosticsStore,
+      navigateToLogin,
+    };
+
+    const result = await shellBootstrap(options);
+
+    expect(result).toMatchObject({
+      success: false,
+      degraded: false,
+      loadedCount: 0,
+      rejectedCount: 0,
+    });
+    expect(navigateToLogin).toHaveBeenCalledTimes(1);
+    expect(navigateToLogin).toHaveBeenCalledWith();
+    expect(diagnosticsStore.isDegraded).toBe(false);
+    expect(pluginRuntime.bootstrapPlugins).not.toHaveBeenCalled();
   });
 });

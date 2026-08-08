@@ -157,3 +157,6 @@ bench-reports/
 
 # Deployment-local persistence credentials
 app_settings.local.json
+
+# Local authentication SQLite state and migration lock artifacts
+.prosto/

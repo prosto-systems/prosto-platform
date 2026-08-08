@@ -1,4 +1,4 @@
-﻿import { readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const PACKAGE_DIRS = [
@@ -8,9 +8,12 @@ const PACKAGE_DIRS = [
   'platform-contract-tests',
   'platform-cli',
   'platform-adapter-http',
-  'platform-adapter-auth',
+  'platform-adapter-auth-oidc',
   'platform-adapter-aes-key-ring',
-  'platform-adapter-auth-session',
+  'platform-adapter-auth-oidc-session',
+  'platform-adapter-auth-local',
+  'platform-module-auth-oidc-session',
+  'platform-module-auth-local-session',
   'platform-adapter-typeorm',
 ];
 

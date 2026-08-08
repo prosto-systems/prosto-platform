@@ -15,6 +15,7 @@ import {
   type IPlatformHttpServerConfig,
 } from '@prosto/platform-adapter-http';
 import {
+  ADMIN_AUTHENTICATION_API_SCHEMA_VERSION,
   ADMIN_COMPATIBILITY_CONTRACT_VERSION,
   AdminPluginCompatibilityEvaluator,
   AdminUIPluginManifestValidator,
@@ -37,10 +38,7 @@ import {
   type IPlatformHttpRouteHandler,
   type IPlatformHttpResponse,
   type IPlatformHttpRouteRegistration,
-  type IPlatformRequestIdentityResolver,
-  type IPlatformIdentityResolutionRequest,
-  PlatformAnonymousIdentity,
-  type PlatformRequestIdentityType,
+  type IPlatformAuthenticationProvider,
 } from '@prosto/platform-sdk';
 
 /** Configuration for the BFF services constructed by this composition root. */
@@ -55,7 +53,9 @@ export interface IAdminBffHostConfig {
 
 /** Inputs owned by the runtime host, rather than either HTTP or BFF adapter. */
 export interface IAdminBffRuntimeHostConfig {
-  readonly http: IPlatformHttpServerConfig;
+  readonly http: Omit<IPlatformHttpServerConfig, 'identityResolver'>;
+  /** Selected authentication facade, including identity resolver and public routes. */
+  readonly authenticationProvider: IPlatformAuthenticationProvider;
   readonly runtime: IRuntimeBuilderOptions;
   readonly adminBff: IAdminBffHostConfig;
   /** SDK route registrations supplied by the composition root before startup. */
@@ -63,43 +63,44 @@ export interface IAdminBffRuntimeHostConfig {
   readonly runtimeBuilder?: IRuntimeBuilder;
 }
 
-const AUTH_RECOVERY_ROUTES = new Set([
-  '/auth/login',
-  '/auth/callback',
-  '/auth/logout',
-]);
-
-/**
- * Keeps bearer credentials authoritative while allowing the browser broker to
- * recover from damaged session cookies on its public routes.
- * @internal
- */
-export class CompositeAuthenticationResolver implements IPlatformRequestIdentityResolver {
-  constructor(
-    private readonly _bearerResolver: IPlatformRequestIdentityResolver,
-    private readonly _sessionResolver: IPlatformRequestIdentityResolver,
-  ) {}
-
-  resolve(
-    request: IPlatformIdentityResolutionRequest,
-  ): Promise<PlatformRequestIdentityType> {
-    if (request.headers.authorization !== undefined) {
-      return this._bearerResolver.resolve(request);
-    }
-
-    if (AUTH_RECOVERY_ROUTES.has(request.path)) {
-      return Promise.resolve(new PlatformAnonymousIdentity());
-    }
-
-    return this._sessionResolver.resolve(request);
-  }
-}
-
 class BaseContextFactory implements IPlatformHttpRouteContextFactory<IPlatformHttpRouteContext> {
   async create(
     input: IPlatformHttpRouteContextFactoryInput,
   ): Promise<IPlatformHttpRouteContext> {
     return input.baseContext;
+  }
+}
+
+/** Provides the provider-neutral OIDC session status consumed by the shell. */
+class OidcAuthenticationSessionRoute implements IPlatformHttpRouteRegistration {
+  readonly method = 'GET';
+  readonly route = '/admin/api/v1/auth/session';
+
+  async execute(
+    input: IPlatformHttpRouteContextFactoryInput,
+  ): Promise<IPlatformHttpResponse> {
+    const authenticated = isPlatformDelegatedIdentity(
+      input.baseContext.identity,
+    );
+
+    return new PlatformHttpResponse({
+      status: 200,
+      body: {
+        variant: 'json',
+        data: authenticated
+          ? {
+              mode: 'oidc',
+              state: 'authenticated',
+              schemaVersion: ADMIN_AUTHENTICATION_API_SCHEMA_VERSION,
+            }
+          : {
+              mode: 'oidc',
+              state: 'anonymous',
+              loginUrl: '/auth/login',
+              schemaVersion: ADMIN_AUTHENTICATION_API_SCHEMA_VERSION,
+            },
+      },
+    });
   }
 }
 
@@ -200,8 +201,15 @@ export class PlatformAdminBffRuntimeHost {
       logger: config.adminBff.logger,
     });
 
-    this.httpServer = new PlatformHttpServer(config.http);
+    this.httpServer = new PlatformHttpServer({
+      ...config.http,
+      identityResolver: config.authenticationProvider.resolver,
+    });
     this.httpServer.registerRoutes([
+      ...config.authenticationProvider.publicRouteRegistrations,
+      ...(config.authenticationProvider.mode === 'oidc'
+        ? [new OidcAuthenticationSessionRoute()]
+        : []),
       ...adminBffAdapter
         .getHandlers()
         .map(

@@ -178,6 +178,27 @@ describe('AdminDiscoveryClient', () => {
       }
     });
 
+    it('should return UNAUTHENTICATED on HTTP 401', async () => {
+      const fetchMock = createFetchMock({
+        ok: false,
+        status: 401,
+        json: () => Promise.resolve({}),
+      });
+      const client = new AdminDiscoveryClient({
+        baseUrl: 'http://localhost:3001',
+        fetch: fetchMock,
+      });
+
+      const result = await client.getDiscovery();
+
+      expect(result).toEqual({
+        success: false,
+        reason: 'UNAUTHENTICATED',
+        message: 'Authentication is required.',
+        statusCode: 401,
+      });
+    });
+
     it('should return VALIDATION_FAILED on invalid JSON body', async () => {
       const fetchMock = createFetchMock({
         ok: true,
@@ -313,6 +334,7 @@ describe('AdminDiscoveryClient', () => {
         expect.anything(),
         expect.objectContaining({
           headers: { Accept: 'application/json' },
+          credentials: 'same-origin',
         }),
       );
     });
@@ -443,6 +465,23 @@ describe('AdminDiscoveryClient', () => {
           expect(error.statusCode).toBe(403);
         }
       }
+    });
+
+    it('should throw UNAUTHENTICATED on HTTP 401', async () => {
+      const fetchMock = createFetchMock({
+        ok: false,
+        status: 401,
+        json: () => Promise.resolve({}),
+      });
+      const client = new AdminDiscoveryClient({
+        baseUrl: 'http://localhost:3001',
+        fetch: fetchMock,
+      });
+
+      await expect(client.getDiscoveryOrThrow()).rejects.toMatchObject({
+        reason: 'UNAUTHENTICATED',
+        statusCode: 401,
+      });
     });
 
     it('should throw AdminDiscoveryClientError on network error', async () => {

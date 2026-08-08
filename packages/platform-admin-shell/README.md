@@ -18,6 +18,7 @@ Vue 3 SPA for Prosto platform admin interface with plugin runtime, policy-gated 
 - Degraded mode with operator-facing diagnostics for rejected or failed plugins
 - Telemetry instrumentation for plugin load outcomes and UI extension usage
 - Isolation of plugin failures from shell bootstrap
+- Same-origin browser authentication with login retry and logout controls
 
 ## Architecture
 
@@ -45,8 +46,15 @@ src/
 
 ### Boundaries
 - `platform-admin-shell` does not import `platform-core` or server adapters directly
-- All server communication goes through the admin discovery BFF client in `shared/api`
+- All server communication goes through framework-neutral BFF clients in `shared/api`
 - Framework-agnostic logic in `features/*/model` and `shared/api` must not import Vue, Pinia, or Vuetify
+
+## Browser authentication
+
+- The admin BFF defaults to `window.location.origin`.
+- Optional build-time `VITE_ADMIN_BFF_BASE_URL` values must resolve to the exact browser origin; cross-origin values fail startup.
+- Discovery and logout requests use `credentials: 'same-origin'` and never read browser cookies or store tokens.
+- A discovery `401` navigates to `/auth/login`; `/?auth=failed` instead renders a single manual retry action.
 
 ## Commands
 - `npm run --workspace @prosto/platform-admin-shell dev` — start dev server with HMR

@@ -232,7 +232,9 @@ describe('Admin BFF observability: adapter request logging', () => {
     expect(received?.context?.correlationId).toBeDefined();
     expect(received?.context?.method).toBe('GET');
     expect(received?.context?.path).toBe('/admin/api/v1/discovery');
-    expect(received?.context?.subjectId).toBe('operator-1');
+    expect(received?.context?.subjectId).toBeUndefined();
+    expect(received?.context?.roles).toBeUndefined();
+    expect(received?.context?.permissions).toBeUndefined();
 
     const completed = infoCalls.find((c) => c.message === 'Request completed');
 
@@ -687,6 +689,35 @@ describe('Admin BFF observability: correlation ID propagation', () => {
       if (call.context?.phase !== 'init') {
         expect(call.context?.correlationId).toBe('trace-001');
       }
+    }
+  });
+});
+
+describe('Admin BFF observability: identity privacy', () => {
+  it('should not provide identity PII to a custom logger', async () => {
+    const logger = createMockLogger();
+    const { adapter } = buildFullPipeline([createValidManifest()], { logger });
+
+    await adapter.handleRequest(createSdkRequest());
+    await adapter.handleRequest(
+      createSdkRequest({ path: '/admin/api/v1/health' }),
+    );
+    await adapter.handleRequest(
+      createSdkRequest({ path: '/admin/api/v1/diagnostics' }),
+    );
+    await adapter.handleRequest(
+      createSdkRequest({
+        method: 'POST',
+        path: '/admin/api/v1/action/catalog.export',
+        params: { actionId: 'catalog.export' },
+      }),
+    );
+
+    for (const call of logger.calls) {
+      expect(call.context).not.toHaveProperty('subject');
+      expect(call.context).not.toHaveProperty('subjectId');
+      expect(call.context).not.toHaveProperty('roles');
+      expect(call.context).not.toHaveProperty('permissions');
     }
   });
 });

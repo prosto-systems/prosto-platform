@@ -90,6 +90,10 @@ riskScore = probabilityScore * impactScore
 | S03 | Secret leakage in logs | 3 | 4 | 12 | Core Team | Redaction policy and structured logging validation | Redaction checks pass and leak tests show zero secret exposure |
 | S04 | Isolation bypass in worker model | 2 | 4 | 8 | Core Team | Constrained worker policies and restricted capabilities | Security tests validate denied escape patterns |
 | S05 | Unauthorized registry access | 3 | 4 | 12 | Core Team | Tokenized access model and policy validation | Access tests confirm unauthorized operations are denied |
+| S06 | Forged, malformed, or mis-scoped OIDC JWT accepted as a delegated identity | 3 | 5 | 15 | Security Team | Exact issuer/audience/algorithm validation, bounded claims, HTTPS redirect-denying JWKS retrieval | Bearer and OIDC token validation tests reject invalid issuer, audience, algorithm, signature, temporal claims, and malformed identity claims |
+| S07 | Application-held key-ring material or durable refresh secrets exposed or misused | 3 | 5 | 15 | Security Team | Deployment-injected versioned AES-GCM key ring, encrypted bounded secret storage, redacted failures | Key-ring and session tests show AAD-bound encryption, corruption rejection, and no raw secret persistence or logging |
+| S08 | Unsafe key rotation or key compromise response leaves active sessions vulnerable | 2 | 5 | 10 | Security Team | Dual-key staged rotation, lazy re-encryption only for normal rotation, global session invalidation for compromise | Rotation tests cover old-key decrypt/re-encryption; incident runbook requires session invalidation and cookie-version increment |
+| S09 | Browser session cookie theft, fixation, or cross-site request abuse | 3 | 5 | 15 | Security Team | Same-origin HTTPS-only `__Host-` cookies, HttpOnly/SameSite policy, one-time PKCE transaction and strict callback parsing | SDK cookie, session runtime, and host composition tests reject malformed cookies and enforce cookie/CSRF flow invariants |
 
 ### Technical Risks
 

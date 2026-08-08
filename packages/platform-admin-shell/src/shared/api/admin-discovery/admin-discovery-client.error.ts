@@ -2,7 +2,7 @@ import type { IAdminDiscoveryPayloadValidationIssue } from '@prosto/platform-adm
 
 /**
  * Error raised when the admin discovery contract client encounters
- * a network, HTTP, timeout, or payload validation failure.
+ * an authentication, network, HTTP, timeout, or payload validation failure.
  */
 export class AdminDiscoveryClientError extends Error {
   readonly statusCode?: number;
@@ -13,6 +13,7 @@ export class AdminDiscoveryClientError extends Error {
       | 'NETWORK_ERROR'
       | 'HTTP_ERROR'
       | 'TIMEOUT'
+      | 'UNAUTHENTICATED'
       | 'VALIDATION_FAILED',
     message: string,
     options?: {

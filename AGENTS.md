@@ -60,7 +60,7 @@ All detailed rules are in `.agents/rules/` directory:
 - **No `any` type** — use union types and type guards
 
 ### Publishable Adapter and Package Layouts
-- Every new publishable adapter or package MUST follow the `packages/platform-adapter-auth` or `packages/platform-core` layouts: root `package.json`, `vite.config.ts`, `vitest.config.ts`, `tsconfig*.json`, root implementation files in `src/`, and `tests/`.
+- Every new publishable adapter or package MUST follow the `packages/platform-adapter-auth-oidc` or `packages/platform-core` layouts: root `package.json`, `vite.config.ts`, `vitest.config.ts`, `tsconfig*.json`, root implementation files in `src/`, and `tests/`.
 - Do not place constants, errors, interfaces, or utilities directly in `src/` when creating or modifying a publishable adapter or package.
 
 ### Security
@@ -149,6 +149,8 @@ npm run validate:dependency-policy    # Enforce dependency layering
 npm run validate:module-graph         # Check module dependency tree
 npm run validate:public-api-boundary  # Verify SDK public API contracts
 npm run validate:runtime-policy       # Check runtime module loading policies
+npm run start:local                   # Start the local SQLite admin BFF host
+npm run auth:bootstrap-local          # Bootstrap local auth from an interactive TTY
 
 npm run bench:startup      # Run startup-sequence benchmark, JSON report -> bench-reports/startup.json
 npm run bench:events       # Run event-dispatch benchmark, JSON report -> bench-reports/events.json
