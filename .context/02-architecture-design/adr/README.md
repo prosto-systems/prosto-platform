@@ -16,6 +16,7 @@ ADRs capture key architecture decisions for `prosto-platform`, including context
 - [ADR-0007 Observability And Operability Baseline](./ADR-0007-observability-and-operability-baseline.md)
 - [ADR-0008 Testing And Contract Quality Gates](./ADR-0008-test-strategy-contract-testing-and-quality-gates.md)
 - [ADR-0009 Hybrid Admin UI Model Shell And UI Plugins](./ADR-0009-admin-ui-hybrid-shell-plugin-model.md)
+- [ADR-0010 Local Authentication Adapter And Opaque Sessions](./ADR-0010-local-authentication-adapter-and-opaque-sessions.md)
 
 ## Status Legend
 - `Draft`: proposed in architecture package, pending formal team acceptance.

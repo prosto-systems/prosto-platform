@@ -32,7 +32,6 @@ export class AdminDiagnosticsRouteHandler implements IPlatformHttpRouteHandler<I
     context.logger.debug('Diagnostics generation started', {
       phase: AdminBffPhase.DIAGNOSTICS,
       correlationId: context.correlationId,
-      subjectId: context.identity.subjectId,
     });
 
     const result = await context.discoveryService.discover(context.identity);

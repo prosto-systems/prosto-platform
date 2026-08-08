@@ -4,6 +4,10 @@ import {
   parseBearerAuthConfig,
 } from '@/config/auth-config.js';
 import { parseKeyRingConfig } from '@/config/key-ring-config.js';
+import {
+  AdminBffHostConfigurationError as HostConfigurationError,
+  parseAdminBffHostConfiguration,
+} from '@/config/host-config.js';
 import { parseSessionConfig } from '@/config/session-config.js';
 
 const key = Buffer.alloc(32, 7).toString('base64url');
@@ -74,6 +78,41 @@ describe('Admin BFF host configuration parsers', (): void => {
 
     // Assert
     expect(parse).toThrow(AdminBffHostConfigurationError);
+    expect(parse).toThrow('Admin BFF host configuration is invalid.');
+  });
+
+  it('uses local defaults without requiring OIDC configuration', (): void => {
+    // Arrange
+    const environment: NodeJS.ProcessEnv = { ADMIN_BFF_AUTH_MODE: 'local' };
+
+    // Act
+    const configuration = parseAdminBffHostConfiguration(environment);
+
+    // Assert
+    expect(configuration.auth).toEqual({
+      mode: 'local',
+      local: {
+        origin: 'http://127.0.0.1:3001',
+        secureCookies: false,
+      },
+    });
+    expect(configuration.configDir).toBe('./config');
+    expect(configuration.http).toEqual({ host: '127.0.0.1', port: 3001 });
+  });
+
+  it('rejects public plaintext local authentication without exposing configuration', (): void => {
+    // Arrange
+    const environment: NodeJS.ProcessEnv = {
+      ADMIN_BFF_AUTH_MODE: 'local',
+      ADMIN_BFF_PUBLIC_ORIGIN: 'http://admin.example.test',
+    };
+
+    // Act
+    const parse = (): ReturnType<typeof parseAdminBffHostConfiguration> =>
+      parseAdminBffHostConfiguration(environment);
+
+    // Assert
+    expect(parse).toThrow(HostConfigurationError);
     expect(parse).toThrow('Admin BFF host configuration is invalid.');
   });
 });

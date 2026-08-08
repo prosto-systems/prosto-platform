@@ -12,6 +12,7 @@ export interface IShellBootstrapOptions {
   readonly pluginRuntime: PluginRuntimeService;
   readonly pluginStore: PluginStoreType;
   readonly diagnosticsStore: DiagnosticsStoreType;
+  readonly navigateToLogin: () => void | Promise<void>;
   readonly telemetry?: AdminShellTelemetryService;
   readonly logger?: IAdminShellLogger;
 }

@@ -22,6 +22,12 @@ A TypeScript-based **headless platform** built on a micro-core architecture with
 | [`@prosto/platform-contract-tests`](packages/platform-contract-tests) | Reusable contract conformance tests for modules |
 | [`@prosto/platform-cli`](packages/platform-cli) | CLI scaffolding and validation utilities |
 | [`@prosto/platform-adapter-http`](packages/platform-adapter-http) | Fastify HTTP transport adapter — framework-neutral SDK route dispatch, transport security controls, and graceful shutdown |
+| [`@prosto/platform-adapter-auth-oidc`](packages/platform-adapter-auth-oidc) | OIDC bearer authentication adapter — strict JWT validation and delegated identity resolution |
+| [`@prosto/platform-adapter-aes-key-ring`](packages/platform-adapter-aes-key-ring) | AES key-ring adapter — versioned AES-256-GCM secret-cipher implementation |
+| [`@prosto/platform-adapter-auth-oidc-session`](packages/platform-adapter-auth-oidc-session) | Framework-neutral browser OIDC session adapter — session resolution and broker route handlers |
+| [`@prosto/platform-module-auth-oidc-session`](packages/platform-module-auth-oidc-session) | Auth-session module — TypeORM-backed session persistence lifecycle and runtime facade |
+| [`@prosto/platform-adapter-auth-local`](packages/platform-adapter-auth-local) | Framework-neutral local username/password, opaque-session, cookie, and CSRF policies |
+| [`@prosto/platform-module-auth-local-session`](packages/platform-module-auth-local-session) | TypeORM-backed local account, session, failed-login, and bootstrap module |
 | [`@prosto/platform-admin-contracts`](packages/platform-admin-contracts) | Admin contract authority — UI plugin manifests, discovery payloads, permissions, compatibility rules |
 | [`@prosto/platform-adapter-admin-bff`](packages/platform-adapter-admin-bff) | Admin BFF adapter — policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, observability |
 | [`@prosto/platform-admin-shell`](packages/platform-admin-shell) | Admin UI runtime — Vue 3 SPA, plugin runtime, permission guards, degraded mode |
@@ -41,6 +47,48 @@ turbo test
 # Run contract tests
 npm run test:contracts
 ```
+
+### Local Admin BFF
+
+Prerequisites: Node.js 22.12 or later and npm 8 or later. Local authentication
+uses the committed SQLite configuration and does not require OIDC variables or
+an external identity provider.
+
+```bash
+# Install the locked dependency graph
+npm ci
+
+# Start the local BFF at http://127.0.0.1:3001
+npm run start:local
+
+# In another terminal, start the admin shell at http://127.0.0.1:3000
+npm run --workspace @prosto/platform-admin-shell dev
+```
+
+On its first interactive start, the BFF creates an `admin` account and writes a
+cryptographically random one-time password directly to the terminal. The value
+is not written to application logs or SQLite and cannot be displayed again.
+Change it at the shell's password-change page before accessing the admin BFF.
+
+The example's local SQLite state is
+`examples/admin-bff-http-host/.prosto/local-auth.sqlite`; `.prosto/` is ignored
+by Git. To reset a non-production local installation, stop the BFF and delete
+that `.prosto` directory. This permanently removes local accounts and sessions;
+the next interactive start creates a new one-time `admin` credential.
+
+In production, expose local authentication only through HTTPS with secure
+cookies and use a service account that can read and write the SQLite state.
+First-run bootstrap requires an interactive TTY. For a non-interactive
+deployment, run the explicit bootstrap command from an interactive terminal
+before starting the service:
+
+```bash
+npm run auth:bootstrap-local -- --database examples/admin-bff-http-host/.prosto/local-auth.sqlite
+```
+
+Do not use a public plaintext HTTP origin for local authentication. See the
+[local authentication operations guide](docs/operations/local-authentication.md)
+for recovery, backup, restore, and migration procedures.
 
 ### Development Commands
 
@@ -85,6 +133,7 @@ Key architectural decisions are documented as ADRs in [`.context/02-architecture
 - **ADR-0004** — Lifecycle orchestration and startup policies
 - **ADR-0007** — Observability (Pino logging, structured logs, metrics)
 - **ADR-0009** — Admin UI hybrid shell plugin model
+- **ADR-0010** — Local authentication adapter and opaque session boundary
 
 Full architecture diagrams (C4, DFD, sequence) are in [`.context/02-architecture-design/`](.context/02-architecture-design/).
 

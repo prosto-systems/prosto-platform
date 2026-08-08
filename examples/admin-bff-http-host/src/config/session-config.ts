@@ -1,4 +1,4 @@
-import type { IPlatformAuthSessionModuleConfig } from '@prosto/platform-module-auth-session';
+import type { IPlatformAuthOidcSessionModuleConfig } from '@prosto/platform-module-auth-oidc-session';
 import {
   AdminBffHostConfigurationError,
   parseBearerAuthConfig,
@@ -6,7 +6,7 @@ import {
 } from './auth-config.js';
 
 type SessionModuleEnvironmentConfigType = Omit<
-  IPlatformAuthSessionModuleConfig,
+  IPlatformAuthOidcSessionModuleConfig,
   'cipher' | 'accessTokenResolver'
 >;
 

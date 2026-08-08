@@ -31,6 +31,8 @@
   "scripts": {
     "build": "turbo build",
     "start": "npm run start --workspace=@prosto/platform-core",
+    "start:local": "turbo build --filter=@examples/admin-bff-http-host... && npm run start:local --workspace=@examples/admin-bff-http-host",
+    "auth:bootstrap-local": "turbo build --filter=@prosto/platform-cli... && node packages/platform-cli/dist/index.js auth bootstrap-local",
     "dev": "turbo dev",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -69,7 +71,7 @@
     "nodemon": "^3.1.14",
     "p-limit": "^7.3.0",
     "prettier": "^3.8.4",
-    "turbo": "^2.9.16",
+    "turbo": "^2.10.9",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.61.0"
   },

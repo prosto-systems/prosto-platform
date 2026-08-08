@@ -25,6 +25,9 @@ const SENSITIVE_KEY_PATTERNS = [
   'authorization',
   'cookie',
   'credential',
+  'subject',
+  'roles',
+  'permissions',
 ];
 
 /**
@@ -52,18 +55,24 @@ function redactContext(
   for (const [key, value] of Object.entries(context)) {
     if (isSensitiveKey(key)) {
       redacted[key] = '[REDACTED]';
-    } else if (
-      typeof value === 'object' &&
-      value !== null &&
-      !Array.isArray(value)
-    ) {
-      redacted[key] = redactContext(value as Record<string, unknown>);
     } else {
-      redacted[key] = value;
+      redacted[key] = redactValue(value);
     }
   }
 
   return redacted;
+}
+
+function redactValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => redactValue(item));
+  }
+
+  if (typeof value === 'object' && value !== null) {
+    return redactContext(value as Record<string, unknown>);
+  }
+
+  return value;
 }
 
 /**
@@ -71,7 +80,7 @@ function redactContext(
  * Console-based structured logger for the admin BFF adapter.
  *
  * Outputs structured JSON logs via console methods with automatic
- * redaction of sensitive context fields (passwords, tokens, secrets).
+ * redaction of sensitive context fields and identity PII.
  *
  * All log entries include the moduleId for correlation with platform-wide
  * observability pipelines.

@@ -1,5 +1,6 @@
 import pkg from '../package.json' with { type: 'json' };
 
+export * from './authentication/index.js';
 export * from './compatibility/index.js';
 export * from './discovery/index.js';
 export * from './manifests/index.js';

@@ -168,6 +168,30 @@ describe('ConsoleAdminBffLogger', () => {
     expect(entry.context.safeKey).toBe('visible');
   });
 
+  it('should recursively redact identity PII keys in objects and arrays', () => {
+    const logger = new ConsoleAdminBffLogger();
+
+    logger.info('test', {
+      identity: {
+        subjectId: 'operator-1',
+        roles: ['admin'],
+        permissions: ['catalog.read'],
+      },
+      entries: [{ subject: 'operator-2', safeKey: 'visible' }],
+    });
+
+    const [, entry] = infoSpy.mock.calls[0];
+    const context = entry.context as Record<string, unknown>;
+    const identity = context.identity as Record<string, unknown>;
+    const entries = context.entries as Record<string, unknown>[];
+
+    expect(identity.subjectId).toBe('[REDACTED]');
+    expect(identity.roles).toBe('[REDACTED]');
+    expect(identity.permissions).toBe('[REDACTED]');
+    expect(entries[0]?.subject).toBe('[REDACTED]');
+    expect(entries[0]?.safeKey).toBe('visible');
+  });
+
   it('should handle undefined context gracefully', () => {
     const logger = new ConsoleAdminBffLogger();
 

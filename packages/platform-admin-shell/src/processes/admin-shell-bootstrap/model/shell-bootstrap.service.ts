@@ -66,6 +66,22 @@ export async function shellBootstrap(
 
   if (!result.success) {
     const reason = result.reason;
+
+    if (reason === 'UNAUTHENTICATED') {
+      telemetry?.recordDiscoveryFailed(reason, discoveryDurationMs);
+      telemetry?.recordStartupFailed(reason);
+
+      await options.navigateToLogin();
+
+      return {
+        success: false,
+        degraded: false,
+        loadedCount: 0,
+        rejectedCount: 0,
+        message: 'Authentication is required.',
+      };
+    }
+
     const statusCode =
       reason === 'HTTP_ERROR'
         ? (result as { readonly statusCode?: number }).statusCode

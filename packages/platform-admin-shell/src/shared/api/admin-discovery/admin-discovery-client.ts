@@ -65,6 +65,7 @@ export class AdminDiscoveryClient {
     try {
       response = await this._fetch(`${this._baseUrl}${DISCOVERY_ENDPOINT}`, {
         method: 'GET',
+        credentials: 'same-origin',
         headers: { Accept: 'application/json' },
         signal: controller.signal,
       });
@@ -84,6 +85,15 @@ export class AdminDiscoveryClient {
       };
     } finally {
       clearTimeout(timeoutId);
+    }
+
+    if (response.status === 401) {
+      return {
+        success: false,
+        reason: 'UNAUTHENTICATED',
+        message: 'Authentication is required.',
+        statusCode: 401,
+      };
     }
 
     if (!response.ok) {
@@ -178,8 +188,8 @@ export class AdminDiscoveryClient {
    * This method is a convenience for bootstrapping paths where
    * a failure should halt shell startup.
    *
-   * @throws {AdminDiscoveryClientError} on network, HTTP, timeout,
-   *   or validation failure.
+   * @throws {AdminDiscoveryClientError} on authentication, network, HTTP,
+   *   timeout, or validation failure.
    */
   async getDiscoveryOrThrow(): Promise<IAdminDiscoveryPayload> {
     const result = await this.getDiscovery();

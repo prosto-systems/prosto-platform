@@ -54,6 +54,10 @@ export const usePluginStore = defineStore('plugins', () => {
     );
   }
 
+  function clear(): void {
+    plugins.value.clear();
+  }
+
   return {
     plugins,
     register,
@@ -63,6 +67,7 @@ export const usePluginStore = defineStore('plugins', () => {
     rejectedPlugins,
     failedPlugins,
     readyPlugins,
+    clear,
   };
 });
 

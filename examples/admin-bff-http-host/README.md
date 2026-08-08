@@ -20,18 +20,40 @@ requests from reaching a stopping runtime.
 npm run --workspace @examples/admin-bff-http-host typecheck
 npm run --workspace @examples/admin-bff-http-host test
 npm run --workspace @examples/admin-bff-http-host build
-npm run --workspace @examples/admin-bff-http-host start
+npm run start:local
+npm run --workspace @prosto/platform-admin-shell dev
 ```
 
-`start` loads the local `.env` file through Node's `--env-file` option. Copy
-`.env.example` before local execution, then inject
-`ADMIN_BFF_OIDC_CLIENT_SECRET` and `ADMIN_BFF_SESSION_KEY_RING_JSON` through
-the environment; these secrets are intentionally not present in `.env`.
+## Local Authentication
+
+`npm run start:local` builds this host and starts it with
+`config/local.env`. It selects local authentication, SQLite state at
+`.prosto/local-auth.sqlite`, host `127.0.0.1`, and port `3001`; it does not
+load `.env` and does not require any `ADMIN_BFF_AUTH_*` OIDC values.
+
+On the first interactive start, the host prints a one-time `admin` password
+directly to the TTY. It stores only an Argon2id hash and requires a password
+change before allowing admin BFF access. The shell development server proxies
+same-origin `/admin` and `/auth` paths to this host.
+
+If a blank local database must be initialized by a non-interactive deployment,
+run this command from an interactive terminal before starting the service:
+
+```bash
+npm run auth:bootstrap-local -- --database examples/admin-bff-http-host/.prosto/local-auth.sqlite
+```
+
+## OIDC Authentication
+
+`npm run --workspace @examples/admin-bff-http-host start` builds the host and
+runs Node with `--env-file=.env.example`. The supplied file is a template for
+an explicit OIDC deployment, not a local `.env` file. Keep OIDC client secrets
+and `ADMIN_BFF_SESSION_KEY_RING_JSON` in the deployment secret manager.
 
 `installShutdownHandlers()` belongs to the runtime entry point and subscribes
 to `SIGINT` and `SIGTERM`; it awaits `host.stop()` before exiting.
 
-The host requires `ADMIN_BFF_CONFIG_DIR`, bearer OIDC configuration
+In OIDC mode, the host requires `ADMIN_BFF_CONFIG_DIR`, bearer OIDC configuration
 (`ADMIN_BFF_AUTH_ISSUER`, `ADMIN_BFF_AUTH_JWKS_URI`, and
 `ADMIN_BFF_AUTH_AUDIENCES_JSON`), browser OIDC configuration, and a deployment
 injected AES key ring. Optional host values are `ADMIN_BFF_HTTP_HOST`,
@@ -69,5 +91,7 @@ Deployment-local secret overrides belong in `app_settings.local.json` or the
 existing `PROSTO_PERSISTENCE__TYPEORM__...` core environment override, not in
 this example.
 
-Browser use requires a same-origin HTTPS ingress or reverse proxy. Cookies are
-always secure and CORS credentials are not configured by this host.
+OIDC browser use requires a same-origin HTTPS ingress or reverse proxy. Cookies
+are always secure and CORS credentials are not configured by this host. Local
+authentication permits loopback HTTP only; a public local origin must use HTTPS
+and secure cookies.

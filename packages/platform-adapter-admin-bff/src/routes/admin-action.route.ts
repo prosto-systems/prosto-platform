@@ -36,7 +36,6 @@ export class AdminActionRouteHandler implements IPlatformHttpRouteHandler<IAdmin
         phase: AdminBffPhase.ACTION_EVALUATION,
         correlationId: context.correlationId,
         errorCode: AdminBffErrorCodes.VALIDATION_FAILED,
-        subjectId: context.identity.subjectId,
       });
 
       return new PlatformHttpResponse({
@@ -58,8 +57,6 @@ export class AdminActionRouteHandler implements IPlatformHttpRouteHandler<IAdmin
       phase: AdminBffPhase.ACTION_EVALUATION,
       correlationId: context.correlationId,
       actionId,
-      subjectId: context.identity.subjectId,
-      roles: context.identity.roles,
     });
 
     const evaluation = context.permissionService.evaluateAction(
@@ -75,8 +72,6 @@ export class AdminActionRouteHandler implements IPlatformHttpRouteHandler<IAdmin
         actionId,
         allowed: false,
         reasonCode: evaluation.reasonCode,
-        subjectId: context.identity.subjectId,
-        roles: context.identity.roles,
         errorCode: AdminBffErrorCodes.PERMISSION_DENIED,
       });
 
@@ -102,8 +97,6 @@ export class AdminActionRouteHandler implements IPlatformHttpRouteHandler<IAdmin
       event: AdminBffLogEvents.ACTION_EVALUATED,
       actionId,
       allowed: true,
-      subjectId: context.identity.subjectId,
-      roles: context.identity.roles,
     });
 
     return new PlatformHttpResponse({

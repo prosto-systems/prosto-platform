@@ -9,7 +9,7 @@ import type {
  */
 export interface IAdminDiscoveryClientConfig {
   /**
-   * Base URL of the admin BFF adapter (e.g. `http://localhost:3001`).
+   * Same-origin base URL of the admin BFF adapter.
    */
   readonly baseUrl: string;
 
@@ -79,9 +79,21 @@ export interface IAdminDiscoveryClientNetworkFailure {
 
 /**
  * @alpha
+ * Failed discovery result indicating that browser authentication is required.
+ */
+export interface IAdminDiscoveryClientUnauthenticatedFailure {
+  readonly success: false;
+  readonly reason: 'UNAUTHENTICATED';
+  readonly message: string;
+  readonly statusCode: 401;
+}
+
+/**
+ * @alpha
  * Discriminated union of all discovery client results.
  */
 export type AdminDiscoveryClientResultType =
   | IAdminDiscoveryClientSuccess
   | IAdminDiscoveryClientValidationFailure
-  | IAdminDiscoveryClientNetworkFailure;
+  | IAdminDiscoveryClientNetworkFailure
+  | IAdminDiscoveryClientUnauthenticatedFailure;

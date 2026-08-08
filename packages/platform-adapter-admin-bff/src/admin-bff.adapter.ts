@@ -17,7 +17,6 @@ import {
   AdminHealthRouteHandler,
 } from './routes/index.js';
 import type {
-  IPlatformDelegatedIdentity,
   IPlatformHttpRequest,
   IPlatformHttpResponse,
   IPlatformHttpRouteHandler,
@@ -119,15 +118,11 @@ export class PlatformAdminBffAdapter {
       );
     }
 
-    const identity: IPlatformDelegatedIdentity = request.identity;
-
     this._logger.info('Request received', {
       phase: AdminBffPhase.REQUEST,
       correlationId,
       method: request.method,
       path: request.path,
-      subjectId: identity.subjectId,
-      roles: identity.roles,
     });
 
     const handler = this.findHandler(request.method, request.path);
@@ -165,7 +160,7 @@ export class PlatformAdminBffAdapter {
 
     const context: IAdminBffRouteContext = {
       correlationId,
-      identity,
+      identity: request.identity,
       signal: signal ?? new AbortController().signal,
       discoveryService: this._discoveryService,
       permissionService: this._permissionService,

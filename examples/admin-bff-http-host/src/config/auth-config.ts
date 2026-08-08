@@ -1,7 +1,7 @@
 import type {
   IPlatformOidcBearerResolverConfig,
   PlatformAuthJwtAlgorithmType,
-} from '@prosto/platform-adapter-auth';
+} from '@prosto/platform-adapter-auth-oidc';
 
 const ALLOWED_ALGORITHMS = new Set<PlatformAuthJwtAlgorithmType>([
   'RS256',

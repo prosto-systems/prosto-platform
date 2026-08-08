@@ -5,6 +5,7 @@ Generated from current exported contract surface in `packages/platform-sdk/src/i
 Status context:
 - Phase 03: completed (SDK contract baseline)
 - Phase 11: transport HTTP contracts (`@alpha`)
+- Local authentication Phase 1: provider facade contracts (`@alpha`)
 
 ## Surface Version
 - `SDK_CONTRACT_VERSION` (`@alpha`)
@@ -21,6 +22,8 @@ Status context:
 - `ALLOWED_APPLICATION_HTTP_METHODS` (`@alpha`)
 - `ALLOWED_IDENTITY_AUTHENTICATION_TYPES` (`@alpha`)
 - `PLATFORM_RESPONSE_HEADER_NAMES` (`@alpha`)
+- `PLATFORM_AUTHENTICATION_PROVIDER_MODES` (`@alpha`)
+- `PLATFORM_AUTHENTICATION_SESSION_STATES` (`@alpha`)
 
 ## Types
 - `PlatformModuleLifecycleStageType` (`@alpha`)
@@ -43,6 +46,9 @@ Status context:
 - `PlatformHttpSetCookieInputType` (`@alpha`)
 - `PlatformSecretCipherPurposeType` (`@alpha`)
 - `PlatformSecretCipherErrorCodeType` (`@alpha`)
+- `PlatformAuthenticationProviderModeType` (`@alpha`)
+- `PlatformAuthenticationSessionStateType` (`@alpha`)
+- `PlatformAuthenticationErrorCodeType` (`@alpha`)
 
 ## Interfaces
 - `IServiceRegistry` (`@alpha`)
@@ -102,6 +108,8 @@ Status context:
 - `IPlatformSecretCipherDecryptInput` (`@alpha`)
 - `IPlatformSecretCipherDecryptResult` (`@alpha`)
 - `IPlatformSecretCipher` (`@alpha`)
+- `IPlatformAuthenticationSessionState` (`@alpha`)
+- `IPlatformAuthenticationProvider` (`@alpha`)
 
 ## Errors
 - `PlatformSdkError` (`@alpha`)
@@ -115,6 +123,7 @@ Status context:
 - `PlatformHttpErrorCodeType` (`@alpha`)
 - `PlatformHttpError` (`@alpha`)
 - `PlatformSecretCipherError` (`@alpha`)
+- `PlatformAuthenticationError` (`@alpha`)
 
 ## Schemas
 - `SemverVersionSchema` (`@alpha`)

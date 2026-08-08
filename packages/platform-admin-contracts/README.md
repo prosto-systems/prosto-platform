@@ -5,6 +5,7 @@ Contract authority for Prosto platform admin shell and UI plugin integration.
 ## Status
 - Phase 07 baseline completed
 - Phase 09 integration baseline completed
+- Local authentication Phase 1 contracts completed
 - All exported contracts are marked `@alpha`
 
 ## Public API
@@ -30,6 +31,14 @@ Contract authority for Prosto platform admin shell and UI plugin integration.
 - `ADMIN_ACTION_GATING_EFFECTS`
 - `ADMIN_COMPATIBILITY_CONTRACT_VERSION`
 - `ADMIN_COMPATIBILITY_REASON_CODES`
+- `ADMIN_AUTHENTICATION_API_SCHEMA_VERSION`
+- `ADMIN_AUTHENTICATION_MODES`
+- `ADMIN_AUTHENTICATION_SESSION_STATES`
+- `ADMIN_AUTHENTICATION_API_ROUTES`
+- `ADMIN_AUTHENTICATION_FAILURE_CODES`
+- `ADMIN_AUTHENTICATION_MINIMUM_PASSWORD_LENGTH`
+- `ADMIN_AUTHENTICATION_MAXIMUM_PASSWORD_LENGTH`
+- `ADMIN_AUTHENTICATION_MAXIMUM_USERNAME_LENGTH`
 - `CAPABILITY_METADATA_KEY`
 - `PERMISSION_METADATA_KEY`
 
@@ -63,6 +72,11 @@ Contract authority for Prosto platform admin shell and UI plugin integration.
 - `AdminDiscoveryPayloadValidationResultType`
 - `AdminPermissionPolicyValidationResultType`
 - `AdminPluginCompatibilityResultType`
+- `AdminAuthenticationApiSchemaVersionType`
+- `AdminAuthenticationModeType`
+- `AdminAuthenticationSessionStateType`
+- `AdminAuthenticationFailureCodeType`
+- `AdminAuthenticationSessionResponseType`
 
 ### Interfaces
 - `IAdminUIPluginIdentity`
@@ -101,6 +115,18 @@ Contract authority for Prosto platform admin shell and UI plugin integration.
 - `IAdminPluginCompatibilityAllowedResult`
 - `IAdminPluginCompatibilityRejectedResult`
 - `IAdminPluginCompatibilityEvaluator`
+- `IAdminAuthenticationPayload`
+- `IAdminLocalAuthenticationSessionResponse`
+- `IAdminOidcAnonymousAuthenticationSessionResponse`
+- `IAdminOidcAuthenticatedAuthenticationSessionResponse`
+- `IAdminAuthenticationLoginRequest`
+- `IAdminAuthenticationLoginResponse`
+- `IAdminAuthenticationChangePasswordRequest`
+- `IAdminAuthenticationChangePasswordResponse`
+- `IAdminAuthenticationLogoutRequest`
+- `IAdminAuthenticationLogoutResponse`
+- `IAdminAuthenticationFailureResponse`
+- `IAdminAuthenticationValidationIssue`
 
 ### Schemas
 - `SemverVersionSchema`
@@ -111,6 +137,17 @@ Contract authority for Prosto platform admin shell and UI plugin integration.
 - `AdminUIPluginManifestSchema`
 - `AdminDiscoveryPayloadSchema`
 - `AdminPermissionPolicySchema`
+- `AdminAuthenticationApiSchemaVersionSchema`
+- `AdminAuthenticationUsernameSchema`
+- `AdminAuthenticationPasswordSchema`
+- `AdminAuthenticationSessionResponseSchema`
+- `AdminAuthenticationLoginRequestSchema`
+- `AdminAuthenticationLoginResponseSchema`
+- `AdminAuthenticationChangePasswordRequestSchema`
+- `AdminAuthenticationChangePasswordResponseSchema`
+- `AdminAuthenticationLogoutRequestSchema`
+- `AdminAuthenticationLogoutResponseSchema`
+- `AdminAuthenticationFailureResponseSchema`
 
 ### Validators
 - `PlatformModuleManifestValidator`
@@ -120,9 +157,13 @@ Contract authority for Prosto platform admin shell and UI plugin integration.
 - `AdminPermissionPolicyValidator`
 - `AdminPluginCompatibilityEvaluator`
 - `AdminActionGateEvaluator`
+- `AdminAuthenticationContractValidator`
 
 ### Utilities
 - `convertDescriptorToManifest`
+
+### Errors
+- `AdminAuthenticationValidationError`
 
 ## Commands
 - `npm run --workspace @prosto/platform-admin-contracts build`
