@@ -20,13 +20,18 @@ prosto-platform/
 ├── packages/
 │   ├── platform-sdk/                    # Contract package (types, interfaces, tokens)
 │   ├── platform-core/                   # Runtime kernel
-│   ├── platform-adapter-typeorm/        # TypeORM persistence adapter (shared DataSource)
+│   ├── platform-adapters/
+│   │   ├── platform-adapter-typeorm/    # TypeORM persistence adapter (shared DataSource)
+│   │   ├── platform-adapter-http/       # HTTP adapter (Fastify/Express abstraction)
+│   │   ├── platform-adapter-auth-oidc/  # OIDC bearer authentication adapter
+│   │   ├── platform-adapter-aes-key-ring/ # AES-256-GCM secret-cipher adapter
+│   │   ├── platform-adapter-auth-oidc-session/ # Browser OIDC session adapter
+│   │   ├── platform-adapter-auth-local/ # Local authentication adapter
+│   │   └── platform-adapter-admin-bff/  # Admin BFF adapter for policy-aware aggregation
 │   ├── platform-contract-tests/         # Shared contract test suite
 │   ├── platform-cli/                    # CLI tooling for module development
-│   ├── platform-adapter-http/           # HTTP adapter (Fastify/Express abstraction)
-│   ├── platform-adapter-auth/           # Authentication/authorization abstraction
 │   ├── platform-admin-contracts/        # Admin shell and UI plugin contracts
-│   └── platform-adapter-admin-bff/      # Admin BFF adapter for policy-aware aggregation
+│   └── platform-admin-shell/            # Admin UI runtime
 │
 ├── examples/
 │   ├── module-health/                   # Example module: health check endpoint
@@ -258,10 +263,10 @@ platform-admin-contracts/
 
 **Purpose**: policy-aware admin aggregation adapter for shell discovery, permission-aware actions, and diagnostics.
 
-**Directory**: `packages/platform-adapter-admin-bff/`
+**Directory**: `packages/platform-adapters/platform-adapter-admin-bff/`
 
 ```text
-platform-adapter-admin-bff/
+platform-adapters/platform-adapter-admin-bff/
 ├── src/
 │   ├── index.ts
 │   ├── discovery/
@@ -287,7 +292,7 @@ platform-adapter-admin-bff/
 Example `platform-adapter-http`:
 
 ```
-platform-adapter-http/
+platform-adapters/platform-adapter-http/
 ├── src/
 │   ├── index.ts
 │   ├── http.adapter.ts             # Framework abstraction

@@ -83,7 +83,7 @@ status: approved-with-mitigation
 - `docs/operations/incident-register.md`
 - `docs/operations/policy-exception-register.md`
 - `docs/operations/admin-plugin-readiness-report.md`
-- `packages/platform-adapter-typeorm/README.md`
+- `packages/platform-adapters/platform-adapter-typeorm/README.md`
 - `docs/persistence/typeorm-dialect-support.md`
 - `docs/persistence/typeorm-shared-datasource-guide.md`
 - `examples/typeorm-shared-datasource/*`

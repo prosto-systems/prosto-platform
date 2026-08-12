@@ -18,18 +18,18 @@ A TypeScript-based **headless platform** built on a micro-core architecture with
 |---------|---------|
 | [`@prosto/platform-sdk`](packages/platform-sdk) | Contract authority — schemas, validators, lifecycle interfaces, typed tokens, persistence contracts |
 | [`@prosto/platform-core`](packages/platform-core) | Minimal runtime kernel — bootstrap, modularity, events, security, caching, diagnostics |
-| [`@prosto/platform-adapter-typeorm`](packages/platform-adapter-typeorm) | TypeORM persistence adapter — shared DataSource, migration locks, descriptor registry |
+| [`@prosto/platform-adapter-typeorm`](packages/platform-adapters/platform-adapter-typeorm) | TypeORM persistence adapter — shared DataSource, migration locks, descriptor registry |
 | [`@prosto/platform-contract-tests`](packages/platform-contract-tests) | Reusable contract conformance tests for modules |
 | [`@prosto/platform-cli`](packages/platform-cli) | CLI scaffolding and validation utilities |
-| [`@prosto/platform-adapter-http`](packages/platform-adapter-http) | Fastify HTTP transport adapter — framework-neutral SDK route dispatch, transport security controls, and graceful shutdown |
-| [`@prosto/platform-adapter-auth-oidc`](packages/platform-adapter-auth-oidc) | OIDC bearer authentication adapter — strict JWT validation and delegated identity resolution |
-| [`@prosto/platform-adapter-aes-key-ring`](packages/platform-adapter-aes-key-ring) | AES key-ring adapter — versioned AES-256-GCM secret-cipher implementation |
-| [`@prosto/platform-adapter-auth-oidc-session`](packages/platform-adapter-auth-oidc-session) | Framework-neutral browser OIDC session adapter — session resolution and broker route handlers |
+| [`@prosto/platform-adapter-http`](packages/platform-adapters/platform-adapter-http) | Fastify HTTP transport adapter — framework-neutral SDK route dispatch, transport security controls, and graceful shutdown |
+| [`@prosto/platform-adapter-auth-oidc`](packages/platform-adapters/platform-adapter-auth-oidc) | OIDC bearer authentication adapter — strict JWT validation and delegated identity resolution |
+| [`@prosto/platform-adapter-aes-key-ring`](packages/platform-adapters/platform-adapter-aes-key-ring) | AES key-ring adapter — versioned AES-256-GCM secret-cipher implementation |
+| [`@prosto/platform-adapter-auth-oidc-session`](packages/platform-adapters/platform-adapter-auth-oidc-session) | Framework-neutral browser OIDC session adapter — session resolution and broker route handlers |
 | [`@prosto/platform-module-auth-oidc-session`](packages/platform-module-auth-oidc-session) | Auth-session module — TypeORM-backed session persistence lifecycle and runtime facade |
-| [`@prosto/platform-adapter-auth-local`](packages/platform-adapter-auth-local) | Framework-neutral local username/password, opaque-session, cookie, and CSRF policies |
+| [`@prosto/platform-adapter-auth-local`](packages/platform-adapters/platform-adapter-auth-local) | Framework-neutral local username/password, opaque-session, cookie, and CSRF policies |
 | [`@prosto/platform-module-auth-local-session`](packages/platform-module-auth-local-session) | TypeORM-backed local account, session, failed-login, and bootstrap module |
 | [`@prosto/platform-admin-contracts`](packages/platform-admin-contracts) | Admin contract authority — UI plugin manifests, discovery payloads, permissions, compatibility rules |
-| [`@prosto/platform-adapter-admin-bff`](packages/platform-adapter-admin-bff) | Admin BFF adapter — policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, observability |
+| [`@prosto/platform-adapter-admin-bff`](packages/platform-adapters/platform-adapter-admin-bff) | Admin BFF adapter — policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, observability |
 | [`@prosto/platform-admin-shell`](packages/platform-admin-shell) | Admin UI runtime — Vue 3 SPA, plugin runtime, permission guards, degraded mode |
 
 ## Quick Start
@@ -120,7 +120,7 @@ platform-sdk  (innermost — contract authority, zero runtime dependencies)
      ↑
 platform-core (runtime kernel, depends only on sdk)
      ↑
-adapters      (platform-adapter-typeorm, platform-adapter-http, platform-adapter-admin-bff)
+platform-adapters/  (platform-adapter-typeorm, platform-adapter-http, platform-adapter-admin-bff)
      ↑
 modules / CLI  (depend on sdk and admin-contracts, must NOT import core)
 ```

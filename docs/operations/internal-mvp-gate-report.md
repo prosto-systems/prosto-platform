@@ -26,11 +26,11 @@ reviewers:
 | Core runtime | `@prosto/platform-core` | `0.0.0` | `packages/platform-core/package.json` |
 | SDK contracts | `@prosto/platform-sdk` | `0.0.0` | `packages/platform-sdk/package.json` |
 | Contract tests | `@prosto/platform-contract-tests` | `0.0.0` | `packages/platform-contract-tests/package.json` |
-| Persistence adapter | `@prosto/platform-adapter-typeorm` | `0.0.0` | `packages/platform-adapter-typeorm/package.json` |
+| Persistence adapter | `@prosto/platform-adapter-typeorm` | `0.0.0` | `packages/platform-adapters/platform-adapter-typeorm/package.json` |
 | Reference module | `@examples/module-health` | `0.0.0` | `examples/module-health/package.json` |
 | Reference module | `@examples/module-auth` | `0.0.0` | `examples/module-auth/package.json` |
 | Admin contracts | `@prosto/platform-admin-contracts` | `0.0.0` | `packages/platform-admin-contracts/package.json` |
-| Admin BFF | `@prosto/platform-adapter-admin-bff` | `0.0.0` | `packages/platform-adapter-admin-bff/package.json` |
+| Admin BFF | `@prosto/platform-adapter-admin-bff` | `0.0.0` | `packages/platform-adapters/platform-adapter-admin-bff/package.json` |
 | Admin shell | `@prosto/platform-admin-shell` | `0.0.0` | `packages/platform-admin-shell/package.json` |
 
 ## Staging Pilot Cycles

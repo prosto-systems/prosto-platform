@@ -7,7 +7,7 @@ import {
   ALLOWED_INTERNAL_DEPENDENCIES,
   DYNAMIC_IMPORT_ALLOWLIST,
   REQUIRED_PACKAGE_DIRS,
-  REQUIRED_WORKSPACE_GLOB,
+  REQUIRED_WORKSPACE_GLOBS,
 } from './architecture/dependency-matrix.mjs';
 import {
   collectSourceFiles,
@@ -25,10 +25,12 @@ const workspaces = Array.isArray(rootManifest.workspaces)
   ? rootManifest.workspaces
   : [];
 
-if (!workspaces.includes(REQUIRED_WORKSPACE_GLOB)) {
-  throw new Error(
-    `Expected root workspaces to include "${REQUIRED_WORKSPACE_GLOB}".`,
-  );
+for (const requiredWorkspaceGlob of REQUIRED_WORKSPACE_GLOBS) {
+  if (!workspaces.includes(requiredWorkspaceGlob)) {
+    throw new Error(
+      `Expected root workspaces to include "${requiredWorkspaceGlob}".`,
+    );
+  }
 }
 
 for (const packageDir of REQUIRED_PACKAGE_DIRS) {
@@ -47,17 +49,50 @@ for (const packageDir of REQUIRED_PACKAGE_DIRS) {
   }
 }
 
+async function collectPackageDirectories(
+  directoryPath,
+  relativeDirectory = '',
+) {
+  const entries = await readdir(directoryPath, { withFileTypes: true });
+  const packageDirectories = [];
+
+  for (const entry of entries) {
+    if (!entry.isDirectory() || entry.name === 'node_modules') {
+      continue;
+    }
+
+    const packageDirectory = path.join(directoryPath, entry.name);
+    const relativePackageDirectory = path.join(relativeDirectory, entry.name);
+    const manifestPath = path.join(packageDirectory, 'package.json');
+
+    try {
+      await readFile(manifestPath, 'utf8');
+      packageDirectories.push(relativePackageDirectory);
+      continue;
+    } catch {
+      packageDirectories.push(
+        ...(await collectPackageDirectories(
+          packageDirectory,
+          relativePackageDirectory,
+        )),
+      );
+    }
+  }
+
+  return packageDirectories;
+}
+
 // Build a set of known workspace package names from package.json manifests.
 const knownPackageNames = new Set();
 const packageDirToName = new Map();
-const packageEntries = await readdir(PACKAGES_ROOT, { withFileTypes: true });
+const packageDirectories = await collectPackageDirectories(PACKAGES_ROOT);
 
-for (const entry of packageEntries) {
-  if (!entry.isDirectory()) {
-    continue;
-  }
-
-  const manifestPath = path.resolve(PACKAGES_ROOT, entry.name, 'package.json');
+for (const packageDirectory of packageDirectories) {
+  const manifestPath = path.resolve(
+    PACKAGES_ROOT,
+    packageDirectory,
+    'package.json',
+  );
 
   try {
     const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
@@ -65,11 +100,31 @@ for (const entry of packageEntries) {
 
     if (name.startsWith('@prosto/')) {
       knownPackageNames.add(name);
-      packageDirToName.set(entry.name, name);
+      packageDirToName.set(packageDirectory, name);
     }
   } catch {
     // Manifest missing or unreadable: skip non-package directories.
   }
+}
+
+const packageRoots = [...packageDirToName.keys()]
+  .map((packageDirectory) => [
+    packageDirectory,
+    path.resolve(PACKAGES_ROOT, packageDirectory),
+  ])
+  .sort(([, leftPath], [, rightPath]) => rightPath.length - leftPath.length);
+
+function findContainingPackageDirectory(filePath) {
+  for (const [packageDirectory, packageRoot] of packageRoots) {
+    if (
+      filePath === packageRoot ||
+      filePath.startsWith(`${packageRoot}${path.sep}`)
+    ) {
+      return packageDirectory;
+    }
+  }
+
+  return undefined;
 }
 
 const violations = [];
@@ -113,17 +168,10 @@ for (const [dirName, packageName] of packageDirToName) {
       if (specifier.startsWith('.')) {
         // Relative imports are allowed inside the same package. Cross-package relative imports are forbidden.
         const resolved = path.resolve(path.dirname(filePath), specifier);
-        const fromPackageDir = path
-          .relative(PACKAGES_ROOT, filePath)
-          .split(path.sep)[0];
-        const toPackageDir = path
-          .relative(PACKAGES_ROOT, resolved)
-          .split(path.sep)[0];
+        const fromPackageDir = findContainingPackageDirectory(filePath);
+        const toPackageDir = findContainingPackageDirectory(resolved);
 
-        if (
-          toPackageDir !== fromPackageDir &&
-          !path.relative(PACKAGES_ROOT, resolved).startsWith('..')
-        ) {
+        if (toPackageDir !== undefined && toPackageDir !== fromPackageDir) {
           violations.push(
             `Cross-package relative import from ${packageName} to ${specifier} is not allowed (file: ${filePath}).`,
           );

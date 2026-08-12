@@ -16,7 +16,7 @@
 - Phase 09 admin shell runtime: `@prosto/platform-admin-shell` (Vue 3 SPA, plugin runtime, permission guards, degraded mode)
 - Persistence adapter: `@prosto/platform-adapter-typeorm` (shared DataSource, migration locks, descriptor registry)
 - Phase 10 operations evidence: `docs/operations/internal-mvp-gate-report.md`, `docs/operations/incident-register.md`, `docs/operations/policy-exception-register.md`, `docs/operations/admin-plugin-readiness-report.md`
-- Root/package TypeScript baselines: `packages/platform-utils/tsconfig/base.json`, `packages/*/tsconfig.json`
+- Root/package TypeScript baselines: `packages/platform-utils/tsconfig/base.json`, `packages/*/tsconfig.json`, `packages/platform-adapters/*/tsconfig.json`
 - Build: Vite 8 (`vite.config.ts`) with `vite-plugin-dts`
 - Governance scripts in root `package.json`: `lint`, `lint:fix`, `lint:architecture`, `validate:dependency-policy`, `validate:module-graph`, `validate:public-api-boundary`, `validate:runtime-policy`, `test:contracts`, `test:lifecycle-determinism`, `release:evidence`
 - Test runner: Vitest (`packages/platform-sdk/vitest.config.ts`)
@@ -60,7 +60,8 @@ All detailed rules are in `.agents/rules/` directory:
 - **No `any` type** — use union types and type guards
 
 ### Publishable Adapter and Package Layouts
-- Every new publishable adapter or package MUST follow the `packages/platform-adapter-auth-oidc` or `packages/platform-core` layouts: root `package.json`, `vite.config.ts`, `vitest.config.ts`, `tsconfig*.json`, root implementation files in `src/`, and `tests/`.
+- All adapter packages MUST live under `packages/platform-adapters/`; other publishable packages remain direct children of `packages/`.
+- Every new publishable adapter or package MUST follow the `packages/platform-adapters/platform-adapter-auth-oidc` or `packages/platform-core` layouts: root `package.json`, `vite.config.ts`, `vitest.config.ts`, `tsconfig*.json`, root implementation files in `src/`, and `tests/`.
 - Do not place constants, errors, interfaces, or utilities directly in `src/` when creating or modifying a publishable adapter or package.
 
 ### Security
@@ -181,5 +182,5 @@ These checks are enforced in CI via `.github/workflows/` gates and must pass bef
 
 ---
 
-**Last Updated**: 2026-08-06
-**Version**: 0.5.0
+**Last Updated**: 2026-08-12
+**Version**: 0.6.0

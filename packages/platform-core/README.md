@@ -139,7 +139,7 @@ const runtime = new RuntimeBuilder().build({
 3. The persistence provider initializes the shared DataSource, acquires a migration lock, runs migrations, and publishes its native service token (e.g. `TYPEORM_DATA_SOURCE_SERVICE_TOKEN`).
 4. Modules resolve the native token in `start()` or later via `ctx.services.resolveRequired(TYPEORM_DATA_SOURCE_SERVICE_TOKEN)` — never during `init()`.
 
-See [`@prosto/platform-adapter-typeorm`](../platform-adapter-typeorm) for the reference TypeORM implementation and [`docs/persistence/typeorm-shared-datasource-guide.md`](../../docs/persistence/typeorm-shared-datasource-guide.md) for ownership conventions and lifecycle restrictions.
+See [`@prosto/platform-adapter-typeorm`](../platform-adapters/platform-adapter-typeorm) for the reference TypeORM implementation and [`docs/persistence/typeorm-shared-datasource-guide.md`](../../docs/persistence/typeorm-shared-datasource-guide.md) for ownership conventions and lifecycle restrictions.
 
 ### RuntimeBuilder Defaults
 
