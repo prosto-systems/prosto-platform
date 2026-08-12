@@ -138,8 +138,9 @@ npm run validate:public-api-boundary
 ### Directory Layout
 
 - Adapter workspaces live in `packages/platform-adapters/platform-adapter-*/`.
+- Module workspaces live in `packages/platform-modules/platform-module-*/`.
 - Other platform workspaces remain direct children of `packages/`.
-- Root workspace globs must include both `packages/*` and `packages/*/*`.
+- Root workspace globs must include `packages/*`, `packages/*/*`, and `packages/*/*/*`.
 
 ### Turborepo Configuration
 

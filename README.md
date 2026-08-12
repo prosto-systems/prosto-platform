@@ -25,9 +25,9 @@ A TypeScript-based **headless platform** built on a micro-core architecture with
 | [`@prosto/platform-adapter-auth-oidc`](packages/platform-adapters/platform-adapter-auth-oidc) | OIDC bearer authentication adapter — strict JWT validation and delegated identity resolution |
 | [`@prosto/platform-adapter-aes-key-ring`](packages/platform-adapters/platform-adapter-aes-key-ring) | AES key-ring adapter — versioned AES-256-GCM secret-cipher implementation |
 | [`@prosto/platform-adapter-auth-oidc-session`](packages/platform-adapters/platform-adapter-auth-oidc-session) | Framework-neutral browser OIDC session adapter — session resolution and broker route handlers |
-| [`@prosto/platform-module-auth-oidc-session`](packages/platform-module-auth-oidc-session) | Auth-session module — TypeORM-backed session persistence lifecycle and runtime facade |
+| [`@prosto/platform-module-auth-oidc-session`](packages/platform-modules/platform-module-auth-oidc-session) | Auth-session module — TypeORM-backed session persistence lifecycle and runtime facade |
 | [`@prosto/platform-adapter-auth-local`](packages/platform-adapters/platform-adapter-auth-local) | Framework-neutral local username/password, opaque-session, cookie, and CSRF policies |
-| [`@prosto/platform-module-auth-local-session`](packages/platform-module-auth-local-session) | TypeORM-backed local account, session, failed-login, and bootstrap module |
+| [`@prosto/platform-module-auth-local-session`](packages/platform-modules/platform-module-auth-local-session) | TypeORM-backed local account, session, failed-login, and bootstrap module |
 | [`@prosto/platform-admin-contracts`](packages/platform-admin-contracts) | Admin contract authority — UI plugin manifests, discovery payloads, permissions, compatibility rules |
 | [`@prosto/platform-adapter-admin-bff`](packages/platform-adapters/platform-adapter-admin-bff) | Admin BFF adapter — policy-aware admin APIs, UI plugin discovery aggregation, permission mapping, compatibility filtering, diagnostics, observability |
 | [`@prosto/platform-admin-shell`](packages/platform-admin-shell) | Admin UI runtime — Vue 3 SPA, plugin runtime, permission guards, degraded mode |
@@ -121,8 +121,8 @@ platform-sdk  (innermost — contract authority, zero runtime dependencies)
 platform-core (runtime kernel, depends only on sdk)
      ↑
 platform-adapters/  (platform-adapter-typeorm, platform-adapter-http, platform-adapter-admin-bff)
-     ↑
-modules / CLI  (depend on sdk and admin-contracts, must NOT import core)
+      ↑
+platform-modules/ / CLI  (depend on sdk and admin-contracts, must NOT import core)
 ```
 
 Key architectural decisions are documented as ADRs in [`.context/02-architecture-design/adr/`](.context/02-architecture-design/adr/):

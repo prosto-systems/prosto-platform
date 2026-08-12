@@ -12,8 +12,8 @@ const PACKAGE_DIRS = [
   'platform-adapters/platform-adapter-aes-key-ring',
   'platform-adapters/platform-adapter-auth-oidc-session',
   'platform-adapters/platform-adapter-auth-local',
-  'platform-module-auth-oidc-session',
-  'platform-module-auth-local-session',
+  'platform-modules/platform-module-auth-oidc-session',
+  'platform-modules/platform-module-auth-local-session',
   'platform-adapters/platform-adapter-typeorm',
 ];
 
