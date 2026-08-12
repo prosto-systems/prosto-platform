@@ -55,16 +55,16 @@ export const WORKSPACE_PACKAGE_DIRS = [
   'platform-core',
   'platform-contract-tests',
   'platform-cli',
-  'platform-adapter-http',
-  'platform-adapter-auth-oidc',
-  'platform-adapter-aes-key-ring',
-  'platform-adapter-auth-oidc-session',
-  'platform-adapter-auth-local',
+  'platform-adapters/platform-adapter-http',
+  'platform-adapters/platform-adapter-auth-oidc',
+  'platform-adapters/platform-adapter-aes-key-ring',
+  'platform-adapters/platform-adapter-auth-oidc-session',
+  'platform-adapters/platform-adapter-auth-local',
   'platform-module-auth-oidc-session',
   'platform-module-auth-local-session',
-  'platform-adapter-typeorm',
+  'platform-adapters/platform-adapter-typeorm',
   'platform-admin-contracts',
-  'platform-adapter-admin-bff',
+  'platform-adapters/platform-adapter-admin-bff',
   'platform-admin-shell',
 ];
 
@@ -80,7 +80,7 @@ export const FORBIDDEN_ROOT_DEPS = [
 ];
 
 /** @internal */
-export const REQUIRED_WORKSPACE_GLOB = 'packages/*';
+export const REQUIRED_WORKSPACE_GLOBS = ['packages/*', 'packages/*/*'];
 
 /** @internal */
 export const REQUIRED_PACKAGE_DIRS = [
@@ -89,14 +89,14 @@ export const REQUIRED_PACKAGE_DIRS = [
   'platform-core',
   'platform-contract-tests',
   'platform-cli',
-  'platform-adapter-http',
-  'platform-adapter-auth-oidc',
-  'platform-adapter-aes-key-ring',
-  'platform-adapter-auth-oidc-session',
-  'platform-adapter-auth-local',
+  'platform-adapters/platform-adapter-http',
+  'platform-adapters/platform-adapter-auth-oidc',
+  'platform-adapters/platform-adapter-aes-key-ring',
+  'platform-adapters/platform-adapter-auth-oidc-session',
+  'platform-adapters/platform-adapter-auth-local',
   'platform-module-auth-oidc-session',
   'platform-module-auth-local-session',
-  'platform-adapter-typeorm',
+  'platform-adapters/platform-adapter-typeorm',
 ];
 
 /**

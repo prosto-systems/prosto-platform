@@ -16,8 +16,8 @@ This report validates Phase 10 admin shell and UI plugin readiness for the hybri
 
 | Plugin ID | Version | Trust Class | Review Status | Shell Compatibility | Expected Result | Evidence |
 |---|---:|---|---|---|---|---|
-| `catalog-admin-ui` | `1.2.0` | `trusted` | `approved` | `>=1.0.0` | accepted | `packages/platform-adapter-admin-bff/tests/integration/admin-bff-discovery-pipeline.test.ts` |
-| `settings-panel` | `2.0.0` | `trusted` | `approved` | `>=1.0.0` | accepted | `packages/platform-adapter-admin-bff/tests/integration/admin-bff-discovery-pipeline.test.ts` |
+| `catalog-admin-ui` | `1.2.0` | `trusted` | `approved` | `>=1.0.0` | accepted | `packages/platform-adapters/platform-adapter-admin-bff/tests/integration/admin-bff-discovery-pipeline.test.ts` |
+| `settings-panel` | `2.0.0` | `trusted` | `approved` | `>=1.0.0` | accepted | `packages/platform-adapters/platform-adapter-admin-bff/tests/integration/admin-bff-discovery-pipeline.test.ts` |
 | `plugin-nav-a` | `1.0.0` | `trusted` | `approved` | `>=0.0.0` | accepted and rendered | `packages/platform-admin-shell/tests/integration/fixtures/plugin-manifests.ts` |
 | `plugin-page-b` | `1.0.0` | `trusted` | `approved` | `>=0.0.0` | accepted and rendered | `packages/platform-admin-shell/tests/integration/fixtures/plugin-manifests.ts` |
 | `plugin-old-d` | `1.0.0` | `trusted` | `approved` | `>=99.0.0` | rejected | `packages/platform-admin-shell/tests/integration/fixtures/plugin-manifests.ts` |
@@ -28,10 +28,10 @@ This report validates Phase 10 admin shell and UI plugin readiness for the hybri
 | Scenario | Acceptance Criteria | Result | Evidence |
 |---|---|---|---|
 | Successful plugin discovery and render | Valid plugin appears in discovery payload and shell registry renders extension descriptors. | pass | `packages/platform-admin-shell/tests/integration/discovery.spec.ts` |
-| Compatibility rejection behavior | Incompatible shell range is rejected and surfaced in diagnostics. | pass | `packages/platform-adapter-admin-bff/tests/unit/admin-discovery-aggregation.service.test.ts` |
+| Compatibility rejection behavior | Incompatible shell range is rejected and surfaced in diagnostics. | pass | `packages/platform-adapters/platform-adapter-admin-bff/tests/unit/admin-discovery-aggregation.service.test.ts` |
 | Permission-filtered extension behavior | Extension descriptors requiring missing permissions are hidden from the operator. | pass | `packages/platform-admin-shell/tests/unit/permission-guard-service.spec.ts` |
 | Degraded shell mode under partial plugin failures | Failed plugin load does not crash shell and diagnostics remain visible. | pass | `packages/platform-admin-shell/tests/unit/plugin-runtime.service.spec.ts` |
-| Admin BFF diagnostics | Discovery diagnostics include accepted and rejected counts with correlation evidence. | pass | `packages/platform-adapter-admin-bff/tests/unit/admin-diagnostics.service.test.ts` |
+| Admin BFF diagnostics | Discovery diagnostics include accepted and rejected counts with correlation evidence. | pass | `packages/platform-adapters/platform-adapter-admin-bff/tests/unit/admin-diagnostics.service.test.ts` |
 
 ## KPI Evidence
 

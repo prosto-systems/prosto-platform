@@ -28,7 +28,7 @@ Implement `@prosto/platform-adapter-admin-bff` to provide policy-aware admin API
   - `.context/02-architecture-design/adr/ADR-0009-admin-ui-hybrid-shell-plugin-model.md`
 
 ## Detailed Ordered Implementation Steps
-1. Create package scaffold `packages/platform-adapter-admin-bff`.
+1. Create package scaffold `packages/platform-adapters/platform-adapter-admin-bff`.
 2. Implement BFF routing layer for admin shell operations:
    - plugin discovery route
    - permission-aware action route
@@ -89,18 +89,18 @@ if (!permissions.canAccess(operatorRoles, plugin.requiredPermissions)) {
 
 ## Affected Modules or Files
 ### Existing files likely updated
-- `packages/platform-adapter-http/*`
+- `packages/platform-adapters/platform-adapter-http/*`
 - `.context/02-architecture-design/c4/02-container-view.md`
 
 ### New files expected
-- `packages/platform-adapter-admin-bff/package.json`
-- `packages/platform-adapter-admin-bff/tsconfig.json`
-- `packages/platform-adapter-admin-bff/src/index.ts`
-- `packages/platform-adapter-admin-bff/src/routes/*.ts`
-- `packages/platform-adapter-admin-bff/src/discovery/*.ts`
-- `packages/platform-adapter-admin-bff/src/permissions/*.ts`
-- `packages/platform-adapter-admin-bff/src/diagnostics/*.ts`
-- `packages/platform-adapter-admin-bff/test/integration/*.test.ts`
+- `packages/platform-adapters/platform-adapter-admin-bff/package.json`
+- `packages/platform-adapters/platform-adapter-admin-bff/tsconfig.json`
+- `packages/platform-adapters/platform-adapter-admin-bff/src/index.ts`
+- `packages/platform-adapters/platform-adapter-admin-bff/src/routes/*.ts`
+- `packages/platform-adapters/platform-adapter-admin-bff/src/discovery/*.ts`
+- `packages/platform-adapters/platform-adapter-admin-bff/src/permissions/*.ts`
+- `packages/platform-adapters/platform-adapter-admin-bff/src/diagnostics/*.ts`
+- `packages/platform-adapters/platform-adapter-admin-bff/test/integration/*.test.ts`
 
 ## Validation and Testing Approach
 - Integration tests for discovery with mixed valid and invalid plugin sets.

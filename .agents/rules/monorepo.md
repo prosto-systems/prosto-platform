@@ -135,6 +135,12 @@ npm run validate:public-api-boundary
 
 ## Workspace Configuration
 
+### Directory Layout
+
+- Adapter workspaces live in `packages/platform-adapters/platform-adapter-*/`.
+- Other platform workspaces remain direct children of `packages/`.
+- Root workspace globs must include both `packages/*` and `packages/*/*`.
+
 ### Turborepo Configuration
 
 The project uses Turborepo for monorepo task orchestration.

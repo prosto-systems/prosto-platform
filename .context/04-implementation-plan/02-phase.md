@@ -8,7 +8,7 @@
   - `packages/platform-core/package.json`
   - `packages/platform-contract-tests/package.json`
   - `packages/platform-cli/package.json`
-  - `packages/platform-adapter-http/package.json`
+   - `packages/platform-adapters/platform-adapter-http/package.json`
   - `tsconfig.base.json`
   - `docs/architecture/dependency-map.md`
   - `scripts/lint-architecture.mjs`
@@ -50,7 +50,7 @@ Create the concrete repository structure and package scaffolding required by the
    - `packages/platform-core/src`
    - `packages/platform-contract-tests/src`
    - `packages/platform-cli/src`
-   - `packages/platform-adapter-http/src`
+    - `packages/platform-adapters/platform-adapter-http/src`
 3. Add per-package `package.json` with explicit package names and private/public settings.
 4. Add `tsconfig.base.json` at root and per-package `tsconfig.json` that extends base.
 5. Move HTTP/security middleware dependencies from root to adapter package scope where applicable.
@@ -108,7 +108,7 @@ export * from './tokens/service.tokens.js';
 - `packages/platform-core/package.json`
 - `packages/platform-contract-tests/package.json`
 - `packages/platform-cli/package.json`
-- `packages/platform-adapter-http/package.json`
+- `packages/platform-adapters/platform-adapter-http/package.json`
 - per-package `src/index.ts`
 
 ## Validation and Testing Approach

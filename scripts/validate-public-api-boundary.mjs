@@ -7,13 +7,13 @@ const PACKAGE_DIRS = [
   'platform-core',
   'platform-contract-tests',
   'platform-cli',
-  'platform-adapter-http',
-  'platform-adapter-auth-oidc',
-  'platform-adapter-aes-key-ring',
-  'platform-adapter-auth-oidc-session',
+  'platform-adapters/platform-adapter-http',
+  'platform-adapters/platform-adapter-auth-oidc',
+  'platform-adapters/platform-adapter-aes-key-ring',
+  'platform-adapters/platform-adapter-auth-oidc-session',
   'platform-module-auth-oidc-session',
   'platform-module-auth-local-session',
-  'platform-adapter-typeorm',
+  'platform-adapters/platform-adapter-typeorm',
 ];
 
 const FORBIDDEN_PUBLIC_TYPE_IMPORTS = new Set([
@@ -102,6 +102,7 @@ async function collectPublicDeclarationFiles(entryPath) {
 }
 
 for (const packageDir of PACKAGE_DIRS) {
+  const packageBaseName = path.basename(packageDir);
   const packageJsonPath = path.resolve('packages', packageDir, 'package.json');
   const manifest = JSON.parse(await readFile(packageJsonPath, 'utf8'));
   const packageName = String(manifest.name ?? '');
@@ -134,9 +135,9 @@ for (const packageDir of PACKAGE_DIRS) {
   }
 
   if (
-    !packageDir.startsWith('platform-adapter-auth') &&
-    packageDir !== 'platform-module-auth-oidc-session' &&
-    packageDir !== 'platform-module-auth-local-session'
+    !packageBaseName.startsWith('platform-adapter-auth') &&
+    packageBaseName !== 'platform-module-auth-oidc-session' &&
+    packageBaseName !== 'platform-module-auth-local-session'
   ) {
     continue;
   }
@@ -149,7 +150,7 @@ for (const packageDir of PACKAGE_DIRS) {
   );
   const declarations = await collectPublicDeclarationFiles(declarationPath);
   const stabilityFiles =
-    STABILITY_DECLARATION_FILES.get(packageDir) ?? new Set();
+    STABILITY_DECLARATION_FILES.get(packageBaseName) ?? new Set();
 
   for (const [filePath, source] of declarations) {
     EXTERNAL_DECLARATION_IMPORT_RE.lastIndex = 0;

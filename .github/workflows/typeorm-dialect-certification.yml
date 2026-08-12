@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, develop]
     paths:
-      - 'packages/platform-adapter-typeorm/**'
+      - 'packages/platform-adapters/platform-adapter-typeorm/**'
       - 'packages/platform-sdk/src/persistence/**'
       - 'packages/platform-core/src/bootstrap/**'
       - 'packages/platform-core/src/modularity/**'
