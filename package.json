@@ -1,0 +1,88 @@
+{
+  "name": "prosto-platform",
+  "version": "0.0.0",
+  "description": "Нeadless TypeScript-based platform with a “micro-core” architecture, extensible via modules",
+  "private": true,
+  "author": {
+    "name": "PROSTO SYSTEMS",
+    "url": "https://github.com/prosto-systems"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/prosto-systems/prosto-platform#readme",
+  "bugs": {
+    "url": "https://github.com/prosto-systems/prosto-platform/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prosto-systems/prosto-platform.git"
+  },
+  "keywords": [
+    "prosto",
+    "headless",
+    "platform",
+    "typescript",
+    "micro-kernel",
+    "microkernel",
+    "cms",
+    "content management system",
+    "admin panel",
+    "backend"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "test:contracts": "turbo test:contracts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.1",
+    "@vue/eslint-config-prettier": "^10.2.0",
+    "@vue/eslint-config-typescript": "^14.9.0",
+    "dotenv": "^17.4.2",
+    "eslint": "^10.8.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-boundaries": "^7.2.0",
+    "eslint-plugin-vue": "^10.10.0",
+    "globals": "^17.11.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
+    "nodemon": "^3.1.14",
+    "p-limit": "^7.3.1",
+    "prettier": "^3.9.6",
+    "turbo": "^2.10.11",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.67.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "packages/*/*",
+    "packages/*/*/*",
+    "examples/*"
+  ],
+  "lint-staged": {
+    "*.{js,mjs,cjs,ts,tsx,mts,cts,vue}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,mdx,yml,yaml,html,css,scss,graphql}": "prettier --write"
+  },
+  "packageManager": "npm@12.0.2",
+  "engines": {
+    "node": ">=22.23.0",
+    "npm": ">=10.0.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "sqlite3@6.0.1": true,
+    "unrs-resolver@1.12.2": true
+  }
+}

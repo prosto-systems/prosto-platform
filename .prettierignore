@@ -1,0 +1,13 @@
+dist
+artifacts
+node_modules
+coverage
+package-lock.json
+.git
+.github
+.husky
+.idea
+.turbo
+*.md
+*.svg
+*.snap
