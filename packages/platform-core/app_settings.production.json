@@ -4,7 +4,7 @@
   },
   "modules": {
     "artifactCache": {
-      "enabled": true
+      "enabled": false
     }
   },
   "logging": {
