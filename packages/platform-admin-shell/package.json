@@ -1,0 +1,32 @@
+{
+  "name": "@prosto/platform-admin-shell",
+  "version": "0.0.0",
+  "description": "Admin shell with Vue 3 plugin runtime for Prosto platform",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite --open",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run --reporter=verbose"
+  },
+  "dependencies": {
+    "@prosto/platform-sdk": "0.0.0",
+    "pinia": "^4.0.3",
+    "vue": "^3.5.41",
+    "vue-i18n": "^11.4.8",
+    "vue-router": "^5.2.0",
+    "vuetify": "^4.1.10"
+  },
+  "devDependencies": {
+    "@prosto/platform-tsconfig": "*",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "@vue/test-utils": "^2.4.11",
+    "happy-dom": "^20.11.2",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.7",
+    "vue-tsc": "^3.3.4"
+  }
+}

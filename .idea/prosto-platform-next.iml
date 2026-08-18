@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-adapters/platform-adapter-typeorm/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-admin-shell/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-cli/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-contract-tests/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-core/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-sdk/.turbo" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
