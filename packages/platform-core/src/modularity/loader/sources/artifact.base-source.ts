@@ -115,27 +115,31 @@ export abstract class ArtifactBaseSource implements IArtifactSource {
     if (await fileExists(pkgPath)) {
       const pkg = JSON.parse(await readFile(pkgPath, 'utf8'));
 
-      if (pkg.main) {
-        return join(packageDir, pkg.main);
-      }
-
       if (pkg.exports) {
-        const entry =
-          typeof pkg.exports === 'string'
-            ? pkg.exports
-            : (pkg.exports['.']?.import ?? pkg.exports['.']?.default);
+        let entry = pkg.exports['./platform'];
+
+        if (!entry) {
+          entry =
+            typeof pkg.exports === 'string'
+              ? pkg.exports
+              : (pkg.exports['.']?.import ?? pkg.exports['.']?.default);
+        }
 
         if (entry) {
           return join(packageDir, entry);
         }
       }
+
+      if (pkg.main) {
+        return join(packageDir, pkg.main);
+      }
     }
 
     for (const candidate of [
-      'index.mjs',
-      'index.js',
-      'dist/index.mjs',
+      'dist/platform/platform.module.js',
+      'dist/platform/index.js',
       'dist/index.js',
+      'index.js',
     ]) {
       const candidatePath = join(packageDir, candidate);
 
