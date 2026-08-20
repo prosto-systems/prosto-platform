@@ -1,0 +1,34 @@
+{
+  "name": "@examples/module-test",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./admin": "./dist/admin/admin.plugin.js",
+    "./platform": "./dist/platform/platform.module.js"
+  },
+  "files": [
+    "dist",
+    "manifest.json"
+  ],
+  "scripts": {
+    "build": "npm run build:platform && npm run build:admin",
+    "build:platform": "vite build --mode platform",
+    "build:admin": "vite build --mode admin",
+    "pack": "npm run build && node scripts/create-artifact.mjs"
+  },
+  "dependencies": {
+    "@prosto/platform-contract-tests": "^0.0.0",
+    "@prosto/platform-sdk": "^0.0.0"
+  },
+  "devDependencies": {
+    "@prosto/platform-tsconfig": "^0.0.0",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "archiver": "^8.0.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.2.1",
+    "vite-plugin-dts": "^5.0.1",
+    "vitest": "^4.1.7",
+    "vue": "^3.5.41"
+  }
+}

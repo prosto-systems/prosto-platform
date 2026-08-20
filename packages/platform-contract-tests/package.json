@@ -24,7 +24,7 @@
     "@prosto/platform-sdk": "0.0.0"
   },
   "devDependencies": {
-    "@prosto/platform-tsconfig": "*",
+    "@prosto/platform-tsconfig": "^0.0.0",
     "@tsconfig/node22": "^22.0.5",
     "vite": "^8.2.1",
     "vite-plugin-dts": "^5.0.1",

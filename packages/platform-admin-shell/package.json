@@ -21,7 +21,7 @@
     "vuetify": "^4.1.10"
   },
   "devDependencies": {
-    "@prosto/platform-tsconfig": "*",
+    "@prosto/platform-tsconfig": "^0.0.0",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/test-utils": "^2.4.11",
     "happy-dom": "^20.11.2",

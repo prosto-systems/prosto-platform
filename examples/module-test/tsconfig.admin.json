@@ -1,0 +1,28 @@
+{
+  "extends": "@prosto/platform-tsconfig/base.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "useDefineForClassFields": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "paths": {
+      "@/admin*": ["./src/admin*"]
+    },
+    "types": ["vite/client", "@prosto/platform-sdk"]
+  },
+  "include": ["src/admin/**/*.ts", "src/admin/**/*.vue"]
+}

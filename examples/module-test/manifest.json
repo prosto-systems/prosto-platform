@@ -1,0 +1,7 @@
+{
+  "id": "module-test",
+  "version": "1.0.0",
+  "sdkVersion": "^0.0.0",
+  "title": "Test",
+  "dependencies": []
+}

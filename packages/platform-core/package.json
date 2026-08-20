@@ -30,7 +30,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@prosto/platform-tsconfig": "*",
+    "@prosto/platform-tsconfig": "^0.0.0",
     "@tsconfig/node22": "^22.0.5",
     "@types/adm-zip": "^0.5.8",
     "@types/node": "22.20.1",
