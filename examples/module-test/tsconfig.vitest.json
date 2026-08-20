@@ -1,0 +1,12 @@
+{
+  "extends": "@prosto/platform-tsconfig/base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@/admin*": ["./src/admin*"],
+      "@/platform*": ["./src/platform*"]
+    },
+    "types": ["node"]
+  },
+  "include": ["tests/**/*.test.ts", "tests/**/*.spec.ts"]
+}

@@ -27,7 +27,7 @@
     "typeorm": "^1.1.0"
   },
   "devDependencies": {
-    "@prosto/platform-tsconfig": "*",
+    "@prosto/platform-tsconfig": "^0.0.0",
     "@tsconfig/node22": "^22.0.5",
     "cross-env": "^10.1.0",
     "mssql": "^12.7.0",
