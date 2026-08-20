@@ -34,6 +34,7 @@ export default defineConfig({
       entryRoot: 'src',
       afterDiagnostic: hasDtsDiagnostics,
       tsconfigPath: './tsconfig.package.json',
+      copyDtsFiles: true,
     }),
   ],
   build: {
