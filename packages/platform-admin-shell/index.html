@@ -2,13 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="/layers.css" />
-    <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="stylesheet" href="/layers.css" />
     <title>Prosto Platform</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app" aria-busy="true">
+      <main class="app-bootstrap" aria-live="polite">
+        Loading Prosto Platform...
+      </main>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

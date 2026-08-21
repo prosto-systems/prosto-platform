@@ -42,6 +42,7 @@ All detailed rules are in `.agents/rules/` directory:
 ### Security
 - **Zod validation** at all boundaries
 - **Secret redaction** from logs (Pino `redact` config)
+- **MSW 2** is available in `platform-admin-shell` for opt-in browser development mocks and Vitest integration mocks; it is not a production backend
 
 ### Testing
 - **Vitest** as test runner (`turbo test`, `turbo test:contracts`)
@@ -106,6 +107,7 @@ When guidance conflicts, use this precedence order:
 - npm >= 10
 - TypeScript compiler (dependency)
 - Vite 8 and `vite-plugin-dts` for publishable package builds
+- MSW 2 in `@prosto/platform-admin-shell` for browser development and Vitest API mocks
 - Git for version control
 - Turborepo (for monorepo task orchestration)
 
@@ -126,5 +128,5 @@ turbo typecheck      # Type check all packages
 
 ---
 
-**Last Updated**: 2026-08-18
-**Version**: 1.0.0
+**Last Updated**: 2026-08-23
+**Version**: 1.1.0

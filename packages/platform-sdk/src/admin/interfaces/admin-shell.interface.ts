@@ -1,14 +1,19 @@
-import type { IAdminShellContext } from './admin-shell-context.inteface.js';
+import type { IAdminShellContext } from './admin-shell-context.interface.js';
 
+/**
+ * @alpha
+ * Callback invoked when a platform module registers an admin shell plugin.
+ */
 export type RegisterPluginCallbackType = (
   ctx: IAdminShellContext,
 ) => void | Promise<void>;
 
 /**
+ * @alpha
  * @example
  * (function(global) {
  *   const PLATFORM_MODULE_ID = 'test';
- *   const adminShell = global.adminShell;
+ *   const adminShell = global.__PROSTO_ADMIN_SHELL__;
  *
  *   if (!adminShell) {
  *     throw new ReferenceError(

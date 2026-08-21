@@ -8,11 +8,12 @@ import pluginVue from 'eslint-plugin-vue';
 import globals from 'globals';
 import tsEslint from 'typescript-eslint';
 
-export default tsEslint.config(
+export default defineConfigWithVueTs(
   {
     name: 'app/files-to-ignore',
     ignores: [
-      'public/**',
+      '**/public/**',
+      '**/artifacts/**',
       '**/dist/**',
       '**/dist-ssr/**',
       '**/coverage/**',
@@ -48,11 +49,9 @@ export default tsEslint.config(
       },
     },
   },
-  ...defineConfigWithVueTs(
-    pluginVue.configs['flat/recommended'],
-    vueTsConfigs.recommended,
-    vuePrettierConfig,
-  ),
+  pluginVue.configs['flat/recommended'],
+  vueTsConfigs.recommended,
+  vuePrettierConfig,
   {
     name: 'app/override-rules',
     rules: {
@@ -62,6 +61,14 @@ export default tsEslint.config(
       ],
       '@typescript-eslint/naming-convention': [
         'error',
+        {
+          selector: 'interface',
+          filter: {
+            regex: '^(?:ImportMeta|ImportMetaEnv|RouteMeta)$',
+            match: true,
+          },
+          format: ['PascalCase'],
+        },
         { selector: 'interface', format: ['PascalCase'], prefix: ['I'] },
         {
           selector: 'typeAlias',
@@ -111,6 +118,39 @@ export default tsEslint.config(
             exceptions: ['*'],
             balanced: true,
           },
+        },
+      ],
+      'vue/block-lang': ['error', { script: { lang: 'ts' } }],
+      'vue/block-order': [
+        'warn',
+        {
+          order: [
+            'template',
+            'script:not([setup])',
+            'script[setup]',
+            'style:not([scoped])',
+            'style[scoped]',
+          ],
+        },
+      ],
+      'vue/custom-event-name-casing': [
+        'warn',
+        'camelCase',
+        {
+          ignores: ['/^[a-z]+:[a-z]+(?:[A-Z][a-z]+)*$/u'], // Пример: $emit('change:itemQuantity', $event)
+        },
+      ],
+      'vue/define-macros-order': [
+        'error',
+        {
+          order: [
+            'defineOptions',
+            'defineEmits',
+            'defineProps',
+            'defineSlots',
+            'defineModel',
+          ],
+          defineExposeLast: true,
         },
       ],
     },

@@ -2,11 +2,11 @@ import { id } from '../../manifest.json';
 
 (function (global) {
   const PLATFORM_MODULE_ID = id;
-  const adminShell = global.adminShell;
+  const adminShell = global.__PROSTO_ADMIN_SHELL__;
 
   if (!adminShell) {
     throw new ReferenceError(
-      `Plugin ${PLATFORM_MODULE_ID}: 'adminShell' is not supported`,
+      `Plugin ${PLATFORM_MODULE_ID}: '__POSTO_ADMIN_SHELL__' is not supported`,
     );
   }
 

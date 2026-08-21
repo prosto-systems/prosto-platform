@@ -42,7 +42,7 @@ export default defineConfig({
     port: 3000,
     strictPort: true,
     proxy: {
-      '/admin': {
+      '/api/admin': {
         target: 'http://127.0.0.1:3001',
         changeOrigin: true,
       },
