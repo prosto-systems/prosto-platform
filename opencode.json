@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "vuetify-mcp": {
+      "type": "remote",
+      "url": "https://mcp.vuetifyjs.com/mcp",
+      "enabled": true
+    }
+  }
+}
