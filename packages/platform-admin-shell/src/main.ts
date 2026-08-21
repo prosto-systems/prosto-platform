@@ -1,12 +1,7 @@
-import { createApp } from 'vue';
-import { registerPlugins } from '@/plugins';
-import App from './App.vue';
+import { bootstrapApplication } from './app/bootstrap';
 
 // Styles
 import 'unfonts.css';
+import './styles/accessibility.css';
 
-const app = createApp(App);
-
-registerPlugins(app);
-
-app.mount('#app');
+void bootstrapApplication();

@@ -2,6 +2,7 @@ dist
 artifacts
 node_modules
 coverage
+packages/platform-admin-shell/public
 package-lock.json
 .git
 .github

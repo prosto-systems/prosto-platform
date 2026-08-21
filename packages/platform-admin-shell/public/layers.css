@@ -1,1 +1,13 @@
 @layer vuetify-core, vuetify-components, vuetify-overrides, vuetify-utilities, vuetify-final;
+
+body {
+  margin: 0;
+}
+
+.app-bootstrap {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  color: #4d4d4d;
+  font-family: Roboto, Arial, sans-serif;
+}
