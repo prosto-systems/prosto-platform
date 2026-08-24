@@ -24,6 +24,8 @@
   },
   "dependencies": {
     "semver": "^7.7.4",
+    "vue": "^3.5.41",
+    "vue-i18n": "^11.4.8",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -32,6 +34,7 @@
     "@types/semver": "^7.7.1",
     "vite": "^8.2.1",
     "vite-plugin-dts": "^5.0.1",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.7",
+    "vue-router": "^5.2.0"
   }
 }

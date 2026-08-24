@@ -14,7 +14,10 @@ export const ruMessages: ApplicationMessagesType = {
   },
   navigation: {
     dashboard: 'Панель управления',
+    more: 'Больше',
+    less: 'Меньше',
     workspace: 'Рабочая область',
+    settings: 'Настройки',
     openNavigation: 'Открыть навигацию',
     toggleNavigationRail: 'Переключить компактную навигацию',
   },

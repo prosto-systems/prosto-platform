@@ -10,7 +10,10 @@ export function getUrlWithCache(file: IAdminShellPluginContentFile) {
     : file.path;
 }
 
-export function injectStyle(file: IAdminShellPluginContentFile) {
+export function injectStyle(
+  file: IAdminShellPluginContentFile,
+  moduleId: string,
+) {
   const href = getUrlWithCache(file);
 
   if (!href) return;
@@ -19,11 +22,15 @@ export function injectStyle(file: IAdminShellPluginContentFile) {
 
   link.rel = 'stylesheet';
   link.href = href;
+  link.dataset.moduleId = moduleId;
 
   document.head.appendChild(link);
 }
 
-export function injectScript(file: IAdminShellPluginContentFile) {
+export function injectScript(
+  file: IAdminShellPluginContentFile,
+  moduleId: string,
+) {
   return new Promise<void>(function (resolve) {
     const src = getUrlWithCache(file);
 
@@ -39,6 +46,7 @@ export function injectScript(file: IAdminShellPluginContentFile) {
     script.async = false;
     script.src = src;
     script.type = 'text/javascript';
+    script.dataset.moduleId = moduleId;
     script.onload = () => resolve();
     script.onerror = () => {
       // Don't block remaining plugins — log and continue.

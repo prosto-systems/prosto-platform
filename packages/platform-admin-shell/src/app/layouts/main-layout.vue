@@ -4,15 +4,14 @@
       v-if="isAuthenticated"
       v-model="drawerOpen"
       :temporary="mobile"
+      :persistent="!mobile"
       :rail="!mobile && isRail"
       rail-width="60"
       class="app-drawer"
-      color="transparent"
       elevation="0"
       width="248"
-      permanent
     >
-      <div class="drawer-brand bg-blue-grey-darken-4">
+      <div class="app-drawer__brand bg-blue-grey-darken-4">
         <v-avatar color="primary" rounded="lg" size="28">
           <span class="brand-mark">P</span>
         </v-avatar>
@@ -32,11 +31,7 @@
 
       <!--<v-divider />-->
 
-      <v-list class="drawer-navigation" density="compact" nav>
-        <v-list-subheader v-if="!isRail || mobile">
-          {{ t('navigation.workspace') }}
-        </v-list-subheader>
-
+      <v-list class="app-drawer__navigation" density="compact" nav>
         <v-list-item
           v-for="item in navigationItems"
           :key="item.title"
@@ -44,12 +39,25 @@
           :prepend-icon="item.icon"
           :title="item.title"
           :to="item.to"
+          prepend-gap="8"
           color="primary"
+        />
+
+        <v-list-item
+          v-if="secondNavigationItems.length || settingsNavigationItems.length"
+          aria-label="More"
+          prepend-icon="mdi-dots-horizontal"
+          :title="
+            secondDrawerOpen ? t('navigation.less') : t('navigation.more')
+          "
+          prepend-gap="8"
+          color="primary"
+          @click="toggleSubNavigation"
         />
       </v-list>
 
-      <template v-if="!mobile" #append>
-        <div class="drawer-footer">
+      <template #append>
+        <div class="app-drawer__footer">
           <v-btn
             :aria-label="t('navigation.toggleNavigationRail')"
             :icon="isRail ? 'mdi-menu-close' : 'mdi-menu-open'"
@@ -78,9 +86,9 @@
         @click="toggleNavigation"
       />
 
-      <v-app-bar-title class="app-bar-title">{{ pageTitle }}</v-app-bar-title>
+      <v-app-bar-title class="app-bar__title">{{ pageTitle }}</v-app-bar-title>
 
-      <div class="app-bar-actions me-3">
+      <div class="app-bar__actions me-3">
         <v-menu
           v-model="isLocaleMenuOpen"
           @update:model-value="onLocaleMenuChange"
@@ -191,6 +199,100 @@
     </v-app-bar>
 
     <v-main>
+      <v-navigation-drawer
+        v-if="isAuthenticated"
+        v-model="secondDrawerOpen"
+        elevation="0"
+        class="app-second-drawer"
+        temporary
+      >
+        <v-list density="compact" nav>
+          <v-list-subheader v-if="secondNavigationItems.length">
+            {{ t('navigation.workspace') }}
+          </v-list-subheader>
+
+          <v-list-item
+            v-for="item in secondNavigationItems"
+            :key="item.title"
+            :aria-label="item.title"
+            :prepend-icon="item.icon"
+            :title="item.title"
+            :to="item.to"
+            prepend-gap="8"
+            color="primary"
+          >
+            <template #append>
+              <v-list-item-action class="ml-0">
+                <v-avatar
+                  variant="plain"
+                  class="cursor-pointer"
+                  @click="() => void 0"
+                >
+                  <v-icon
+                    v-if="item.selected"
+                    size="small"
+                    color="yellow-darken-3"
+                  >
+                    mdi-star
+                  </v-icon>
+
+                  <v-icon v-else size="small" class="opacity-30">
+                    mdi-star-outline
+                  </v-icon>
+                </v-avatar>
+              </v-list-item-action>
+            </template>
+          </v-list-item>
+
+          <v-list-subheader v-if="settingsNavigationItems.length" class="mt-2">
+            {{ t('navigation.settings') }}
+          </v-list-subheader>
+
+          <v-list-item
+            v-for="item in settingsNavigationItems"
+            :key="item.title"
+            :aria-label="item.title"
+            :prepend-icon="item.icon"
+            :title="item.title"
+            :to="item.to"
+            prepend-gap="8"
+            color="primary"
+          >
+            <template #append>
+              <v-list-item-action class="ml-0">
+                <v-avatar
+                  variant="plain"
+                  class="cursor-pointer"
+                  @click="() => void 0"
+                >
+                  <v-icon
+                    v-if="item.selected"
+                    size="small"
+                    color="yellow-darken-3"
+                  >
+                    mdi-star
+                  </v-icon>
+
+                  <v-icon v-else size="small" class="opacity-30">
+                    mdi-star-outline
+                  </v-icon>
+                </v-avatar>
+              </v-list-item-action>
+            </template>
+          </v-list-item>
+        </v-list>
+
+        <template v-if="mobile" #append>
+          <div class="app-second-drawer__footer">
+            <v-btn
+              :icon="isRail ? 'mdi-menu-close' : 'mdi-menu-open'"
+              variant="plain"
+              density="compact"
+              @click="toggleSubNavigation"
+            />
+          </div>
+        </template>
+      </v-navigation-drawer>
       <slot />
     </v-main>
   </v-app>
@@ -213,7 +315,8 @@ import { usePlatform } from '@/features/platform';
 interface INavigationItem {
   readonly icon: string;
   readonly title: string;
-  readonly to: { readonly name: string };
+  readonly to?: { readonly name: string };
+  readonly selected?: boolean;
 }
 
 interface IButtonActivator {
@@ -221,7 +324,7 @@ interface IButtonActivator {
 }
 
 const { mobile } = useDisplay();
-const { t } = useI18n();
+const { t, te } = useI18n();
 const theme = useTheme();
 const router = useRouter();
 const { manifest } = usePlatform();
@@ -232,6 +335,7 @@ const { isAuthenticated } = storeToRefs(authStore);
 const { locale, theme: themePreference } = storeToRefs(preferencesStore);
 
 const drawerOpen = shallowRef(true);
+const secondDrawerOpen = shallowRef(false);
 const isRail = shallowRef(false);
 
 const isLocaleMenuOpen = shallowRef(false);
@@ -242,9 +346,10 @@ const localeActivator = useTemplateRef<IButtonActivator>('localeActivator');
 const themeActivator = useTemplateRef<IButtonActivator>('themeActivator');
 const accountActivator = useTemplateRef<IButtonActivator>('accountActivator');
 
-const pageTitle = computed(() =>
-  t(router.currentRoute.value.meta.title ?? 'app.brand'),
-);
+const pageTitle = computed(() => {
+  const { title } = router.currentRoute.value.meta;
+  return title ? (te(title) ? t(title) : title) : '';
+});
 
 const principalInitial = computed(
   () => authStore.principal?.displayName.charAt(0).toUpperCase() ?? 'P',
@@ -264,13 +369,26 @@ const navigationItems = computed<INavigationItem[]>(() => [
   },
 ]);
 
+const secondNavigationItems = computed<INavigationItem[]>(() => []);
+
+const settingsNavigationItems = computed<INavigationItem[]>(() => []);
+
 function toggleNavigation(): void {
   if (mobile.value) {
     drawerOpen.value = !drawerOpen.value;
+    secondDrawerOpen.value = false;
     return;
   }
 
   isRail.value = !isRail.value;
+}
+
+function toggleSubNavigation(): void {
+  if (mobile.value) {
+    drawerOpen.value = false;
+  }
+
+  secondDrawerOpen.value = !secondDrawerOpen.value;
 }
 
 async function logout(): Promise<void> {
@@ -308,6 +426,7 @@ watch(
   mobile,
   (isMobile) => {
     drawerOpen.value = !isMobile;
+    secondDrawerOpen.value = false;
     isRail.value = false;
   },
   { immediate: true },
@@ -392,17 +511,49 @@ watch(
 .app-drawer {
   border-right: 0;
   //border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  background: #f6f8fb;
+
+  .app--dark & {
+    background: #10151d;
+  }
+
+  &__brand {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    height: 56px;
+    padding: 0 16px;
+    border-right: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+    //background: rgb(var(--v-theme-background));
+    //background: rgba(var(--v-theme-background), var(--v-high-emphasis-opacity));
+  }
+
+  &__navigation {
+    padding: 14px 10px;
+    height: calc(100% - 56px);
+    border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  }
+
+  &__footer {
+    color: rgba(var(--v-theme-on-surface), 0.5);
+    font-size: 0.7rem;
+    padding: 12px 15px;
+    border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  }
 }
 
-.drawer-brand {
-  align-items: center;
-  display: flex;
-  gap: 10px;
-  height: 56px;
-  padding: 0 16px;
-  border-right: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
-  //background: rgb(var(--v-theme-background));
-  //background: rgba(var(--v-theme-background), var(--v-high-emphasis-opacity));
+.app-second-drawer {
+  background: #f6f8fb;
+
+  .app--dark & {
+    background: #10151d;
+  }
+
+  &__footer {
+    color: rgba(var(--v-theme-on-surface), 0.5);
+    font-size: 0.7rem;
+    padding: 12px 15px;
+  }
 }
 
 .brand-mark {
@@ -439,19 +590,6 @@ watch(
   }
 }
 
-.drawer-navigation {
-  padding: 14px 10px;
-  height: calc(100% - 56px);
-  border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-}
-
-.drawer-footer {
-  color: rgba(var(--v-theme-on-surface), 0.5);
-  font-size: 0.7rem;
-  padding: 12px 15px;
-  border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-}
-
 .app-bar {
   //background: rgb(var(--v-theme-background));
   //background: rgba(var(--v-theme-background), var(--v-high-emphasis-opacity));
@@ -463,17 +601,17 @@ watch(
   .app--dark & {
     color: rgba(var(--v-theme-on-surface), 0.5);
   }
-}
 
-.app-bar-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-}
+  &__title {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
 
-.app-bar-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 }
 
 .principal-name {
