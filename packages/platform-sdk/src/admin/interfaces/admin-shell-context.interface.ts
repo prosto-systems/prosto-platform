@@ -1,4 +1,5 @@
 import type { IAdminShellAuthorization } from './admin-shell-authorization.interface.js';
+import type { IAdminShellNavigation } from './admin-shell-navigation.js';
 
 /**
  * @alpha
@@ -7,4 +8,5 @@ import type { IAdminShellAuthorization } from './admin-shell-authorization.inter
 export interface IAdminShellContext {
   readonly moduleId: string;
   readonly auth: IAdminShellAuthorization;
+  readonly navigation: IAdminShellNavigation;
 }

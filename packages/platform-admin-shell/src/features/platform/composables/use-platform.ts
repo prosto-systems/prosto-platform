@@ -57,23 +57,30 @@ export function usePlatform() {
     isLoadingPlugins.value = true;
 
     plugins.forEach((plugin) =>
-      collectFilesByType(plugin, 'style').forEach(injectStyle),
+      collectFilesByType(plugin, 'style').forEach((file) =>
+        injectStyle(file, plugin.moduleId),
+      ),
     );
 
     /*
      * Inject scripts sequentially. The topological order returned by the server
      * must be preserved so dependent modules find their prerequisites.
      */
-    let scripts: IAdminShellPluginContentFile[] = [];
+    const scripts: {
+      moduleId: string;
+      file: IAdminShellPluginContentFile;
+    }[] = [];
 
-    plugins.forEach((plugin) => {
-      // https://stackoverflow.com/q/61740599
-      scripts = scripts.concat(collectFilesByType(plugin, 'script'));
-    });
+    plugins.forEach((plugin) =>
+      collectFilesByType(plugin, 'script').forEach((file) =>
+        scripts.push({ file, moduleId: plugin.moduleId }),
+      ),
+    );
 
     return scripts
       .reduce(
-        (chain, file) => chain.then(() => injectScript(file)),
+        (chain, { file, moduleId }) =>
+          chain.then(() => injectScript(file, moduleId)),
         Promise.resolve(),
       )
       .then(() => {

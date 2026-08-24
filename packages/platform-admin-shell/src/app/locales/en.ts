@@ -7,7 +7,10 @@ export const enMessages = {
   },
   navigation: {
     dashboard: 'Dashboard',
+    more: 'More',
+    less: 'Less',
     workspace: 'Workspace',
+    settings: 'Settings',
     openNavigation: 'Open navigation',
     toggleNavigationRail: 'Toggle navigation rail',
   },

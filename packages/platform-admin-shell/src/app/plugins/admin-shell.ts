@@ -1,12 +1,13 @@
 import type {
   AdminShellPermissionType,
-  IAdminShellAuthorization,
   IAdminShell,
+  IAdminShellAuthorization,
+  IAdminShellNavigation,
   RegisterPluginCallbackType,
 } from '@prosto/platform-sdk';
+import type { App } from 'vue';
 import type { Pinia } from 'pinia';
 import { useAuthStore } from '@/features/auth';
-import type { App } from 'vue';
 
 class AdminShell implements IAdminShell {
   readonly #pinia: Pinia;
@@ -24,11 +25,20 @@ class AdminShell implements IAdminShell {
     platformModuleId: string,
     callback: RegisterPluginCallbackType,
   ): this => {
+    if (this.#plugins.includes(platformModuleId)) {
+      console.error(
+        `[AdminShell::AdminShell.registerPlugin]: Plugin '${platformModuleId}' is already registered.`,
+      );
+
+      return this;
+    }
+
     this.#plugins.push(platformModuleId);
 
     const result = callback({
       moduleId: platformModuleId,
       auth: this._createAuthorization(),
+      navigation: this._createNavigation(),
     });
 
     void Promise.resolve(result); // .catch(() => undefined);
@@ -40,6 +50,14 @@ class AdminShell implements IAdminShell {
     return {
       can: (permission: AdminShellPermissionType): boolean =>
         useAuthStore(this.#pinia).can(permission),
+    };
+  }
+
+  private _createNavigation(): IAdminShellNavigation {
+    return {
+      add: () => {
+        console.debug('[AdminShell::Navigation.add]');
+      },
     };
   }
 }
