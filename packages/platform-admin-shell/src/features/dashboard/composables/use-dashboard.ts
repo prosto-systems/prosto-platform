@@ -1,7 +1,6 @@
 import type {
   ActivityItemType,
   DashboardSummaryType,
-  PlatformHealthType,
   PlatformModuleType,
 } from '../models';
 import type { ShallowRef } from 'vue';
@@ -42,13 +41,10 @@ function toApiError(error: unknown): ApiError {
 
 export function useDashboard() {
   const summary = createResourceState<DashboardSummaryType>();
-  const health = createResourceState<PlatformHealthType>();
   const modules = createResourceState<readonly PlatformModuleType[]>();
   const activity = createResourceState<readonly ActivityItemType[]>();
 
   const restartingModuleId = shallowRef<string>();
-  const isRestartingPlatform = shallowRef(false);
-  const isUpdatingMaintenance = shallowRef(false);
 
   async function loadResource<TValue>(
     resource: IResourceState<TValue>,
@@ -70,23 +66,12 @@ export function useDashboard() {
     return loadResource(summary, dashboardApi.getSummary);
   }
 
-  function loadHealth(): Promise<void> {
-    return loadResource(health, dashboardApi.getHealth);
-  }
-
   function loadModules(): Promise<void> {
     return loadResource(modules, dashboardApi.getModules);
   }
 
   function loadActivity(): Promise<void> {
     return loadResource(activity, dashboardApi.getActivity);
-  }
-
-  function loadAll(): void {
-    void loadSummary();
-    void loadHealth();
-    void loadModules();
-    void loadActivity();
   }
 
   async function restartModule(
@@ -103,46 +88,14 @@ export function useDashboard() {
     }
   }
 
-  async function restartPlatform(csrfToken: string): Promise<void> {
-    isRestartingPlatform.value = true;
-
-    try {
-      await dashboardApi.restartPlatform(csrfToken);
-      await loadActivity();
-    } finally {
-      isRestartingPlatform.value = false;
-    }
-  }
-
-  async function setMaintenance(
-    enabled: boolean,
-    csrfToken: string,
-  ): Promise<void> {
-    isUpdatingMaintenance.value = true;
-
-    try {
-      await dashboardApi.setMaintenance(enabled, csrfToken);
-      await Promise.all([loadSummary(), loadHealth(), loadActivity()]);
-    } finally {
-      isUpdatingMaintenance.value = false;
-    }
-  }
-
   return {
     summary,
-    health,
     modules,
     activity,
     restartingModuleId,
-    isRestartingPlatform,
-    isUpdatingMaintenance,
     loadSummary,
-    loadHealth,
     loadModules,
     loadActivity,
-    loadAll,
     restartModule,
-    restartPlatform,
-    setMaintenance,
   };
 }

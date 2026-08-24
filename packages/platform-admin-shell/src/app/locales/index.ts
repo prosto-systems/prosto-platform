@@ -1,5 +1,5 @@
-import { enMessages } from './en.ts';
-import { ruMessages } from './ru.ts';
+import { enMessages } from './en';
+import { ruMessages } from './ru';
 
 export const messages = {
   en: enMessages,

@@ -1,5 +1,4 @@
 import { http } from 'msw';
-import { z } from 'zod';
 import { addActivity, getMockState, type IMockModule } from '../mock-state';
 import {
   ADMIN_API_PATH,
@@ -11,29 +10,7 @@ import {
   jsonResponse,
 } from './handler-utils';
 
-const maintenanceRequestSchema = z.object({ enabled: z.boolean() });
-
 export const dashboardHandlers = [
-  http.get(`${ADMIN_API_PATH}/plugins`, async ({ cookies, request }) => {
-    await applyMockLatency();
-
-    const authenticatedRequest = getAuthenticatedRequest(cookies);
-
-    if (authenticatedRequest === undefined) {
-      return errorResponse(401, 'session_expired');
-    }
-
-    if (!hasPermission(authenticatedRequest, 'modules:view')) {
-      return errorResponse(403, 'permission_denied');
-    }
-
-    if (!hasValidCsrfToken(request, authenticatedRequest)) {
-      return errorResponse(403, 'csrf_invalid');
-    }
-
-    return jsonResponse(getMockState().plugins);
-  }),
-
   http.get(`${ADMIN_API_PATH}/dashboard`, async ({ cookies }) => {
     await applyMockLatency();
 
@@ -55,22 +32,16 @@ export const dashboardHandlers = [
     });
   }),
 
-  http.get(`${ADMIN_API_PATH}/platform/health`, async ({ cookies }) => {
+  http.get(`${ADMIN_API_PATH}/activity`, async ({ cookies }) => {
     await applyMockLatency();
 
-    const error = requirePermission(cookies, 'health:view');
+    const error = requirePermission(cookies, 'activity:view');
 
     if (error !== undefined) {
       return error;
     }
 
-    return jsonResponse({
-      status: getMockState().maintenanceEnabled ? 'maintenance' : 'healthy',
-      services: [
-        { name: 'API gateway', status: 'healthy' },
-        { name: 'Module registry', status: 'healthy' },
-      ],
-    });
+    return jsonResponse(getMockState().activity);
   }),
 
   http.get(`${ADMIN_API_PATH}/modules`, async ({ cookies }) => {
@@ -83,18 +54,6 @@ export const dashboardHandlers = [
     }
 
     return jsonResponse(getMockState().modules);
-  }),
-
-  http.get(`${ADMIN_API_PATH}/activity`, async ({ cookies }) => {
-    await applyMockLatency();
-
-    const error = requirePermission(cookies, 'activity:view');
-
-    if (error !== undefined) {
-      return error;
-    }
-
-    return jsonResponse(getMockState().activity);
   }),
 
   http.post(
@@ -128,68 +87,6 @@ export const dashboardHandlers = [
       return jsonResponse({ accepted: true });
     },
   ),
-
-  http.post(
-    `${ADMIN_API_PATH}/platform/restart`,
-    async ({ cookies, request }) => {
-      await applyMockLatency();
-
-      const authenticatedRequest = getAuthenticatedRequest(cookies);
-
-      if (authenticatedRequest === undefined) {
-        return errorResponse(401, 'session_expired');
-      }
-
-      if (!hasPermission(authenticatedRequest, 'platform:restart')) {
-        return errorResponse(403, 'permission_denied');
-      }
-
-      if (!hasValidCsrfToken(request, authenticatedRequest)) {
-        return errorResponse(403, 'csrf_invalid');
-      }
-
-      addActivity('Restarted the platform.');
-
-      return jsonResponse({ accepted: true });
-    },
-  ),
-
-  http.patch(
-    `${ADMIN_API_PATH}/platform/maintenance`,
-    async ({ cookies, request }) => {
-      await applyMockLatency();
-
-      const authenticatedRequest = getAuthenticatedRequest(cookies);
-
-      if (authenticatedRequest === undefined) {
-        return errorResponse(401, 'session_expired');
-      }
-
-      if (!hasPermission(authenticatedRequest, 'maintenance:manage')) {
-        return errorResponse(403, 'permission_denied');
-      }
-
-      if (!hasValidCsrfToken(request, authenticatedRequest)) {
-        return errorResponse(403, 'csrf_invalid');
-      }
-
-      const parsed = maintenanceRequestSchema.safeParse(
-        await readJson(request),
-      );
-
-      if (!parsed.success) {
-        return errorResponse(422, 'validation_failed');
-      }
-
-      getMockState().maintenanceEnabled = parsed.data.enabled;
-      addActivity(
-        `Maintenance mode ${parsed.data.enabled ? 'enabled' : 'disabled'}.`,
-        parsed.data.enabled ? 'warning' : 'info',
-      );
-
-      return jsonResponse({ enabled: parsed.data.enabled });
-    },
-  ),
 ];
 
 function requirePermission(
@@ -215,12 +112,4 @@ function findModule(
   }
 
   return getMockState().modules.find((module) => module.id === moduleId);
-}
-
-async function readJson(request: Request): Promise<unknown> {
-  try {
-    return await request.json();
-  } catch {
-    return undefined;
-  }
 }

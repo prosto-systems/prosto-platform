@@ -1,5 +1,5 @@
 import { ru as vuetifyRu } from 'vuetify/locale';
-import type { enMessages } from './en.ts';
+import type { enMessages } from './en';
 
 type LocalizedMessageType<T> = T extends string
   ? string
@@ -10,7 +10,6 @@ type ApplicationMessagesType = LocalizedMessageType<typeof enMessages>;
 export const ruMessages: ApplicationMessagesType = {
   $vuetify: vuetifyRu,
   app: {
-    brand: 'Платформа Prosto',
     loading: 'Загрузка платформы Prosto...',
   },
   navigation: {

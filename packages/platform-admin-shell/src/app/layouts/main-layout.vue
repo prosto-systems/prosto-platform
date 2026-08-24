@@ -12,17 +12,25 @@
       width="248"
       permanent
     >
-      <div class="drawer-brand">
+      <div class="drawer-brand bg-blue-grey-darken-4">
         <v-avatar color="primary" rounded="lg" size="28">
           <span class="brand-mark">P</span>
         </v-avatar>
 
-        <span v-show="!isRail || mobile" class="brand-name">
-          {{ t('app.brand') }}
-        </span>
+        <template v-if="!isRail || mobile">
+          <span class="brand-name">
+            {{ manifest.data.value?.platformName }}
+          </span>
+
+          <v-spacer />
+
+          <span class="platform-version">
+            {{ manifest.data.value?.platformVersion }}
+          </span>
+        </template>
       </div>
 
-      <v-divider />
+      <!--<v-divider />-->
 
       <v-list class="drawer-navigation" density="compact" nav>
         <v-list-subheader v-if="!isRail || mobile">
@@ -57,6 +65,7 @@
       v-if="isAuthenticated"
       elevation="0"
       density="comfortable"
+      color="blue-grey-darken-4"
       class="app-bar"
     >
       <v-btn
@@ -199,6 +208,7 @@ import {
   type ThemePreferenceType,
 } from '@/features/preferences';
 import { i18n } from '@/app/plugins';
+import { usePlatform } from '@/features/platform';
 
 interface INavigationItem {
   readonly icon: string;
@@ -214,6 +224,8 @@ const { mobile } = useDisplay();
 const { t } = useI18n();
 const theme = useTheme();
 const router = useRouter();
+const { manifest } = usePlatform();
+
 const authStore = useAuthStore();
 const preferencesStore = usePreferencesStore();
 const { isAuthenticated } = storeToRefs(authStore);
@@ -312,7 +324,7 @@ watch(
 watch(
   themePreference,
   (selectedTheme: ThemePreferenceType) => {
-    theme.global.name.value = selectedTheme;
+    theme.change(selectedTheme);
   },
   { immediate: true },
 );
@@ -378,7 +390,8 @@ watch(
 }
 
 .app-drawer {
-  border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-right: 0;
+  //border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .drawer-brand {
@@ -387,7 +400,8 @@ watch(
   gap: 10px;
   height: 56px;
   padding: 0 16px;
-  background: rgb(var(--v-theme-background));
+  border-right: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+  //background: rgb(var(--v-theme-background));
   //background: rgba(var(--v-theme-background), var(--v-high-emphasis-opacity));
 }
 
@@ -398,27 +412,57 @@ watch(
 }
 
 .brand-name {
+  color: rgba(var(--v-theme-surface), 0.5);
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 0.95rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: 3em;
+
+  .app--dark & {
+    color: rgba(var(--v-theme-on-surface), 0.5);
+  }
+}
+
+.platform-version {
+  color: rgba(var(--v-theme-surface), 0.5);
+  font-size: 0.72rem;
   letter-spacing: -0.02em;
-  white-space: nowrap;
+  line-height: 1rem;
+
+  .app--dark & {
+    color: rgba(var(--v-theme-on-surface), 0.5);
+  }
 }
 
 .drawer-navigation {
   padding: 14px 10px;
+  height: calc(100% - 56px);
+  border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .drawer-footer {
   color: rgba(var(--v-theme-on-surface), 0.5);
   font-size: 0.7rem;
   padding: 12px 15px;
+  border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .app-bar {
-  background: rgb(var(--v-theme-background));
+  //background: rgb(var(--v-theme-background));
   //background: rgba(var(--v-theme-background), var(--v-high-emphasis-opacity));
-  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-  backdrop-filter: blur(200px);
+  //border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  //backdrop-filter: blur(200px);
+
+  color: rgba(var(--v-theme-surface), 0.5);
+
+  .app--dark & {
+    color: rgba(var(--v-theme-on-surface), 0.5);
+  }
 }
 
 .app-bar-title {
