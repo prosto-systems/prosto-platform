@@ -27,6 +27,8 @@ export type RegisterPluginCallbackType = (
  * })(globalThis);
  */
 export interface IAdminShell {
+  plugins: readonly string[];
+
   registerPlugin: (
     platformModuleId: string,
     callback: RegisterPluginCallbackType,

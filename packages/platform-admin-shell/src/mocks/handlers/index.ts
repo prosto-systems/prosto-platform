@@ -1,6 +1,11 @@
 import { authHandlers } from './auth.handlers';
+import { platformHandlers } from './platform.handlers';
 import { dashboardHandlers } from './dashboard.handlers';
 
-export { authHandlers, dashboardHandlers };
+export { authHandlers, platformHandlers, dashboardHandlers };
 
-export const handlers = [...authHandlers, ...dashboardHandlers];
+export const handlers = [
+  ...authHandlers,
+  ...platformHandlers,
+  ...dashboardHandlers,
+];

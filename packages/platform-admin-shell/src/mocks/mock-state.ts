@@ -14,6 +14,12 @@ export interface IMockUser {
   password: string;
 }
 
+export interface IMockManifest {
+  readonly platformName: string;
+  readonly platformVersion: string;
+  readonly plugins: readonly IAdminShellPluginInfo[];
+}
+
 export interface IMockSession {
   readonly id: string;
   readonly userId: string;
@@ -42,10 +48,10 @@ export interface IMockActivity {
 }
 
 export interface IMockState {
+  readonly manifest: IMockManifest;
   readonly users: Map<string, IMockUser>;
   readonly sessions: Map<string, IMockSession>;
   readonly resetTokens: Map<string, IMockResetToken>;
-  readonly plugins: readonly IAdminShellPluginInfo[];
   readonly modules: IMockModule[];
   readonly activity: IMockActivity[];
   maintenanceEnabled: boolean;
@@ -98,14 +104,22 @@ export function createMockState(): IMockState {
         },
       ],
     ]),
-    plugins: [
-      {
-        moduleId: 'platform-health',
-        moduleVersion: '0.0.0-dev',
-        entry: { type: 'script', path: '/plugins/platform-health/index.js' },
-        contentFiles: [],
-      },
-    ],
+    manifest: {
+      platformName: 'Prosto Platform',
+      platformVersion: '0.0.0',
+      plugins: [
+        {
+          moduleId: 'module-test',
+          moduleVersion: '1.0.0',
+          entry: {
+            type: 'script',
+            path: '/plugins/module-test/dist/admin/admin.plugin.js',
+            hash: Date.now().toString(),
+          },
+          contentFiles: [],
+        },
+      ],
+    },
     modules: [
       {
         id: 'platform-core',

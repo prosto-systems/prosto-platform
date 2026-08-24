@@ -15,7 +15,7 @@
 
       <v-chip
         :color="
-          dashboard.health.data.value?.status === 'healthy'
+          platform.health.data.value?.status === 'healthy'
             ? 'success'
             : 'warning'
         "
@@ -23,8 +23,8 @@
         variant="tonal"
       >
         {{
-          dashboard.health.data.value
-            ? t(`dashboard.statuses.${dashboard.health.data.value.status}`)
+          platform.health.data.value
+            ? t(`dashboard.statuses.${platform.health.data.value.status}`)
             : t('dashboard.checkingPlatform')
         }}
       </v-chip>
@@ -41,8 +41,8 @@
       class="dashboard-section"
       :can-manage-maintenance="canManageMaintenance"
       :can-restart-platform="canRestartPlatform"
-      :is-restarting-platform="dashboard.isRestartingPlatform.value"
-      :is-updating-maintenance="dashboard.isUpdatingMaintenance.value"
+      :is-restarting-platform="platform.isRestartingPlatform.value"
+      :is-updating-maintenance="platform.isUpdatingMaintenance.value"
       :summary="dashboard.summary.data.value"
       @restart-platform="handlePlatformRestart"
       @update-maintenance="handleMaintenanceChange"
@@ -51,10 +51,10 @@
     <v-row class="dashboard-section" density="comfortable">
       <v-col cols="12" md="5">
         <DashboardHealthPanel
-          :error="dashboard.health.error.value !== null"
-          :health="dashboard.health.data.value"
-          :is-loading="dashboard.health.isLoading.value"
-          @retry="dashboard.loadHealth"
+          :error="platform.health.error.value !== null"
+          :health="platform.health.data.value"
+          :is-loading="platform.health.isLoading.value"
+          @retry="platform.loadHealth"
         />
       </v-col>
 
@@ -103,8 +103,10 @@ import {
   useDashboard,
 } from '@/features/dashboard';
 import { useAuthStore } from '@/features/auth';
+import { usePlatform } from '@/features/platform';
 
 const authStore = useAuthStore();
+const platform = usePlatform();
 const dashboard = useDashboard();
 const { t } = useI18n();
 const snackbar = shallowRef({ message: '', visible: false });
@@ -118,7 +120,14 @@ const greeting = computed(
   () => authStore.principal?.displayName ?? t('dashboard.defaultGreetingName'),
 );
 
-onMounted(() => dashboard.loadAll());
+onMounted(() => loadAll());
+
+function loadAll() {
+  platform.loadHealth();
+  dashboard.loadSummary();
+  dashboard.loadModules();
+  dashboard.loadActivity();
+}
 
 async function runAction(
   action: () => Promise<void>,
@@ -143,15 +152,18 @@ async function handleModuleRestart(moduleId: string): Promise<void> {
 }
 
 async function handlePlatformRestart(): Promise<void> {
-  await runAction(
-    () => dashboard.restartPlatform(getCsrfToken()),
-    t('dashboard.platformRestartQueued'),
-  );
+  await runAction(async () => {
+    await platform.restartPlatform(getCsrfToken());
+    await dashboard.loadActivity();
+  }, t('dashboard.platformRestartQueued'));
 }
 
 async function handleMaintenanceChange(enabled: boolean): Promise<void> {
   await runAction(
-    () => dashboard.setMaintenance(enabled, getCsrfToken()),
+    async () => {
+      await platform.setMaintenance(enabled, getCsrfToken());
+      await Promise.all([dashboard.loadSummary(), dashboard.loadActivity()]);
+    },
     enabled
       ? t('dashboard.maintenanceEnabled')
       : t('dashboard.maintenanceDisabled'),
@@ -159,7 +171,7 @@ async function handleMaintenanceChange(enabled: boolean): Promise<void> {
 }
 
 function getCsrfToken(): string {
-  if (authStore.csrfToken === null) {
+  if (!authStore.csrfToken) {
     throw new Error('The current session has no CSRF token.');
   }
 
@@ -197,7 +209,7 @@ function getCsrfToken(): string {
 }
 
 .dashboard-title {
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
   font-weight: 700;
   letter-spacing: -0.025em;
   line-height: 1.2;

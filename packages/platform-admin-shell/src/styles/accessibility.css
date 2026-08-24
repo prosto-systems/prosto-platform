@@ -1,7 +1,9 @@
+/*
 :focus-visible {
   outline: 3px solid rgb(var(--v-theme-primary));
   outline-offset: 3px;
 }
+*/
 
 @media (prefers-reduced-motion: reduce) {
   *,

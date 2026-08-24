@@ -7,16 +7,6 @@ export const dashboardSummarySchema = z.object({
   modules: z.number().int().nonnegative(),
 });
 
-export const platformHealthSchema = z.object({
-  services: z.array(
-    z.object({
-      name: z.string().min(1),
-      status: z.enum(['healthy', 'degraded', 'maintenance']),
-    }),
-  ),
-  status: z.enum(['healthy', 'degraded', 'maintenance']),
-});
-
 export const platformModuleSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
@@ -33,9 +23,6 @@ export const activityItemSchema = z.object({
 
 export const acceptedResponseSchema = z.object({ accepted: z.literal(true) });
 
-export const maintenanceResponseSchema = z.object({ enabled: z.boolean() });
-
 export type DashboardSummaryType = z.infer<typeof dashboardSummarySchema>;
-export type PlatformHealthType = z.infer<typeof platformHealthSchema>;
 export type PlatformModuleType = z.infer<typeof platformModuleSchema>;
 export type ActivityItemType = z.infer<typeof activityItemSchema>;

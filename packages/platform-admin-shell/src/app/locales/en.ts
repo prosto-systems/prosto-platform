@@ -3,7 +3,6 @@ import { en as vuetifyEn } from 'vuetify/locale';
 export const enMessages = {
   $vuetify: vuetifyEn,
   app: {
-    brand: 'Prosto Platform',
     loading: 'Loading Prosto Platform...',
   },
   navigation: {
