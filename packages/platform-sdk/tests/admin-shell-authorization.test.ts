@@ -1,6 +1,6 @@
 import type {
   AdminShellPermissionType,
-  IAdminShellAuthorization,
+  IAdminShellAuthService,
   IAdminShellContext,
 } from '@/index.js';
 import { describe, expectTypeOf, it } from 'vitest';
@@ -8,15 +8,15 @@ import { describe, expectTypeOf, it } from 'vitest';
 describe('admin authorization contract', () => {
   it('keeps permission checks framework-neutral', () => {
     expectTypeOf<
-      IAdminShellContext['auth']
-    >().toEqualTypeOf<IAdminShellAuthorization>();
+      IAdminShellContext['authService']
+    >().toEqualTypeOf<IAdminShellAuthService>();
 
-    expectTypeOf<IAdminShellAuthorization['can']>()
+    expectTypeOf<IAdminShellAuthService['can']>()
       .parameter(0)
       .toEqualTypeOf<AdminShellPermissionType>();
 
     expectTypeOf<
-      IAdminShellAuthorization['can']
+      IAdminShellAuthService['can']
     >().returns.toEqualTypeOf<boolean>();
   });
 });

@@ -81,6 +81,7 @@ export default defineConfigWithVueTs(
       ],
       '@typescript-eslint/no-extraneous-class': 'off',
       // '@typescript-eslint/no-inferrable-types': 'warn',
+      '@typescript-eslint/no-invalid-void-type': 'off',
       '@typescript-eslint/no-non-null-assertion': 'warn',
       '@typescript-eslint/no-shadow': 'error',
       '@typescript-eslint/no-unused-vars': [

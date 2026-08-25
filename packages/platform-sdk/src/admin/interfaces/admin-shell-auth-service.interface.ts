@@ -8,7 +8,7 @@ export type AdminShellPermissionType = `${string}:${string}`;
  * @alpha
  * Provides permission checks to admin shell plugins without exposing identity or session data.
  */
-export interface IAdminShellAuthorization {
+export interface IAdminShellAuthService {
   /**
    * Returns whether the current principal has the requested permission.
    */

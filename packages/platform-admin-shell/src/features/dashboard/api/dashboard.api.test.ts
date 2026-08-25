@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { ApiError } from '@/shared/api';
 import { server } from '@/mocks/server';
 import { dashboardApi } from './dashboard.api';
+import { platformApi } from '@/features/platform';
 
 describe('dashboardApi', () => {
   it('loads dashboard resources and sends the session CSRF token for mutations', async () => {
@@ -24,7 +25,7 @@ describe('dashboardApi', () => {
     );
 
     const summary = await dashboardApi.getSummary();
-    const maintenanceEnabled = await dashboardApi.setMaintenance(
+    const maintenanceEnabled = await platformApi.setMaintenance(
       true,
       'csrf-token',
     );
