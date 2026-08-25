@@ -10,21 +10,54 @@ import { id } from '../../manifest.json';
     );
   }
 
-  adminShell.registerPlugin(PLATFORM_MODULE_ID, ({ workspaceService }) => {
-    console.log(`Plugin ${PLATFORM_MODULE_ID} registered`);
+  adminShell.registerPlugin(
+    PLATFORM_MODULE_ID,
+    ({ workspaceService, mainMenuService }) => {
+      const workspace = `workspace.${PLATFORM_MODULE_ID}`;
 
-    workspaceService.addWorkspace(`workspace.${PLATFORM_MODULE_ID}`, {
-      url: '/test',
-      title: 'Test',
-      onCreate() {
-        console.log(`Workspace ${PLATFORM_MODULE_ID} created`);
-      },
-      onMount() {
-        console.log(`Workspace ${PLATFORM_MODULE_ID} mounted`);
-      },
-      onUnmount() {
-        console.log(`Workspace ${PLATFORM_MODULE_ID} unmounted`);
-      },
-    });
-  });
+      workspaceService.addWorkspace(workspace, {
+        url: '/test',
+        title: 'Test',
+        permission: 'maintenance:manage',
+        onMounted() {
+          console.log(`Workspace ${PLATFORM_MODULE_ID} mounted`);
+        },
+        onUnmounted() {
+          console.log(`Workspace ${PLATFORM_MODULE_ID} unmounted`);
+        },
+      });
+
+      workspaceService.addWorkspace(workspace + '2', {
+        url: '/test2',
+        title: 'Test',
+        permission: 'maintenance:manage',
+        onMounted() {
+          console.log(`Workspace ${PLATFORM_MODULE_ID}2 mounted`);
+        },
+        onUnmounted() {
+          console.log(`Workspace ${PLATFORM_MODULE_ID}2 unmounted`);
+        },
+      });
+
+      mainMenuService.addMenuItem({
+        path: `browse/${PLATFORM_MODULE_ID}`,
+        title: 'Test',
+        permission: 'maintenance:manage',
+        action: async () => {
+          await workspaceService.go(workspace);
+        },
+      });
+
+      mainMenuService.addMenuItem({
+        path: `browse/${PLATFORM_MODULE_ID}2`,
+        title: 'Test2',
+        permission: 'maintenance:manage',
+        action: async () => {
+          await workspaceService.go(workspace + '2');
+        },
+      });
+
+      console.debug(`Plugin ${PLATFORM_MODULE_ID} registered`);
+    },
+  );
 })(globalThis);

@@ -36,6 +36,10 @@ export const useWorkspacesStore = defineStore('workspaces', {
           requiresAuth: true,
           title: workspace.title,
           permission: workspace.permission,
+          on: {
+            mounted: workspace.onMounted,
+            unmounted: workspace.onUnmounted,
+          },
         },
       });
 

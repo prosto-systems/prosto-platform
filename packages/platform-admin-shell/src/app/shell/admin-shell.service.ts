@@ -2,17 +2,18 @@ import type { Pinia } from 'pinia';
 import type {
   IAdminShell,
   IAdminShellAuthService,
+  IAdminShellMainMenuService,
   IAdminShellWorkspaceService,
   RegisterPluginCallbackType,
 } from '@prosto/platform-sdk';
-import { useWorkspacesStore } from '@/app/shell/navigation';
+import { useMainMenuStore, useWorkspacesStore } from '@/app/shell/navigation';
 import { useAuthStore } from '@/features/auth';
 
 export class AdminShell implements IAdminShell {
   readonly #pinia: Pinia;
   readonly #plugins: string[] = [];
 
-  public constructor(pinia: Pinia) {
+  constructor(pinia: Pinia) {
     this.#pinia = pinia;
   }
 
@@ -20,10 +21,10 @@ export class AdminShell implements IAdminShell {
     return this.#plugins;
   }
 
-  public readonly registerPlugin = (
+  registerPlugin(
     platformModuleId: string,
     callback: RegisterPluginCallbackType,
-  ): this => {
+  ): this {
     if (this.#plugins.includes(platformModuleId)) {
       console.error(
         `[AdminShell::AdminShell.registerPlugin]: Plugin '${platformModuleId}' is already registered.`,
@@ -36,6 +37,7 @@ export class AdminShell implements IAdminShell {
       moduleId: platformModuleId,
       authService: this._createAuthService(),
       workspaceService: this._createWorkspaceService(),
+      mainMenuService: this._createMainMenuService(),
     });
 
     void Promise.resolve(result)
@@ -43,7 +45,7 @@ export class AdminShell implements IAdminShell {
       .catch(() => undefined);
 
     return this;
-  };
+  }
 
   private _createAuthService(): IAdminShellAuthService {
     const authStore = useAuthStore(this.#pinia);
@@ -59,6 +61,16 @@ export class AdminShell implements IAdminShell {
     return {
       addWorkspace: workspacesStore.addWorkspace,
       go: workspacesStore.go,
+    };
+  }
+
+  private _createMainMenuService(): IAdminShellMainMenuService {
+    const mainMenuStore = useMainMenuStore(this.#pinia);
+
+    return {
+      menuItems: mainMenuStore.items,
+      addMenuItem: mainMenuStore.addMenuItem,
+      removeMenuItem: mainMenuStore.removeMenuItem,
     };
   }
 }

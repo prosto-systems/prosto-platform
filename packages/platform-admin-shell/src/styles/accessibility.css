@@ -5,6 +5,10 @@
 }
 */
 
+* {
+  scrollbar-width: thin;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

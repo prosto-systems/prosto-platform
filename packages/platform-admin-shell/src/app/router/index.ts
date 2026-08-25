@@ -24,6 +24,10 @@ declare module 'vue-router' {
     readonly guestOnly?: boolean;
     readonly requiresAuth?: boolean;
     readonly permission?: AdminShellPermissionType;
+    readonly on?: {
+      readonly mounted?: () => void | Promise<void>;
+      readonly unmounted?: () => void | Promise<void>;
+    };
   }
 }
 
