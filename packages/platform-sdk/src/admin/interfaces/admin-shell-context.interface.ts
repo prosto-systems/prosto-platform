@@ -1,5 +1,7 @@
-import type { IAdminShellAuthorization } from './admin-shell-authorization.interface.js';
-import type { IAdminShellNavigation } from './admin-shell-navigation.js';
+import type { IAdminShellAuthService } from './admin-shell-auth-service.interface.js';
+// import type { IAdminShellBladeService } from './admin-shell-blade-service.interface.js';
+// import type { IAdminShellMainMenuService } from './admin-shell-main-menu-service.interface.js';
+import type { IAdminShellWorkspaceService } from './admin-shell-workspace-service.interface.js';
 
 /**
  * @alpha
@@ -7,6 +9,8 @@ import type { IAdminShellNavigation } from './admin-shell-navigation.js';
  */
 export interface IAdminShellContext {
   readonly moduleId: string;
-  readonly auth: IAdminShellAuthorization;
-  readonly navigation: IAdminShellNavigation;
+  readonly authService: IAdminShellAuthService;
+  readonly workspaceService: IAdminShellWorkspaceService;
+  // readonly bladeService: IAdminShellBladeService;
+  // readonly mainMenuService: IAdminShellMainMenuService;
 }

@@ -44,6 +44,14 @@ function toApiError(error: unknown): ApiError {
   return new ApiError({ code: 'request_failed', status: 0 });
 }
 
+let resolveLoadingPluginsPromise: (value: boolean) => void = () => {
+  /* noop */
+};
+
+const loadingPluginsPromise = new Promise((resolve) => {
+  resolveLoadingPluginsPromise = resolve;
+});
+
 const manifest = createResourceState<PlatformManifestType>();
 
 export function usePlatform() {
@@ -84,7 +92,12 @@ export function usePlatform() {
         Promise.resolve(),
       )
       .then(() => {
+        resolveLoadingPluginsPromise(true);
         console.debug('Plugins loaded');
+      })
+      .catch(() => {
+        resolveLoadingPluginsPromise(false);
+        console.debug('Plugins not loaded');
       })
       .finally(() => {
         isLoadingPlugins.value = false;
@@ -149,6 +162,7 @@ export function usePlatform() {
   }
 
   return {
+    loadingPluginsPromise,
     manifest,
     health,
     isLoadingPlugins,

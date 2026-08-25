@@ -14,8 +14,8 @@ describe('AdminShellRuntime', () => {
     const adminShell = installAdminShell({} as App, pinia);
     let canViewDashboard = true;
 
-    adminShell.registerPlugin('example-module', ({ auth }) => {
-      canViewDashboard = auth.can('dashboard:view');
+    adminShell.registerPlugin('example-module', ({ authService }) => {
+      canViewDashboard = authService.can('dashboard:view');
     });
 
     expect(canViewDashboard).toBe(false);
@@ -28,7 +28,7 @@ describe('AdminShellRuntime', () => {
       { can(permission: AdminShellPermissionType): boolean } | undefined;
 
     adminShell.registerPlugin('example-module', (context) => {
-      auth = context.auth;
+      auth = context.authService;
     });
 
     authStore.$patch({

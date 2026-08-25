@@ -10,7 +10,21 @@ import { id } from '../../manifest.json';
     );
   }
 
-  adminShell.registerPlugin(PLATFORM_MODULE_ID, () => {
+  adminShell.registerPlugin(PLATFORM_MODULE_ID, ({ workspaceService }) => {
     console.log(`Plugin ${PLATFORM_MODULE_ID} registered`);
+
+    workspaceService.addWorkspace(`workspace.${PLATFORM_MODULE_ID}`, {
+      url: '/test',
+      title: 'Test',
+      onCreate() {
+        console.log(`Workspace ${PLATFORM_MODULE_ID} created`);
+      },
+      onMount() {
+        console.log(`Workspace ${PLATFORM_MODULE_ID} mounted`);
+      },
+      onUnmount() {
+        console.log(`Workspace ${PLATFORM_MODULE_ID} unmounted`);
+      },
+    });
   });
 })(globalThis);

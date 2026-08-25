@@ -5,6 +5,7 @@ import {
   type RouteRecordRaw,
 } from 'vue-router';
 import { pinia } from '@/app/plugins/pinia';
+import { WorkspacePage } from '@/app/shell';
 import {
   ForbiddenPage,
   ForgotPasswordPage,
@@ -15,6 +16,7 @@ import {
 } from '@/features/auth';
 import { httpClient } from '@/shared/api';
 import { getSafeReturnUrl } from './safe-return-url';
+import { usePlatform } from '@/features/platform';
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -52,6 +54,7 @@ const errorRoutes: RouteRecordRaw[] = [
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: NotFoundPage,
+    meta: { requiresAuth: true },
   },
   {
     path: '/:pathMatch(.*)*',
@@ -73,6 +76,15 @@ export const router = createRouter({
         requiresAuth: true,
         permission: 'dashboard:view',
       },
+    },
+    {
+      path: '/workspace',
+      name: 'Workspace',
+      // component: RouterView,
+      component: WorkspacePage,
+      children: [],
+      redirect: { name: 'Dashboard' },
+      meta: { requiresAuth: true },
     },
     ...authRoutes,
     /* Error pages should always be the last one */
@@ -97,22 +109,21 @@ httpClient.setUnauthorizedHandler(async () => {
   });
 });
 
+/* Check authorization */
 router.beforeEach(async (to) => {
   const authStore = useAuthStore(pinia);
   const meta = to.meta;
 
-  if (to.name !== 'NotFound') {
-    await authStore.resolveInitialState();
-  }
+  await authStore.resolveInitialState();
 
-  if (meta.guestOnly && authStore.status === 'authenticated') {
+  if (meta.guestOnly && authStore.isAuthenticated) {
     const returnUrl =
       typeof to.query.returnUrl === 'string' ? to.query.returnUrl : undefined;
 
     return getSafeReturnUrl(returnUrl);
   }
 
-  if (meta.requiresAuth && authStore.status !== 'authenticated') {
+  if (meta.requiresAuth && !authStore.isAuthenticated) {
     return {
       name: 'Login',
       query: { returnUrl: getSafeReturnUrl(to.fullPath) },
@@ -127,5 +138,25 @@ router.beforeEach(async (to) => {
       query: to.query,
       hash: to.hash,
     };
+  }
+});
+
+/* Load platform plugins */
+router.beforeEach(async (to) => {
+  const authStore = useAuthStore(pinia);
+  const { manifest, loadManifest, loadPlugins } = usePlatform();
+  const loadPlatformPlugins = async () => {
+    if (!authStore.csrfToken) {
+      throw new Error('The current session has no CSRF token.');
+    }
+
+    await loadManifest(authStore.csrfToken);
+    await loadPlugins(manifest.data.value?.plugins || []);
+  };
+
+  if (!manifest.data.value && authStore.isAuthenticated) {
+    await loadPlatformPlugins();
+
+    return to.fullPath;
   }
 });
