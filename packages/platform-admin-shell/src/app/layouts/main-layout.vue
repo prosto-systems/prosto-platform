@@ -33,23 +33,35 @@
 
       <v-list class="app-drawer__navigation" density="compact" nav>
         <v-list-item
-          v-for="item in navigationItems"
-          :key="item.title"
-          :aria-label="item.title"
-          :prepend-icon="item.icon"
-          :title="item.title"
-          :to="item.to"
+          :title="t('navigation.dashboard')"
+          :aria-label="t('navigation.dashboard')"
+          :to="{ name: 'Dashboard' }"
+          :active="false"
+          prepend-icon="mdi-view-dashboard-outline"
           prepend-gap="8"
           color="primary"
         />
 
         <v-list-item
-          v-if="secondNavigationItems.length || settingsNavigationItems.length"
-          aria-label="More"
-          prepend-icon="mdi-dots-horizontal"
+          v-for="item in favoriteMenuItems"
+          :key="item.path"
+          :title="item.title"
+          :aria-label="item.title"
+          :prepend-icon="item.icon"
+          prepend-gap="8"
+          color="primary"
+          @click="item.action($event)"
+        />
+
+        <v-list-item
+          v-if="browseMenuItems.length || configurationMenuItems.length"
           :title="
             secondDrawerOpen ? t('navigation.less') : t('navigation.more')
           "
+          :aria-label="
+            secondDrawerOpen ? t('navigation.less') : t('navigation.more')
+          "
+          prepend-icon="mdi-dots-horizontal"
           prepend-gap="8"
           color="primary"
           @click="toggleSubNavigation"
@@ -204,78 +216,118 @@
         v-model="secondDrawerOpen"
         elevation="0"
         class="app-second-drawer"
+        width="268"
         temporary
       >
         <v-list density="compact" nav>
-          <v-list-subheader v-if="secondNavigationItems.length">
-            {{ t('navigation.workspace') }}
+          <v-list-subheader v-if="browseMenuItems.length">
+            {{ t('navigation.browse') }}
           </v-list-subheader>
 
           <v-list-item
-            v-for="item in secondNavigationItems"
-            :key="item.title"
-            :aria-label="item.title"
-            :prepend-icon="item.icon"
+            v-for="item in browseMenuItems"
+            :key="item.path"
             :title="item.title"
-            :to="item.to"
+            :aria-label="item.title"
             prepend-gap="8"
             color="primary"
+            @click="item.action($event)"
           >
+            <template #prepend>
+              <v-icon :icon="item.icon" class="opacity-30" />
+            </template>
+
             <template #append>
               <v-list-item-action class="ml-0">
                 <v-avatar
+                  v-if="item.isAlwaysFavorite"
                   variant="plain"
-                  class="cursor-pointer"
-                  @click="() => void 0"
+                  disabled
+                  @click.stop="() => void 0"
                 >
                   <v-icon
-                    v-if="item.selected"
+                    icon="mdi-star"
                     size="small"
                     color="yellow-darken-3"
-                  >
-                    mdi-star
-                  </v-icon>
+                  />
+                </v-avatar>
 
-                  <v-icon v-else size="small" class="opacity-30">
-                    mdi-star-outline
-                  </v-icon>
+                <v-avatar
+                  v-else
+                  variant="plain"
+                  class="cursor-pointer"
+                  @click.stop="mainMenuStore.toggleFavorite(item.path)"
+                >
+                  <v-icon
+                    v-if="item.isFavorite"
+                    icon="mdi-star"
+                    size="small"
+                    color="yellow-darken-3"
+                  />
+
+                  <v-icon
+                    v-else
+                    icon="mdi-star-outline"
+                    size="small"
+                    class="opacity-30"
+                  />
                 </v-avatar>
               </v-list-item-action>
             </template>
           </v-list-item>
 
-          <v-list-subheader v-if="settingsNavigationItems.length" class="mt-2">
-            {{ t('navigation.settings') }}
+          <v-list-subheader v-if="configurationMenuItems.length" class="mt-2">
+            {{ t('navigation.configuration') }}
           </v-list-subheader>
 
           <v-list-item
-            v-for="item in settingsNavigationItems"
-            :key="item.title"
+            v-for="item in configurationMenuItems"
+            :key="item.path"
+            :title="item.title"
             :aria-label="item.title"
             :prepend-icon="item.icon"
-            :title="item.title"
-            :to="item.to"
             prepend-gap="8"
             color="primary"
+            @click="item.action($event)"
           >
+            <template #prepend>
+              <v-icon :icon="item.icon" class="opacity-30" />
+            </template>
+
             <template #append>
               <v-list-item-action class="ml-0">
                 <v-avatar
+                  v-if="item.isAlwaysFavorite"
                   variant="plain"
-                  class="cursor-pointer"
-                  @click="() => void 0"
+                  disabled
+                  @click.stop="() => void 0"
                 >
                   <v-icon
-                    v-if="item.selected"
+                    icon="mdi-star"
                     size="small"
                     color="yellow-darken-3"
-                  >
-                    mdi-star
-                  </v-icon>
+                  />
+                </v-avatar>
 
-                  <v-icon v-else size="small" class="opacity-30">
-                    mdi-star-outline
-                  </v-icon>
+                <v-avatar
+                  v-else
+                  variant="plain"
+                  class="cursor-pointer"
+                  @click.stop="mainMenuStore.toggleFavorite(item.path)"
+                >
+                  <v-icon
+                    v-if="item.isFavorite"
+                    icon="mdi-star"
+                    size="small"
+                    color="yellow-darken-3"
+                  />
+
+                  <v-icon
+                    v-else
+                    icon="mdi-star-outline"
+                    size="small"
+                    class="opacity-30"
+                  />
                 </v-avatar>
               </v-list-item-action>
             </template>
@@ -304,20 +356,14 @@ import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { useDisplay, useTheme } from 'vuetify';
 import { useI18n } from 'vue-i18n';
+import { i18n } from '@/app/plugins';
+import { useMainMenuStore } from '@/app/shell';
 import { useAuthStore } from '@/features/auth';
+import { usePlatform } from '@/features/platform';
 import {
   usePreferencesStore,
   type ThemePreferenceType,
 } from '@/features/preferences';
-import { i18n } from '@/app/plugins';
-import { usePlatform } from '@/features/platform';
-
-interface INavigationItem {
-  readonly icon: string;
-  readonly title: string;
-  readonly to?: { readonly name: string };
-  readonly selected?: boolean;
-}
 
 interface IButtonActivator {
   readonly $el: HTMLElement;
@@ -331,8 +377,11 @@ const { manifest } = usePlatform();
 
 const authStore = useAuthStore();
 const preferencesStore = usePreferencesStore();
+const mainMenuStore = useMainMenuStore();
 const { isAuthenticated } = storeToRefs(authStore);
 const { locale, theme: themePreference } = storeToRefs(preferencesStore);
+const { favoriteMenuItems, browseMenuItems, configurationMenuItems } =
+  storeToRefs(mainMenuStore);
 
 const drawerOpen = shallowRef(true);
 const secondDrawerOpen = shallowRef(false);
@@ -361,17 +410,7 @@ const principalRole = computed(() => {
   return role ? t(`account.roles.${role}`) : '';
 });
 
-const navigationItems = computed<INavigationItem[]>(() => [
-  {
-    icon: 'mdi-view-dashboard-outline',
-    title: t('navigation.dashboard'),
-    to: { name: 'Dashboard' },
-  },
-]);
-
-const secondNavigationItems = computed<INavigationItem[]>(() => []);
-
-const settingsNavigationItems = computed<INavigationItem[]>(() => []);
+mainMenuStore.loadFavorites();
 
 function toggleNavigation(): void {
   if (mobile.value) {
@@ -454,11 +493,11 @@ watch(
   /* * /
   background: rgb(var(--v-theme-surface-light));
   /* */
-  background: linear-gradient(120deg, #f6f8fb 260px, #ffffff 180%);
+  background: linear-gradient(120deg, #f6f8fb 260px, #ffffff 160%);
   //background: linear-gradient(120deg, #f7f8fa 260px, #ffffff 200%);
 
   &--dark {
-    background: linear-gradient(120deg, #10151d 260px, #090c10 200%);
+    background: linear-gradient(120deg, #10151d 260px, #090c10 180%);
     //background: linear-gradient(120deg, #181818 260px, #0c0c0c 200%);
   }
   /* * /

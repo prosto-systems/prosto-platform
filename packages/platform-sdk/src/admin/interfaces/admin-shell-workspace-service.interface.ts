@@ -7,9 +7,8 @@ export interface IAdminShellWorkspace {
   title: string;
   component?: Component;
   permission?: AdminShellPermissionType;
-  onCreate?: () => void | Promise<void>;
-  onMount?: () => void | Promise<void>;
-  onUnmount?: () => void | Promise<void>;
+  onMounted?: () => void | Promise<void>;
+  onUnmounted?: () => void | Promise<void>;
 }
 
 export interface IAdminShellWorkspaceService {
