@@ -1,6 +1,7 @@
 import type { AuthSessionType } from '@/features/auth';
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
+import { getMockState, reloadMockStateFromStorage } from '../mock-state';
 import { server } from '../server';
 
 const API_URL = 'http://localhost/api/admin';
@@ -70,6 +71,27 @@ describe('MSW authentication handlers', () => {
     expect(invalidLogin.body).toEqual({ code: 'invalid_credentials' });
   });
 
+  it('restores a persisted session after the mock runtime is recreated', async () => {
+    const login = await loginAsAdmin();
+
+    reloadMockStateFromStorage();
+    const restoredSession = await request<AuthSessionType>('/auth/session');
+
+    expect(restoredSession.response.status).toBe(200);
+    expect(restoredSession.body).toEqual(login.body);
+    expect(getMockState().sessions.size).toBe(1);
+  });
+
+  it('expires a stale session cookie when restoration fails', async () => {
+    document.cookie = 'prosto_admin_session=missing; Path=/; SameSite=Lax';
+
+    const expiredSession = await request<IErrorResponse>('/auth/session');
+
+    expect(expiredSession.response.status).toBe(401);
+    expect(expiredSession.body).toEqual({ code: 'session_expired' });
+    expect(document.cookie).not.toContain('prosto_admin_session=');
+  });
+
   it('enforces CSRF protection and expires the session cookie on logout', async () => {
     const login = await loginAsAdmin();
     const rejectedLogout = await request<IErrorResponse>('/auth/logout', {
@@ -81,11 +103,14 @@ describe('MSW authentication handlers', () => {
         'X-CSRF-Token': login.body?.csrfToken ?? '',
       },
     });
+
+    reloadMockStateFromStorage();
     const expiredSession = await request<IErrorResponse>('/auth/session');
 
     expect(rejectedLogout.body).toEqual({ code: 'csrf_invalid' });
     expect(logout.response.status).toBe(204);
     expect(expiredSession.body).toEqual({ code: 'session_expired' });
+    expect(getMockState().sessions.size).toBe(0);
   });
 
   it('keeps reset requests neutral and invalidates a used reset token', async () => {

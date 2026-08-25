@@ -5,6 +5,7 @@ import {
   MOCK_USERS,
   type MockRoleType,
 } from './mock-fixtures';
+import { getBrowserStorage, MockSessionStorage } from './mock-session-storage';
 
 export interface IMockUser {
   readonly id: string;
@@ -62,6 +63,7 @@ export interface IMockState {
 
 const SESSION_DURATION_MS = 60 * 60 * 1000;
 const RESET_TOKEN_DURATION_MS = 60 * 60 * 1000;
+const mockSessionStorage = new MockSessionStorage(getBrowserStorage());
 
 const ROLE_PERMISSIONS: Readonly<
   Record<MockRoleType, readonly AdminShellPermissionType[]>
@@ -149,14 +151,19 @@ export function createMockState(): IMockState {
   };
 }
 
-let mockState = createMockState();
+let mockState = createHydratedMockState();
 
 export function getMockState(): IMockState {
   return mockState;
 }
 
 export function resetMockState(): void {
+  mockSessionStorage.clear();
   mockState = createMockState();
+}
+
+export function reloadMockStateFromStorage(): void {
+  mockState = createHydratedMockState();
 }
 
 export function getPermissions(
@@ -185,6 +192,7 @@ export function createSession(user: IMockUser): IMockSession {
   };
 
   mockState.sessions.set(session.id, session);
+  persistSessions();
 
   return session;
 }
@@ -199,7 +207,10 @@ export function findActiveSession(
   const session = mockState.sessions.get(sessionId);
 
   if (session === undefined || session.expiresAt <= Date.now()) {
-    mockState.sessions.delete(sessionId);
+    if (mockState.sessions.delete(sessionId)) {
+      persistSessions();
+    }
+
     return undefined;
   }
 
@@ -207,7 +218,9 @@ export function findActiveSession(
 }
 
 export function destroySession(sessionId: string): void {
-  mockState.sessions.delete(sessionId);
+  if (mockState.sessions.delete(sessionId)) {
+    persistSessions();
+  }
 }
 
 export function createResetToken(user: IMockUser): string {
@@ -234,5 +247,25 @@ export function addActivity(
     timestamp: new Date().toISOString(),
     message,
     severity,
+  });
+}
+
+function createHydratedMockState(): IMockState {
+  const state = createMockState();
+  const snapshot = mockSessionStorage.load(new Set(state.users.keys()));
+
+  for (const session of snapshot.sessions) {
+    state.sessions.set(session.id, session);
+  }
+
+  state.sessionSequence = snapshot.sessionSequence;
+
+  return state;
+}
+
+function persistSessions(): void {
+  mockSessionStorage.save({
+    sessionSequence: mockState.sessionSequence,
+    sessions: [...mockState.sessions.values()],
   });
 }

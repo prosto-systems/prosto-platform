@@ -27,6 +27,11 @@ import {
 const invalidCredentialsResponse = (): Response =>
   errorResponse(401, 'invalid_credentials');
 
+const expiredSessionResponse = (): Response =>
+  jsonResponse({ code: 'session_expired' }, 401, {
+    'Set-Cookie': createExpiredSessionCookie(),
+  });
+
 export const authHandlers = [
   http.post(`${ADMIN_API_PATH}/auth/login`, async ({ request }) => {
     await applyMockLatency();
@@ -57,7 +62,7 @@ export const authHandlers = [
     const authenticatedRequest = getAuthenticatedRequest(cookies);
 
     if (authenticatedRequest === undefined) {
-      return errorResponse(401, 'session_expired');
+      return expiredSessionResponse();
     }
 
     return jsonResponse(
