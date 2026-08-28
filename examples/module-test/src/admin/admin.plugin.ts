@@ -1,18 +1,14 @@
 import { id } from '../../manifest.json';
+import { useAdminShell } from '@prosto/platform-sdk';
+import MainBlade from './main-blade.vue';
 
-(function (global) {
+(function () {
   const PLATFORM_MODULE_ID = id;
-  const adminShell = global.__PROSTO_ADMIN_SHELL__;
-
-  if (!adminShell) {
-    throw new ReferenceError(
-      `Plugin ${PLATFORM_MODULE_ID}: '__POSTO_ADMIN_SHELL__' is not supported`,
-    );
-  }
+  const adminShell = useAdminShell();
 
   adminShell.registerPlugin(
     PLATFORM_MODULE_ID,
-    ({ workspaceService, mainMenuService }) => {
+    ({ workspaceService, mainMenuService, bladeService }) => {
       const workspace = `workspace.${PLATFORM_MODULE_ID}`;
 
       workspaceService.addWorkspace(workspace, {
@@ -21,6 +17,12 @@ import { id } from '../../manifest.json';
         permission: 'maintenance:manage',
         onMounted() {
           console.log(`Workspace ${PLATFORM_MODULE_ID} mounted`);
+
+          bladeService.showBlade({
+            id: `blade.${PLATFORM_MODULE_ID}.main`,
+            title: `Blade title ${PLATFORM_MODULE_ID}`,
+            component: MainBlade,
+          });
         },
         onUnmounted() {
           console.log(`Workspace ${PLATFORM_MODULE_ID} unmounted`);
@@ -60,4 +62,4 @@ import { id } from '../../manifest.json';
       console.debug(`Plugin ${PLATFORM_MODULE_ID} registered`);
     },
   );
-})(globalThis);
+})();

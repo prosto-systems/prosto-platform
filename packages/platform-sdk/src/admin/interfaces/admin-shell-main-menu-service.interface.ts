@@ -13,7 +13,6 @@ export interface IAdminShellMainMenuItem {
 }
 
 export interface IAdminShellMainMenuService {
-  readonly menuItems: readonly IAdminShellMainMenuItem[];
   addMenuItem: (menuItem: IAdminShellMainMenuItem) => void;
   removeMenuItem:
     ((menuItem: IAdminShellMainMenuItem) => void) | ((path: string) => void);

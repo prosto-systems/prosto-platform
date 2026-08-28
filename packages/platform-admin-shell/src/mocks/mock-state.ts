@@ -118,7 +118,12 @@ export function createMockState(): IMockState {
             path: '/plugins/module-test/dist/admin/admin.plugin.js',
             hash: Date.now().toString(),
           },
-          contentFiles: [],
+          contentFiles: [
+            {
+              type: 'style',
+              path: '/plugins/module-test/dist/admin/module-test.css',
+            },
+          ],
         },
       ],
     },

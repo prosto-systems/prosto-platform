@@ -5,6 +5,7 @@ import pkg from './package.json' with { type: 'json' };
 import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
+import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
 
 const externalPackages = Object.keys(pkg.dependencies ?? {});
 
@@ -61,7 +62,14 @@ export default defineConfig(({ mode }) => {
 
   if (mode === 'admin') {
     return {
-      plugins: [vue()],
+      plugins: [
+        vue({
+          template: { transformAssetUrls },
+        }),
+        vuetify({
+          autoImport: true,
+        }),
+      ],
       resolve: {
         tsconfigPaths: true,
       },

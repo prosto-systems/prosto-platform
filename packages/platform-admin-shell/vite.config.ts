@@ -32,9 +32,10 @@ export default defineConfig({
   define: { 'process.env': {} },
   resolve: {
     tsconfigPaths: true,
-    // alias: {
-    //   '@': fileURLToPath(new URL('src', import.meta.url)),
-    // },
+    alias: {
+      vue: 'vue/dist/vue.esm-bundler.js',
+      // '@': fileURLToPath(new URL('src', import.meta.url)),
+    },
     extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue'],
   },
   server: {
