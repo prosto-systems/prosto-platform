@@ -44,8 +44,8 @@ export function injectScript(
     // async=false on dynamically-created scripts preserves execution order
     // when multiple are appended in sequence (ES spec / WHATWG).
     script.async = false;
+    script.type = 'module';
     script.src = src;
-    script.type = 'text/javascript';
     script.dataset.moduleId = moduleId;
     script.onload = () => resolve();
     script.onerror = () => {

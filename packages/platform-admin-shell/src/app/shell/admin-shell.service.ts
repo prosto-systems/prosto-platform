@@ -1,13 +1,14 @@
 import type { Pinia } from 'pinia';
 import type {
   IAdminShell,
-  IAdminShellAuthService,
-  IAdminShellMainMenuService,
-  IAdminShellWorkspaceService,
   RegisterPluginCallbackType,
 } from '@prosto/platform-sdk';
-import { useMainMenuStore, useWorkspacesStore } from '@/app/shell/navigation';
-import { useAuthStore } from '@/features/auth';
+import {
+  createAuthService,
+  createBladeService,
+  createMainMenuService,
+  createWorkspaceService,
+} from './utils';
 
 export class AdminShell implements IAdminShell {
   readonly #pinia: Pinia;
@@ -35,9 +36,10 @@ export class AdminShell implements IAdminShell {
 
     const result = callback({
       moduleId: platformModuleId,
-      authService: this._createAuthService(),
-      workspaceService: this._createWorkspaceService(),
-      mainMenuService: this._createMainMenuService(),
+      authService: createAuthService(this.#pinia),
+      workspaceService: createWorkspaceService(this.#pinia),
+      mainMenuService: createMainMenuService(this.#pinia),
+      bladeService: createBladeService(this.#pinia),
     });
 
     void Promise.resolve(result)
@@ -45,32 +47,5 @@ export class AdminShell implements IAdminShell {
       .catch(() => undefined);
 
     return this;
-  }
-
-  private _createAuthService(): IAdminShellAuthService {
-    const authStore = useAuthStore(this.#pinia);
-
-    return {
-      can: authStore.can,
-    };
-  }
-
-  private _createWorkspaceService(): IAdminShellWorkspaceService {
-    const workspacesStore = useWorkspacesStore(this.#pinia);
-
-    return {
-      addWorkspace: workspacesStore.addWorkspace,
-      go: workspacesStore.go,
-    };
-  }
-
-  private _createMainMenuService(): IAdminShellMainMenuService {
-    const mainMenuStore = useMainMenuStore(this.#pinia);
-
-    return {
-      menuItems: mainMenuStore.items,
-      addMenuItem: mainMenuStore.addMenuItem,
-      removeMenuItem: mainMenuStore.removeMenuItem,
-    };
   }
 }

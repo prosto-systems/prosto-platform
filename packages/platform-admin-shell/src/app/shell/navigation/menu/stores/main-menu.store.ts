@@ -7,13 +7,16 @@ export interface IMainMenuItem extends IAdminShellMainMenuItem {
 }
 
 interface IWorkspaceState {
-  items: IAdminShellMainMenuItem[];
+  menuItemsByPath: Map<
+    IAdminShellMainMenuItem['path'],
+    IAdminShellMainMenuItem
+  >;
   favoritePaths: IAdminShellMainMenuItem['path'][];
 }
 
 export const useMainMenuStore = defineStore('main-menu', {
   state: (): IWorkspaceState => ({
-    items: [],
+    menuItemsByPath: new Map(),
     favoritePaths: [],
   }),
 
@@ -22,7 +25,7 @@ export const useMainMenuStore = defineStore('main-menu', {
       const authStore = useAuthStore();
       const result: IMainMenuItem[] = [];
 
-      state.items.forEach((item) => {
+      [...state.menuItemsByPath.values()].forEach((item) => {
         if (item.permission && !authStore.can(item.permission)) return;
 
         result.push({
@@ -37,10 +40,6 @@ export const useMainMenuStore = defineStore('main-menu', {
         if (a.priority == null || b.priority == null) return -1;
         return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
       });
-    },
-
-    allPaths(state): IMainMenuItem['path'][] {
-      return state.items.map(({ path }) => path);
     },
 
     favoriteMenuItems(): IMainMenuItem[] {
@@ -73,7 +72,7 @@ export const useMainMenuStore = defineStore('main-menu', {
         menuItem,
       );
 
-      if (this.allPaths.includes(menuItem.path)) {
+      if (this.menuItemsByPath.has(menuItem.path)) {
         console.error(
           `[AdminShell::useWorkspacesStore.addMenuItem]: Menu item path '${menuItem.path}' already exists.`,
         );
@@ -81,21 +80,23 @@ export const useMainMenuStore = defineStore('main-menu', {
         return;
       }
 
-      this.items.push(menuItem);
+      this.menuItemsByPath.set(menuItem.path, menuItem);
     },
 
-    removeMenuItem(pathOrMenuItem: string | IAdminShellMainMenuItem): void {
+    removeMenuItem(
+      pathOrMenuItem: IAdminShellMainMenuItem['path'] | IAdminShellMainMenuItem,
+    ): void {
       console.debug(
         '[AdminShell::useMainMenuStore.removeWorkspace]: pathOrMenuItem',
         pathOrMenuItem,
       );
 
-      const index =
+      const path =
         typeof pathOrMenuItem === 'string'
-          ? this.items.findIndex((item) => item.path === pathOrMenuItem)
-          : this.items.indexOf(pathOrMenuItem);
+          ? pathOrMenuItem
+          : pathOrMenuItem.path;
 
-      this.items.splice(index, 1);
+      this.menuItemsByPath.delete(path);
     },
 
     async loadFavorites(): Promise<void> {

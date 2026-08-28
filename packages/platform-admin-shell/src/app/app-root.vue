@@ -1,6 +1,10 @@
 <template>
   <MainLayout>
-    <router-view />
+    <router-view v-slot="{ Component }">
+      <v-fade-transition hide-on-leave>
+        <component :is="Component" />
+      </v-fade-transition>
+    </router-view>
   </MainLayout>
 </template>
 
