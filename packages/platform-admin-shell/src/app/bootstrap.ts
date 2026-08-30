@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import AppRoot from './app-root.vue';
 import { installApplicationPlugins } from './plugins';
+import { installAdminRuntime } from './runtime';
 import { router } from './router';
 
 async function startMockServiceWorker(): Promise<void> {
@@ -18,6 +19,7 @@ export async function bootstrapApplication(): Promise<void> {
 
   const app = createApp(AppRoot);
 
+  installAdminRuntime();
   installApplicationPlugins(app);
 
   await router.isReady();

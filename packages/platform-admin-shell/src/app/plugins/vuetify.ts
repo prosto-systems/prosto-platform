@@ -1,21 +1,16 @@
-import { createVuetify } from 'vuetify';
-import * as components from 'vuetify/components';
-import * as directives from 'vuetify/directives';
-import * as labsComponents from 'vuetify/labs/components';
+import { createVuetify, type VuetifyOptions } from 'vuetify';
 import { createVueI18nAdapter } from 'vuetify/locale/adapters/vue-i18n';
 import { useI18n } from 'vue-i18n';
 import { readPersistedThemePreference } from '@/features/preferences';
+import { adminRuntimeNamespaces } from '../runtime';
 import { i18n } from './i18n';
 
 import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
 
-export const vuetify = createVuetify({
-  directives,
-  components: {
-    ...components,
-    ...labsComponents,
-  },
+export const vuetifyOptions: VuetifyOptions = {
+  directives: adminRuntimeNamespaces.vuetify.directives,
+  components: adminRuntimeNamespaces.vuetify.components,
   locale: {
     adapter: createVueI18nAdapter({ i18n, useI18n }),
   },
@@ -62,4 +57,6 @@ export const vuetify = createVuetify({
       },
     },
   },
-});
+};
+
+export const vuetify = createVuetify(vuetifyOptions);

@@ -12,6 +12,10 @@ export const ruMessages: ApplicationMessagesType = {
   app: {
     loading: 'Загрузка платформы Prosto...',
   },
+  plugins: {
+    loadFailed: 'Не удалось загрузить некоторые плагины администрирования:',
+    dismiss: 'Закрыть',
+  },
   navigation: {
     dashboard: 'Панель управления',
     more: 'Больше',

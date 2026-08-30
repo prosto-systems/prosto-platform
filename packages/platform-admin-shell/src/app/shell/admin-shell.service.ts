@@ -10,31 +10,37 @@ import {
   createWorkspaceService,
 } from './utils';
 
+/**
+ * Signals an attempt to register a plugin that is already registered or loading.
+ */
+export class AdminPluginAlreadyRegisteredError extends Error {
+  constructor(platformModuleId: string) {
+    super(`Admin plugin already registered: '${platformModuleId}'.`);
+    this.name = 'AdminPluginAlreadyRegisteredError';
+  }
+}
+
 export class AdminShell implements IAdminShell {
   readonly #pinia: Pinia;
-  readonly #plugins: string[] = [];
+  readonly #plugins = new Set<string>();
 
   constructor(pinia: Pinia) {
     this.#pinia = pinia;
   }
 
   get plugins(): readonly string[] {
-    return this.#plugins;
+    return [...this.#plugins.values()];
   }
 
-  registerPlugin(
+  async registerPlugin(
     platformModuleId: string,
     callback: RegisterPluginCallbackType,
-  ): this {
-    if (this.#plugins.includes(platformModuleId)) {
-      console.error(
-        `[AdminShell::AdminShell.registerPlugin]: Plugin '${platformModuleId}' is already registered.`,
-      );
-
-      return this;
+  ): Promise<this> {
+    if (this.#plugins.has(platformModuleId)) {
+      throw new AdminPluginAlreadyRegisteredError(platformModuleId);
     }
 
-    const result = callback({
+    await callback({
       moduleId: platformModuleId,
       authService: createAuthService(this.#pinia),
       workspaceService: createWorkspaceService(this.#pinia),
@@ -42,9 +48,7 @@ export class AdminShell implements IAdminShell {
       bladeService: createBladeService(this.#pinia),
     });
 
-    void Promise.resolve(result)
-      .then(() => this.#plugins.push(platformModuleId))
-      .catch(() => undefined);
+    this.#plugins.add(platformModuleId);
 
     return this;
   }
