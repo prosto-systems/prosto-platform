@@ -1,5 +1,8 @@
-import type { AdminShellPermissionType } from '@prosto/platform-sdk';
-import type { IAdminShellPluginInfo } from '@prosto/platform-sdk';
+import {
+  ADMIN_SHELL_RUNTIME_API_VERSION,
+  type AdminShellPermissionType,
+  type IAdminShellPluginInfo,
+} from '@prosto/platform-sdk';
 import {
   DETERMINISTIC_RESET_TOKEN,
   MOCK_USERS,
@@ -113,15 +116,16 @@ export function createMockState(): IMockState {
         {
           moduleId: 'module-test',
           moduleVersion: '1.0.0',
+          runtimeApiVersion: ADMIN_SHELL_RUNTIME_API_VERSION,
           entry: {
             type: 'script',
-            path: '/plugins/module-test/dist/admin/admin.plugin.js',
-            hash: Date.now().toString(),
+            path: '/modules/module-test/dist/admin/admin.plugin.js',
+            hash: '1.0.0',
           },
           contentFiles: [
             {
               type: 'style',
-              path: '/plugins/module-test/dist/admin/module-test.css',
+              path: '/modules/module-test/dist/admin/admin.plugin.css',
             },
           ],
         },

@@ -1,22 +1,10 @@
 import { z } from 'zod';
-
-export const adminShellPluginContentFileSchema = z.object({
-  type: z.enum(['style', 'script']),
-  path: z.string().min(1),
-  hash: z.string().optional(),
-});
+import { adminShellPluginInfosSchema } from '@prosto/platform-sdk';
 
 export const platformManifestSchema = z.object({
   platformName: z.string().min(1),
   platformVersion: z.string().min(1),
-  plugins: z.array(
-    z.object({
-      moduleId: z.string().min(1),
-      moduleVersion: z.string().min(1),
-      entry: adminShellPluginContentFileSchema,
-      contentFiles: z.array(adminShellPluginContentFileSchema),
-    }),
-  ),
+  plugins: adminShellPluginInfosSchema,
 });
 
 export const platformHealthSchema = z.object({

@@ -5,6 +5,10 @@ export const enMessages = {
   app: {
     loading: 'Loading Prosto Platform...',
   },
+  plugins: {
+    loadFailed: 'Some admin plugins could not be loaded:',
+    dismiss: 'Dismiss',
+  },
   navigation: {
     dashboard: 'Dashboard',
     more: 'More',

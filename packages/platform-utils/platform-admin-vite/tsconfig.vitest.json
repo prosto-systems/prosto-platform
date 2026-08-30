@@ -1,0 +1,15 @@
+{
+  "extends": "@prosto/platform-tsconfig/base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["node"]
+  },
+  "include": [
+    "tests/**/*.test.ts",
+    "tests/fixtures/**/*.ts",
+    "tests/fixtures/**/*.vue"
+  ]
+}

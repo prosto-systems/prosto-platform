@@ -107,6 +107,7 @@ When guidance conflicts, use this precedence order:
 - npm >= 10
 - TypeScript compiler (dependency)
 - Vite 8 and `vite-plugin-dts` for publishable package builds
+- `@prosto/platform-admin-vite` provides the shared Vue ecosystem runtime transform (`vue`, `vue-i18n`, `pinia`, `vue-router`, and Vuetify) for admin module artifacts; configure it after the Vue and Vuetify Vite plugins
 - MSW 2 in `@prosto/platform-admin-shell` for browser development and Vitest API mocks
 - Git for version control
 - Turborepo (for monorepo task orchestration)
@@ -117,6 +118,9 @@ turbo build          # Build all packages with dependency ordering
 turbo dev            # Start dev mode in all packages
 turbo test           # Run tests across all packages
 turbo typecheck      # Type check all packages
+turbo test --filter=@prosto/platform-admin-vite # Test the admin runtime Vite integration
+turbo build --filter=@prosto/platform-admin-vite # Build the admin runtime Vite integration
+turbo typecheck --filter=@prosto/platform-admin-vite # Type check the admin runtime Vite integration
 ```
 
 ## Additional Resources

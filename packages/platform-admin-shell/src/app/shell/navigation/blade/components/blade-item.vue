@@ -49,8 +49,6 @@
       class="blade__content"
       :class="{ 'bg-blue-grey-darken-1': theme.current.value.dark }"
     >
-      {{ proxiedBlade.isLoading }}
-      <VBtn color="primary">add blade</VBtn>
       <component :is="blade.component" />
     </div>
   </div>
@@ -73,7 +71,7 @@ import {
   useBladesStore,
 } from '@/app/shell';
 import { pinia } from '@/app/plugins';
-import { useTheme } from 'vuetify/framework';
+import { useTheme } from 'vuetify';
 import { VBtn } from 'vuetify/components';
 
 interface IProps {

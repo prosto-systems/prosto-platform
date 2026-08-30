@@ -1,17 +1,14 @@
-import type { PlatformHealthType, PlatformManifestType } from '../models';
+import type {
+  IPluginLoadResult,
+  PlatformHealthType,
+  PlatformManifestType,
+} from '../models';
 import type { ShallowRef } from 'vue';
 import { shallowRef } from 'vue';
 import { ApiError } from '@/shared/api';
 import { platformApi } from '../api';
-import type {
-  IAdminShellPluginContentFile,
-  IAdminShellPluginInfo,
-} from '@prosto/platform-sdk';
-import {
-  collectFilesByType,
-  injectScript,
-  injectStyle,
-} from '@/features/platform';
+import { type IAdminShellPluginInfo } from '@prosto/platform-sdk';
+import { createPluginLoadResult, loadPlugin } from '@/features/platform';
 
 interface IResourceState<TValue> {
   readonly data: ShallowRef<TValue | null>;
@@ -44,64 +41,49 @@ function toApiError(error: unknown): ApiError {
   return new ApiError({ code: 'request_failed', status: 0 });
 }
 
-let resolveLoadingPluginsPromise: (value: boolean) => void = () => {
-  /* noop */
-};
-
-const loadingPluginsPromise = new Promise((resolve) => {
-  resolveLoadingPluginsPromise = resolve;
-});
-
 const manifest = createResourceState<PlatformManifestType>();
+const isLoadingPlugins = shallowRef(false);
+const pluginLoadResults = shallowRef<readonly IPluginLoadResult[]>([]);
+let pluginsLoadingPromise: Promise<readonly IPluginLoadResult[]> | null = null;
 
 export function usePlatform() {
   const health = createResourceState<PlatformHealthType>();
 
   const isRestartingPlatform = shallowRef(false);
   const isUpdatingMaintenance = shallowRef(false);
-  const isLoadingPlugins = shallowRef(false);
 
-  async function loadPlugins(plugins: IAdminShellPluginInfo[]): Promise<void> {
+  function loadPlugins(
+    plugins: readonly IAdminShellPluginInfo[],
+  ): Promise<readonly IPluginLoadResult[]> {
+    if (pluginsLoadingPromise) {
+      return pluginsLoadingPromise;
+    }
+
     isLoadingPlugins.value = true;
-
-    plugins.forEach((plugin) =>
-      collectFilesByType(plugin, 'style').forEach((file) =>
-        injectStyle(file, plugin.moduleId),
-      ),
+    pluginLoadResults.value = plugins.map((plugin) =>
+      createPluginLoadResult(plugin, 'pending'),
     );
 
-    /*
-     * Inject scripts sequentially. The topological order returned by the server
-     * must be preserved so dependent modules find their prerequisites.
-     */
-    const scripts: {
-      moduleId: string;
-      file: IAdminShellPluginContentFile;
-    }[] = [];
+    pluginsLoadingPromise = (async (): Promise<
+      readonly IPluginLoadResult[]
+    > => {
+      const results = plugins.map((plugin) =>
+        createPluginLoadResult(plugin, 'pending'),
+      );
 
-    plugins.forEach((plugin) =>
-      collectFilesByType(plugin, 'script').forEach((file) =>
-        scripts.push({ file, moduleId: plugin.moduleId }),
-      ),
-    );
+      for (const [index, plugin] of plugins.entries()) {
+        const result = await loadPlugin(plugin);
 
-    return scripts
-      .reduce(
-        (chain, { file, moduleId }) =>
-          chain.then(() => injectScript(file, moduleId)),
-        Promise.resolve(),
-      )
-      .then(() => {
-        resolveLoadingPluginsPromise(true);
-        console.debug('Plugins loaded');
-      })
-      .catch(() => {
-        resolveLoadingPluginsPromise(false);
-        console.debug('Plugins not loaded');
-      })
-      .finally(() => {
-        isLoadingPlugins.value = false;
-      });
+        results[index] = result;
+        pluginLoadResults.value = [...results];
+      }
+
+      return results;
+    })().finally(() => {
+      isLoadingPlugins.value = false;
+    });
+
+    return pluginsLoadingPromise;
   }
 
   async function loadResource<TValue>(
@@ -162,10 +144,10 @@ export function usePlatform() {
   }
 
   return {
-    loadingPluginsPromise,
     manifest,
     health,
     isLoadingPlugins,
+    pluginLoadResults,
     isRestartingPlatform,
     isUpdatingMaintenance,
     loadPlugins,

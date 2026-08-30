@@ -347,6 +347,8 @@
       </v-navigation-drawer>
       <slot />
     </v-main>
+
+    <PluginLoadAlert :failed-plugins="failedPluginLoads" />
   </v-app>
 </template>
 
@@ -359,10 +361,14 @@ import { useI18n } from 'vue-i18n';
 import { i18n } from '@/app/plugins';
 import { useMainMenuStore } from '@/app/shell';
 import { useAuthStore } from '@/features/auth';
-import { usePlatform } from '@/features/platform';
 import {
-  usePreferencesStore,
+  PluginLoadAlert,
+  type PluginLoadFailureCodeType,
+  usePlatform,
+} from '@/features/platform';
+import {
   type ThemePreferenceType,
+  usePreferencesStore,
 } from '@/features/preferences';
 
 interface IButtonActivator {
@@ -373,7 +379,7 @@ const { mobile } = useDisplay();
 const { t, te } = useI18n();
 const theme = useTheme();
 const router = useRouter();
-const { manifest } = usePlatform();
+const { manifest, isLoadingPlugins, pluginLoadResults } = usePlatform();
 
 const authStore = useAuthStore();
 const preferencesStore = usePreferencesStore();
@@ -408,6 +414,23 @@ const principalRole = computed(() => {
   const role = authStore.principal?.role;
 
   return role ? t(`account.roles.${role}`) : '';
+});
+
+const failedPluginLoads = computed<
+  {
+    moduleId: string;
+    code: PluginLoadFailureCodeType;
+  }[]
+>(() => {
+  if (isLoadingPlugins.value) {
+    return [];
+  }
+
+  return pluginLoadResults.value.flatMap((result) =>
+    result.status === 'failed' && result.code
+      ? [{ moduleId: result.moduleId, code: result.code }]
+      : [],
+  );
 });
 
 mainMenuStore.loadFavorites();

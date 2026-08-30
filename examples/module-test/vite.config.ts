@@ -2,6 +2,7 @@ import type { Diagnostic } from 'typescript';
 import { builtinModules } from 'node:module';
 import { resolve } from 'node:path';
 import pkg from './package.json' with { type: 'json' };
+import { prostoAdminRuntime } from '@prosto/platform-admin-vite';
 import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
@@ -68,7 +69,9 @@ export default defineConfig(({ mode }) => {
         }),
         vuetify({
           autoImport: true,
+          styles: 'none',
         }),
+        prostoAdminRuntime(),
       ],
       resolve: {
         tsconfigPaths: true,
@@ -83,6 +86,14 @@ export default defineConfig(({ mode }) => {
           entry: resolve(import.meta.dirname, 'src/admin/admin.plugin.ts'),
           formats: ['es'],
           fileName: () => 'admin.plugin.js',
+        },
+        rolldownOptions: {
+          output: {
+            assetFileNames: (asset) =>
+              asset.names.some((name) => name.endsWith('.css'))
+                ? 'admin.plugin.css'
+                : '[name]-[hash][extname]',
+          },
         },
       },
     };

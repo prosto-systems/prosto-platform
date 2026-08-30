@@ -1,1 +1,1 @@
-export * from './blades.store.ts';
+export * from './blades.store';

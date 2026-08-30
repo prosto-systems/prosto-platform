@@ -48,7 +48,7 @@ cookie and is never written to Web Storage.
 | `POST` | `/auth/logout` | Session cookie and `X-CSRF-Token`. |
 | `POST` | `/auth/password-reset-requests` | Public; always returns the same accepted response. |
 | `POST` | `/auth/password-resets` | Public; accepts a one-time reset token and new password. |
-| `GET` | `/plugins` | `modules:view`, session cookie, and `X-CSRF-Token`. |
+| `GET` | `/platform/manifest` | `modules:view`, session cookie, and `X-CSRF-Token`; returns platform metadata and ordered admin plugin entries. |
 | `GET` | `/dashboard` | `dashboard:view`. |
 | `GET` | `/platform/health` | `health:view`. |
 | `GET` | `/modules` | `modules:view`. |
@@ -59,6 +59,91 @@ cookie and is never written to Web Storage.
 
 The `/api/admin` prefix is omitted from the table paths. In development, Vite
 proxies this namespace to `http://127.0.0.1:3001` unless MSW intercepts it.
+
+## Admin module runtime
+
+Admin plugin artifacts are native ESM files executed as trusted, first-party
+same-origin code. The runtime is a capability and API boundary, not a sandbox:
+module code can access everything normally available to same-origin JavaScript.
+Only plugin assets served from the shell origin under `/modules/` are accepted.
+
+The shell owns its Vue app and configured Vuetify, Vue I18n, Pinia, and Vue
+Router instances, including theme, locale, stable Vuetify components and
+directives, fonts, and all Vuetify CSS. Modules may import the shared package
+APIs, but must not create competing application-wide runtimes, reconfigure
+shell services, or import Vuetify styles. The runtime global exposes package
+namespaces only; it does not expose the app or configured service instances. A
+module owns only its feature CSS, whether scoped or global. If the admin build
+emits CSS, declare every emitted stylesheet as a `style` entry in the plugin
+manifest's `contentFiles`; the shell loads it before the ESM entry.
+
+### Build contract
+
+Build admin entries with `@prosto/platform-admin-vite`. Configure the plugins in
+this order after the standard Vue template asset transform:
+
+```ts
+import { prostoAdminRuntime } from '@prosto/platform-admin-vite';
+import vue from '@vitejs/plugin-vue';
+import { defineConfig } from 'vite';
+import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
+
+export default defineConfig({
+  plugins: [
+    vue({ template: { transformAssetUrls } }),
+    vuetify({ autoImport: true, styles: 'none' }),
+    prostoAdminRuntime(),
+  ],
+});
+```
+
+Runtime ABI v1 supports direct source imports only from:
+
+```ts
+import * as Vue from 'vue';
+import { useI18n } from 'vue-i18n';
+import { defineStore } from 'pinia';
+import { useRouter } from 'vue-router';
+import { useTheme } from 'vuetify';
+import { VBtn, VCard } from 'vuetify/components';
+import { Ripple } from 'vuetify/directives';
+```
+
+The build fails for `@vue/*`, deep imports from `vue-i18n`, `pinia`, and
+`vue-router`, dynamic imports of shared runtime packages, and all other
+Vuetify paths. In particular, do not import `vuetify/styles`, Vuetify CSS/Sass,
+`vuetify/labs/*`, `vuetify/locale/*`, `vuetify/components/*`, or
+`vuetify/directives/*`. These restrictions prevent a second Vue ecosystem
+runtime or shell-owned styling from being bundled into a module artifact.
+
+An ESM admin entry must export exactly one named registration callback. It must
+not register itself or discover shell globals when the module is imported:
+
+```ts
+import type { RegisterPluginCallbackType } from '@prosto/platform-sdk';
+
+export const registerAdminPlugin: RegisterPluginCallbackType = (context) => {
+  context.mainMenuService.addMenuItem({
+    path: 'example',
+    title: 'Example',
+    permission: 'modules:view',
+    action: async () => undefined,
+  });
+};
+```
+
+The manifest declares `runtimeApiVersion: 1`, a `script` entry, and optional
+module-owned `style` content files. The shell validates the runtime ABI before
+loading and invokes `registerAdminPlugin` only after the entry is imported and
+validated. Vue and Vuetify version strings are diagnostics only; an incompatible
+change to an exposed Vue ecosystem API requires an admin runtime ABI bump.
+
+### Current limitations
+
+This frontend slice does not implement production module discovery, static asset
+serving, cryptographic artifact integrity, or Content Security Policy headers.
+Those server-side controls are required before production deployment and are not
+provided by MSW or the runtime loader.
 
 ## Permissions
 

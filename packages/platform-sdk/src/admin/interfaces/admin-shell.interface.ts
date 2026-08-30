@@ -10,21 +10,7 @@ export type RegisterPluginCallbackType = (
 
 /**
  * @alpha
- * @example
- * (function(global) {
- *   const PLATFORM_MODULE_ID = 'test';
- *   const adminShell = global.__PROSTO_ADMIN_SHELL__;
- *
- *   if (!adminShell) {
- *     throw new ReferenceError(
- *       `Plugin ${PLATFORM_MODULE_ID}: 'adminShell' is not supported`,
- *     );
- *   }
- *
- *   adminShell.registerPlugin(PLATFORM_MODULE_ID, ({ moduleId }) => {
- *     console.log('moduleId', moduleId);
- *   });
- * })(globalThis);
+ * Registers an admin plugin after its ESM entry has been imported and validated.
  */
 export interface IAdminShell {
   plugins: readonly string[];
@@ -32,5 +18,5 @@ export interface IAdminShell {
   registerPlugin: (
     platformModuleId: string,
     callback: RegisterPluginCallbackType,
-  ) => this;
+  ) => Promise<this>;
 }
