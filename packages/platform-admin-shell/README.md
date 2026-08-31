@@ -2,7 +2,8 @@
 
 Responsive administration shell for Prosto Platform. It provides cookie-session
 authentication, permission-gated operational views, English/Russian localization,
-and persisted non-sensitive display preferences.
+persisted non-sensitive display preferences, and an alpha runtime for trusted
+first-party admin plugins.
 
 ## Requirements
 
@@ -48,7 +49,7 @@ cookie and is never written to Web Storage.
 | `POST` | `/auth/logout` | Session cookie and `X-CSRF-Token`. |
 | `POST` | `/auth/password-reset-requests` | Public; always returns the same accepted response. |
 | `POST` | `/auth/password-resets` | Public; accepts a one-time reset token and new password. |
-| `GET` | `/platform/manifest` | `modules:view`, session cookie, and `X-CSRF-Token`; returns platform metadata and ordered admin plugin entries. |
+| `GET` | `/platform/manifest` | Production backend: `modules:view`, session cookie, and `X-CSRF-Token`; returns platform metadata and ordered admin plugin entries. |
 | `GET` | `/dashboard` | `dashboard:view`. |
 | `GET` | `/platform/health` | `health:view`. |
 | `GET` | `/modules` | `modules:view`. |
@@ -59,6 +60,9 @@ cookie and is never written to Web Storage.
 
 The `/api/admin` prefix is omitted from the table paths. In development, Vite
 proxies this namespace to `http://127.0.0.1:3001` unless MSW intercepts it.
+Production backends must enforce `modules:view` for the manifest. The current
+MSW manifest handler validates the mock session and CSRF token but does not
+enforce that permission.
 
 ## Admin module runtime
 
@@ -116,27 +120,126 @@ Vuetify paths. In particular, do not import `vuetify/styles`, Vuetify CSS/Sass,
 `vuetify/directives/*`. These restrictions prevent a second Vue ecosystem
 runtime or shell-owned styling from being bundled into a module artifact.
 
-An ESM admin entry must export exactly one named registration callback. It must
-not register itself or discover shell globals when the module is imported:
+An ESM admin entry must export exactly one named registration callback. Plugin
+entries must register through the injected callback context, rather than
+discovering shell globals when imported. This is a required plugin convention,
+not a loader-side security sandbox:
 
 ```ts
-import type { RegisterPluginCallbackType } from '@prosto/platform-sdk';
+import type { IAdminShellPluginContext } from '@prosto/platform-sdk';
+import ExampleBlade from './example-blade.vue';
 
-export const registerAdminPlugin: RegisterPluginCallbackType = (context) => {
-  context.mainMenuService.addMenuItem({
-    path: 'example',
-    title: 'Example',
-    permission: 'modules:view',
-    action: async () => undefined,
+const WORKSPACE = 'example.workspace';
+
+export function registerAdminPlugin(context: IAdminShellPluginContext): void {
+  context.translationService.registerLocaleMessages({
+    en: { example: { title: 'Example' } },
+    ru: { example: { title: 'Example' } },
   });
-};
+
+  context.workspaceService.addWorkspace(WORKSPACE, {
+    url: '/example',
+    title: 'example.title',
+    onMounted: () => {
+      context.bladeService.showBlade({
+        id: 'example.main',
+        title: 'example.title',
+        component: ExampleBlade,
+      });
+    },
+  });
+
+  context.mainMenuService.addMenuItem({
+    path: 'browse/example',
+    title: 'example.title',
+    action: async () => {
+      await context.workspaceService.go(WORKSPACE);
+    },
+  });
+}
 ```
 
-The manifest declares `runtimeApiVersion: 1`, a `script` entry, and optional
-module-owned `style` content files. The shell validates the runtime ABI before
-loading and invokes `registerAdminPlugin` only after the entry is imported and
-validated. Vue and Vuetify version strings are diagnostics only; an incompatible
-change to an exposed Vue ecosystem API requires an admin runtime ABI bump.
+The manifest requires `runtimeApiVersion: 1`, a `script` entry, and a
+`contentFiles` array. Use an empty array when the module has no CSS; every item
+in `contentFiles` must be a module-owned `style` asset.
+
+```json
+{
+  "moduleId": "example",
+  "moduleVersion": "1.0.0",
+  "runtimeApiVersion": 1,
+  "entry": {
+    "type": "script",
+    "path": "/modules/example/admin.plugin.js",
+    "hash": "build-hash"
+  },
+  "contentFiles": [
+    {
+      "type": "style",
+      "path": "/modules/example/admin.plugin.css",
+      "hash": "build-hash"
+    }
+  ]
+}
+```
+
+The shell accepts only same-origin asset URLs under `/modules/`. An optional
+`hash` is appended only as the `v` cache-busting query parameter. Styles load
+before the ESM entry. The shell validates the runtime ABI, imports and validates
+the entry, then invokes `registerAdminPlugin`. Vue and Vuetify version strings
+are diagnostics only; an incompatible change to an exposed Vue ecosystem API
+requires an admin runtime ABI bump.
+
+### Plugin registration services
+
+The registration context is an `@alpha` SDK API. It contains `authService`,
+`translationService`, `workspaceService`, `mainMenuService`, `bladeService`, and
+`bladeToolbarService`, as well as the plugin's `moduleId`.
+
+#### Translations
+
+`translationService.registerLocaleMessages()` merges message maps into the
+shell's Vue I18n instance. Supply both supported locales, `en` and `ru`, and
+prefix keys with the module ID to avoid collisions.
+
+```ts
+translationService.registerLocaleMessages({
+  en: { example: { save: 'Save' } },
+  ru: { example: { save: 'Save' } },
+});
+```
+
+#### Menus and workspaces
+
+`mainMenuService` accepts paths beginning with `browse/` or `configuration/`.
+The shell categorizes them by that prefix, hides items that the current
+principal cannot access, and sorts by ascending priority. Users' menu favorites
+are stored per principal in browser storage.
+
+`workspaceService.addWorkspace()` adds an authenticated child route below
+`/workspace`. For example, `url: '/example'` creates `/workspace/example`.
+The optional `onMounted` and `onUnmounted` callbacks are workspace lifecycle
+hooks. Menu actions normally navigate with `workspaceService.go(workspaceName)`.
+
+#### Blades and toolbar commands
+
+The default workspace page is a blade container. Blades are scoped to the
+active workspace and are cleared when it is left. `bladeService.showBlade()`
+applies defaults, replaces a matching blade, and accepts an optional parent
+blade for nested navigation. A blade component can call `useBladeScope()` from
+`@prosto/platform-sdk` to access its reactive blade and the service facades.
+
+`bladeToolbarService.register()`, `tryRegister()`, and `override()` add commands
+for a blade ID. Toolbar commands are permission-filtered and sorted by priority;
+their names and optional titles may be translation keys.
+
+### Plugin loading behavior
+
+The shell loads the ordered manifest entries after authentication on the first
+authenticated route transition. Loading remains in manifest order. A failure in
+one plugin does not prevent later plugins from loading: the shell displays a
+dismissible alert naming the affected module and writes the detailed cause to
+`console.error`.
 
 ### Current limitations
 
@@ -176,6 +279,10 @@ VITE_ENABLE_MSW=true
 Then run the `dev` script. Omit the variable or set it to `false` to use the Vite
 proxy and a backend instead. The committed worker is
 `public/mockServiceWorker.js`; do not enable MSW in deployed environments.
+
+Only the development mock persists its simulated session backing store in
+`localStorage` under `prosto.admin.msw.sessions.v1`. Production shell code does
+not persist the real session or CSRF token.
 
 The mock login panel is compiled only for development with MSW enabled. It can
 fill the three demonstration accounts and expose a deterministic password-reset

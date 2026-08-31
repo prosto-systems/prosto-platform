@@ -26,7 +26,7 @@ All detailed rules are in `.agents/rules/` directory:
 - **Micro-core architecture**: minimal platform core, expansion through plug-in modules
 - **Contract-first**: define types in `platform-sdk` BEFORE implementing in `platform-core`
 - **Package boundaries**: `platform-core` MUST NOT import from adapters or modules; modules MUST NOT import from other modules
-- **Current vs Target state**: docs describe target architecture, not implemented code
+- **Repository authority**: source code and package manifests define current behavior; architecture documentation defines constraints for future changes
 
 ### Code Style
 - **TypeScript strict mode** with ESM (`"type": "module"`, `.js` extensions in relative imports)
@@ -43,9 +43,14 @@ All detailed rules are in `.agents/rules/` directory:
 - **Zod validation** at all boundaries
 - **Secret redaction** from logs (Pino `redact` config)
 - **MSW 2** is available in `platform-admin-shell` for opt-in browser development mocks and Vitest integration mocks; it is not a production backend
+- **Admin plugins** are trusted first-party ESM code. The admin runtime is an API boundary, not a sandbox.
+
+### Admin Integration
+- The `@alpha` admin plugin registration context provides auth, translation, workspace, main-menu, blade, and blade-toolbar services.
+- Follow `packages/platform-admin-shell/README.md` for the admin plugin manifest, shared-runtime imports, and workspace lifecycle contract.
 
 ### Testing
-- **Vitest** as test runner (`turbo test`, `turbo test:contracts`)
+- **Vitest** as test runner (`npm run test`, `npm run test:contracts`)
 - **Contract tests** mandatory for all modules before integration
 - **AAA pattern**: Arrange, Act, Assert
 
@@ -114,13 +119,16 @@ When guidance conflicts, use this precedence order:
 
 ### Common Commands
 ```bash
-turbo build          # Build all packages with dependency ordering
-turbo dev            # Start dev mode in all packages
-turbo test           # Run tests across all packages
-turbo typecheck      # Type check all packages
-turbo test --filter=@prosto/platform-admin-vite # Test the admin runtime Vite integration
-turbo build --filter=@prosto/platform-admin-vite # Build the admin runtime Vite integration
-turbo typecheck --filter=@prosto/platform-admin-vite # Type check the admin runtime Vite integration
+npm run build          # Build all packages with dependency ordering
+npm run dev            # Start available workspace development tasks
+npm run test           # Run tests across workspaces
+npm run test:contracts # Run workspaces that provide contract tests
+npm run typecheck      # Type-check workspaces
+npm run lint           # Run ESLint
+npm run format         # Check formatting with Prettier
+npm run test --workspace=@prosto/platform-admin-vite      # Test admin runtime Vite integration
+npm run build --workspace=@prosto/platform-admin-vite     # Build admin runtime Vite integration
+npm run typecheck --workspace=@prosto/platform-admin-vite # Type-check admin runtime Vite integration
 ```
 
 ## Additional Resources
@@ -132,5 +140,5 @@ turbo typecheck --filter=@prosto/platform-admin-vite # Type check the admin runt
 
 ---
 
-**Last Updated**: 2026-08-23
-**Version**: 1.1.0
+**Last Updated**: 2026-08-31
+**Version**: 1.2.0
