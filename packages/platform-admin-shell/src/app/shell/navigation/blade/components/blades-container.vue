@@ -1,6 +1,11 @@
 <template>
   <div class="blade-container">
-    <blade-item v-for="blade in blades" :key="blade.id" :blade="blade" />
+    <blade-item
+      v-for="blade in blades"
+      :id="blade.id"
+      :key="blade.id"
+      :blade="blade"
+    />
   </div>
 </template>
 

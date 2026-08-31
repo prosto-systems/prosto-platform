@@ -1,4 +1,4 @@
-import type { IAdminShell } from '@prosto/platform-sdk';
+import type { IAdminShell } from '../interfaces/index.js';
 import { ADMIN_SHELL_GLOBAL } from '../constants/index.js';
 
 export function useAdminShell(): IAdminShell {
@@ -6,7 +6,7 @@ export function useAdminShell(): IAdminShell {
 
   if (!adminShell) {
     throw new ReferenceError(
-      `[AdminShell::useAdminShell] "${ADMIN_SHELL_GLOBAL}" is not supported`,
+      `[PlatformSDK::useAdminShell] "${ADMIN_SHELL_GLOBAL}" is not supported`,
     );
   }
 

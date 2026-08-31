@@ -125,4 +125,10 @@ export const enMessages = {
     useAccount: 'Use {role}',
     resetLink: 'Open deterministic reset link',
   },
+  shell: {
+    commands: {
+      more: 'More',
+      less: 'Less',
+    },
+  },
 } as const;

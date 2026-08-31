@@ -1,6 +1,8 @@
 export type * from './admin-shell.interface.js';
 export type * from './admin-shell-auth-service.interface.js';
+export type * from './admin-shell-blade-scope.interface.js';
 export type * from './admin-shell-blade-service.interface.js';
+export type * from './admin-shell-blade-toolbar-service.interface.js';
 export type * from './admin-shell-context.interface.js';
 export type * from './admin-shell-main-menu-service.interface.js';
 export type * from './admin-shell-plugin-info.interface.js';

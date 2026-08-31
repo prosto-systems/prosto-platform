@@ -6,6 +6,7 @@ import type {
 import {
   createAuthService,
   createBladeService,
+  createBladeToolbarService,
   createMainMenuService,
   createWorkspaceService,
 } from './utils';
@@ -46,6 +47,7 @@ export class AdminShell implements IAdminShell {
       workspaceService: createWorkspaceService(this.#pinia),
       mainMenuService: createMainMenuService(this.#pinia),
       bladeService: createBladeService(this.#pinia),
+      bladeToolbarService: createBladeToolbarService(this.#pinia),
     });
 
     this.#plugins.add(platformModuleId);

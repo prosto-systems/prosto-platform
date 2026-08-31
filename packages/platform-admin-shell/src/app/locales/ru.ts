@@ -133,4 +133,10 @@ export const ruMessages: ApplicationMessagesType = {
     useAccount: 'Использовать: {role}',
     resetLink: 'Открыть детерминированную ссылку сброса',
   },
+  shell: {
+    commands: {
+      more: 'Больше',
+      less: 'Меньше',
+    },
+  },
 };

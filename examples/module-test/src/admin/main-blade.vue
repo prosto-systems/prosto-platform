@@ -13,29 +13,71 @@
 </template>
 
 <script setup lang="ts">
-import { bladeScopeToken, type IAdminShellBlade } from '@prosto/platform-sdk';
+import { type IAdminShellBlade, useBladeScope } from '@prosto/platform-sdk';
 import { defineStore } from 'pinia';
-import { computed, inject, shallowReactive } from 'vue';
+import { computed, shallowReactive, shallowRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useTheme } from 'vuetify';
-import { VBtn, VCard, VCardText, VCardTitle } from 'vuetify/components';
+import SecondBlade from './second-blade.vue';
+
+interface IEmits {
+  close: [];
+}
+
+const emit = defineEmits<IEmits>();
 
 const useModuleTestStore = defineStore('module-test-blade', {
   state: () => ({ isReady: true }),
 });
 
-const scope = inject(bladeScopeToken)!;
+const scope = useBladeScope();
+const theme = useTheme();
+const route = useRoute();
+const { locale } = useI18n();
+const store = useModuleTestStore();
 
 const blade = shallowReactive<IAdminShellBlade>(scope.blade);
-const { locale } = useI18n();
-const route = useRoute();
-const store = useModuleTestStore();
-const theme = useTheme();
+const flag = shallowRef(true);
 
 const themeLabel = computed(() =>
   theme.global.current.value.dark ? 'dark' : 'light',
 );
+
+blade.toolbarCommands = [
+  {
+    name: 'Back',
+    title: 'Tooltip',
+    icon: 'mdi-arrow-left',
+    showSeparator: true,
+    action: () => {
+      emit('close');
+    },
+  },
+  {
+    name: 'Refresh',
+    title: 'Tooltip',
+    icon: 'mdi-refresh',
+    action: () => {
+      flag.value = !flag.value;
+    },
+  },
+  {
+    name: 'Add',
+    title: 'Tooltip',
+    icon: 'mdi-plus',
+    action: () => addBlade(),
+  },
+  {
+    name: 'Remove',
+    title: 'Tooltip',
+    icon: 'mdi-delete-outline',
+    isDisabled: () => flag.value,
+    action: () => {
+      blade.size = 'large';
+    },
+  },
+];
 
 blade.isLoading = false;
 
@@ -44,9 +86,8 @@ function addBlade() {
     {
       id: `blade.${blade.id}.child`,
       title: `Blade title ${blade.id}`,
-      component: {
-        template: '<div>child</div>',
-      },
+      size: 'large',
+      component: SecondBlade,
     },
     blade,
   );
