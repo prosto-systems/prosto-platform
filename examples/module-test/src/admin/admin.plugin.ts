@@ -1,25 +1,30 @@
+import type { IAdminShellPluginContext } from '@prosto/platform-sdk';
 import { id } from '../../manifest.json';
-import type { RegisterPluginCallbackType } from '@prosto/platform-sdk';
+import { messages } from './locales';
 import MainBlade from './main-blade.vue';
 
-export const registerAdminPlugin: RegisterPluginCallbackType = ({
+export function registerAdminPlugin({
+  translationService,
   workspaceService,
   mainMenuService,
   bladeService,
-}) => {
+}: IAdminShellPluginContext) {
   const PLATFORM_MODULE_ID = id;
-  const workspace = `workspace.${PLATFORM_MODULE_ID}`;
+  const WORKSPACE = `workspace.${PLATFORM_MODULE_ID}`;
 
-  workspaceService.addWorkspace(workspace, {
+  translationService.registerLocaleMessages(messages);
+
+  workspaceService.addWorkspace(WORKSPACE, {
     url: '/test',
-    title: 'Test',
+    title: 'module_test.main_blade.title',
     permission: 'maintenance:manage',
     onMounted() {
       console.log(`Workspace ${PLATFORM_MODULE_ID} mounted`);
 
       bladeService.showBlade({
         id: `blade.${PLATFORM_MODULE_ID}.main`,
-        title: `Blade title ${PLATFORM_MODULE_ID}`,
+        title: 'module_test.main_blade.title',
+        subtitle: PLATFORM_MODULE_ID,
         isClosingDisabled: true,
         size: 'large',
         component: MainBlade,
@@ -30,7 +35,7 @@ export const registerAdminPlugin: RegisterPluginCallbackType = ({
     },
   });
 
-  workspaceService.addWorkspace(workspace + '2', {
+  workspaceService.addWorkspace(WORKSPACE + '2', {
     url: '/test2',
     title: 'Test',
     permission: 'maintenance:manage',
@@ -44,10 +49,10 @@ export const registerAdminPlugin: RegisterPluginCallbackType = ({
 
   mainMenuService.addMenuItem({
     path: `browse/${PLATFORM_MODULE_ID}`,
-    title: 'Test',
+    title: 'module_test.main_blade.title',
     permission: 'maintenance:manage',
     action: async () => {
-      await workspaceService.go(workspace);
+      await workspaceService.go(WORKSPACE);
     },
   });
 
@@ -56,9 +61,9 @@ export const registerAdminPlugin: RegisterPluginCallbackType = ({
     title: 'Test2',
     permission: 'maintenance:manage',
     action: async () => {
-      await workspaceService.go(workspace + '2');
+      await workspaceService.go(WORKSPACE + '2');
     },
   });
 
   console.debug(`Plugin ${PLATFORM_MODULE_ID} registered`);
-};
+}

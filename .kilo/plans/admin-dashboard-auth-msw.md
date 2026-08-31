@@ -16,7 +16,7 @@
 ### Public plugin contract
 
 - In `packages/platform-sdk/src/admin/interfaces`, add an `@alpha` `AdminShellPermissionType` (open namespaced string) and `IAdminShellAuthService` with `can(permission): boolean`.
-- Add readonly `authorization: IAdminAuthorization` to `IAdminShellContext`; keep `moduleId` readonly. Add required JSDoc/stability tags to every touched public admin export and re-export the new contract through the existing barrels.
+- Add readonly `authorization: IAdminAuthorization` to `IAdminShellPluginContext`; keep `moduleId` readonly. Add required JSDoc/stability tags to every touched public admin export and re-export the new contract through the existing barrels.
 - Correct the existing `admin-shell-context.inteface.ts` filename typo while updating barrel/internal imports; package-root imports remain the supported public path.
 - Implement a minimal shell-side `IAdminShell` runtime that assigns `globalThis.adminShell` and supplies a live `can()` adapter backed by the auth store. `can()` returns `false` when signed out and reads current permissions on every call. Plugin asset discovery/loading and reactive identity events remain out of scope.
 
@@ -101,7 +101,7 @@ The frontend gates routes, navigation, sections, and controls, but MSW independe
 
 ## Validation
 
-- SDK type tests prove `IAdminShellContext.authorization.can()` accepts namespaced permissions, remains framework-neutral, and is exported from `@prosto/platform-sdk`.
+- SDK type tests prove `IAdminShellPluginContext.authorization.can()` accepts namespaced permissions, remains framework-neutral, and is exported from `@prosto/platform-sdk`.
 - Unit tests cover permission lookup, auth state transitions, response validation, safe return URLs, theme/locale persistence, and the shell authorization adapter (including signed-out behavior).
 - MSW-backed integration tests cover login for all three roles, invalid credentials, session restore/expiry, CSRF rejection, logout, neutral forgot-password response, reset success, invalid/expired/reused token, and login with the changed mock password.
 - Router/component tests cover guest/auth redirects, forbidden routes, action visibility for each role, server-side `403`, dashboard loading/partial failure/retry/empty states, maintenance toggle, module restart, locale switching, and mobile drawer behavior.

@@ -1,9 +1,6 @@
-import { ru as vuetifyRu } from 'vuetify/locale';
+import type { LocalizedMessageType } from '@prosto/platform-sdk';
 import type { enMessages } from './en';
-
-type LocalizedMessageType<T> = T extends string
-  ? string
-  : { [K in keyof T]: LocalizedMessageType<T[K]> };
+import { ru as vuetifyRu } from 'vuetify/locale';
 
 type ApplicationMessagesType = LocalizedMessageType<typeof enMessages>;
 
@@ -135,6 +132,11 @@ export const ruMessages: ApplicationMessagesType = {
   },
   shell: {
     commands: {
+      back: 'Назад',
+      refresh: 'Обновить',
+      add: 'Добавить',
+      remove: 'Удалить',
+      save: 'Сохранить',
       more: 'Больше',
       less: 'Меньше',
     },

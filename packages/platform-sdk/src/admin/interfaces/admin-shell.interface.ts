@@ -1,11 +1,11 @@
-import type { IAdminShellContext } from './admin-shell-context.interface.js';
+import type { IAdminShellPluginContext } from './admin-shell-plugin-context.interface.js';
 
 /**
  * @alpha
  * Callback invoked when a platform module registers an admin shell plugin.
  */
 export type RegisterPluginCallbackType = (
-  ctx: IAdminShellContext,
+  ctx: IAdminShellPluginContext,
 ) => void | Promise<void>;
 
 /**
