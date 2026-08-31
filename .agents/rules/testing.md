@@ -23,11 +23,14 @@
 ### Common Commands
 
 ```bash
-turbo test                                    # Run all tests across packages
-turbo test --filter=@prosto/platform-sdk      # Run tests in specific package
-turbo test:unit                               # Run unit tests only
-turbo test:contracts                          # Run contract conformance tests
+npm run test                                  # Run tests across workspaces
+npm run test --workspace=@prosto/platform-sdk # Run SDK tests
+npm run test:contracts                        # Run workspaces that expose contract tests
 ```
+
+There is no root-level unit-test-only script. Use a package's `test:unit`
+script where it exists, such as `@prosto/platform-sdk` or
+`@prosto/platform-admin-shell`.
 
 ## Test Structure
 
@@ -95,7 +98,7 @@ describe('HealthModule contract', () => {
 **All modules MUST pass contract tests before integration:**
 
 ```bash
-turbo test:contracts
+npm run test:contracts
 ```
 
 ## Test Data

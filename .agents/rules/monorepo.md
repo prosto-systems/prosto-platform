@@ -101,16 +101,10 @@ import { UserService } from './services/user.service';
 
 ### Dependency Validation
 
-```bash
-# Validate dependency boundaries
-npm run validate:dependency-policy
-
-# Check for circular dependencies
-npm run lint:architecture
-
-# Validate public API boundary
-npm run validate:public-api-boundary
-```
+No dedicated dependency-policy, architecture-lint, or public-API-boundary
+script exists at the repository root. Validate the implemented checks with
+`npm run lint`, `npm run typecheck`, and the relevant package tests; review
+package manifests and imports when changing a package boundary.
 
 ### Adding New Dependencies
 
@@ -148,17 +142,17 @@ The project uses Turborepo for monorepo task orchestration.
 - `build` - Builds publishable packages with Vite 8 and emits declarations via `vite-plugin-dts` (depends on `^build` for dependency order)
 - `typecheck` - Type checking (depends on `^build`)
 - `test` - Runs test suites (depends on `^build`)
-- `test:types`, `test:unit`, `test:contracts` - Specific test types
-- `lint` / `lint:fix` - ESLint checks (runs in parallel)
+- `test:contracts` - Runs workspaces that provide this task (depends on `^build`)
+- `lint` / `lint:fix` / `format` / `format:fix` - Linting and formatting tasks
 - `dev` - Development mode (no cache, persistent)
 
 **Common Commands**:
 ```bash
-turbo build                                 # Build all packages with dependency ordering
-turbo test                                  # Run tests across all packages
-turbo typecheck                             # Type check all packages
-turbo dev                                   # Start dev mode in all packages
-turbo build --filter=@prosto/platform-sdk   # Build specific package
+npm run build                                 # Build all packages with dependency ordering
+npm run test                                  # Run tests across workspaces
+npm run typecheck                             # Type-check workspaces
+npm run dev                                   # Start available workspace development tasks
+npm run build --workspace=@prosto/platform-sdk # Build the SDK package
 ```
 
 ---
@@ -183,8 +177,8 @@ modules (depend on sdk, other modules)
 1. `platform-sdk` - must build first (contract authority)
 2. `platform-core` - depends on SDK
 3. `platform-contract-tests` - depends on SDK
-4. `platform-adapter-*` - depends on SDK and core
-5. Example modules - depend on SDK and other example modules
+4. `platform-adapter-*` - depends on SDK
+5. Admin shell, admin Vite integration, and example modules - depend on SDK as declared in their package manifests
 
 ---
 
