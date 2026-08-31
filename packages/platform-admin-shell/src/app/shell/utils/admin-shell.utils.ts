@@ -1,12 +1,14 @@
 import type {
   IAdminShellAuthService,
   IAdminShellBladeService,
+  IAdminShellBladeToolbarService,
   IAdminShellMainMenuService,
   IAdminShellWorkspaceService,
 } from '@prosto/platform-sdk';
 import {
   useBladesStore,
   useMainMenuStore,
+  useToolbarsStore,
   useWorkspacesStore,
 } from '@/app/shell';
 import { useAuthStore } from '@/features/auth';
@@ -51,5 +53,17 @@ export function createBladeService(pinia = Pinia): IAdminShellBladeService {
     findBlade: bladesStore.findBlade,
     showBlade: bladesStore.showBlade,
     closeBlade: bladesStore.closeBlade,
+  };
+}
+
+export function createBladeToolbarService(
+  pinia = Pinia,
+): IAdminShellBladeToolbarService {
+  const toolbarsStore = useToolbarsStore(pinia);
+
+  return {
+    register: toolbarsStore.register,
+    tryRegister: toolbarsStore.tryRegister,
+    override: toolbarsStore.override,
   };
 }

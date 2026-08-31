@@ -1,17 +1,19 @@
 import type { Component, ComputedRef } from 'vue';
+import type { IAdminShellBladeToolbarItem } from './admin-shell-blade-toolbar-service.interface.js';
 
 export interface IAdminShellBlade {
   readonly id: string;
   component: Component;
   headIcon?: string;
   title?: string;
+  subtitle?: string;
   navigationGroup?: string;
   /** @default true */
   isLoading?: boolean;
   /** @default false */
   isMaximized?: boolean;
   /** @default false */
-  isMaximizeDisabled?: boolean;
+  isMaximizedDisabled?: boolean;
   /** @default false */
   isClosingDisabled?: boolean;
   /** @default 'base' */
@@ -21,6 +23,8 @@ export interface IAdminShellBlade {
   errorBody?: string;
   parentBlade?: IAdminShellBlade;
   childrenBlades?: IAdminShellBlade[];
+  toolbarCommands?: IAdminShellBladeToolbarItem[];
+  refresh?: () => void;
   onClose?: (doCloseBlade: () => void) => void;
 }
 

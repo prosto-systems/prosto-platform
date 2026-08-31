@@ -127,6 +127,7 @@ export const useBladesStore = defineStore('blades', {
       parentBlade?: IAdminShellBlade,
     ): Promise<void> {
       newBlade.childrenBlades = [];
+      newBlade.toolbarCommands ??= [];
       newBlade.isLoading ??= true;
       newBlade.title ??= parentBlade?.title;
       newBlade.headIcon ??= parentBlade?.headIcon || 'mdi-cube-outline';

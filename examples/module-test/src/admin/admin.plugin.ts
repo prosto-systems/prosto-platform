@@ -21,6 +21,7 @@ export const registerAdminPlugin: RegisterPluginCallbackType = ({
         id: `blade.${PLATFORM_MODULE_ID}.main`,
         title: `Blade title ${PLATFORM_MODULE_ID}`,
         isClosingDisabled: true,
+        size: 'large',
         component: MainBlade,
       });
     },
