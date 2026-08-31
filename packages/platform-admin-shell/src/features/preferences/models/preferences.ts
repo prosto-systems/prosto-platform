@@ -1,15 +1,17 @@
 import { z } from 'zod';
+import {
+  supportedLocales,
+  type SupportedLocaleType,
+} from '@prosto/platform-sdk';
 
-export const LOCALES = ['en', 'ru'] as const;
 export const THEME_PREFERENCES = ['light', 'dark', 'system'] as const;
 
-export type ApplicationLocaleType = (typeof LOCALES)[number];
 export type ThemePreferenceType = (typeof THEME_PREFERENCES)[number];
 
-export const DEFAULT_LOCALE: ApplicationLocaleType = 'en';
+export const DEFAULT_LOCALE: SupportedLocaleType = 'en';
 export const DEFAULT_THEME_PREFERENCE: ThemePreferenceType = 'system';
 
-const localeSchema = z.enum(LOCALES);
+const localeSchema = z.enum(supportedLocales);
 const themePreferenceSchema = z.enum(THEME_PREFERENCES);
 
 const LOCALE_STORAGE_KEY = 'prosto.admin.locale';
@@ -31,7 +33,7 @@ function persistPreference(key: string, value: string): void {
   }
 }
 
-export function readPersistedLocale(): ApplicationLocaleType {
+export function readPersistedLocale(): SupportedLocaleType {
   return readPreference(LOCALE_STORAGE_KEY, localeSchema, DEFAULT_LOCALE);
 }
 
@@ -43,7 +45,7 @@ export function readPersistedThemePreference(): ThemePreferenceType {
   );
 }
 
-export function persistLocale(locale: ApplicationLocaleType): void {
+export function persistLocale(locale: SupportedLocaleType): void {
   persistPreference(LOCALE_STORAGE_KEY, locale);
 }
 

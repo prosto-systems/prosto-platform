@@ -1,3 +1,4 @@
+import type { SupportedLocaleType } from '@prosto/platform-sdk';
 import { defineStore } from 'pinia';
 import { shallowRef } from 'vue';
 import {
@@ -5,15 +6,14 @@ import {
   persistThemePreference,
   readPersistedLocale,
   readPersistedThemePreference,
-  type ApplicationLocaleType,
   type ThemePreferenceType,
 } from '../models';
 
 export const usePreferencesStore = defineStore('preferences', () => {
-  const locale = shallowRef<ApplicationLocaleType>(readPersistedLocale());
+  const locale = shallowRef<SupportedLocaleType>(readPersistedLocale());
   const theme = shallowRef<ThemePreferenceType>(readPersistedThemePreference());
 
-  function setLocale(nextLocale: ApplicationLocaleType): void {
+  function setLocale(nextLocale: SupportedLocaleType): void {
     locale.value = nextLocale;
     persistLocale(nextLocale);
   }

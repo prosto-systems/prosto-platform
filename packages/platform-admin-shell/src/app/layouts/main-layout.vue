@@ -43,7 +43,7 @@
         />
 
         <v-list-item
-          v-for="item in favoriteMenuItems"
+          v-for="item in translatedFavoriteMenuItems"
           :key="item.path"
           :title="item.title"
           :aria-label="item.title"
@@ -220,12 +220,12 @@
         temporary
       >
         <v-list density="compact" nav>
-          <v-list-subheader v-if="browseMenuItems.length">
+          <v-list-subheader v-if="translatedBrowseMenuItems.length">
             {{ t('navigation.browse') }}
           </v-list-subheader>
 
           <v-list-item
-            v-for="item in browseMenuItems"
+            v-for="item in translatedBrowseMenuItems"
             :key="item.path"
             :title="item.title"
             :aria-label="item.title"
@@ -276,12 +276,15 @@
             </template>
           </v-list-item>
 
-          <v-list-subheader v-if="configurationMenuItems.length" class="mt-2">
+          <v-list-subheader
+            v-if="translatedConfigurationMenuItems.length"
+            class="mt-2"
+          >
             {{ t('navigation.configuration') }}
           </v-list-subheader>
 
           <v-list-item
-            v-for="item in configurationMenuItems"
+            v-for="item in translatedConfigurationMenuItems"
             :key="item.path"
             :title="item.title"
             :aria-label="item.title"
@@ -359,7 +362,7 @@ import { useRouter } from 'vue-router';
 import { useDisplay, useTheme } from 'vuetify';
 import { useI18n } from 'vue-i18n';
 import { i18n } from '@/app/plugins';
-import { useMainMenuStore } from '@/app/shell';
+import { type IMainMenuItem, useMainMenuStore } from '@/app/shell';
 import { useAuthStore } from '@/features/auth';
 import {
   PluginLoadAlert,
@@ -389,6 +392,8 @@ const { locale, theme: themePreference } = storeToRefs(preferencesStore);
 const { favoriteMenuItems, browseMenuItems, configurationMenuItems } =
   storeToRefs(mainMenuStore);
 
+mainMenuStore.loadFavorites();
+
 const drawerOpen = shallowRef(true);
 const secondDrawerOpen = shallowRef(false);
 const isRail = shallowRef(false);
@@ -401,7 +406,7 @@ const localeActivator = useTemplateRef<IButtonActivator>('localeActivator');
 const themeActivator = useTemplateRef<IButtonActivator>('themeActivator');
 const accountActivator = useTemplateRef<IButtonActivator>('accountActivator');
 
-const pageTitle = computed(() => {
+const pageTitle = computed<string>(() => {
   const { title } = router.currentRoute.value.meta;
   return title ? (te(title) ? t(title) : title) : '';
 });
@@ -415,6 +420,27 @@ const principalRole = computed(() => {
 
   return role ? t(`account.roles.${role}`) : '';
 });
+
+const translatedFavoriteMenuItems = computed<IMainMenuItem[]>(() =>
+  favoriteMenuItems.value.map((item) => ({
+    ...item,
+    title: te(item.title) ? t(item.title) : item.title,
+  })),
+);
+
+const translatedBrowseMenuItems = computed<IMainMenuItem[]>(() =>
+  browseMenuItems.value.map((item) => ({
+    ...item,
+    title: te(item.title) ? t(item.title) : item.title,
+  })),
+);
+
+const translatedConfigurationMenuItems = computed<IMainMenuItem[]>(() =>
+  configurationMenuItems.value.map((item) => ({
+    ...item,
+    title: te(item.title) ? t(item.title) : item.title,
+  })),
+);
 
 const failedPluginLoads = computed<
   {
@@ -432,8 +458,6 @@ const failedPluginLoads = computed<
       : [],
   );
 });
-
-mainMenuStore.loadFavorites();
 
 function toggleNavigation(): void {
   if (mobile.value) {

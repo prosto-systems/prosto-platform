@@ -46,7 +46,7 @@ const themeLabel = computed(() =>
 
 blade.toolbarCommands = [
   {
-    name: 'Back',
+    name: 'shell.commands.back',
     title: 'Tooltip',
     icon: 'mdi-arrow-left',
     showSeparator: true,
@@ -55,7 +55,7 @@ blade.toolbarCommands = [
     },
   },
   {
-    name: 'Refresh',
+    name: 'shell.commands.refresh',
     title: 'Tooltip',
     icon: 'mdi-refresh',
     action: () => {
@@ -63,13 +63,13 @@ blade.toolbarCommands = [
     },
   },
   {
-    name: 'Add',
+    name: 'shell.commands.add',
     title: 'Tooltip',
     icon: 'mdi-plus',
     action: () => addBlade(),
   },
   {
-    name: 'Remove',
+    name: 'shell.commands.remove',
     title: 'Tooltip',
     icon: 'mdi-delete-outline',
     isDisabled: () => flag.value,
@@ -84,7 +84,7 @@ blade.isLoading = false;
 function addBlade() {
   scope.bladeService.showBlade(
     {
-      id: `blade.${blade.id}.child`,
+      id: `${blade.id}.child`,
       title: `Blade title ${blade.id}`,
       size: 'large',
       component: SecondBlade,

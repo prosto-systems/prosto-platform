@@ -26,7 +26,9 @@
 
     <header class="blade__header bg-blue-grey-darken-2 pa-2">
       <v-icon :icon="blade.headIcon" size="large" />
-      <h1 class="blade__title text-title-small ms-2 my-0">{{ blade.title }}</h1>
+      <h1 class="blade__title text-title-small ms-2 my-0">
+        {{ bladeTitle }}
+      </h1>
     </header>
 
     <div class="blade__toolbar bg-blue-grey-darken-2 px-0">
@@ -144,7 +146,7 @@ interface IProps {
 const props = defineProps<IProps>();
 
 const theme = useTheme();
-const { t } = useI18n();
+const { t, te, locale } = useI18n();
 
 const bladesStore = useBladesStore();
 const toolbarsStore = useToolbarsStore();
@@ -178,16 +180,30 @@ const classes = computed<string>(() =>
   ]),
 );
 
+const bladeTitle = computed(() =>
+  proxiedBlade.title && te(proxiedBlade.title)
+    ? t(proxiedBlade.title)
+    : proxiedBlade.title,
+);
+
 const toolbarItems = computed<IAdminShellBladeToolbarItem[]>(() =>
   toolbarsStore.toolbarItems(proxiedBlade),
 );
 
 const firstToolbarItems = computed<IAdminShellBladeToolbarItem[]>(() =>
-  toolbarItems.value.slice(0, toolbarPerLineCount.value),
+  toolbarItems.value.slice(0, toolbarPerLineCount.value).map((item) => ({
+    ...item,
+    name: te(item.name) ? t(item.name) : item.name,
+    title: item.title && te(item.title) ? t(item.title) : item.title,
+  })),
 );
 
 const secondToolbarItems = computed<IAdminShellBladeToolbarItem[]>(() =>
-  toolbarItems.value.slice(toolbarPerLineCount.value),
+  toolbarItems.value.slice(toolbarPerLineCount.value).map((item) => ({
+    ...item,
+    name: te(item.name) ? t(item.name) : item.name,
+    title: item.title && te(item.title) ? t(item.title) : item.title,
+  })),
 );
 
 function close() {
@@ -236,9 +252,9 @@ function setVisibleMoreTools(): void {
 
         while (
           i < buttons.length &&
-          toolsWidth + buttons[i].clientWidth <= maxToolbarWidth
+          toolsWidth + (buttons[i]?.clientWidth ?? 0) <= maxToolbarWidth
         ) {
-          toolsWidth += buttons[i].clientWidth;
+          toolsWidth += buttons[i]?.clientWidth ?? 0;
           i++;
         }
 
@@ -282,7 +298,12 @@ watch(isMaximized, async () => {
 });
 
 watch(
-  [() => proxiedBlade.size, () => proxiedBlade.toolbarCommands, isMaximized],
+  [
+    () => proxiedBlade.size,
+    () => proxiedBlade.toolbarCommands,
+    isMaximized,
+    locale,
+  ],
   () => setVisibleMoreTools(),
   {
     immediate: true,

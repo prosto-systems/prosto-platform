@@ -1,8 +1,10 @@
 import type { Pinia } from 'pinia';
 import type {
   IAdminShell,
+  IAdminShellTranslationService,
   RegisterPluginCallbackType,
 } from '@prosto/platform-sdk';
+import { registerLocaleMessages } from '@/app/plugins';
 import {
   createAuthService,
   createBladeService,
@@ -43,6 +45,7 @@ export class AdminShell implements IAdminShell {
 
     await callback({
       moduleId: platformModuleId,
+      translationService: this._createTranslationService(),
       authService: createAuthService(this.#pinia),
       workspaceService: createWorkspaceService(this.#pinia),
       mainMenuService: createMainMenuService(this.#pinia),
@@ -53,5 +56,11 @@ export class AdminShell implements IAdminShell {
     this.#plugins.add(platformModuleId);
 
     return this;
+  }
+
+  private _createTranslationService(): IAdminShellTranslationService {
+    return {
+      registerLocaleMessages: registerLocaleMessages,
+    };
   }
 }

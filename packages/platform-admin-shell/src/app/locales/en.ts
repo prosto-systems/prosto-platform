@@ -127,6 +127,11 @@ export const enMessages = {
   },
   shell: {
     commands: {
+      back: 'Back',
+      refresh: 'Refresh',
+      add: 'Add',
+      remove: 'Remove',
+      save: 'Save',
       more: 'More',
       less: 'Less',
     },
