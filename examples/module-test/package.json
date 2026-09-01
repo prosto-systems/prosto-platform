@@ -15,6 +15,7 @@
     "build": "npm run build:platform && npm run build:admin",
     "build:platform": "vite build --mode platform",
     "build:admin": "vite build --mode admin",
+    "test:contracts": "vitest run",
     "pack": "npm run build && node scripts/create-artifact.mjs"
   },
   "dependencies": {

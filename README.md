@@ -20,11 +20,11 @@ for the implemented admin contract and its limits.
 | --- | --- |
 | `packages/platform-sdk` | Public contracts, validation schemas, and admin runtime types. |
 | `packages/platform-core` | Minimal runtime kernel, configuration, module loading, events, logging, caching, and services. |
-| `packages/platform-contract-tests` | Reusable contract-conformance package for modules. |
 | `packages/platform-cli` | CLI scaffolding and validation package. |
+| `packages/platform-admin-shell` | Vue, Vuetify, Pinia, and Vue I18n administration shell. |
 | `packages/platform-adapters/platform-adapter-typeorm` | TypeORM persistence adapter. |
 | `packages/platform-utils/platform-admin-vite` | Vite transform for the shared admin Vue runtime. |
-| `packages/platform-admin-shell` | Vue, Vuetify, Pinia, and Vue I18n administration shell. |
+| `packages/platform-utils/platform-contract-tests` | Reusable module contract-conformance package. See its [README](packages/platform-utils/platform-contract-tests/README.md). |
 | `examples/module-test` | Example platform module and admin-plugin artifact. |
 
 ## Requirements

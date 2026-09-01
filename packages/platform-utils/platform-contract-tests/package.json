@@ -18,7 +18,7 @@
   "scripts": {
     "build": "vite build",
     "typecheck": "tsc -p tsconfig.package.json --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
   },
   "dependencies": {
     "@prosto/platform-sdk": "0.0.0"

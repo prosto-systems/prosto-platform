@@ -83,7 +83,7 @@ The platform provides reusable contract tests for module conformance:
 ```typescript
 // examples/module-health/tests/contracts.test.ts
 import { describe, it } from 'vitest';
-import { createModuleContractTests } from '@prosto/platform-contract-tests';
+import { createPlatformModuleContractTests } from '@prosto/platform-contract-tests';
 import manifest from '../manifest.json';
 import { PlatformModule } from '../src/platform/platform.module.js';
 

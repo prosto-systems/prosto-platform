@@ -24,7 +24,7 @@
 
 **`platform-sdk` MUST NOT:**
 - Depend on other platform runtime packages
-- Own full contract conformance test suites (that's `platform-contract-tests`)
+- Own full contract conformance test suites (that's `platform-utils/platform-contract-tests`)
 
 **Adapters MAY:**
 - Depend on `platform-sdk`
@@ -94,7 +94,7 @@ import { UserService } from './services/user.service';
 |---------|---------------|------------------|
 | `platform-sdk` | Minimal vetted external libs | Other PROSTO runtime packages |
 | `platform-core` | `platform-sdk`, vetted runtime libs | Adapters implementations, feature modules |
-| `platform-contract-tests` | `platform-sdk`, test framework | `platform-core`, adapters implementations |
+| `platform-utils/platform-contract-tests` | `platform-sdk`, test framework | `platform-core`, adapters implementations |
 | `platform-cli` | `platform-sdk`, CLI libs | `platform-core` runtime internals |
 | `platform-adapter-*` | `platform-sdk`, framework libs | Other adapters internals, feature modules |
 | `modules` | `platform-sdk`, approved third-party libs | `platform-core` internals, other modules internals |
@@ -131,7 +131,7 @@ package manifests and imports when changing a package boundary.
 
 - Adapter workspaces live in `packages/platform-adapters/platform-adapter-*/`.
 - Modules live in separate repositories.
-- Other platform workspaces remain direct children of `packages/`.
+- Shared utility workspaces live under `packages/platform-utils/`; other platform workspaces remain direct children of `packages/`.
 - Root workspace globs must include `packages/*`, `packages/*/*`, and `packages/*/*/*`.
 
 ### Turborepo Configuration
@@ -166,8 +166,8 @@ platform-sdk (base)
     ↓
 platform-core (depends on sdk)
     ↓
-platform-contract-tests (depends on sdk)
 platform-adapter-* (depend on sdk, core)
+platform-utils/platform-contract-tests (depends on sdk)
     ↓
 modules (depend on sdk, other modules)
 ```
@@ -176,7 +176,7 @@ modules (depend on sdk, other modules)
 
 1. `platform-sdk` - must build first (contract authority)
 2. `platform-core` - depends on SDK
-3. `platform-contract-tests` - depends on SDK
+3. `platform-utils/platform-contract-tests` - depends on SDK
 4. `platform-adapter-*` - depends on SDK
 5. Admin shell, admin Vite integration, and example modules - depend on SDK as declared in their package manifests
 
