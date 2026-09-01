@@ -18,9 +18,9 @@ import {
 export class ConfigurationBuilder<
   TSchema extends ZodTypeAny = ZodType<Record<string, unknown>>,
 > implements IConfigurationBuilder<TSchema> {
-  protected readonly _providers: IConfigurationProvider[] = [];
+  private readonly _providers: IConfigurationProvider[] = [];
 
-  constructor(protected readonly schema?: TSchema) {}
+  constructor(private readonly _schema?: TSchema) {}
 
   addInMemoryCollection(config: Record<string, unknown>): this {
     this._providers.push(new InMemoryConfigurationProvider(config));
@@ -55,8 +55,8 @@ export class ConfigurationBuilder<
 
     let merged = this._merge(sources);
 
-    if (this.schema) {
-      merged = this.schema.parse(merged) as Record<string, unknown>;
+    if (this._schema) {
+      merged = this._schema.parse(merged) as Record<string, unknown>;
     }
 
     return merged;
