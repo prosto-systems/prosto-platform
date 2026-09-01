@@ -7,10 +7,12 @@ on those contracts.
 
 ## Current status
 
-The repository contains the platform foundations and an alpha administration
-module runtime. It does not yet provide a production HTTP backend, production
-module discovery, module asset serving, artifact-integrity verification, or
-Content Security Policy configuration. See the
+The repository contains an alpha runtime kernel, a TypeORM persistence adapter,
+and an alpha administration module runtime. The runtime can load modules from
+memory, local paths, registries, and URLs, resolve their dependencies, execute
+their lifecycle, and expose startup and shutdown diagnostics. It does not yet
+provide a production HTTP application, admin module asset serving, or Content
+Security Policy configuration. See the
 [`@prosto/platform-admin-shell` README](packages/platform-admin-shell/README.md)
 for the implemented admin contract and its limits.
 
@@ -18,14 +20,16 @@ for the implemented admin contract and its limits.
 
 | Path | Purpose |
 | --- | --- |
-| `packages/platform-sdk` | Public contracts, validation schemas, and admin runtime types. |
-| `packages/platform-core` | Minimal runtime kernel, configuration, module loading, events, logging, caching, and services. |
-| `packages/platform-admin-shell` | Vue, Vuetify, Pinia, and Vue I18n administration shell. |
-| `packages/platform-adapters/platform-adapter-typeorm` | TypeORM persistence adapter. |
-| `packages/platform-utils/platform-admin-vite` | Vite transform for the shared admin Vue runtime. |
-| `packages/platform-utils/platform-cli` | CLI scaffolding and validation package. |
-| `packages/platform-utils/platform-contract-tests` | Reusable module contract-conformance package. See its [README](packages/platform-utils/platform-contract-tests/README.md). |
-| `examples/module-test` | Example platform module and admin-plugin artifact. |
+| `packages/platform-sdk` | [Public contracts, validation schemas, and admin runtime types.](packages/platform-sdk/README.md) |
+| `packages/platform-core` | [Runtime kernel, module loading, lifecycle orchestration, diagnostics, events, and services.](packages/platform-core/README.md) |
+| `packages/platform-admin-shell` | [Vue, Vuetify, Pinia, and Vue I18n administration shell.](packages/platform-admin-shell/README.md) |
+| `packages/platform-adapters/platform-adapter-typeorm` | [TypeORM persistence adapter.](packages/platform-adapters/platform-adapter-typeorm/README.md) |
+| `packages/platform-utils/platform-admin-vite` | [Vite transform for the shared admin Vue runtime.](packages/platform-utils/platform-admin-vite/README.md) |
+| `packages/platform-utils/platform-cli` | [CLI package scaffold.](packages/platform-utils/platform-cli/README.md) |
+| `packages/platform-utils/platform-contract-tests` | [Reusable module contract-conformance package.](packages/platform-utils/platform-contract-tests/README.md) |
+| `packages/platform-utils/tsconfig` | [Private shared strict TypeScript configuration.](packages/platform-utils/tsconfig/README.md) |
+| `examples/module-test` | [Example platform module and admin-plugin artifact.](examples/module-test/README.md) |
+| `examples/typeorm-shared-datasource` | [Runtime composition with a shared TypeORM DataSource.](examples/typeorm-shared-datasource/README.md) |
 
 ## Requirements
 
@@ -87,5 +91,6 @@ commands. Build admin artifacts with `@prosto/platform-admin-vite` so Vue,
 Vue I18n, Pinia, Vue Router, and Vuetify are consumed from the shell's shared
 runtime rather than bundled again.
 
-The example in `examples/module-test` demonstrates a module package, an admin
-plugin, localized messages, workspaces, menu entries, and blades.
+[`examples/module-test`](examples/module-test/README.md) demonstrates a module
+package, contract checks, artifact packaging, an admin plugin, localized
+messages, workspaces, menu entries, and blades.

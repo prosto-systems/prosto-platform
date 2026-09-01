@@ -1,29 +1,34 @@
 # Observability Rules
 
+## Current implementation
+
+`platform-core` provides `ConsoleModuleLogger` for module contexts. It redacts
+messages and context with `SecretsRedactor` before writing to the console; Pino
+is not a repository dependency. The core also produces structured startup and
+shutdown diagnostics. HTTP health/readiness endpoints and metrics export are
+not implemented core contracts.
+
 ## Structured Logging
 
-### Logger Configuration
+### Core module logger
 
-**Use Pino for all logging:**
+Use the logger supplied by `IPlatformModuleContext`; do not bypass its redaction
+by logging unredacted module configuration directly.
 
 ```typescript
-import pino from 'pino';
+import type { IPlatformModuleContext } from '@prosto/platform-sdk';
 
-const logger = pino({
-  level: process.env.LOG_LEVEL || 'info',
-  // Redact sensitive fields
-  redact: {
-    paths: ['*.password', '*.secret', '*.apiKey', '*.token', 'config.*'],
-    remove: true
-  },
-  // Include timestamp
-  timestamp: pino.stdTimeFunctions.isoTime
-});
+function logModuleStart(context: IPlatformModuleContext): void {
+  context.logger.info('Module lifecycle phase starting', {
+    phase: 'start',
+  });
+}
 ```
 
 ### Required Log Fields
 
-**ALL logs MUST include:**
+Add these fields where the calling context has them. The console logger adds a
+module prefix but does not synthesize all fields.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -54,7 +59,7 @@ logger.debug({ config, moduleId }, 'Module configuration loaded');
 class ModuleLifecycleOrchestrator {
   async executePhase(
     moduleEnvelope: IModuleEnvelope,
-    phase: LifecyclePhaseType,
+    phase: PlatformModuleLifecycleStageType,
     ctx: IPlatformModuleContext
   ): Promise<void> {
     const start = Date.now();
@@ -94,47 +99,22 @@ class ModuleLifecycleOrchestrator {
 
 ## Startup Report
 
-### Startup Diagnostics Contract
+### Implemented startup diagnostics
 
-**Startup report MUST include:**
+`IPlatformRuntime.reports.startup` is an `IRuntimeStartupReport`:
 
 ```typescript
-interface IStartupReport {
-  timestamp: string;
-  duration: number;
-  sdkVersion: string;
-  
-  modules: {
-    loaded: IModuleSummary[];
-    skipped: ISkippedModule[];
-    failed: IFailedModule[];
-  };
-  
-  health: {
-    status: 'healthy' | 'degraded' | 'unhealthy';
-    criticalModulesLoaded: boolean;
-    optionalModulesFailed: number;
-  };
-}
-
-interface IModuleSummary {
-  id: string;
-  version: string;
-  loadDuration: number;
-}
-
-interface ISkippedModule {
-  id: string;
-  reason: 'INCOMPATIBLE_VERSION' | 'OPTIONAL_DISABLED';
-  details?: string;
-}
-
-interface IFailedModule {
-  id: string;
-  phase: LifecyclePhaseType;
-  errorCode: string;
-  errorMessage: string;
-  remediationHint?: string;
+interface IRuntimeStartupReport {
+  type: 'startup';
+  status: RuntimeStartupStatus;
+  policyMode: PlatformStartupPolicyType;
+  correlationId: string;
+  startedAt: string;
+  completedAt: string;
+  degraded: boolean;
+  loadedModules: readonly IRuntimeLoadedModuleDiagnostic[];
+  skippedModules: readonly IRuntimeSkippedModuleDiagnostic[];
+  failedModules: readonly IRuntimeFailureDiagnostic[];
 }
 ```
 
@@ -171,7 +151,7 @@ interface IPlatformError {
   code: string;
   message: string;
   moduleId?: string;
-  phase?: LifecyclePhaseType;
+  phase?: PlatformModuleLifecycleStageType;
   remediationHint?: string;
   cause?: Error;
 }
@@ -180,7 +160,7 @@ class ModuleLoadError extends Error implements IPlatformError {
   constructor(
     public readonly code: string,
     public readonly moduleId: string,
-    public readonly phase?: LifecyclePhaseType,
+    public readonly phase?: PlatformModuleLifecycleStageType,
     public readonly remediationHint?: string,
     cause?: Error
   ) {
@@ -203,9 +183,10 @@ throw new ModuleLoadError(
 
 ## Health & Readiness
 
-### Health Check Endpoints
+### Recommended adapter endpoints
 
-**Provided by adapter layer:**
+The core does not expose health or readiness endpoints. An HTTP adapter may
+derive its response from runtime state and diagnostics using a contract such as:
 
 ```typescript
 interface IHealthResponse {
@@ -331,7 +312,7 @@ async function handleRequest(req: Request): Promise<Response> {
 ```typescript
 interface IStartupMetrics {
   totalDuration: number;
-  phaseDurations: Record<LifecyclePhaseType, number>;
+  phaseDurations: Record<PlatformModuleLifecycleStageType, number>;
   moduleDurations: Record<string, number>;
   dependencyResolutionTime: number;
 }
@@ -340,11 +321,11 @@ class MetricsCollector {
   private phaseTimings = new Map<string, number>();
   private moduleTimings = new Map<string, number>();
 
-  startPhase(phase: LifecyclePhaseType): void {
+  startPhase(phase: PlatformModuleLifecycleStageType): void {
     this.phaseTimings.set(phase, Date.now());
   }
 
-  endPhase(phase: LifecyclePhaseType): number {
+  endPhase(phase: PlatformModuleLifecycleStageType): number {
     const start = this.phaseTimings.get(phase);
     const duration = Date.now() - start!;
     this.metrics.phaseDurations[phase] = duration;
@@ -370,7 +351,7 @@ interface IPlatformModuleMetrics {
   lastLoadTime: string;
   lastError?: {
     code: string;
-    phase: LifecyclePhaseType;
+    phase: PlatformModuleLifecycleStageType;
     timestamp: string;
   };
 }

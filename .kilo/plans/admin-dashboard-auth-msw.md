@@ -1,5 +1,10 @@
 # Admin dashboard with authentication
 
+> **Status: historical.** This planning document predates the implemented SDK
+> context and platform manifest endpoint. Consult
+> `packages/platform-admin-shell/README.md` and the SDK admin interfaces for
+> the current runtime contract.
+
 ## Goal and fixed decisions
 
 - Replace the Vuetify starter in `packages/platform-admin-shell` with a responsive, feature-based admin dashboard.

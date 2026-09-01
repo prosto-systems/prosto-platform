@@ -15,12 +15,13 @@ interface IPlatformModuleManifest {
   id: string;
   version: string;
   sdkVersion: string;
-  
-  // Criticality for startup policy
-  optional: boolean;
-  
-  // Dependencies
-  dependencies: string[];
+  title: string;
+  optional?: boolean;
+  dependencies: Array<{
+    id: string;
+    version: string;
+    optional?: boolean;
+  }>;
 }
 ```
 
@@ -73,16 +74,15 @@ function handleCreateModule(req: Request): Module {
 ### Secret Redaction
 
 ```typescript
-// ✅ Good: Redact secrets from logs
-const logger = pino({
-  redact: {
-    paths: ['*.password', '*.secret', '*.apiKey', '*.token'],
-    remove: true
-  }
-});
+// ✅ Good: redact strings and structured context before logging
+import { SecretsRedactor } from '@prosto/platform-sdk';
+
+const redactor = new SecretsRedactor();
+const context = redactor.redactObject({ password, moduleId });
+console.info(redactor.redact('Module configuration loaded'), context);
 
 // ❌ Bad: Log sensitive data
-logger.info({ config }, 'Loading configuration'); // May expose secrets
+console.info({ config }, 'Loading configuration'); // May expose secrets
 ```
 
 ### Environment Variables
@@ -145,7 +145,7 @@ npm audit --audit-level=critical
 - Consider if dependency can be in consumer packages
 
 **For `platform-core`:**
-- No framework dependencies in kernel path
+- Keep framework-specific APIs out of the public core contract
 - Vet all dependencies for security
 - Track dependency licenses
 

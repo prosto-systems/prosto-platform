@@ -23,7 +23,7 @@
 
 ```typescript
 // ✅ Good: Organized imports with ESM (.js extensions for relative paths)
-import type { IModuleContext } from '@prosto/platform-sdk';
+import type { IPlatformModuleContext } from '@prosto/platform-sdk';
 import { UserService } from './services/user.service.js';
 import { Logger } from './utils/logger.js';
 import { Database } from './database.js';
@@ -34,7 +34,7 @@ export * from './services.js';
 export * from './utils.js';
 
 // ✅ Good: Named imports for better tree-shaking
-import { ServiceRegistry } from '@prosto/platform-core';
+import { InMemoryServiceRegistry } from '@prosto/platform-core';
 ```
 
 ### Import Organization Order
@@ -48,14 +48,17 @@ import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 
 // 3. Platform SDK (contract package)
-import { IPlatformModule, LifecyclePhaseType } from '@prosto/platform-sdk';
+import {
+  type IPlatformModule,
+  type PlatformModuleLifecycleStageType,
+} from '@prosto/platform-sdk';
 
 // 4. Platform core (runtime)
-import { ServiceRegistry } from '@prosto/platform-core';
+import { InMemoryServiceRegistry } from '@prosto/platform-core';
 
 // 5. Same-package imports (relative)
-import type { User } from '../types/user.types';
-import { UserService } from './services/user.service';
+import type { User } from '../types/user.types.js';
+import { UserService } from './services/user.service.js';
 ```
 
 ### Cross-Package Imports
@@ -63,7 +66,7 @@ import { UserService } from './services/user.service';
 ```typescript
 // ✅ Good: Using @prosto/* scoped imports for cross-package
 import { IPlatformModule } from '@prosto/platform-sdk';
-import { ModuleLifecycleOrchestrator } from '@prosto/platform-core';
+import { RuntimeBuilder } from '@prosto/platform-core';
 
 // ❌ Bad: Direct cross-package relative imports
 import { IPlatformModule } from '../../platform-sdk/src/platform/interfaces';

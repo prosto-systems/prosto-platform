@@ -17,6 +17,9 @@
 - Own vendor integrations
 - Own feature domain logic
 
+The public core API has no HTTP contract. Its `src/main.ts` currently contains
+a Fastify development demonstration and is not a framework API for consumers.
+
 **`platform-sdk` MUST:**
 - Keep external runtime dependencies minimal and justified
 - Prefer TypeScript and platform-native APIs
@@ -74,10 +77,13 @@ import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 
 // 3. Platform SDK (contract package)
-import { PlatformModule, LifecyclePhaseType } from '@prosto/platform-sdk';
+import {
+  type IPlatformModule,
+  type PlatformModuleLifecycleStageType,
+} from '@prosto/platform-sdk';
 
 // 4. Platform core (runtime)
-import { ServiceRegistry } from '@prosto/platform-core';
+import { InMemoryServiceRegistry } from '@prosto/platform-core';
 
 // 5. Same-package imports (relative)
 import { User } from '../types/user.types';
@@ -95,7 +101,7 @@ import { UserService } from './services/user.service';
 | `platform-sdk` | Minimal vetted external libs | Other PROSTO runtime packages |
 | `platform-core` | `platform-sdk`, vetted runtime libs | Adapters implementations, feature modules |
 | `platform-utils/platform-contract-tests` | `platform-sdk`, test framework | `platform-core`, adapters implementations |
-| `platform-utils/platform-cli` | `platform-sdk`, CLI libs | `platform-core` runtime internals |
+| `platform-utils/platform-cli` | `platform-sdk` | `platform-core` runtime internals |
 | `platform-adapter-*` | `platform-sdk`, framework libs | Other adapters internals, feature modules |
 | `modules` | `platform-sdk`, approved third-party libs | `platform-core` internals, other modules internals |
 
@@ -164,14 +170,15 @@ npm run build --workspace=@prosto/platform-sdk # Build the SDK package
 ```
 platform-sdk (base)
     ↓
-platform-core (depends on sdk)
+platform-core, platform-adapter-*, platform-contract-tests, platform-cli,
+platform-admin-vite, platform-admin-shell
     ↓
-platform-adapter-* (depend on sdk, core)
-platform-utils/platform-contract-tests (depends on sdk)
-platform-utils/platform-cli (depends on sdk)
-    ↓
-modules (depend on sdk, other modules)
+examples and application compositions
 ```
+
+The TypeORM adapter currently depends on the SDK and TypeORM, not on
+`platform-core`. Always use package manifests as the authority for a workspace's
+actual dependency graph.
 
 ### Build Order
 
@@ -179,8 +186,9 @@ modules (depend on sdk, other modules)
 2. `platform-core` - depends on SDK
 3. `platform-utils/platform-contract-tests` - depends on SDK
 4. `platform-utils/platform-cli` - depends on SDK
-5. `platform-adapter-*` - depends on SDK
-6. Admin shell, admin Vite integration, and example modules - depend on SDK as declared in their package manifests
+5. `platform-adapter-*` - depends on SDK and adapter-specific libraries
+6. Admin Vite integration and admin shell - depend on SDK
+7. Example modules and application compositions - depend on the packages they compose
 
 ---
 

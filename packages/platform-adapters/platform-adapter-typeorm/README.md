@@ -55,7 +55,7 @@ descriptor, and module descriptor are available in
 - `TYPEORM_DATA_SOURCE_SERVICE_TOKEN` — typed service token for the ready shared `DataSource` (valid only after provider readiness)
 
 ### Interfaces
-- `ITypeOrmPersistencePlatformConfig` — driver-neutral TypeORM persistence settings (dialect, host, port, database, credentials, pool, migration transaction mode)
+- `ITypeOrmPersistenceConfig` — driver-neutral TypeORM persistence settings (dialect, host, port, database, credentials, pool, migration transaction mode)
 - `ITypeOrmPersistenceDescriptorPayload` — TypeORM-specific descriptor payload (`entities`, `migrations`)
 - `IMigrationLock` — dialect-specific database migration lock (`acquire`/`release`)
 - `IMigrationLockFactoryInterface` — factory for creating migration lock instances

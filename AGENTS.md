@@ -41,7 +41,7 @@ All detailed rules are in `.agents/rules/` directory:
 
 ### Security
 - **Zod validation** at all boundaries
-- **Secret redaction** from logs (Pino `redact` config)
+- **Secret redaction** from core module logs through `SecretsRedactor` and `ConsoleModuleLogger`
 - **MSW 2** is available in `platform-admin-shell` for opt-in browser development mocks and Vitest integration mocks; it is not a production backend
 - **Admin plugins** are trusted first-party ESM code. The admin runtime is an API boundary, not a sandbox.
 

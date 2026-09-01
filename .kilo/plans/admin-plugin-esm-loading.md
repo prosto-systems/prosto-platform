@@ -1,5 +1,10 @@
 # Admin Plugin ESM Loading
 
+> **Status: historical.** This plan predates the current admin runtime. The
+> implemented loader uses dynamic `import()`, validates the registration export,
+> and supports style-only `contentFiles`. Consult
+> `packages/platform-admin-shell/README.md` for the current contract.
+
 ## Goal
 
 Load every admin plugin asset declared as `type: 'script'` as an ESM module instead of a classic JavaScript script, while preserving manifest order, cache busting, module metadata, and the current continue-on-error behavior.

@@ -15,5 +15,5 @@ runtime so the provider closes its shared DataSource.
 `config/app_settings.json` contains only non-secret SQLite settings. For a
 deployment-local override, create `config/app_settings.local.json` from
 `config/app_settings.local.example.json`; never commit the local file. A server
-deployment may use that ignored override for its password or URL after changing
+deployment may use that local override for its password or URL after changing
 the safe dialect settings in `app_settings.json`.

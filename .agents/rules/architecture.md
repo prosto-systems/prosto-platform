@@ -41,6 +41,10 @@
 - Own vendor integrations
 - Own feature domain logic
 
+The public core API has no HTTP contract. `src/main.ts` currently starts a
+Fastify development demonstration; it is application bootstrap code, not a
+framework API exposed by the core package.
+
 ### `platform-sdk` MUST:
 - Keep external runtime dependencies minimal and justified
 - Prefer TypeScript and platform-native APIs
@@ -71,7 +75,8 @@
 ## Current vs Target State
 
 - Keep a hard distinction between current-state repository and target-state architecture
-- Treat architecture docs as target constraint for future implementation planning
+- Treat the boundary rules as constraints for future implementation planning;
+  validate claims about implemented behavior against source and package manifests
 - Architecture docs assume separate module repositories for feature modules
 
 ## Contract Authority Split

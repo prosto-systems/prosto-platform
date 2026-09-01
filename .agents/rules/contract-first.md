@@ -16,37 +16,46 @@
 
 ```typescript
 // ✅ Step 1: Define contract in platform-sdk
-// packages/platform-sdk/src/platform/interfaces/platform-module-manifest.interfaces.ts
+// packages/platform-sdk/src/platform/modularity/interfaces/platform-module-manifest.interfaces.ts
 export interface IPlatformModuleManifest {
   id: string;
   version: string;
   sdkVersion: string;
-  dependencies: string[];
+  title: string;
+  dependencies: IPlatformModuleDependency[];
 }
 
 // ✅ Step 2: Define platform module lifecycle interface
-// packages/platform-sdk/src/platform/interfaces/platform-module.interface.ts
+// packages/platform-sdk/src/platform/modularity/interfaces/platform-module.interface.ts
 export interface IPlatformModule {
   // Lifecycle phases (in order)
-  init(ctx: IPlatformModuleContext): Promise<void>;
-  start(ctx: IPlatformModuleContext): Promise<void>;
-  stop(ctx: IPlatformModuleContext): Promise<void>;
+  init(ctx: IPlatformModuleContext): void | Promise<void>;
+  start(ctx: IPlatformModuleContext): void | Promise<void>;
+  stop(ctx: IPlatformModuleContext): void | Promise<void>;
 }
 
-// ✅ Step 3: Define admin module lifecycle interface
-// packages/platform-sdk/src/admin/interfaces/platform-admin-module.interface.ts
-export interface IPlatformAdminModule {
-  init(ctx: IPlatformAdminModuleContext): Promise<void>;
-  mount(ctx: IPlatformAdminModuleContext): Promise<void>;
-  unmount(ctx: IPlatformAdminModuleContext): Promise<void>;
+// ✅ Step 3: Define the admin registration context
+// packages/platform-sdk/src/admin/interfaces/admin-shell-plugin-context.interface.ts
+export interface IAdminShellPluginContext {
+  readonly moduleId: string;
+  readonly authService: IAdminShellAuthService;
+  readonly translationService: IAdminShellTranslationService;
 }
 
 // ✅ Step 4: Implement in platform-core using contracts
 // packages/platform-core/src/modularity/lifecycle/module-lifecycle.orchestrator.ts
-import { IPlatformModule, IPlatformModuleContext } from '@prosto/platform-sdk';
+import type {
+  IPlatformModule,
+  IPlatformModuleContext,
+  PlatformModuleLifecycleStageType,
+} from '@prosto/platform-sdk';
 
 export class ModuleLifecycleOrchestrator {
-  async executePhase(module: IPlatformModule, phase: LifecyclePhaseType, ctx: IPlatformModuleContext): Promise<void> {
+  async executePhase(
+    module: IPlatformModule,
+    phase: PlatformModuleLifecycleStageType,
+    ctx: IPlatformModuleContext,
+  ): Promise<void> {
     // Implementation uses contract types
   }
 }
@@ -260,21 +269,28 @@ async function loadModule(id: string): Promise<IPlatformModuleManifest> {
 ### Runtime Validation with Zod
 
 ```typescript
-// packages/platform-sdk/src/modularity/schemas/platform-module-manifest.schema.ts
+// packages/platform-sdk/src/platform/modularity/schemas/platform-module-manifest.schema.ts
 import { z } from 'zod';
 
 export const PlatformModuleManifestSchema = z.object({
-  id: z.string().regex(/^[a-z][a-z0-9-]*$/),
-  version: z.string().regex(/^\d+\.\d+\.\d+$/),
+  id: z.string().regex(/^[a-z][a-z0-9-]{2,}$/),
+  version: z.string(),
   sdkVersion: z.string(),
-  dependencies: z.array(z.string()),
+  title: z.string().trim().min(1),
+  dependencies: z.array(z.object({
+    id: z.string().regex(/^[a-z][a-z0-9-]{2,}$/),
+    version: z.string(),
+    optional: z.boolean().optional(),
+  })).default([]),
 });
 
-export type TPlatformModuleManifest = z.infer<typeof PlatformModuleManifestSchema>;
+export type PlatformModuleManifestType = z.output<
+  typeof PlatformModuleManifestSchema
+>;
 
 // Usage in module loader
-function validateManifest(raw: unknown): TPlatformModuleManifest {
-  return ModuleManifestSchema.parse(raw);
+function validateManifest(raw: unknown): PlatformModuleManifestType {
+  return PlatformModuleManifestSchema.parse(raw);
 }
 ```
 
