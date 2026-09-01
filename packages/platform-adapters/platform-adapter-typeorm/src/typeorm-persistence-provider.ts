@@ -143,6 +143,25 @@ export class TypeOrmPersistenceProvider implements IPersistenceProvider {
       migrationsRun: false,
     };
 
+    if (configuration.type === 'sqlite') {
+      if (
+        configuration.url !== undefined ||
+        configuration.database === undefined
+      ) {
+        throw new PersistenceError(
+          'PersistenceInitializationFailed',
+          'TypeORM SQLite persistence configuration requires a database and does not support URL.',
+          { dialect: configuration.type, phase: 'configuration' },
+        );
+      }
+
+      return {
+        type: 'better-sqlite3',
+        database: configuration.database,
+        ...commonOptions,
+      };
+    }
+
     if (configuration.url !== undefined) {
       return {
         type: configuration.type,
@@ -160,13 +179,6 @@ export class TypeOrmPersistenceProvider implements IPersistenceProvider {
     }
 
     switch (configuration.type) {
-      case 'sqlite':
-        return {
-          type: 'sqlite',
-          database: configuration.database,
-          ...commonOptions,
-        };
-
       case 'postgres':
         return {
           type: 'postgres',
@@ -328,7 +340,7 @@ export class TypeOrmPersistenceProvider implements IPersistenceProvider {
     dialect: TypeOrmDialectType | undefined,
   ): string | undefined {
     const explicitDriver =
-      /Please install (pg|mysql2|sqlite3|mssql) package manually/i.exec(
+      /Please install (pg|mysql2|better-sqlite3|mssql) package manually/i.exec(
         message,
       )?.[1];
 
@@ -349,7 +361,7 @@ export class TypeOrmPersistenceProvider implements IPersistenceProvider {
         return 'mysql2';
 
       case 'sqlite':
-        return 'sqlite3';
+        return 'better-sqlite3';
 
       case 'mssql':
         return 'mssql';

@@ -49,34 +49,23 @@ const typeOrmPersistenceSchema = z
       return;
     }
 
-    const structuredFields = [
-      config.host,
-      config.port,
-      config.database,
-      config.username,
-      config.password,
-      config.schema,
-      config.poolSize,
-    ];
-
-    if (config.url && structuredFields.some((value) => value !== undefined)) {
-      context.addIssue({
-        code: 'custom',
-        path: ['url'],
-        message:
-          'TypeORM url cannot be combined with structured connection fields.',
-      });
-    }
-
-    if (!config.url && !config.database) {
-      context.addIssue({
-        code: 'custom',
-        path: ['database'],
-        message: 'TypeORM requires either url or database connection settings.',
-      });
-    }
-
     if (config.type === 'sqlite') {
+      if (config.url !== undefined) {
+        context.addIssue({
+          code: 'custom',
+          path: ['url'],
+          message: 'TypeORM sqlite does not support url.',
+        });
+      }
+
+      if (config.database === undefined) {
+        context.addIssue({
+          code: 'custom',
+          path: ['database'],
+          message: 'TypeORM sqlite requires database connection settings.',
+        });
+      }
+
       for (const field of [
         'host',
         'port',
@@ -93,13 +82,43 @@ const typeOrmPersistenceSchema = z
           });
         }
       }
-    } else if (!config.url && (!config.host || !config.username)) {
-      context.addIssue({
-        code: 'custom',
-        path: ['host'],
-        message:
-          'TypeORM server dialects require host and username when url is absent.',
-      });
+    } else {
+      const structuredFields = [
+        config.host,
+        config.port,
+        config.database,
+        config.username,
+        config.password,
+        config.schema,
+        config.poolSize,
+      ];
+
+      if (config.url && structuredFields.some((value) => value !== undefined)) {
+        context.addIssue({
+          code: 'custom',
+          path: ['url'],
+          message:
+            'TypeORM url cannot be combined with structured connection fields.',
+        });
+      }
+
+      if (!config.url && !config.database) {
+        context.addIssue({
+          code: 'custom',
+          path: ['database'],
+          message:
+            'TypeORM requires either url or database connection settings.',
+        });
+      }
+
+      if (!config.url && (!config.host || !config.username)) {
+        context.addIssue({
+          code: 'custom',
+          path: ['host'],
+          message:
+            'TypeORM server dialects require host and username when url is absent.',
+        });
+      }
     }
 
     if (config.schema && config.type !== 'postgres') {

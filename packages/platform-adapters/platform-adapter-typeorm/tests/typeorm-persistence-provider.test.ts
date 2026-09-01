@@ -209,11 +209,44 @@ describe('TypeOrmPersistenceProvider', () => {
 
     expect(provider.state).toBe('ready');
     expect(dataSource.isInitialized).toBe(true);
+    expect(dataSource.options.type).toBe('better-sqlite3');
     expect(services.resolve(TYPEORM_DATA_SOURCE_SERVICE_TOKEN)).toBe(
       dataSource,
     );
 
     await provider.dispose();
+  });
+
+  it('rejects SQLite URL configuration before publishing a DataSource', async () => {
+    // Arrange
+    const provider = new TypeOrmPersistenceProvider();
+    const services = new TestServiceRegistry();
+
+    // Act and assert
+    await expect(
+      provider.initialize({
+        descriptors: [],
+        configuration: {
+          typeorm: {
+            enabled: true,
+            type: 'sqlite',
+            url: 'file:///tmp/platform.sqlite',
+          },
+        },
+        services,
+      }),
+    ).rejects.toMatchObject({
+      code: 'PersistenceInitializationFailed',
+      message:
+        'TypeORM SQLite persistence configuration requires a database and does not support URL.',
+      details: expect.objectContaining({
+        dialect: 'sqlite',
+        phase: 'configuration',
+      }),
+    });
+
+    expect(services.has(TYPEORM_DATA_SOURCE_SERVICE_TOKEN)).toBe(false);
+    expect(provider.state).toBe('failed');
   });
 
   it('destroys the registered DataSource once and permits repeated disposal', async () => {

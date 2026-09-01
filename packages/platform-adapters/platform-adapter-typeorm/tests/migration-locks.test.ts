@@ -4,6 +4,7 @@ import { PersistenceError } from '@prosto/platform-sdk';
 import {
   MySqlMigrationLock,
   PostgresMigrationLock,
+  SqliteMigrationLock,
   SqlServerMigrationLock,
 } from '@/migration-locks/index.js';
 
@@ -95,6 +96,27 @@ describe('migration lock strategies', () => {
     });
     await lock.release();
 
+    expect(runner.release).toHaveBeenCalledOnce();
+  });
+
+  it('polls for an exclusive SQLite lock without blocking the event loop', async () => {
+    // Arrange
+    const runner = createQueryRunner([]);
+    vi.mocked(runner.query)
+      .mockResolvedValueOnce([])
+      .mockRejectedValueOnce(new Error('SQLITE_BUSY'))
+      .mockResolvedValueOnce([]);
+    const lock = new SqliteMigrationLock(runner, false);
+
+    // Act
+    await lock.acquire(100);
+    await lock.release();
+
+    // Assert
+    expect(runner.query).toHaveBeenNthCalledWith(1, 'PRAGMA busy_timeout = 0');
+    expect(runner.query).toHaveBeenNthCalledWith(2, 'BEGIN EXCLUSIVE');
+    expect(runner.query).toHaveBeenNthCalledWith(3, 'BEGIN EXCLUSIVE');
+    expect(runner.query).toHaveBeenNthCalledWith(4, 'COMMIT');
     expect(runner.release).toHaveBeenCalledOnce();
   });
 });

@@ -81,8 +81,8 @@
     "npm": ">=10.0.0"
   },
   "allowScripts": {
+    "better-sqlite3@12.11.1": true,
     "esbuild@0.28.2": true,
-    "sqlite3@5.1.7": true,
     "unrs-resolver@1.12.2": true,
     "@parcel/watcher@2.6.0": true,
     "msw@2.15.0": true

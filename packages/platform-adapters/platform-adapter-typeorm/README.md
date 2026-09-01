@@ -9,11 +9,15 @@ application through `RuntimeBuilder`; platform core does not depend on TypeORM.
 Install the adapter and the one driver selected by application configuration:
 
 ```bash
-npm install @prosto/platform-adapter-typeorm sqlite3
+npm install @prosto/platform-adapter-typeorm better-sqlite3
 ```
 
 Use `pg` for PostgreSQL, `mysql2` for MySQL or MariaDB, and `mssql` for SQL
 Server.
+
+SQLite configuration keeps the driver-neutral `type: 'sqlite'` value and
+requires `database`; SQLite URLs are not supported. The adapter maps this
+dialect to `better-sqlite3` internally.
 
 ## Usage
 

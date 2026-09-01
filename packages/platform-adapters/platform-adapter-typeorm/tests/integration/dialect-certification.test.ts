@@ -80,7 +80,7 @@ class TestServiceRegistry implements IServiceRegistry {
 function primaryKeyColumn(queryRunner: QueryRunner): TableColumnOptions {
   return {
     name: 'id',
-    type: queryRunner.connection.options.type === 'mssql' ? 'int' : 'integer',
+    type: queryRunner.dataSource.options.type === 'mssql' ? 'int' : 'integer',
     isPrimary: true,
   };
 }
