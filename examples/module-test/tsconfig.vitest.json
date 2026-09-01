@@ -1,6 +1,7 @@
 {
   "extends": "@prosto/platform-tsconfig/base.json",
   "compilerOptions": {
+    "moduleResolution": "bundler",
     "noEmit": true,
     "paths": {
       "@/admin*": ["./src/admin*"],

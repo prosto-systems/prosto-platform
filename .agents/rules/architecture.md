@@ -48,7 +48,7 @@
 
 ### `platform-sdk` MUST NOT:
 - Depend on other platform runtime packages
-- Own full contract conformance test suites (that's `platform-contract-tests`)
+- Own full contract conformance test suites (that's `platform-utils/platform-contract-tests`)
 
 ### Adapters MAY:
 - Depend on `platform-sdk`
@@ -77,7 +77,7 @@
 ## Contract Authority Split
 
 - `platform-sdk` owns contracts
-- `platform-contract-tests` owns full conformance suites
+- `platform-utils/platform-contract-tests` owns full conformance suites
 - Avoid merging these responsibilities
 
 ## Admin UI Model

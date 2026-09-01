@@ -170,68 +170,41 @@ export function internalHelper(): void {
 ### Contract Test Structure
 
 ```typescript
-// packages/platform-contract-tests/src/lifecycle/lifecycle.contract.ts
+// Module repository test
 import {
-  IPlatformAdminModule,
-  IPlatformAdminModuleContext,
-  IPlatformModule,
-  IPlatformModuleContext,
-  IPlatformModuleManifest,
-} from '@prosto/platform-sdk';
+  createPlatformModuleContractTests,
+  runModuleContractConformance,
+} from '@prosto/platform-contract-tests';
+import { describe, it } from 'vitest';
+import manifest from '../manifest.json';
+import { PlatformModule } from '../src/platform/platform.module.js';
 
-export function createPlatformModuleLifecycleContractTests(
-  manifest: IPlatformModuleManifest,
-  module: IPlatformModule,
-  runner: {
-    describe(name: string, body: () => void): void;
-    it(name: string, body: () => Promise<void> | void): void;
-  }): void {
-  runner.describe('Platform module Lifecycle Contract', () => {
-    runner.it('should have valid manifest', () => {
-      expect(manifest.id).toMatch(/^[a-z][a-z0-9-]*$/);
-      expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
-    });
+describe('HealthModule contract', () => {
+  createPlatformModuleContractTests(
+    { manifest, module: new PlatformModule() },
+    { describe, it },
+  );
+});
 
-    runner.it('should execute phases in order', async () => {
-      const ctx: IPlatformModuleContext = createMockContext();
-      await module.init(ctx);
-      await module.start(ctx);
-      await module.stop(ctx);
-    });
-  });
-}
-
-export function createAdminModuleLifecycleContractTests(
-  module: IPlatformAdminModule,
-  runner: {
-    describe(name: string, body: () => void): void;
-    it(name: string, body: () => Promise<void> | void): void;
-  }): void {
-  runner.describe('Platform admin module Lifecycle Contract', () => {
-    runner.it('should execute phases in order', async () => {
-      const ctx: IPlatformAdminModuleContext = createMockContext();
-      await module.init(ctx);
-      await module.mount(ctx);
-      await module.unmount(ctx);
-    });
-  });
-}
+const report = await runModuleContractConformance({
+  manifest,
+  module: new PlatformModule(),
+});
 ```
 
 ### Module Contract Validation
 
 ```typescript
-// Module repository test
 import { describe, it } from 'vitest';
-import { createPlatformModuleLifecycleContractTests } from '@prosto/platform-contract-tests';
-import { IPlatformModuleManifest } from '@prosto/platform-sdk';
+import { createPlatformModuleContractTests } from '@prosto/platform-contract-tests';
 import manifest from '../manifest.json';
-import { AdminModule } from '../../src/admin/admin.module';
-import { PlatformModule } from '../../src/platform/platform.module';
+import { PlatformModule } from '../src/platform/platform.module.js';
 
 describe('HealthModule Contract Compliance', () => {
-  createPlatformModuleLifecycleContractTests(manifest, new PlatformModule(), { describe, it });
-  createAdminModuleLifecycleContractTests(new AdminModule(), { describe, it });
+  createPlatformModuleContractTests(
+    { manifest, module: new PlatformModule() },
+    { describe, it },
+  );
 });
 ```
 
