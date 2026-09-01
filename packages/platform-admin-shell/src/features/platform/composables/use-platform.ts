@@ -8,7 +8,7 @@ import { shallowRef } from 'vue';
 import { ApiError } from '@/shared/api';
 import { platformApi } from '../api';
 import { type IAdminShellPluginInfo } from '@prosto/platform-sdk';
-import { createPluginLoadResult, loadPlugin } from '@/features/platform';
+import { createPluginLoadResult, loadPlugin } from '../utils';
 
 interface IResourceState<TValue> {
   readonly data: ShallowRef<TValue | null>;

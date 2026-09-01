@@ -18,7 +18,7 @@
   "scripts": {
     "build": "vite build",
     "typecheck": "tsc -p tsconfig.package.json --noEmit",
-    "test": "vitest run --exclude tests/integration/**",
+    "test": "vitest run --passWithNoTests --exclude tests/integration/**",
     "test:integration": "cross-env PROSTO_TYPEORM_INTEGRATION=1 vitest run"
   },
   "dependencies": {
