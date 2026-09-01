@@ -11,6 +11,8 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-sdk/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/examples/module-test/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/examples/module-test/artifacts" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/typeorm-shared-datasource/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-adapters/platform-adapter-typeorm/dist" />
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-admin-shell/public/modules" />
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-utils/platform-cli/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-utils/platform-contract-tests/.turbo" />
