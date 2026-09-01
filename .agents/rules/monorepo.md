@@ -95,7 +95,7 @@ import { UserService } from './services/user.service';
 | `platform-sdk` | Minimal vetted external libs | Other PROSTO runtime packages |
 | `platform-core` | `platform-sdk`, vetted runtime libs | Adapters implementations, feature modules |
 | `platform-utils/platform-contract-tests` | `platform-sdk`, test framework | `platform-core`, adapters implementations |
-| `platform-cli` | `platform-sdk`, CLI libs | `platform-core` runtime internals |
+| `platform-utils/platform-cli` | `platform-sdk`, CLI libs | `platform-core` runtime internals |
 | `platform-adapter-*` | `platform-sdk`, framework libs | Other adapters internals, feature modules |
 | `modules` | `platform-sdk`, approved third-party libs | `platform-core` internals, other modules internals |
 
@@ -168,6 +168,7 @@ platform-core (depends on sdk)
     ↓
 platform-adapter-* (depend on sdk, core)
 platform-utils/platform-contract-tests (depends on sdk)
+platform-utils/platform-cli (depends on sdk)
     ↓
 modules (depend on sdk, other modules)
 ```
@@ -177,8 +178,9 @@ modules (depend on sdk, other modules)
 1. `platform-sdk` - must build first (contract authority)
 2. `platform-core` - depends on SDK
 3. `platform-utils/platform-contract-tests` - depends on SDK
-4. `platform-adapter-*` - depends on SDK
-5. Admin shell, admin Vite integration, and example modules - depend on SDK as declared in their package manifests
+4. `platform-utils/platform-cli` - depends on SDK
+5. `platform-adapter-*` - depends on SDK
+6. Admin shell, admin Vite integration, and example modules - depend on SDK as declared in their package manifests
 
 ---
 
