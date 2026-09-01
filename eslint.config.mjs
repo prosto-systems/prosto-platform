@@ -1,14 +1,11 @@
 import js from '@eslint/js';
 import vuePrettierConfig from '@vue/eslint-config-prettier';
-import {
-  defineConfigWithVueTs,
-  vueTsConfigs,
-} from '@vue/eslint-config-typescript';
+import { withVueTs, vueTsConfigs } from '@vue/eslint-config-typescript';
 import pluginVue from 'eslint-plugin-vue';
 import globals from 'globals';
 import tsEslint from 'typescript-eslint';
 
-export default defineConfigWithVueTs(
+export default withVueTs(
   {
     name: 'app/files-to-ignore',
     ignores: [
@@ -19,6 +16,14 @@ export default defineConfigWithVueTs(
       '**/coverage/**',
       '**/node_modules/**',
       '**/.idea/**',
+      '**/.agents/**',
+      '**/.codex/**',
+      '**/.kilo/**',
+      '**/.kilocode/**',
+      '**/.turbo/**',
+      '**/.vite/**',
+      '**/.vuetify/**',
+      '**/*.tsbuildinfo',
     ],
   },
   {
@@ -38,8 +43,8 @@ export default defineConfigWithVueTs(
     files: ['**/*.{ts,tsx,mts,cts,vue}'],
     extends: [
       js.configs.recommended,
-      ...tsEslint.configs.strict,
-      ...tsEslint.configs.stylistic,
+      ...vueTsConfigs.strict,
+      ...vueTsConfigs.stylistic,
     ],
     languageOptions: {
       ecmaVersion: 'latest',
@@ -50,10 +55,13 @@ export default defineConfigWithVueTs(
     },
   },
   pluginVue.configs['flat/recommended'],
-  vueTsConfigs.recommended,
   vuePrettierConfig,
   {
     name: 'app/override-rules',
+    files: ['**/*.{ts,tsx,mts,cts,vue}'],
+    plugins: {
+      '@typescript-eslint': tsEslint.plugin,
+    },
     rules: {
       '@typescript-eslint/consistent-type-imports': [
         'warn',
