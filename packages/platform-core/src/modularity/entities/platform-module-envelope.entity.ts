@@ -7,7 +7,7 @@ import type {
   SemverRangeType,
   SemverVersionType,
 } from '@prosto/platform-sdk';
-import { ModuleState } from '../constants/index.js';
+import { ModuleNewState } from '../constants/index.js';
 
 export class PlatformModuleEnvelope implements IPlatformModuleManifest {
   public readonly id: ModuleIdentifierType;
@@ -30,7 +30,7 @@ export class PlatformModuleEnvelope implements IPlatformModuleManifest {
   public isInstalled = false;
   public fullPhysicalPath = '';
   public errors: string[] = [];
-  public state: ModuleState = ModuleState.NotInitialized;
+  public state: ModuleNewState = ModuleNewState.NotInitialized;
   public moduleInstance?: IPlatformModule;
 
   constructor(manifest: IPlatformModuleManifest) {

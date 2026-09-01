@@ -1,6 +1,7 @@
 ﻿export * from './bootstrap/index.js';
 export * from './caching/index.js';
 export * from './common/index.js';
+export * from './diagnostics/index.js';
 export * from './events/index.js';
 export * from './logging/index.js';
 export * from './modularity/index.js';
