@@ -43,17 +43,21 @@ export class AdminShell implements IAdminShell {
       throw new AdminPluginAlreadyRegisteredError(platformModuleId);
     }
 
-    await callback({
-      moduleId: platformModuleId,
-      translationService: this._createTranslationService(),
-      authService: createAuthService(this.#pinia),
-      workspaceService: createWorkspaceService(this.#pinia),
-      mainMenuService: createMainMenuService(this.#pinia),
-      bladeService: createBladeService(this.#pinia),
-      bladeToolbarService: createBladeToolbarService(this.#pinia),
-    });
-
     this.#plugins.add(platformModuleId);
+
+    try {
+      await callback({
+        moduleId: platformModuleId,
+        translationService: this._createTranslationService(),
+        authService: createAuthService(this.#pinia),
+        workspaceService: createWorkspaceService(this.#pinia),
+        mainMenuService: createMainMenuService(this.#pinia),
+        bladeService: createBladeService(this.#pinia),
+        bladeToolbarService: createBladeToolbarService(this.#pinia),
+      });
+    } catch {
+      this.#plugins.delete(platformModuleId);
+    }
 
     return this;
   }

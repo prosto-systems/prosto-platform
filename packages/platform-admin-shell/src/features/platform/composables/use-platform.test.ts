@@ -1,24 +1,24 @@
-import {
-  ADMIN_SHELL_GLOBAL,
-  ADMIN_SHELL_RUNTIME_GLOBAL,
-  type IAdminShell,
-  type IAdminShellPluginInfo,
-} from '@prosto/platform-sdk';
+import { type IAdminShellPluginInfo } from '@prosto/platform-sdk';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
-  importPluginEntry,
-  loadPluginStyle,
-  PluginImportTimeoutError,
-} from '../utils';
+import type { IPluginLoadResult, PluginLoadFailureCodeType } from '../models';
+import { createPluginLoadResult, loadPlugin } from '../utils';
 import { usePlatform } from './use-platform';
 
-vi.mock('../utils', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../utils')>();
-
+vi.mock('../utils', () => {
   return {
-    ...actual,
-    importPluginEntry: vi.fn(),
-    loadPluginStyle: vi.fn(),
+    createPluginLoadResult: vi.fn(
+      (
+        plugin: IAdminShellPluginInfo,
+        status: IPluginLoadResult['status'],
+        code?: PluginLoadFailureCodeType,
+      ): IPluginLoadResult => ({
+        moduleId: plugin.moduleId,
+        moduleVersion: plugin.moduleVersion,
+        status,
+        ...(code ? { code } : {}),
+      }),
+    ),
+    loadPlugin: vi.fn(),
   };
 });
 
@@ -59,48 +59,31 @@ const plugins: IAdminShellPluginInfo[] = [
 
 describe('usePlatform plugin loader', () => {
   afterEach((): void => {
-    Reflect.deleteProperty(globalThis, ADMIN_SHELL_RUNTIME_GLOBAL);
-    Reflect.deleteProperty(globalThis, ADMIN_SHELL_GLOBAL);
     vi.clearAllMocks();
   });
 
-  it('continues in manifest order after registration, namespace, and import failures', async (): Promise<void> => {
+  it('continues in manifest order after individual plugin failures', async (): Promise<void> => {
     const events: string[] = [];
 
-    globalThis[ADMIN_SHELL_RUNTIME_GLOBAL] = { apiVersion: 1 } as never;
-    globalThis[ADMIN_SHELL_GLOBAL] = {
-      plugins: [],
-      registerPlugin: async (moduleId, callback) => {
-        events.push(`register:${moduleId}`);
-        await callback({} as never);
-        return globalThis[ADMIN_SHELL_GLOBAL];
-      },
-    } satisfies IAdminShell;
+    vi.mocked(loadPlugin).mockImplementation(async (plugin) => {
+      events.push(`load:${plugin.moduleId}`);
 
-    vi.mocked(loadPluginStyle).mockImplementation(async (_url, moduleId) => {
-      events.push(`style:${moduleId}`);
-      return document.createElement('link');
-    });
-    vi.mocked(importPluginEntry).mockImplementation(async (url) => {
-      const moduleId = url.pathname.split('/')[2];
-
-      events.push(`import:${moduleId}`);
-
-      if (moduleId === 'invalid-entry-plugin') {
-        return {};
+      switch (plugin.moduleId) {
+        case 'failing-plugin':
+          return createPluginLoadResult(
+            plugin,
+            'failed',
+            'registration_failed',
+          );
+        case 'working-plugin':
+          return createPluginLoadResult(plugin, 'loaded');
+        case 'invalid-entry-plugin':
+          return createPluginLoadResult(plugin, 'failed', 'invalid_entry');
+        case 'timed-out-plugin':
+          return createPluginLoadResult(plugin, 'failed', 'entry_timeout');
+        default:
+          throw new Error(`Unexpected plugin: ${plugin.moduleId}`);
       }
-
-      if (moduleId === 'timed-out-plugin') {
-        throw new PluginImportTimeoutError();
-      }
-
-      return {
-        registerAdminPlugin: async () => {
-          if (moduleId === 'failing-plugin') {
-            throw new Error('Registration failed.');
-          }
-        },
-      };
     });
 
     const { loadPlugins, pluginLoadResults } = usePlatform();
@@ -133,14 +116,10 @@ describe('usePlatform plugin loader', () => {
     ]);
     expect(pluginLoadResults.value).toEqual(results);
     expect(events).toEqual([
-      'style:failing-plugin',
-      'import:failing-plugin',
-      'register:failing-plugin',
-      'style:working-plugin',
-      'import:working-plugin',
-      'register:working-plugin',
-      'import:invalid-entry-plugin',
-      'import:timed-out-plugin',
+      'load:failing-plugin',
+      'load:working-plugin',
+      'load:invalid-entry-plugin',
+      'load:timed-out-plugin',
     ]);
   });
 });

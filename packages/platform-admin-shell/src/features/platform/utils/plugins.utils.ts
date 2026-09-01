@@ -10,7 +10,7 @@ import {
 import {
   type IPluginLoadResult,
   type PluginLoadFailureCodeType,
-} from '@/features/platform';
+} from '../models';
 
 export const PLUGIN_ASSET_PREFIX = '/modules/';
 export const PLUGIN_ASSET_LOAD_TIMEOUT_MS = 10_000;

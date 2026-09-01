@@ -54,7 +54,7 @@ describe('AdminShellRuntime', () => {
         }),
     );
 
-    expect(adminShell.plugins).not.toContain('async-module');
+    expect(adminShell.plugins).toContain('async-module');
 
     completeRegistration?.();
     await registration;
