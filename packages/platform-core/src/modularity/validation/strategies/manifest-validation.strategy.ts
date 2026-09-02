@@ -28,7 +28,7 @@ export class ManifestValidationStrategy extends ModuleValidationBaseStrategy {
     input: IModuleValidationStrategyInput,
   ): ModuleValidationResultType {
     const result = this._validator.validate(
-      input.artifact.moduleEnvelope.manifest,
+      input.artifact.moduleEnvelope.toManifest(),
     );
 
     if (result.success === true) {

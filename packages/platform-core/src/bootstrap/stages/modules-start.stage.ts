@@ -33,8 +33,8 @@ export class ModulesStartStage extends BootstrapBaseStage {
     );
     const manifests = new Map<string, IPlatformModuleManifest>(
       context.loadedModules.map((moduleEnvelope) => [
-        moduleEnvelope.manifest.id,
-        moduleEnvelope.manifest,
+        moduleEnvelope.id,
+        moduleEnvelope.toManifest(),
       ]),
     );
 

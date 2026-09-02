@@ -1,5 +1,5 @@
 import type { IPlatformModuleManifest } from '@prosto/platform-sdk';
-import type { IModuleEnvelope } from '../loader/index.js';
+import type { PlatformModuleEnvelope } from '../entities/index.js';
 import type { IDependencyGraph, IGraphNode } from './interfaces/index.js';
 
 /**
@@ -12,9 +12,9 @@ export class DependencyGraph implements IDependencyGraph {
     IGraphNode
   >();
 
-  constructor(modules: readonly IModuleEnvelope[]) {
+  constructor(modules: readonly PlatformModuleEnvelope[]) {
     const sorted = [...modules].sort((left, right) =>
-      left.manifest.id.localeCompare(right.manifest.id),
+      left.id.localeCompare(right.id),
     );
 
     for (const module of sorted) {
@@ -25,7 +25,7 @@ export class DependencyGraph implements IDependencyGraph {
   /**
    * Returns all modules in the graph.
    */
-  get modules(): readonly IModuleEnvelope[] {
+  get modules(): readonly PlatformModuleEnvelope[] {
     return [...this._nodes.values()].map((node) => node.moduleEnvelope);
   }
 
@@ -40,7 +40,7 @@ export class DependencyGraph implements IDependencyGraph {
    * Creates a DependencyGraph from a collection of modules.
    * Static factory method for backward compatibility.
    */
-  static create(modules: readonly IModuleEnvelope[]): DependencyGraph {
+  static create(modules: readonly PlatformModuleEnvelope[]): DependencyGraph {
     return new DependencyGraph(modules);
   }
 
@@ -48,13 +48,13 @@ export class DependencyGraph implements IDependencyGraph {
    * Adds a module to the graph with its dependencies.
    * If a module already exists, it will be updated.
    */
-  addModule(moduleEnvelope: IModuleEnvelope): void {
-    const dependencyIds = moduleEnvelope.manifest.dependencies
+  addModule(moduleEnvelope: PlatformModuleEnvelope): void {
+    const dependencyIds = moduleEnvelope.dependencies
       .filter((dependency) => !dependency.optional)
       .map((dependency) => dependency.id)
       .sort((left, right) => left.localeCompare(right));
 
-    this._nodes.set(moduleEnvelope.manifest.id, {
+    this._nodes.set(moduleEnvelope.id, {
       moduleEnvelope,
       dependencyIds,
     });
@@ -100,7 +100,7 @@ export class DependencyGraph implements IDependencyGraph {
   /**
    * Gets a module by its ID.
    */
-  getModule(moduleId: string): IModuleEnvelope | undefined {
+  getModule(moduleId: string): PlatformModuleEnvelope | undefined {
     return this._nodes.get(moduleId)?.moduleEnvelope;
   }
 

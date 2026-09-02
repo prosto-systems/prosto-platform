@@ -8,9 +8,9 @@ import { RuntimeErrorCodes } from '@/common/index.js';
 import {
   ModuleArtifactPackaging,
   ModuleArtifactSource,
-  ModuleState,
 } from '../constants/index.js';
 import { ArtifactBaseSource } from './artifact.base-source.js';
+import { ModuleState, PlatformModuleEnvelope } from '@/modularity/index.js';
 
 /**
  * @alpha
@@ -53,16 +53,15 @@ export class MemorySource extends ArtifactBaseSource {
 
     const { module, manifest } = this._descriptor;
     const fullPath = this.getSourceRef();
+    const moduleEnvelope = new PlatformModuleEnvelope(manifest);
+
+    moduleEnvelope.moduleInstance = module;
+    moduleEnvelope.state = ModuleState.ReadyForInitialization;
 
     const candidateArtifact: IModuleCandidateArtifact = {
+      moduleEnvelope,
       moduleId: manifest.id,
       moduleVersion: manifest.version,
-      moduleEnvelope: {
-        module,
-        manifest,
-        fullPhysicalPath: fullPath,
-        state: ModuleState.ReadyForInitialization,
-      },
       orderingKey: fullPath,
       sourceType: ModuleArtifactSource.Memory,
       sourceRef: fullPath,

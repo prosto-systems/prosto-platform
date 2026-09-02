@@ -1,10 +1,8 @@
 /**
  * @alpha
  * Enum representing the different states of a module.
- *
- * TODO: Rename to `ModuleState`
  */
-export enum ModuleNewState {
+export enum ModuleState {
   /**
    * Initial state for modules. The module is defined,
    * but it has not been loaded, retrieved or initialized yet.

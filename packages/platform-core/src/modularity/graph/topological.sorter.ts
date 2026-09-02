@@ -4,7 +4,7 @@ import type {
   ITopologicalSortResult,
 } from './interfaces/index.js';
 import { DependencyCycleError } from './dependency-graph.errors.js';
-import type { IModuleEnvelope } from '@/modularity/index.js';
+import type { PlatformModuleEnvelope } from '../entities/index.js';
 
 /**
  * @alpha
@@ -107,7 +107,7 @@ export class TopologicalSorter implements ITopologicalSorter {
     }
 
     // Build the ordered modules list
-    const orderedModules: IModuleEnvelope[] = [];
+    const orderedModules: PlatformModuleEnvelope[] = [];
 
     for (const moduleId of orderedIds) {
       const moduleEnvelope = graph.getModule(moduleId);

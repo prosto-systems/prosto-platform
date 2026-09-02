@@ -1,9 +1,6 @@
 import type { PlatformModuleLifecycleStageType } from '@prosto/platform-sdk';
-import {
-  type IModuleContextFactory,
-  type IModuleEnvelope,
-  ModuleState,
-} from '@/modularity/index.js';
+import type { PlatformModuleEnvelope } from '@/modularity/index.js';
+import { type IModuleContextFactory, ModuleState } from '@/modularity/index.js';
 import type {
   IModuleLifecycleContext,
   IModuleLifecycleExecutionIssue,
@@ -31,11 +28,11 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
   constructor(private readonly _moduleContextFactory: IModuleContextFactory) {}
 
   async initializeModules(
-    loadedModules: readonly IModuleEnvelope[],
+    loadedModules: readonly PlatformModuleEnvelope[],
     options: IModuleLifecycleStartupOptions,
   ): Promise<IModulesInitializationResult> {
     const lifecycleContext = this._createLifecycleContext(options);
-    const initializedModules: IModuleEnvelope[] = [];
+    const initializedModules: PlatformModuleEnvelope[] = [];
     const issues: IModuleLifecycleExecutionIssue[] = [];
 
     for (const moduleEnvelope of loadedModules) {
@@ -52,12 +49,10 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
       } catch {
         moduleEnvelope.state = ModuleState.NotInitialized;
         lifecycleContext.persistenceProvider?.descriptors.rollback(
-          moduleEnvelope.manifest.id,
+          moduleEnvelope.id,
         );
 
-        issues.push(
-          this._createStartupIssue(moduleEnvelope.manifest.id, 'init'),
-        );
+        issues.push(this._createStartupIssue(moduleEnvelope.id, 'init'));
 
         continue;
       }
@@ -69,11 +64,11 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
   }
 
   async startModules(
-    initializedModules: readonly IModuleEnvelope[],
+    initializedModules: readonly PlatformModuleEnvelope[],
     options: IModuleLifecycleStartupOptions,
   ): Promise<IModulesStartupResult> {
     const lifecycleContext = this._createLifecycleContext(options);
-    const startedModules: IModuleEnvelope[] = [];
+    const startedModules: PlatformModuleEnvelope[] = [];
     const issues: IModuleLifecycleExecutionIssue[] = [];
 
     for (const moduleEnvelope of initializedModules) {
@@ -88,11 +83,9 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
 
         moduleEnvelope.state = ModuleState.Started;
       } catch {
-        moduleEnvelope.state = ModuleState.NotStarted;
+        // moduleEnvelope.state = ModuleState.NotStarted;
 
-        issues.push(
-          this._createStartupIssue(moduleEnvelope.manifest.id, 'start'),
-        );
+        issues.push(this._createStartupIssue(moduleEnvelope.id, 'start'));
 
         continue;
       }
@@ -108,7 +101,7 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
    * Executes stop stage in reverse order with timeout.
    */
   async stopModules(
-    startedModules: readonly IModuleEnvelope[],
+    startedModules: readonly PlatformModuleEnvelope[],
     options: IModuleLifecycleShutdownOptions,
   ): Promise<IModulesShutdownResult> {
     const lifecycleContext: IModuleLifecycleContext = {
@@ -120,7 +113,7 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
     const issues: IModuleLifecycleShutdownIssue[] = [];
 
     for (const moduleEnvelope of stopModules) {
-      const moduleId = moduleEnvelope.manifest.id;
+      const moduleId = moduleEnvelope.id;
 
       try {
         await executeWithTimeout(
@@ -148,7 +141,7 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
 
     return {
       issues,
-      stopOrder: stopModules.map((module) => module.manifest.id),
+      stopOrder: stopModules.map((module) => module.id),
     };
   }
 
@@ -164,20 +157,20 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
   }
 
   private async _executeModuleStage(
-    moduleEnvelope: IModuleEnvelope,
+    moduleEnvelope: PlatformModuleEnvelope,
     stage: PlatformModuleLifecycleStageType,
     lifecycleContext: IModuleLifecycleContext,
   ): Promise<void> {
     const context = this._moduleContextFactory.create({
       lifecycleStage: stage,
-      moduleManifest: moduleEnvelope.manifest,
+      moduleManifest: moduleEnvelope.toManifest(),
       startupPolicy: lifecycleContext.startupPolicy,
       sdkVersion: lifecycleContext.sdkVersion,
       persistenceProvider: lifecycleContext.persistenceProvider,
       persistenceEnabled: lifecycleContext.persistenceEnabled,
     });
 
-    await moduleEnvelope.module[stage](context);
+    await moduleEnvelope.moduleInstance?.[stage](context);
   }
 
   private _createStartupIssue(

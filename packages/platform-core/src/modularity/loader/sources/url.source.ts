@@ -5,7 +5,6 @@ import { join } from 'node:path';
 import {
   ModuleArtifactPackaging,
   ModuleArtifactSource,
-  ModuleState,
 } from '../constants/index.js';
 import type {
   ArtifactSourceValidationResultType,
@@ -22,6 +21,7 @@ import {
   type IModuleArtifactHttpClient,
 } from '../utils/index.js';
 import { ArtifactBaseSource } from './artifact.base-source.js';
+import { ModuleState, PlatformModuleEnvelope } from '@/modularity/index.js';
 
 /**
  * @alpha
@@ -106,16 +106,16 @@ export class UrlSource extends ArtifactBaseSource {
         await DynamicModuleLoader.loadModuleEntry(entryPath),
       ]);
       const safeUrl = this._redactUrl(this._descriptor.url);
+      const moduleEnvelope = new PlatformModuleEnvelope(manifest);
+
+      moduleEnvelope.moduleInstance = module;
+      moduleEnvelope.state = ModuleState.ReadyForInitialization;
+      moduleEnvelope.fullPhysicalPath = extractionResult.extractPath;
 
       const candidateArtifact: IModuleCandidateArtifact = {
+        moduleEnvelope,
         moduleId: manifest.id,
         moduleVersion: manifest.version,
-        moduleEnvelope: {
-          module,
-          manifest,
-          fullPhysicalPath: extractionResult.extractPath,
-          state: ModuleState.ReadyForInitialization,
-        },
         orderingKey: `url:${safeUrl}`,
         sourceType: ModuleArtifactSource.Url,
         sourceRef: safeUrl,

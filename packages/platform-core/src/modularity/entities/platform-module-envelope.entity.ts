@@ -7,7 +7,7 @@ import type {
   SemverRangeType,
   SemverVersionType,
 } from '@prosto/platform-sdk';
-import { ModuleNewState } from '../constants/index.js';
+import { ModuleState } from '../constants/index.js';
 
 export class PlatformModuleEnvelope implements IPlatformModuleManifest {
   public readonly id: ModuleIdentifierType;
@@ -30,7 +30,7 @@ export class PlatformModuleEnvelope implements IPlatformModuleManifest {
   public isInstalled = false;
   public fullPhysicalPath = '';
   public errors: string[] = [];
-  public state: ModuleNewState = ModuleNewState.NotInitialized;
+  public state: ModuleState = ModuleState.NotInitialized;
   public moduleInstance?: IPlatformModule;
 
   constructor(manifest: IPlatformModuleManifest) {
@@ -52,7 +52,28 @@ export class PlatformModuleEnvelope implements IPlatformModuleManifest {
     this.copyright = manifest.copyright;
   }
 
-  toString() {
+  toManifest(): IPlatformModuleManifest {
+    return {
+      id: this.id,
+      version: this.version,
+      sdkVersion: this.sdkVersion,
+      nodeVersion: this.nodeVersion,
+      title: this.title,
+      description: this.description,
+      optional: this.optional,
+      iconUrl: this.iconUrl,
+      projectUrl: this.projectUrl,
+      dependencies: this.dependencies,
+      incompatibilities: this.incompatibilities,
+      groups: this.groups,
+      tags: this.tags,
+      authors: this.authors,
+      owners: this.owners,
+      copyright: this.copyright,
+    };
+  }
+
+  toString(): string {
     return `${this.id}@${this.version}`;
   }
 

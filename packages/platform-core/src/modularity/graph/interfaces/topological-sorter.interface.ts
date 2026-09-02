@@ -1,12 +1,12 @@
 import type { IDependencyGraph } from './dependency-graph.interface.js';
-import type { IModuleEnvelope } from '../../loader/index.js';
+import type { PlatformModuleEnvelope } from '../../entities/index.js';
 
 /**
  * @alpha
  * Result of topological sort operation.
  */
 export interface ITopologicalSortResult {
-  readonly orderedModules: readonly IModuleEnvelope[];
+  readonly orderedModules: readonly PlatformModuleEnvelope[];
   readonly missingDependencies: ReadonlyMap<string, readonly string[]>;
 }
 

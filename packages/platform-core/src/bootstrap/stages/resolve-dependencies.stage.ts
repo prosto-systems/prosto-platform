@@ -1,9 +1,9 @@
 import {
   DependencyCycleError,
   DependencyGraph,
-  type IModuleEnvelope,
   isModuleCritical,
   type IStartupPolicyEvaluator,
+  type PlatformModuleEnvelope,
   TopologicalSorter,
 } from '@/modularity/index.js';
 import type { IBootstrapStageContext } from '../interfaces/index.js';
@@ -37,7 +37,7 @@ export class ResolveDependenciesStage extends BootstrapBaseStage {
     const dependencyGraph = DependencyGraph.create(validatedModules);
     const topologicalSorter = TopologicalSorter.create();
 
-    let orderedModules: IModuleEnvelope[] = [];
+    let orderedModules: PlatformModuleEnvelope[] = [];
 
     try {
       const topologicalSortResult = topologicalSorter.sort(dependencyGraph);
@@ -61,7 +61,7 @@ export class ResolveDependenciesStage extends BootstrapBaseStage {
           moduleId,
           policyMode: context.policyMode,
           critical:
-            !moduleEnvelope || isModuleCritical(moduleEnvelope.manifest),
+            !moduleEnvelope || isModuleCritical(moduleEnvelope.toManifest()),
         });
 
         if (policy.action === 'abort') {
@@ -73,7 +73,7 @@ export class ResolveDependenciesStage extends BootstrapBaseStage {
       }
 
       orderedModules = topologicalSortResult.orderedModules.filter(
-        (module) => !context.skippedModuleIds.has(module.manifest.id),
+        (module) => !context.skippedModuleIds.has(module.id),
       );
 
       this.addOutcome(context, { ok: true });

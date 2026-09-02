@@ -11,7 +11,6 @@ import { RuntimeErrorCodes } from '@/common/index.js';
 import {
   ModuleArtifactPackaging,
   ModuleArtifactSource,
-  ModuleState,
 } from '../constants/index.js';
 import {
   ArtifactExtractor,
@@ -20,6 +19,7 @@ import {
   DynamicModuleLoader,
 } from '../utils/index.js';
 import { ArtifactBaseSource } from './artifact.base-source.js';
+import { ModuleState, PlatformModuleEnvelope } from '@/modularity/index.js';
 
 /**
  * @alpha
@@ -87,16 +87,16 @@ export class PathSource extends ArtifactBaseSource {
         await DynamicModuleLoader.loadModuleManifest(manifestPath),
         await DynamicModuleLoader.loadModuleEntry(entryPath),
       ]);
+      const moduleEnvelope = new PlatformModuleEnvelope(manifest);
+
+      moduleEnvelope.moduleInstance = module;
+      moduleEnvelope.state = ModuleState.ReadyForInitialization;
+      moduleEnvelope.fullPhysicalPath = extractionResult.extractPath;
 
       const candidateArtifact: IModuleCandidateArtifact = {
+        moduleEnvelope,
         moduleId: manifest.id,
         moduleVersion: manifest.version,
-        moduleEnvelope: {
-          module,
-          manifest,
-          fullPhysicalPath: extractionResult.extractPath,
-          state: ModuleState.ReadyForInitialization,
-        },
         orderingKey: `path:${this._descriptor.path}`,
         sourceType: ModuleArtifactSource.Path,
         sourceRef: this._descriptor.path,

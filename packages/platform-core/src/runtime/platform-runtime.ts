@@ -6,10 +6,10 @@ import type {
 } from '@/diagnostics/index.js';
 import { RuntimeStartupStatus } from '@/diagnostics/index.js';
 import type {
-  IModuleEnvelope,
   IModuleLifecycleOrchestrator,
   IModuleLifecycleShutdownIssue,
   ModuleArtifactSourceDescriptorType,
+  PlatformModuleEnvelope,
 } from '@/modularity/index.js';
 import type {
   IPlatformConfig,
@@ -34,7 +34,7 @@ import {
  * the bootstrapping process and modules lifecycle.
  */
 export class PlatformRuntime implements IPlatformRuntime {
-  private _startedModules: readonly IModuleEnvelope[] = [];
+  private _startedModules: readonly PlatformModuleEnvelope[] = [];
   private _stoppingPromise: Promise<void> | null = null;
 
   private readonly _startupPolicy: PlatformStartupPolicyType;
@@ -56,9 +56,7 @@ export class PlatformRuntime implements IPlatformRuntime {
   }
 
   get startedModuleIds(): readonly string[] {
-    return this._startedModules.map(
-      (moduleEnvelope) => moduleEnvelope.manifest.id,
-    );
+    return this._startedModules.map((moduleEnvelope) => moduleEnvelope.id);
   }
 
   private _started = false;
@@ -123,8 +121,8 @@ export class PlatformRuntime implements IPlatformRuntime {
       correlationId: this._correlationId,
       failedModules: bootstrapContext.failedDiagnostics,
       loadedModules: bootstrapContext.loadedModules.map((moduleEnvelope) => ({
-        moduleId: moduleEnvelope.manifest.id,
-        version: moduleEnvelope.manifest.version,
+        moduleId: moduleEnvelope.id,
+        version: moduleEnvelope.version,
       })),
       skippedModules: bootstrapContext.skippedModuleIds.map((moduleId) => {
         const reason = failedDiagnosticsByModuleId.get(moduleId);
