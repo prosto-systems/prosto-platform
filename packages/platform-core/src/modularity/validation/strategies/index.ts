@@ -1,2 +1,3 @@
+export * from './compatibility-validation.strategy.js';
 export * from './manifest-validation.strategy.js';
 export * from './module-validation.base-strategy.js';

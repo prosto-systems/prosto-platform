@@ -28,21 +28,6 @@ export class PlatformModuleCompatibilityValidator implements IPlatformModuleComp
       ...this._validateRuntimeVersion('nodeVersion', runtime.nodeVersion),
     );
 
-    /*
-    if (
-      !issues.length &&
-      !isSemverSatisfied(runtime.platformVersion, manifest.platformVersion)
-    ) {
-      issues.push({
-        field: 'platformVersion',
-        code: 'VERSION_RANGE_MISMATCH',
-        message: 'Runtime platformVersion is outside the manifest platformVersion range.',
-        expectedRange: manifest.platformVersion,
-        actualVersion: runtime.platformVersion,
-      });
-    }
-    */
-
     if (
       !issues.length &&
       !isSemverSatisfied(runtime.sdkVersion, manifest.sdkVersion)

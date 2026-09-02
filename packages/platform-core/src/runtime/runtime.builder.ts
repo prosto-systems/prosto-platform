@@ -34,6 +34,7 @@ import { ConsoleModuleLoggerFactory } from '@/logging/index.js';
 import {
   ArtifactFetcher,
   ArtifactSourceFactory,
+  CompatibilityValidationStrategy,
   type IModuleContextFactory,
   type IModuleLifecycleOrchestrator,
   ManifestValidationStrategy,
@@ -125,7 +126,7 @@ export class RuntimeBuilder implements IRuntimeBuilder {
         version: pkg.version,
         basePath: process.cwd(),
         discoveryPath: './modules',
-        probingPath: 'app_data/modules',
+        probingPath: './app_data/modules',
         startupPolicy: 'strict',
       },
       modules: {
@@ -235,7 +236,10 @@ export class RuntimeBuilder implements IRuntimeBuilder {
     return new BootstrapCoordinator(
       BootstrapPipeline.create([
         new DiscoverStage(moduleLoader),
-        new ValidateStage([new ManifestValidationStrategy()]),
+        new ValidateStage([
+          new ManifestValidationStrategy(),
+          new CompatibilityValidationStrategy(),
+        ]),
         new ResolveDependenciesStage(startupPolicyEvaluator),
         new ModulesInitializationStage(
           startupPolicyEvaluator,
