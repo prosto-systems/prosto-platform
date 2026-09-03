@@ -85,6 +85,9 @@ export class PlatformRuntime implements IPlatformRuntime {
     return this._reports;
   }
 
+  /**
+   * Runs the bootstrap pipeline once and records its startup report.
+   */
   async start(): Promise<void> {
     if (this._started) return;
 
@@ -142,6 +145,10 @@ export class PlatformRuntime implements IPlatformRuntime {
     }
   }
 
+  /**
+   * Stops started modules in reverse order, disposes persistence and runtime
+   * services, and records the shutdown report.
+   */
   async stop(): Promise<void> {
     if (this._stopped) return;
 
@@ -213,6 +220,9 @@ export class PlatformRuntime implements IPlatformRuntime {
     }
   }
 
+  /**
+   * Writes the probing rebuild marker consumed by the next copy stage.
+   */
   async invalidateProbingFolder(): Promise<void> {
     const normalizedProbingPath = normalize(this._config.platform.probingPath);
 

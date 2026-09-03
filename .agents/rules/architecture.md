@@ -41,9 +41,9 @@
 - Own vendor integrations
 - Own feature domain logic
 
-The public core API has no HTTP contract. `src/main.ts` currently starts a
-Fastify development demonstration; it is application bootstrap code, not a
-framework API exposed by the core package.
+The current core source exposes no HTTP application bootstrap. HTTP composition
+belongs to an application or adapter; the shared TypeORM example owns its
+Fastify development server outside `platform-core`.
 
 ### `platform-sdk` MUST:
 - Keep external runtime dependencies minimal and justified

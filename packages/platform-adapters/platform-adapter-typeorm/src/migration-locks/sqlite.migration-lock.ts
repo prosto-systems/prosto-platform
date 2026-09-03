@@ -2,6 +2,12 @@ import type { QueryRunner } from 'typeorm';
 import { sleep } from '@/utils/index.js';
 import { QueryRunnerBaseMigrationLock } from './base.migration-lock.js';
 
+/**
+ * @internal
+ * SQLite migration lock using a non-blocking retry loop around
+ * `BEGIN EXCLUSIVE`. In-memory databases bypass locking because they cannot
+ * contend across processes.
+ */
 export class SqliteMigrationLock extends QueryRunnerBaseMigrationLock {
   private readonly POLL_INTERVAL_MS = 50;
 

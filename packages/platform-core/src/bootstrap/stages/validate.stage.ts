@@ -5,7 +5,11 @@ import { BootstrapBaseStage } from './bootstrap.base-stage.js';
 
 /**
  * @alpha
- * Bootstrap stage that validates module manifests, integrity, and compatibility.
+ * Runs the configured validation strategies for every discovered manifest.
+ *
+ * The default runtime composition validates the manifest schema and its SDK
+ * and Node.js compatibility ranges. Validation stops at the first failed
+ * strategy for each module while remaining candidates continue.
  */
 export class ValidateStage extends BootstrapBaseStage {
   readonly stageType = BootstrapStage.Validate;

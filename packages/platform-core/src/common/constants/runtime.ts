@@ -1,3 +1,8 @@
+/**
+ * @internal
+ * Marker created in the probing directory to request a full rebuild on the
+ * next runtime startup.
+ */
 export const REBUILD_MARKER_FILE_NAME = '.rebuild';
 
 /**

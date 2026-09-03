@@ -58,23 +58,27 @@ logger.debug({ config, moduleId }, 'Module configuration loaded');
 ```typescript
 class ModuleLifecycleOrchestrator {
   async executePhase(
-    moduleEnvelope: IModuleEnvelope,
+    moduleEnvelope: PlatformModuleEnvelope,
     phase: PlatformModuleLifecycleStageType,
     ctx: IPlatformModuleContext
   ): Promise<void> {
     const start = Date.now();
     
     logger.info({
-      moduleId: moduleEnvelope.manifest.id,
+      moduleId: moduleEnvelope.id,
       phase,
       correlationId: ctx.correlationId
     }, 'Module lifecycle phase starting');
 
     try {
-      await moduleEnvelope.module[phase](ctx);
+      if (!moduleEnvelope.moduleInstance) {
+        throw new Error('Module instance not found');
+      }
+
+      await moduleEnvelope.moduleInstance[phase](ctx);
       
       logger.info({
-        moduleId: moduleEnvelope.manifest.id,
+        moduleId: moduleEnvelope.id,
         phase,
         duration: Date.now() - start,
         correlationId: ctx.correlationId
@@ -83,7 +87,7 @@ class ModuleLifecycleOrchestrator {
     } catch (error) {
       logger.error({
         err: error,
-        moduleId: moduleEnvelope.manifest.id,
+        moduleId: moduleEnvelope.id,
         phase,
         errorCode: 'LIFECYCLE_PHASE_FAILURE',
         correlationId: ctx.correlationId

@@ -49,6 +49,12 @@ All detailed rules are in `.agents/rules/` directory:
 - The `@alpha` admin plugin registration context provides auth, translation, workspace, main-menu, blade, and blade-toolbar services.
 - Follow `packages/platform-admin-shell/README.md` for the admin plugin manifest, shared-runtime imports, and workspace lifecycle contract.
 
+### Module Loading
+- `platform-core` discovers local module packages below `platform.discoveryPath`; modules are not passed through `RuntimeBuilder` options.
+- A discoverable package contains `manifest.json`, `package.json`, and a built `dist/` directory. Prefer a `./platform` package export for the ESM entry.
+- Validated builds are loaded from `platform.probingPath`. Use `refreshProbingFolderOnStart` for startup refreshes or `IPlatformRuntime.invalidateProbingFolder()` to request a complete rebuild on the next startup.
+- URL, registry, archive, checksum, and in-memory artifact sources are not implemented by the current core loader.
+
 ### Testing
 - **Vitest** as test runner (`npm run test`, `npm run test:contracts`)
 - **Contract tests** mandatory for all modules before integration
@@ -140,5 +146,5 @@ npm run typecheck --workspace=@prosto/platform-admin-vite # Type-check admin run
 
 ---
 
-**Last Updated**: 2026-08-31
-**Version**: 1.2.0
+**Last Updated**: 2026-09-03
+**Version**: 1.3.0

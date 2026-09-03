@@ -15,8 +15,9 @@ export interface IRuntimeBuilderOptions {
   readonly environment?: string;
 
   /**
-   * Path to the configuration file directory
-   * @default '.'
+   * Optional deployment configuration directory. When omitted, the builder
+   * loads package defaults but does not read configuration from the current
+   * working directory.
    */
   readonly configDir?: string;
 

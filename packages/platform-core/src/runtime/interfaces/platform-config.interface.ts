@@ -1,9 +1,17 @@
 import type { PlatformStartupPolicyType } from '@prosto/platform-sdk';
 import type { IConfigAccessPolicy } from '@/modularity/index.js';
 
+/**
+ * @alpha
+ * Driver-neutral database dialects accepted by platform configuration.
+ */
 export type TypeOrmDialectType =
   'postgres' | 'mysql' | 'mariadb' | 'sqlite' | 'mssql';
 
+/**
+ * @alpha
+ * Transaction scope used while TypeORM runs pending migrations.
+ */
 export type TypeOrmMigrationTransactionModeType = 'all' | 'each' | 'none';
 
 /**
@@ -24,12 +32,15 @@ export interface ITypeOrmPersistencePlatformConfig extends Record<
   unknown
 > {
   readonly enabled: boolean;
+  /** Driver-neutral dialect. `sqlite` is mapped by the adapter. */
   readonly type?: TypeOrmDialectType;
   readonly host?: string;
   readonly port?: number;
+  /** Required for SQLite and structured server-dialect configuration. */
   readonly database?: string;
   readonly username?: string;
   readonly password?: string;
+  /** Server-dialect connection URL. Unsupported for SQLite. */
   readonly url?: string;
   readonly schema?: string;
   readonly poolSize?: number;
@@ -48,13 +59,13 @@ export interface IPlatformConfig extends Record<string, unknown> {
   platform: {
     name: string;
     version: string;
-    /** @default process.cwd() */
+    /** Informational application base path. @default process.cwd() */
     basePath: string;
-    /** @default './modules' */
+    /** Local package tree recursively scanned for manifests. @default './modules' */
     discoveryPath: string;
-    /** @default 'app_data/modules' */
+    /** Runtime package cache used for ESM imports. @default 'app_data/modules' */
     probingPath: string;
-    /** @default false */
+    /** Copy validated builds into the probing directory on every startup. @default false */
     refreshProbingFolderOnStart: boolean;
     /** @default 'strict' */
     startupPolicy: PlatformStartupPolicyType;

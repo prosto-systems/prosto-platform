@@ -41,11 +41,17 @@ export type PlatformModuleCompatibilityValidationResultType =
  * Contract for runtime compatibility validation.
  */
 export interface IPlatformModuleCompatibilityValidator {
+  /**
+   * Returns structured SDK and Node.js compatibility issues without throwing.
+   */
   validate(
     manifest: IPlatformModuleManifest,
     runtime: IPlatformRuntimeVersionContext,
   ): PlatformModuleCompatibilityValidationResultType;
 
+  /**
+   * Throws when the manifest is incompatible with the runtime versions.
+   */
   assert(
     manifest: IPlatformModuleManifest,
     runtime: IPlatformRuntimeVersionContext,

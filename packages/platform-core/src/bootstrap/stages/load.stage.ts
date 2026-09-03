@@ -8,6 +8,11 @@ import { BootstrapBaseStage } from './bootstrap.base-stage.js';
 
 /**
  * @alpha
+ * Imports validated platform module entries from the probing directory.
+ *
+ * Successfully imported module instances are attached to their existing
+ * envelopes and marked ready for initialization. A failed import skips only
+ * the affected module and adds a structured bootstrap diagnostic.
  */
 export class LoadStage extends BootstrapBaseStage {
   readonly stageType = BootstrapStage.Load;

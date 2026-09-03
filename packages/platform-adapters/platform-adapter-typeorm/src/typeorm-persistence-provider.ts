@@ -24,7 +24,12 @@ import { collectValidatedTypeOrmMetadata } from '@/utils/index.js';
 
 /**
  * @alpha
- * Initializes and owns the shared TypeORM DataSource for a runtime.
+ * Initializes and owns one shared TypeORM 1.1 `DataSource` for a runtime.
+ *
+ * The provider validates collected module metadata, acquires a dialect-specific
+ * migration lock, runs migrations, and publishes the data source only after
+ * successful initialization. Public `sqlite` configuration is implemented by
+ * the `better-sqlite3` driver and requires `database` instead of `url`.
  */
 export class TypeOrmPersistenceProvider implements IPersistenceProvider {
   readonly descriptors = new PersistenceDescriptorRegistry();

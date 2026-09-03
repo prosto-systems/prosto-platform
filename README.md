@@ -8,11 +8,12 @@ on those contracts.
 ## Current status
 
 The repository contains an alpha runtime kernel, a TypeORM persistence adapter,
-and an alpha administration module runtime. The runtime can load modules from
-memory, local paths, registries, and URLs, resolve their dependencies, execute
-their lifecycle, and expose startup and shutdown diagnostics. It does not yet
-provide a production HTTP application, admin module asset serving, or Content
-Security Policy configuration. See the
+and an alpha administration module runtime. The runtime discovers local module
+packages, validates their manifests and SDK/Node.js compatibility, resolves
+their dependencies, copies their builds into a probing directory, executes
+their lifecycle, and exposes startup and shutdown diagnostics. It does not yet
+provide remote module acquisition, a production HTTP application, admin module
+asset serving, or Content Security Policy configuration. See the
 [`@prosto/platform-admin-shell` README](packages/platform-admin-shell/README.md)
 for the implemented admin contract and its limits.
 
@@ -94,3 +95,18 @@ runtime rather than bundled again.
 [`examples/module-test`](examples/module-test/README.md) demonstrates a module
 package, contract checks, artifact packaging, an admin plugin, localized
 messages, workspaces, menu entries, and blades.
+
+## Platform modules
+
+The core discovers every `manifest.json` below the configured
+`platform.discoveryPath` (except files below `artifacts/`). Each manifest must
+belong to a local module package containing `package.json` and a built `dist/`
+directory. After manifest and compatibility validation, the runtime resolves
+dependency order, refreshes the probing directory when required, loads the
+platform ESM entry, and runs `init()`, persistence initialization, and
+`start()`.
+
+The preferred package export is `./platform`. See the
+[`@prosto/platform-core` README](packages/platform-core/README.md) for the
+artifact layout, configuration options, probing refresh behavior, and complete
+bootstrap order.

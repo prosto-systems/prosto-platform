@@ -41,6 +41,11 @@ class module_order_create_order1710000001001 implements MigrationInterface {
   }
 }
 
+/**
+ * @alpha
+ * Example discovered module that contributes TypeORM metadata during `init()`
+ * and consumes the ready shared data source during `start()`.
+ */
 export class OrdersModule implements IPlatformModule {
   init(context: IPlatformModuleContext): void {
     context.persistence?.descriptors?.register(context.moduleId, {

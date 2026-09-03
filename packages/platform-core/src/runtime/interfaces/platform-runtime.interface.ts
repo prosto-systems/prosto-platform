@@ -5,10 +5,15 @@ import type { IRuntimeOperationalReports } from '@/diagnostics/index.js';
  * Active platform runtime with startup reports and lifecycle control.
  */
 export interface IPlatformRuntime {
+  /** IDs of modules whose `start()` hooks completed successfully. */
   readonly startedModuleIds: readonly string[];
+  /** Whether startup completed without a fatal runtime status. */
   readonly started: boolean;
+  /** Whether startup completed with skipped or failed modules. */
   readonly degraded: boolean;
+  /** Whether runtime shutdown has completed. */
   readonly stopped: boolean;
+  /** Startup and shutdown diagnostic reports produced so far. */
   readonly reports: IRuntimeOperationalReports;
 
   /**
@@ -24,8 +29,11 @@ export interface IPlatformRuntime {
   stop(): Promise<void>;
 
   /**
-   * Write a marker file so the next startup rebuilds the probing folder from scratch.
-   * Called at runtime after install/uninstall when loaded assemblies are locked.
+   * Requests a complete probing-directory rebuild on the next startup.
+   *
+   * The method writes a marker instead of deleting loaded module files. Use it
+   * after installing or uninstalling discovery packages when current-process
+   * module entries may still be in use.
    */
   invalidateProbingFolder(): Promise<void>;
 }

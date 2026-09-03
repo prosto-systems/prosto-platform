@@ -13,6 +13,11 @@ import { RuntimeErrorCodes } from '@/common/index.js';
 
 /**
  * @alpha
+ * Discovers module manifests below a local directory.
+ *
+ * The stage recursively reads `manifest.json` files, except those below an
+ * `artifacts` directory, and creates metadata-only module envelopes. Module
+ * code is not imported until the load stage.
  */
 export class DiscoverStage extends BootstrapBaseStage {
   readonly stageType = BootstrapStage.Discover;

@@ -9,6 +9,12 @@ import { BootstrapBaseStage } from './bootstrap.base-stage.js';
 
 /**
  * @alpha
+ * Copies validated module builds into the runtime probing directory.
+ *
+ * The stage copies each package's `dist` directory and `package.json` when the
+ * probing directory is new, startup refresh is enabled, or a rebuild marker is
+ * present. A rebuild marker causes the complete probing directory to be
+ * removed before it is repopulated.
  */
 export class CopyStage extends BootstrapBaseStage {
   readonly stageType = BootstrapStage.Copy;

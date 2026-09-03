@@ -55,6 +55,15 @@ import {
  * Acts as the composition root for wiring all dependencies.
  */
 export class RuntimeBuilder implements IRuntimeBuilder {
+  /**
+   * Creates a runtime from package defaults and deployment overrides.
+   *
+   * Module packages are discovered from `platform.discoveryPath`; executable
+   * modules are not accepted as builder options.
+   *
+   * @param options - Runtime composition and configuration inputs.
+   * @returns A configured runtime that has not been started.
+   */
   build(options: IRuntimeBuilderOptions): IPlatformRuntime {
     const environment =
       options.environment || process.env.NODE_ENV || 'production';

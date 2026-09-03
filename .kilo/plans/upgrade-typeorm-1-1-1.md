@@ -1,5 +1,8 @@
 # Upgrade TypeORM to 1.1.1
 
+> **Status: implemented.** The repository now uses TypeORM 1.1.1 and
+> `better-sqlite3` 12.11.1 with the driver-neutral public `sqlite` dialect.
+
 ## Goal and decisions
 
 - Upgrade every workspace declaration from `typeorm ^0.3.31` to `^1.1.1`.

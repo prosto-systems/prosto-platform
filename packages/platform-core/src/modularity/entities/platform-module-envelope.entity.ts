@@ -9,6 +9,14 @@ import type {
 } from '@prosto/platform-sdk';
 import { ModuleState } from '../constants/index.js';
 
+/**
+ * @alpha
+ * Mutable runtime envelope for immutable module manifest metadata.
+ *
+ * The envelope retains the canonical manifest fields while tracking the
+ * discovery path, probing reference, loaded module instance, installation
+ * state, and lifecycle state used by the bootstrap pipeline.
+ */
 export class PlatformModuleEnvelope implements IPlatformModuleManifest {
   public readonly id: ModuleIdentifierType;
   public readonly version: SemverVersionType;
@@ -52,6 +60,9 @@ export class PlatformModuleEnvelope implements IPlatformModuleManifest {
     this.copyright = manifest.copyright;
   }
 
+  /**
+   * Returns a manifest-only snapshot without runtime state or module code.
+   */
   toManifest(): IPlatformModuleManifest {
     return {
       id: this.id,
@@ -73,6 +84,9 @@ export class PlatformModuleEnvelope implements IPlatformModuleManifest {
     };
   }
 
+  /**
+   * Returns the canonical `<module-id>@<version>` identity.
+   */
   toString(): string {
     return `${this.id}@${this.version}`;
   }

@@ -59,6 +59,13 @@ The manifest schema requires an ID matching `[a-z][a-z0-9-]{2,}`, a semantic
 version, an SDK version range, and a non-empty title. The validator also rejects
 duplicate dependencies and groups, as well as self-dependencies.
 
+`PlatformModuleCompatibilityValidator` validates the runtime SDK and optional
+Node.js versions as semantic versions, then checks them against `sdkVersion` and
+`nodeVersion` from the manifest. The core runs this compatibility check before
+dependency resolution and module loading. `validate()` returns structured
+issues; `assert()` throws `PlatformModuleCompatibilityValidationError` when the
+module is incompatible.
+
 ## Admin Plugins
 
 Admin entries export a named registration callback that receives the SDK's

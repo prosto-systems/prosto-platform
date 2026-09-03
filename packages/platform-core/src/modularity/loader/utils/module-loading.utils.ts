@@ -11,7 +11,10 @@ type UnknownConstructorType = new (...args: unknown[]) => unknown;
 
 /**
  * @alpha
- * Check if a file exists.
+ * Checks whether a filesystem entry can be statted.
+ *
+ * @param filePath - Path to the entry.
+ * @returns `true` when the entry exists and is accessible; otherwise `false`.
  */
 export async function fileExists(filePath: string): Promise<boolean> {
   try {
@@ -24,9 +27,17 @@ export async function fileExists(filePath: string): Promise<boolean> {
 
 /**
  * @alpha
- * ESM module loading with multi-format export resolution.
+ * Resolves and imports platform package ESM entries and JSON manifests.
  */
 export class DynamicModuleLoader {
+  /**
+   * Resolves a package manifest from `manifest.json` or
+   * `dist/manifest.json`, in that order.
+   *
+   * @param packageDir - Module package root.
+   * @returns The first existing manifest path.
+   * @throws When neither supported manifest path exists.
+   */
   static async resolveManifestPath(packageDir: string): Promise<string> {
     for (const candidate of ['manifest.json', 'dist/manifest.json']) {
       const candidatePath = join(packageDir, candidate);
@@ -39,6 +50,17 @@ export class DynamicModuleLoader {
     throw new Error('Manifest was not found');
   }
 
+  /**
+   * Resolves the platform module entry declared by a package.
+   *
+   * Resolution prefers the `./platform` export, then the root export's import
+   * or default condition, `main`, and finally the conventional platform entry
+   * paths.
+   *
+   * @param packageDir - Module package root in the probing directory.
+   * @returns The resolved platform entry path.
+   * @throws When no supported entry point can be resolved.
+   */
   static async resolvePlatformModuleEntryPath(
     packageDir: string,
   ): Promise<string> {
@@ -83,6 +105,16 @@ export class DynamicModuleLoader {
     throw new Error('No platform module entry point found in package');
   }
 
+  /**
+   * Resolves an admin plugin entry declared by a package.
+   *
+   * Resolution prefers the `./admin` export, then the root export's import or
+   * default condition, `main`, and finally conventional admin entry paths.
+   *
+   * @param packageDir - Module package root.
+   * @returns The resolved admin plugin entry path.
+   * @throws When no supported entry point can be resolved.
+   */
   static async resolveAdminShellPluginEntryPath(
     packageDir: string,
   ): Promise<string> {
@@ -125,6 +157,13 @@ export class DynamicModuleLoader {
     throw new Error('No admin shell plugin entry point found in package');
   }
 
+  /**
+   * Imports a JSON module manifest and returns its default export.
+   *
+   * @param manifestPath - Absolute or relative path to `manifest.json`.
+   * @returns The structurally recognized module manifest.
+   * @throws When the JSON module has no recognizable default manifest export.
+   */
   static async loadModuleManifest(
     manifestPath: string,
   ): Promise<IPlatformModuleManifest> {
@@ -138,6 +177,17 @@ export class DynamicModuleLoader {
     throw new Error('No valid IPlatformModuleManifest export found');
   }
 
+  /**
+   * Imports and instantiates an executable platform module entry.
+   *
+   * A default or named export may be an `IPlatformModule` instance or a
+   * zero-argument class. Named functions prefixed with `create`, `init`,
+   * `factory`, `build`, or `make` are invoked as module factories.
+   *
+   * @param entryPath - Path to the platform ESM entry.
+   * @returns The resolved module instance.
+   * @throws When no export resolves to an `IPlatformModule`.
+   */
   static async loadModuleEntry(entryPath: string): Promise<IPlatformModule> {
     const nameSpace = await import(pathToFileURL(entryPath).href);
 

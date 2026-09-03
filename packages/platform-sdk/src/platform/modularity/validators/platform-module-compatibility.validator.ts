@@ -12,9 +12,16 @@ import { isSemverSatisfied, isSemverVersion } from '@/utils/index.js';
 
 /**
  * @alpha
- * The default implementation of platform module compatibility validation.
+ * Validates runtime semantic versions against module compatibility ranges.
+ *
+ * Runtime version values are validated first. The SDK version is always
+ * checked against `manifest.sdkVersion`; Node.js is checked only when the
+ * manifest declares `nodeVersion`.
  */
 export class PlatformModuleCompatibilityValidator implements IPlatformModuleCompatibilityValidator {
+  /**
+   * Returns all runtime-version issues found before the first range mismatch.
+   */
   validate(
     manifest: IPlatformModuleManifest,
     runtime: IPlatformRuntimeVersionContext,
@@ -71,6 +78,12 @@ export class PlatformModuleCompatibilityValidator implements IPlatformModuleComp
     return { compatible: true, issues: [] };
   }
 
+  /**
+   * Asserts that a manifest supports the supplied runtime versions.
+   *
+   * @throws PlatformModuleCompatibilityValidationError when compatibility
+   * validation fails.
+   */
   assert(
     manifest: IPlatformModuleManifest,
     runtime: IPlatformRuntimeVersionContext,

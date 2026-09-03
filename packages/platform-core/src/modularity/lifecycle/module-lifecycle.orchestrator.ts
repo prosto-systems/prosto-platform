@@ -22,11 +22,18 @@ import { ShutdownTimeoutError } from './module-lifecycle.errors.js';
 
 /**
  * @alpha
- * Lifecycle orchestrator for managing module startup and shutdown.
+ * Executes lifecycle hooks on loaded module envelopes.
+ *
+ * Initialization and startup preserve dependency order. Shutdown reverses the
+ * successful startup order and applies the configured per-module timeout.
  */
 export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator {
   constructor(private readonly _moduleContextFactory: IModuleContextFactory) {}
 
+  /**
+   * Runs `init()` for each loaded module and rolls back persistence descriptors
+   * registered by a module whose initialization fails.
+   */
   async initializeModules(
     loadedModules: readonly PlatformModuleEnvelope[],
     options: IModuleLifecycleStartupOptions,
@@ -63,6 +70,9 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
     return { initializedModules, issues };
   }
 
+  /**
+   * Runs `start()` for each successfully initialized module.
+   */
   async startModules(
     initializedModules: readonly PlatformModuleEnvelope[],
     options: IModuleLifecycleStartupOptions,

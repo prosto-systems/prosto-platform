@@ -11,9 +11,11 @@ import { ModuleValidationBaseStrategy } from './module-validation.base-strategy.
 
 /**
  * @alpha
- * Compatibility validation strategy.
- * Wraps IPlatformModuleCompatibilityValidator from SDK
- * to provide pluggable compatibility validation.
+ * Adapts the SDK compatibility validator to the core bootstrap strategy.
+ *
+ * The default validator checks the runtime SDK version and, when requested by
+ * the manifest, the Node.js version. Validation issues are mapped to a single
+ * structured `COMPATIBILITY_MISMATCH` bootstrap failure.
  */
 export class CompatibilityValidationStrategy extends ModuleValidationBaseStrategy {
   readonly name = 'compatibility' as const;

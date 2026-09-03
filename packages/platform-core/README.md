@@ -1,9 +1,10 @@
 # @prosto/platform-core
 
 `@prosto/platform-core` is the alpha runtime kernel for Prosto Platform. It
-discovers module artifacts, validates manifests, resolves dependency order,
-runs module lifecycles, coordinates optional persistence initialization, and
-collects startup and shutdown diagnostics.
+discovers local module packages, validates manifests and runtime compatibility,
+resolves dependency order, maintains a probing directory, runs module
+lifecycles, coordinates optional persistence initialization, and collects
+startup and shutdown diagnostics.
 
 The core depends on SDK contracts and does not depend on adapters or feature
 modules. Compose an adapter, such as the TypeORM persistence adapter, in the
@@ -16,35 +17,14 @@ application's `RuntimeBuilder` options.
 
 ## Usage
 
-Build a runtime with module artifact source descriptors, then start and stop it
-at the application boundary. The core supports `memory`, `path`, `registry`,
-and `url` module sources.
+Build the runtime at the application boundary. Modules are discovered from the
+configured filesystem path; they are not passed to `RuntimeBuilder`.
 
 ```ts
 import { RuntimeBuilder } from '@prosto/platform-core';
-import type {
-  IPlatformModule,
-  IPlatformModuleContext,
-  IPlatformModuleManifest,
-} from '@prosto/platform-sdk';
-
-const manifest: IPlatformModuleManifest = {
-  id: 'example-module',
-  version: '1.0.0',
-  sdkVersion: '^0.0.0',
-  title: 'Example module',
-  dependencies: [],
-};
-
-class ExampleModule implements IPlatformModule {
-  init(_context: IPlatformModuleContext): void {}
-  start(_context: IPlatformModuleContext): void {}
-  stop(_context: IPlatformModuleContext): void {}
-}
 
 const runtime = new RuntimeBuilder().build({
   configDir: './config',
-  modules: [{ type: 'memory', manifest, module: new ExampleModule() }],
 });
 
 await runtime.start();
@@ -55,35 +35,77 @@ await runtime.stop();
 The builder reads package defaults, then optional deployment files from
 `configDir` (`app_settings.json`, environment-specific settings, and
 `app_settings.local.json`). Environment variables with the `PROSTO_` prefix
-and command-line arguments override file settings.
+and command-line arguments override file settings. When `configDir` is omitted,
+deployment files are not read from the current working directory.
 
-## Module artifact sources
+## Module package layout
 
-Pass sources through `RuntimeBuilder`'s `modules` option:
+The runtime recursively searches `platform.discoveryPath` for `manifest.json`
+files and ignores any match below an `artifacts/` directory. A discovered
+module package must have this minimum shape:
 
-- `memory` requires `module` and `manifest`; use it for in-process modules and
-  tests.
-- `path` requires a local artifact `path`.
-- `url` requires an HTTPS `url`; insecure remote URLs are rejected before
-  loading.
-- `registry` requires `packageName` and `version`; it optionally accepts
-  `registryUrl`, `authToken`, and `authType` (`bearer` or `basic`).
+```text
+modules/example-module/
+|-- manifest.json
+|-- package.json
+`-- dist/
+    `-- platform/
+        `-- platform.module.js
+```
 
-Path, URL, and registry sources accept an optional `integrity.checksum`.
-Supplied checksums are verified, and registry artifacts use the registry's
-integrity metadata when no checksum is supplied. The declared
-`integrity.signature` field is not verified by the current loader.
+The preferred `package.json` entry is:
+
+```json
+{
+  "type": "module",
+  "exports": {
+    "./platform": "./dist/platform/platform.module.js"
+  }
+}
+```
+
+The loader checks `exports["./platform"]` first, then the root `exports` import
+or default condition, then `main`. If none is declared, it probes
+`dist/platform/platform.module.js`, `dist/platform/index.js`, `dist/index.js`,
+and `index.js` in that order. The ESM entry may export an `IPlatformModule`
+instance or a zero-argument module class. Named factory functions whose names
+start with `create`, `init`, `factory`, `build`, or `make` are also supported.
+
+Remote URL and registry acquisition, archive extraction, checksums, and
+in-memory module descriptors are not part of the current core loader.
+
+## Module directories
+
+Both paths are resolved relative to the process working directory:
+
+| Setting | Default | Behavior |
+| --- | --- | --- |
+| `platform.discoveryPath` | `./modules` | Source tree scanned recursively for module manifests. |
+| `platform.probingPath` | `app_data/modules` | Runtime cache from which platform entries are imported. |
+| `platform.refreshProbingFolderOnStart` | `false` | Copies validated module `dist/` directories and `package.json` files into the probing directory during startup. |
+
+The probing directory is populated when it does not exist. If it already
+exists and refresh is disabled, its current contents are reused. Set
+`refreshProbingFolderOnStart` to `true` for development or call
+`runtime.invalidateProbingFolder()` after installing or uninstalling a module.
+Invalidation writes a `.rebuild` marker; the next startup removes the complete
+probing directory and rebuilds it from validated discovery packages.
 
 For a persistence-enabled composition, see
 [`examples/typeorm-shared-datasource`](../../examples/typeorm-shared-datasource).
 
 ## Runtime behavior
 
-- The bootstrap pipeline discovers artifacts, validates module manifests,
-  resolves dependencies, initializes modules, initializes persistence, and
-  starts modules.
-- The configured startup policy controls whether a module failure stops the
-  runtime or is recorded while unaffected modules continue.
+- The bootstrap pipeline runs `discover`, `validate`, `resolve`, `copy`, `load`,
+  `initialize`, `persistence`, and `start` in that order.
+- Validation checks the manifest schema plus the manifest's `sdkVersion` and
+  optional `nodeVersion` ranges against the runtime.
+- Required dependencies determine a deterministic topological order. Optional
+  dependencies do not create graph edges.
+- Discovery, validation, copy, and load failures skip the affected module and
+  are recorded in diagnostics. Missing dependencies and lifecycle failures are
+  additionally evaluated by the configured `strict` or `best-effort` startup
+  policy.
 - `runtime.reports` exposes structured startup, shutdown, and operational
   diagnostics. Configured secret redaction is applied to diagnostic output.
 - Call `stop()` during application shutdown to stop started modules in reverse
@@ -99,6 +121,5 @@ Run these commands from the repository root:
 | Command | Purpose |
 | --- | --- |
 | `npm run build --workspace=@prosto/platform-core` | Build the ESM package and type declarations. |
-| `npm run start --workspace=@prosto/platform-core` | Run the development runtime demonstration. |
 | `npm run typecheck --workspace=@prosto/platform-core` | Type-check the package. |
 | `npm run test --workspace=@prosto/platform-core` | Run the test suite once. |

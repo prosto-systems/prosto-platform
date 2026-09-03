@@ -17,6 +17,9 @@ npm run pack --workspace=@examples/module-test
 
 `build` emits the platform module and admin plugin under `dist/`. `pack` builds
 both artifacts and creates a distributable module archive under `artifacts/`.
+The core's local discovery ignores `artifacts/` and uses the package root
+`manifest.json`, `package.json`, and built `dist/` directory. The preferred
+platform entry is declared by the package's `./platform` export.
 
 ## Structure
 

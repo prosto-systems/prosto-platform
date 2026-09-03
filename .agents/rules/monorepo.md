@@ -17,8 +17,8 @@
 - Own vendor integrations
 - Own feature domain logic
 
-The public core API has no HTTP contract. Its `src/main.ts` currently contains
-a Fastify development demonstration and is not a framework API for consumers.
+The current core source exposes no HTTP application bootstrap. HTTP composition
+belongs to an application or adapter, not `platform-core`.
 
 **`platform-sdk` MUST:**
 - Keep external runtime dependencies minimal and justified

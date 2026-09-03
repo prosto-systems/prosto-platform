@@ -26,6 +26,10 @@ export interface IPlatformModuleDependency {
   readonly optional?: boolean;
 }
 
+/**
+ * @alpha
+ * Declares a module version range that cannot coexist with this module.
+ */
 export interface IPlatformModuleIncompatibility {
   readonly id: ModuleIdentifierType;
   readonly version: SemverRangeType;

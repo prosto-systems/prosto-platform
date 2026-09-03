@@ -170,11 +170,17 @@ const typeOrmLocalOverrideSchema = z
   .strict();
 
 /**
+ * @alpha
  * Validates the deployment-local secret override without allowing it to alter
  * unrelated runtime settings.
  */
 export const platformLocalPersistenceConfigSchema = typeOrmLocalOverrideSchema;
 
+/**
+ * @alpha
+ * Validates and supplies defaults for the complete platform configuration,
+ * including module discovery, probing refresh, and persistence settings.
+ */
 export const platformConfigSchema: ZodType<IPlatformConfig> = z.object({
   platform: z
     .object({

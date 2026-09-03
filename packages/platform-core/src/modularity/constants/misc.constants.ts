@@ -4,40 +4,37 @@
  */
 export enum ModuleState {
   /**
-   * Initial state for modules. The module is defined,
-   * but it has not been loaded, retrieved or initialized yet.
+   * Manifest metadata is available, but executable code is not loaded.
    */
   NotInitialized = 'NOT_INITIALIZED',
 
   /**
-   * The assembly that holds the Module is present.
-   * This means the module can be instantiated and initialized.
+   * Executable module code is loaded and can be initialized.
    */
   ReadyForInitialization = 'READY_FOR_INITIALIZATION',
 
   /**
-   * The module is currently Initializing.
-   * This means the module is being initialized and is not ready for starting.
+   * The module's `init()` hook is executing.
    */
   Initializing = 'INITIALIZING',
 
   /**
-   * The module is initialized and ready to start.
+   * The module's `init()` hook completed and it is ready to start.
    */
   Initialized = 'INITIALIZED',
 
   /**
-   * The module is currently starting.
+   * The module's `start()` hook is executing.
    */
   Starting = 'STARTING',
 
   /**
-   * The module is started and ready to be used.
+   * The module's `start()` hook completed successfully.
    */
   Started = 'STARTED',
 
   /**
-   * The module is not started.
+   * The module's `start()` hook failed.
    */
   NotStarted = 'NOT_STARTED',
 }

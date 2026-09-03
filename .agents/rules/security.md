@@ -7,6 +7,14 @@
 **MANDATORY for production:**
 
 1. **Manifest validation** - Schema validation against versioned contract
+2. **Controlled discovery directory** - Only trusted deployment tooling may write module packages below `platform.discoveryPath`
+3. **Controlled probing directory** - Only the runtime identity may rebuild `platform.probingPath`
+
+The current core loader discovers local packages and executes their ESM entry
+from the probing directory in-process. It is not a sandbox. URL/registry
+acquisition, archive verification, checksums, and signatures are not
+implemented, so production deployments must establish package provenance and
+filesystem access controls before startup.
 
 ### Module Manifest Requirements
 
