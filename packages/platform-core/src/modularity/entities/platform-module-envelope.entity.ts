@@ -29,7 +29,7 @@ export class PlatformModuleEnvelope implements IPlatformModuleManifest {
 
   public isInstalled = false;
   public fullPhysicalPath = '';
-  public errors: string[] = [];
+  public ref = '';
   public state: ModuleState = ModuleState.NotInitialized;
   public moduleInstance?: IPlatformModule;
 

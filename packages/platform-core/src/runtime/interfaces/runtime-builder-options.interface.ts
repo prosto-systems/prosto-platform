@@ -2,18 +2,12 @@ import type {
   IPersistenceProvider,
   IPersistenceDescriptor,
 } from '@prosto/platform-sdk';
-import type { ModuleArtifactSourceDescriptorType } from '@/modularity/index.js';
 
 /**
  * @alpha
  * Options for configuring the runtime builder.
  */
 export interface IRuntimeBuilderOptions {
-  /**
-   * List of modules to load
-   */
-  readonly modules?: readonly ModuleArtifactSourceDescriptorType[];
-
   /**
    * Environment name for loading environment-specific config
    * @default process.env.NODE_ENV || 'production'

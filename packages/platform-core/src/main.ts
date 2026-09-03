@@ -1,47 +1,9 @@
-import type {
-  IPlatformModuleContext,
-  IPlatformModule,
-  IPlatformModuleManifest,
-} from '@prosto/platform-sdk';
 import { RuntimeBuilder } from '@/runtime/runtime.builder.js';
 import Fastify from 'fastify';
-
-const demoModuleManifest: IPlatformModuleManifest = {
-  id: 'demo-module',
-  version: '1.0.0',
-  sdkVersion: '^0.0.0',
-  title: 'Demo',
-  dependencies: [],
-};
-
-class DemoModule implements IPlatformModule {
-  init(_ctx: IPlatformModuleContext): void {
-    console.log('[demo module] initialized');
-  }
-
-  start(_ctx: IPlatformModuleContext): void {
-    console.log('[demo module] started');
-  }
-
-  stop(_ctx: IPlatformModuleContext): void {
-    console.log('[demo module] stopped');
-  }
-}
 
 async function main(): Promise<void> {
   const runtime = new RuntimeBuilder().build({
     environment: process.env.NODE_ENV || 'production',
-    modules: [
-      {
-        type: 'memory',
-        manifest: demoModuleManifest,
-        module: new DemoModule(),
-      },
-      {
-        type: 'path',
-        path: '../../examples/module-test/artifacts/module-test-1.0.0.zip',
-      },
-    ],
   });
 
   await runtime.start();

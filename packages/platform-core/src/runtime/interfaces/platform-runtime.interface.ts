@@ -22,4 +22,10 @@ export interface IPlatformRuntime {
    * Cleans up resources and generates a shutdown report.
    */
   stop(): Promise<void>;
+
+  /**
+   * Write a marker file so the next startup rebuilds the probing folder from scratch.
+   * Called at runtime after install/uninstall when loaded assemblies are locked.
+   */
+  invalidateProbingFolder(): Promise<void>;
 }

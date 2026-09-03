@@ -17,6 +17,9 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-utils/platform-admin-vite/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-utils/platform-cli/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-utils/platform-contract-tests/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/typeorm-shared-datasource/app_data" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-core/app_data" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-core/modules" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

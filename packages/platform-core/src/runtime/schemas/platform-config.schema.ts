@@ -183,6 +183,7 @@ export const platformConfigSchema: ZodType<IPlatformConfig> = z.object({
       basePath: z.string().default(process.cwd()),
       discoveryPath: z.string().default('./modules'),
       probingPath: z.string().default('app_data/modules'),
+      refreshProbingFolderOnStart: z.boolean().default(false),
       startupPolicy: z.literal(['strict', 'best-effort']).default('strict'),
     })
     .default({
@@ -191,6 +192,7 @@ export const platformConfigSchema: ZodType<IPlatformConfig> = z.object({
       basePath: process.cwd(),
       discoveryPath: './modules',
       probingPath: 'app_data/modules',
+      refreshProbingFolderOnStart: false,
       startupPolicy: 'strict',
     }),
   runtime: z

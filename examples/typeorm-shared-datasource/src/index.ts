@@ -1,37 +1,23 @@
-import type {
-  IPersistenceDescriptor,
-  IPlatformModule,
-  IPlatformModuleContext,
-  IPlatformModuleManifest,
-} from '@prosto/platform-sdk';
+import type { IPersistenceDescriptor } from '@prosto/platform-sdk';
 import { fileURLToPath } from 'node:url';
 import {
   createTypeOrmPersistenceDescriptor,
-  TYPEORM_DATA_SOURCE_SERVICE_TOKEN,
   TypeOrmPersistenceProvider,
 } from '@prosto/platform-adapter-typeorm';
 import { RuntimeBuilder } from '@prosto/platform-core';
 import Fastify from 'fastify';
 import {
   Entity,
-  PrimaryGeneratedColumn,
   type MigrationInterface,
-  Table,
+  PrimaryGeneratedColumn,
   type QueryRunner,
+  Table,
 } from 'typeorm';
-
-import 'reflect-metadata';
 
 // Entities
 
 @Entity('platform_audit_entry')
 class PlatformAuditEntry {
-  @PrimaryGeneratedColumn()
-  id!: number;
-}
-
-@Entity('orders_order')
-class OrdersOrder {
   @PrimaryGeneratedColumn()
   id!: number;
 }
@@ -53,21 +39,6 @@ class platform_create_audit_entry1710000001000 implements MigrationInterface {
   }
 }
 
-class orders_create_order1710000001001 implements MigrationInterface {
-  async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.createTable(
-      new Table({
-        name: 'orders_order',
-        columns: [{ name: 'id', type: 'integer', isPrimary: true }],
-      }),
-    );
-  }
-
-  async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('orders_order');
-  }
-}
-
 // Platform persistence descriptor
 const platformPersistenceDescriptor: IPersistenceDescriptor = {
   owner: 'platform',
@@ -78,63 +49,12 @@ const platformPersistenceDescriptor: IPersistenceDescriptor = {
   }),
 };
 
-// Module manifest
-const ordersManifest: IPlatformModuleManifest = {
-  id: 'orders',
-  version: '1.0.0',
-  sdkVersion: '^0.0.0',
-  title: 'Orders example',
-  dependencies: [],
-};
-
-// Orders module
-class OrdersModule implements IPlatformModule {
-  init(context: IPlatformModuleContext): void {
-    context.persistence?.descriptors?.register(context.moduleId, {
-      owner: 'module',
-      ownerId: context.moduleId,
-      payload: createTypeOrmPersistenceDescriptor({
-        entities: [OrdersOrder],
-        migrations: [orders_create_order1710000001001],
-      }),
-    });
-  }
-
-  async start(context: IPlatformModuleContext): Promise<void> {
-    const dataSource = context.services.resolveRequired(
-      TYPEORM_DATA_SOURCE_SERVICE_TOKEN,
-    );
-
-    console.log(
-      `[orders module] DataSource is ready: ${dataSource.isInitialized}`,
-    );
-
-    const ordersRepository = dataSource.getRepository(OrdersOrder);
-    const allOrders = await ordersRepository.find();
-
-    console.log(
-      `[orders module] All orders: ${JSON.stringify(allOrders, null, 2)}`,
-    );
-  }
-
-  stop(_context: IPlatformModuleContext): void {
-    return;
-  }
-}
-
 // Main entry point
 async function main(): Promise<void> {
   const runtime = new RuntimeBuilder().build({
     configDir: fileURLToPath(new URL('../config', import.meta.url)),
     persistenceProvider: new TypeOrmPersistenceProvider(),
     platformPersistenceDescriptor,
-    modules: [
-      {
-        type: 'memory',
-        manifest: ordersManifest,
-        module: new OrdersModule(),
-      },
-    ],
   });
 
   await runtime.start();

@@ -8,8 +8,6 @@ import type {
 import type { IRuntimeFailureDiagnostic } from '@/diagnostics/index.js';
 import type {
   IModuleCandidateArtifact,
-  IRejectedModuleArtifact,
-  ModuleArtifactSourceDescriptorType,
   PlatformModuleEnvelope,
 } from '@/modularity/index.js';
 import type { BootstrapStage } from '../constants/index.js';
@@ -38,8 +36,6 @@ export interface IBootstrapStageContext {
   readonly validatedModules: PlatformModuleEnvelope[];
   readonly loadedModules: PlatformModuleEnvelope[];
   readonly failedDiagnostics: IRuntimeFailureDiagnostic[];
-  readonly moduleSources: readonly ModuleArtifactSourceDescriptorType[];
-  readonly preRejectedArtifacts: readonly IRejectedModuleArtifact[];
   readonly candidates: readonly IModuleCandidateArtifact[];
   readonly skippedModuleIds: Set<string>;
   readonly persistenceProvider?: IPersistenceProvider;

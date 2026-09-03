@@ -83,7 +83,7 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
 
         moduleEnvelope.state = ModuleState.Started;
       } catch {
-        // moduleEnvelope.state = ModuleState.NotStarted;
+        moduleEnvelope.state = ModuleState.NotStarted;
 
         issues.push(this._createStartupIssue(moduleEnvelope.id, 'start'));
 
@@ -161,6 +161,10 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
     stage: PlatformModuleLifecycleStageType,
     lifecycleContext: IModuleLifecycleContext,
   ): Promise<void> {
+    if (!moduleEnvelope.moduleInstance) {
+      throw new Error('Module instance not found');
+    }
+
     const context = this._moduleContextFactory.create({
       lifecycleStage: stage,
       moduleManifest: moduleEnvelope.toManifest(),
@@ -170,7 +174,7 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
       persistenceEnabled: lifecycleContext.persistenceEnabled,
     });
 
-    await moduleEnvelope.moduleInstance?.[stage](context);
+    await moduleEnvelope.moduleInstance[stage](context);
   }
 
   private _createStartupIssue(

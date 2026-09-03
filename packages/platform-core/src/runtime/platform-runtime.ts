@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join, normalize } from 'node:path';
 import type { IBootstrapCoordinator } from '@/bootstrap/index.js';
 import type {
   IDiagnosticsReporter,
@@ -8,7 +11,6 @@ import { RuntimeStartupStatus } from '@/diagnostics/index.js';
 import type {
   IModuleLifecycleOrchestrator,
   IModuleLifecycleShutdownIssue,
-  ModuleArtifactSourceDescriptorType,
   PlatformModuleEnvelope,
 } from '@/modularity/index.js';
 import type {
@@ -24,6 +26,7 @@ import {
 import {
   assert,
   dateNowIso,
+  REBUILD_MARKER_FILE_NAME,
   RuntimeErrorCodes,
   RuntimeStage,
 } from '@/common/index.js';
@@ -41,7 +44,6 @@ export class PlatformRuntime implements IPlatformRuntime {
   private readonly _correlationId: string;
 
   constructor(
-    private readonly _modules: readonly ModuleArtifactSourceDescriptorType[],
     private readonly _config: Readonly<IPlatformConfig>,
     private readonly _diagnosticsReporter: IDiagnosticsReporter,
     private readonly _bootstrapCoordinator: IBootstrapCoordinator,
@@ -92,7 +94,6 @@ export class PlatformRuntime implements IPlatformRuntime {
     const bootstrapContext = await this._bootstrapCoordinator.coordinate({
       policyMode,
       startupStartedAt,
-      modules: this._modules,
       correlationId: this._correlationId,
       runtimeVersion: this._options.runtimeVersion ?? {
         sdkVersion: SDK_CONTRACT_VERSION,
@@ -210,6 +211,18 @@ export class PlatformRuntime implements IPlatformRuntime {
       resolveStoppingPromise();
       this._stoppingPromise = null;
     }
+  }
+
+  async invalidateProbingFolder(): Promise<void> {
+    const normalizedProbingPath = normalize(this._config.platform.probingPath);
+
+    if (!existsSync(normalizedProbingPath)) {
+      await mkdir(normalizedProbingPath, { recursive: true });
+    }
+
+    const markerPath = join(normalizedProbingPath, REBUILD_MARKER_FILE_NAME);
+
+    await writeFile(markerPath, '');
   }
 
   private _createCorrelationId(seed?: string): string {

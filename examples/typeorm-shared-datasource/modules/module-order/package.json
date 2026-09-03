@@ -1,0 +1,23 @@
+{
+  "name": "module-order",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./admin": "./dist/admin/admin.plugin.js",
+    "./platform": "./dist/platform/platform.module.js"
+  },
+  "files": [
+    "dist",
+    "manifest.json"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@prosto/platform-sdk": "^0.0.0"
+  },
+  "devDependencies": {
+    "@prosto/platform-tsconfig": "^0.0.0"
+  }
+}

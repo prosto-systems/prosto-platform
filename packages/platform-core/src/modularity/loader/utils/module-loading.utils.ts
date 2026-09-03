@@ -1,19 +1,136 @@
-import { pathToFileURL } from 'node:url';
 import type {
   IPlatformModule,
   IPlatformModuleManifest,
 } from '@prosto/platform-sdk';
+import { pathToFileURL } from 'node:url';
+import { join } from 'node:path';
+import { readFile, stat } from 'node:fs/promises';
 
 type UnknownFunctionType = (...args: unknown[]) => unknown;
 type UnknownConstructorType = new (...args: unknown[]) => unknown;
 
 /**
  * @alpha
+ * Check if a file exists.
+ */
+export async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    await stat(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @alpha
  * ESM module loading with multi-format export resolution.
  */
 export class DynamicModuleLoader {
-  static async loadModuleManifest(manifestPath: string) {
-    const nameSpace = await import(pathToFileURL(manifestPath).href);
+  static async resolveManifestPath(packageDir: string): Promise<string> {
+    for (const candidate of ['manifest.json', 'dist/manifest.json']) {
+      const candidatePath = join(packageDir, candidate);
+
+      if (await fileExists(candidatePath)) {
+        return candidatePath;
+      }
+    }
+
+    throw new Error('Manifest was not found');
+  }
+
+  static async resolvePlatformModuleEntryPath(
+    packageDir: string,
+  ): Promise<string> {
+    const pkgPath = join(packageDir, 'package.json');
+
+    if (await fileExists(pkgPath)) {
+      const pkg = JSON.parse(await readFile(pkgPath, 'utf8'));
+
+      if (pkg.exports) {
+        let entry = pkg.exports['./platform'];
+
+        if (!entry) {
+          entry =
+            typeof pkg.exports === 'string'
+              ? pkg.exports
+              : (pkg.exports['.']?.import ?? pkg.exports['.']?.default);
+        }
+
+        if (entry) {
+          return join(packageDir, entry);
+        }
+      }
+
+      if (pkg.main) {
+        return join(packageDir, pkg.main);
+      }
+    }
+
+    for (const candidate of [
+      'dist/platform/platform.module.js',
+      'dist/platform/index.js',
+      'dist/index.js',
+      'index.js',
+    ]) {
+      const candidatePath = join(packageDir, candidate);
+
+      if (await fileExists(candidatePath)) {
+        return candidatePath;
+      }
+    }
+
+    throw new Error('No platform module entry point found in package');
+  }
+
+  static async resolveAdminShellPluginEntryPath(
+    packageDir: string,
+  ): Promise<string> {
+    const pkgPath = join(packageDir, 'package.json');
+
+    if (await fileExists(pkgPath)) {
+      const pkg = JSON.parse(await readFile(pkgPath, 'utf8'));
+
+      if (pkg.exports) {
+        let entry = pkg.exports['./admin'];
+
+        if (!entry) {
+          entry =
+            typeof pkg.exports === 'string'
+              ? pkg.exports
+              : (pkg.exports['.']?.import ?? pkg.exports['.']?.default);
+        }
+
+        if (entry) {
+          return join(packageDir, entry);
+        }
+      }
+
+      if (pkg.main) {
+        return join(packageDir, pkg.main);
+      }
+    }
+
+    for (const candidate of [
+      'dist/admin/admin.module.js',
+      'dist/admin/index.js',
+    ]) {
+      const candidatePath = join(packageDir, candidate);
+
+      if (await fileExists(candidatePath)) {
+        return candidatePath;
+      }
+    }
+
+    throw new Error('No admin shell plugin entry point found in package');
+  }
+
+  static async loadModuleManifest(
+    manifestPath: string,
+  ): Promise<IPlatformModuleManifest> {
+    const nameSpace = await import(pathToFileURL(manifestPath).href, {
+      with: { type: 'json' },
+    });
 
     const defaultResult = this._tryResolveManifestDefaultExport(nameSpace);
     if (defaultResult) return defaultResult;

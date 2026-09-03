@@ -54,6 +54,8 @@ export interface IPlatformConfig extends Record<string, unknown> {
     discoveryPath: string;
     /** @default 'app_data/modules' */
     probingPath: string;
+    /** @default false */
+    refreshProbingFolderOnStart: boolean;
     /** @default 'strict' */
     startupPolicy: PlatformStartupPolicyType;
   };

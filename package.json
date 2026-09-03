@@ -65,7 +65,6 @@
   "workspaces": [
     "packages/*",
     "packages/*/*",
-    "packages/*/*/*",
     "examples/*"
   ],
   "lint-staged": {

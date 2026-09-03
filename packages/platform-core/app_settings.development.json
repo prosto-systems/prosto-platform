@@ -1,4 +1,7 @@
 {
+  "platform": {
+    "refreshProbingFolderOnStart": true
+  },
   "logging": {
     "level": "debug",
     "format": "text"

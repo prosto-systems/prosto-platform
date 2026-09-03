@@ -19,22 +19,14 @@ export class ValidateStage extends BootstrapBaseStage {
   override async execute(
     context: IBootstrapStageContext,
   ): Promise<IBootstrapStageContext> {
-    // Process pre-rejected artifacts
-    for (const preRejectedArtifact of context.preRejectedArtifacts) {
-      if (preRejectedArtifact.phase !== this.stageType) {
-        continue;
-      }
+    const candidateArtifacts = context.candidates;
 
-      this.skipModule(context, preRejectedArtifact.moduleId);
-      this.addFailure(context, {
-        moduleId: preRejectedArtifact.moduleId,
-        errorCode: preRejectedArtifact.reasonCode,
-        message: preRejectedArtifact.message,
-        remediationHint: preRejectedArtifact.remediationHint,
-      });
+    if (!candidateArtifacts.length) {
+      this.addOutcome(context, { ok: false, details: 'No candidates' });
+      return context;
     }
 
-    candidates: for (const artifact of context.candidates) {
+    candidates: for (const artifact of candidateArtifacts) {
       // Skip pre-rejected modules
       if (context.skippedModuleIds.has(artifact.moduleId)) {
         continue;
@@ -66,7 +58,7 @@ export class ValidateStage extends BootstrapBaseStage {
 
     this.addOutcome(context, {
       ok: validateFailuresCount === 0,
-      details: `${context.validatedModules.length}/${context.candidates.length} modules validated`,
+      details: `${context.validatedModules.length}/${candidateArtifacts.length} modules validated`,
     });
 
     return context;

@@ -23,7 +23,6 @@ export class BootstrapCoordinator implements IBootstrapCoordinator {
       abort: false,
       stageOutcomes: [],
       failedDiagnostics: [],
-      preRejectedArtifacts: [],
       candidates: [],
       validatedModules: [],
       loadedModules: [],
@@ -32,7 +31,6 @@ export class BootstrapCoordinator implements IBootstrapCoordinator {
       correlationId: input.correlationId,
       startupStartedAt: input.startupStartedAt,
       runtimeVersion: input.runtimeVersion,
-      moduleSources: input.modules,
       persistenceProvider: input.persistenceProvider,
       platformPersistenceDescriptor: input.platformPersistenceDescriptor,
       persistenceConfiguration: input.persistenceConfiguration ?? {

@@ -16,8 +16,10 @@ import type {
 import {
   BootstrapCoordinator,
   BootstrapPipeline,
+  CopyStage,
   DiscoverStage,
   type IBootstrapCoordinator,
+  LoadStage,
   ModulesInitializationStage,
   ModulesStartStage,
   PersistenceInitializationStage,
@@ -32,15 +34,12 @@ import {
 import { InMemoryEventBus } from '@/events/index.js';
 import { ConsoleModuleLoggerFactory } from '@/logging/index.js';
 import {
-  ArtifactFetcher,
-  ArtifactSourceFactory,
   CompatibilityValidationStrategy,
   type IModuleContextFactory,
   type IModuleLifecycleOrchestrator,
   ManifestValidationStrategy,
   ModuleContextFactory,
   ModuleLifecycleOrchestrator,
-  ModuleLoader,
   StartupPolicyEvaluator,
 } from '@/modularity/index.js';
 import { InMemoryServiceRegistry } from '@/services/index.js';
@@ -93,7 +92,6 @@ export class RuntimeBuilder implements IRuntimeBuilder {
     );
 
     return new PlatformRuntime(
-      options.modules ?? [],
       config,
       diagnosticsReporter,
       bootstrapCoordinator,
@@ -127,6 +125,7 @@ export class RuntimeBuilder implements IRuntimeBuilder {
         basePath: process.cwd(),
         discoveryPath: './modules',
         probingPath: './app_data/modules',
+        refreshProbingFolderOnStart: false,
         startupPolicy: 'strict',
       },
       modules: {
@@ -228,19 +227,21 @@ export class RuntimeBuilder implements IRuntimeBuilder {
     config: IPlatformConfig,
     moduleLifecycleOrchestrator: IModuleLifecycleOrchestrator,
   ): IBootstrapCoordinator {
-    const moduleLoader = new ModuleLoader(
-      new ArtifactSourceFactory(new ArtifactFetcher()),
-    );
     const startupPolicyEvaluator = new StartupPolicyEvaluator();
 
     return new BootstrapCoordinator(
       BootstrapPipeline.create([
-        new DiscoverStage(moduleLoader),
+        new DiscoverStage(config.platform.discoveryPath),
         new ValidateStage([
           new ManifestValidationStrategy(),
           new CompatibilityValidationStrategy(),
         ]),
         new ResolveDependenciesStage(startupPolicyEvaluator),
+        new CopyStage(
+          config.platform.probingPath,
+          config.platform.refreshProbingFolderOnStart,
+        ),
+        new LoadStage(config.platform.probingPath),
         new ModulesInitializationStage(
           startupPolicyEvaluator,
           moduleLifecycleOrchestrator,

@@ -35,4 +35,9 @@ export enum ModuleState {
    * The module is started and ready to be used.
    */
   Started = 'STARTED',
+
+  /**
+   * The module is not started.
+   */
+  NotStarted = 'NOT_STARTED',
 }

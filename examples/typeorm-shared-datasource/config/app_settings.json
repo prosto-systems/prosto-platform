@@ -1,4 +1,7 @@
 {
+  "platform": {
+    "refreshProbingFolderOnStart": true
+  },
   "persistence": {
     "typeorm": {
       "enabled": true,

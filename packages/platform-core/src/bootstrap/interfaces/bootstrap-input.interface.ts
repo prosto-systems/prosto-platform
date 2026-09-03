@@ -5,7 +5,6 @@ import type {
   IServiceRegistry,
   PlatformStartupPolicyType,
 } from '@prosto/platform-sdk';
-import type { ModuleArtifactSourceDescriptorType } from '@/modularity/index.js';
 import type { IPersistencePlatformConfig } from '@/runtime/index.js';
 
 /**
@@ -15,7 +14,6 @@ import type { IPersistencePlatformConfig } from '@/runtime/index.js';
 export interface IBootstrapInput {
   readonly policyMode: PlatformStartupPolicyType;
   readonly runtimeVersion: IPlatformRuntimeVersionContext;
-  readonly modules: readonly ModuleArtifactSourceDescriptorType[];
   readonly correlationId: string;
   readonly startupStartedAt: string;
   readonly persistenceProvider?: IPersistenceProvider;

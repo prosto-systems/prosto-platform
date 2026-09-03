@@ -6,6 +6,8 @@ export enum BootstrapStage {
   Discover = 'discover',
   Validate = 'validate',
   Resolve = 'resolve',
+  Copy = 'copy',
+  Load = 'load',
   Initialize = 'initialize',
   Persistence = 'persistence',
   Start = 'start',
