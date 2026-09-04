@@ -95,6 +95,27 @@ Build admin plugin artifacts with
 For the plugin manifest, registration lifecycle, and runtime restrictions, see
 [`@prosto/platform-admin-shell`](../platform-admin-shell/README.md).
 
+## HTTP Contracts
+
+The SDK defines framework-neutral alpha HTTP contracts for application hosts and
+modules. An HTTP host adds optional `context.http.endpoints` only while a module
+is executing `init()`. It is absent in later lifecycle phases and in headless
+hosts. Endpoints use `IHttpEndpoint`, receive immutable
+`IHttpRequestContext`, and return the standard Web `Response`; they never
+receive Fastify, Busboy, or Node stream types.
+
+Endpoint paths are absolute and case-sensitive. They support literal segments,
+`:parameters`, and at most one terminal `*`; trailing slashes remain distinct.
+Request-derived values are untrusted. JSON and text are typed body variants;
+raw and multipart data are handler-owned one-shot Web streams that must be
+consumed or cancelled before the handler returns.
+
+`IHttpApplication` and `IHttpApplicationRuntime` define a narrow lifecycle
+boundary for hosts. The SDK contracts include stable probe response shapes and
+sanitized transport errors, but do not provide an HTTP server. Use
+[`@prosto/platform-adapter-fastify`](../platform-adapters/platform-adapter-fastify/README.md)
+to compose a Fastify-backed application.
+
 ## Public API
 
 - **Modularity**: `IPlatformModule`, module lifecycle context and logger,
@@ -104,6 +125,8 @@ For the plugin manifest, registration lifecycle, and runtime restrictions, see
   `PersistenceDescriptorRegistry`; and structured persistence errors.
 - **Events and services**: event-bus and service-registry interfaces with typed
   token helpers and platform service-token constants.
+- **HTTP**: endpoint, request-body, registrar, host lifecycle, probe, and
+  sanitized-error contracts, plus the HTTP registrar-provider service token.
 - **Security**: integrity verification and secret-redaction utilities.
 - **Admin**: plugin manifest schemas and guards, registration-context interfaces,
   admin-shell constants and tokens, plus `useAdminShell()` and `useBladeScope()`.

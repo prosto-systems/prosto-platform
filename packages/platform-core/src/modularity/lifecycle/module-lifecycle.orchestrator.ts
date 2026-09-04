@@ -1,4 +1,8 @@
-import type { PlatformModuleLifecycleStageType } from '@prosto/platform-sdk';
+import type {
+  IHttpEndpointRegistrarProvider,
+  PlatformModuleLifecycleStageType,
+} from '@prosto/platform-sdk';
+import { HttpEndpointRegistrationError } from '@prosto/platform-sdk';
 import type { PlatformModuleEnvelope } from '@/modularity/index.js';
 import { type IModuleContextFactory, ModuleState } from '@/modularity/index.js';
 import type {
@@ -28,7 +32,10 @@ import { ShutdownTimeoutError } from './module-lifecycle.errors.js';
  * successful startup order and applies the configured per-module timeout.
  */
 export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator {
-  constructor(private readonly _moduleContextFactory: IModuleContextFactory) {}
+  constructor(
+    private readonly _moduleContextFactory: IModuleContextFactory,
+    private readonly _httpEndpointRegistrarProvider?: IHttpEndpointRegistrarProvider,
+  ) {}
 
   /**
    * Runs `init()` for each loaded module and rolls back persistence descriptors
@@ -52,14 +59,18 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
           lifecycleContext,
         );
 
+        this._httpEndpointRegistrarProvider?.commit(moduleEnvelope.id);
+
         moduleEnvelope.state = ModuleState.Initialized;
-      } catch {
+      } catch (error) {
         moduleEnvelope.state = ModuleState.NotInitialized;
+
         lifecycleContext.persistenceProvider?.descriptors.rollback(
           moduleEnvelope.id,
         );
+        this._httpEndpointRegistrarProvider?.rollback(moduleEnvelope.id);
 
-        issues.push(this._createStartupIssue(moduleEnvelope.id, 'init'));
+        issues.push(this._createStartupIssue(moduleEnvelope.id, 'init', error));
 
         continue;
       }
@@ -92,10 +103,14 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
         );
 
         moduleEnvelope.state = ModuleState.Started;
-      } catch {
+      } catch (error) {
         moduleEnvelope.state = ModuleState.NotStarted;
 
-        issues.push(this._createStartupIssue(moduleEnvelope.id, 'start'));
+        this._httpEndpointRegistrarProvider?.rollback(moduleEnvelope.id);
+
+        issues.push(
+          this._createStartupIssue(moduleEnvelope.id, 'start', error),
+        );
 
         continue;
       }
@@ -190,7 +205,24 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
   private _createStartupIssue(
     moduleId: string,
     stage: ModuleStartupStagesType,
+    error: unknown,
   ): IModuleLifecycleExecutionIssue {
+    if (error instanceof HttpEndpointRegistrationError) {
+      const remediationHint = error.details?.remediationHint;
+
+      return {
+        moduleId,
+        phase: RuntimeStage.Lifecycle,
+        lifecycleStage: stage,
+        errorCode: RuntimeErrorCodes.HttpEndpointRegistrationFailed,
+        message: error.message,
+        remediationHint:
+          typeof remediationHint === 'string' && remediationHint.length > 0
+            ? remediationHint
+            : `Correct HTTP endpoint declarations for module "${moduleId}" during init().`,
+      };
+    }
+
     const reasonCodeMap: Record<ModuleStartupStagesType, RuntimeErrorCodes> = {
       init: RuntimeErrorCodes.LifecycleInitFailed,
       start: RuntimeErrorCodes.LifecycleStartFailed,

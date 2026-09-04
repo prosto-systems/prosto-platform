@@ -1,11 +1,15 @@
 import type {
   IEventBus,
+  IHttpEndpointRegistrarProvider,
   IPersistenceModuleContext,
   IPlatformModuleContext,
   IPlatformModuleManifest,
   IServiceRegistry,
 } from '@prosto/platform-sdk';
-import { resolveNestedValue } from '@prosto/platform-sdk';
+import {
+  HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN,
+  resolveNestedValue,
+} from '@prosto/platform-sdk';
 import type { IModuleLoggerFactory } from '@/logging/index.js';
 import type { IPlatformConfig } from '@/runtime/index.js';
 import {
@@ -35,6 +39,18 @@ export class ModuleContextFactory implements IModuleContextFactory {
     const logger = this._moduleLoggerFactory.create({ moduleId });
     const scopedConfig = this._getScopedConfig(options.moduleManifest);
 
+    const httpEndpointRegistrarProvider:
+      IHttpEndpointRegistrarProvider | undefined =
+      options.lifecycleStage === 'init'
+        ? this._services.resolve(HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN)
+        : undefined;
+
+    const http = httpEndpointRegistrarProvider
+      ? {
+          endpoints: httpEndpointRegistrarProvider.createRegistrar(moduleId),
+        }
+      : undefined;
+
     const persistence: IPersistenceModuleContext | undefined =
       options.persistenceEnabled
         ? {
@@ -50,6 +66,7 @@ export class ModuleContextFactory implements IModuleContextFactory {
 
     return {
       logger,
+      http,
       moduleId,
       persistence,
       startupPolicy: options.startupPolicy,

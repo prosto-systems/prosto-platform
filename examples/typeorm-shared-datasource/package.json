@@ -4,23 +4,26 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "npm run build:dependencies && tsc -p tsconfig.json",
+    "build:dependencies": "npm run build:module && npm run build --workspace=@prosto/platform-adapter-typeorm && npm run build --workspace=@prosto/platform-adapter-fastify",
     "build:module": "npm --prefix modules/module-order run build",
-    "start": "npm run build:module && npm run build && node dist/index.js",
+    "prestart": "npm run build:dependencies",
+    "start": "tsx src/index.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@prosto/platform-adapter-fastify": "^0.0.0",
     "@prosto/platform-adapter-typeorm": "^0.0.0",
     "@prosto/platform-core": "^0.0.0",
     "@prosto/platform-sdk": "^0.0.0",
     "better-sqlite3": "^12.11.1",
-    "fastify": "^5.10.0",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^1.1.1"
   },
   "devDependencies": {
     "@prosto/platform-tsconfig": "^0.0.0",
     "@types/node": "^22.20.1",
+    "tsx": "^4.23.1",
     "typescript": "^6.0.3"
   }
 }

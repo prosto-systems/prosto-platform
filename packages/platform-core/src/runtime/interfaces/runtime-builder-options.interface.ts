@@ -1,6 +1,7 @@
 import type {
   IPersistenceProvider,
   IPersistenceDescriptor,
+  ServiceRegistryConfiguratorType,
 } from '@prosto/platform-sdk';
 
 /**
@@ -41,4 +42,12 @@ export interface IRuntimeBuilderOptions {
    * Optional correlation ID for tracing
    */
   readonly correlationId?: string;
+
+  /**
+   * Optional synchronous application-host service composition callback.
+   *
+   * The callback runs after core creates its service registry and before module
+   * contexts are constructed. Asynchronous registration is not supported.
+   */
+  readonly configureServices?: ServiceRegistryConfiguratorType;
 }

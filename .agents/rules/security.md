@@ -69,6 +69,19 @@ function handleCreateModule(req: Request): Module {
 - Configuration loading
 - Module manifest loading
 
+### HTTP streaming boundary
+
+`@prosto/platform-adapter-fastify` exposes framework-neutral request contexts.
+All headers, parameters, query values, URLs, bodies, multipart fields, and file
+metadata are untrusted. Modules must validate them at their boundary, including
+file metadata and streamed content.
+
+Raw request and multipart file streams are one-shot and handler-owned only
+until the handler returns. Consume or cancel every stream before returning; do
+not implement duplex request-to-response piping. The adapter bounds parsed,
+raw, and multipart input, does not persist upload files to disk, and returns
+sanitized transport errors with correlation IDs rather than exception details.
+
 **Never trust:**
 - Module-provided data without validation
 - User input from any source

@@ -5,8 +5,8 @@
 `platform-core` provides `ConsoleModuleLogger` for module contexts. It redacts
 messages and context with `SecretsRedactor` before writing to the console; Pino
 is not a repository dependency. The core also produces structured startup and
-shutdown diagnostics. HTTP health/readiness endpoints and metrics export are
-not implemented core contracts.
+shutdown diagnostics. The Fastify adapter, not the core, implements `GET
+/health` and `GET /ready` from SDK probe contracts.
 
 ## Structured Logging
 
@@ -187,88 +187,12 @@ throw new ModuleLoadError(
 
 ## Health & Readiness
 
-### Recommended adapter endpoints
-
-The core does not expose health or readiness endpoints. An HTTP adapter may
-derive its response from runtime state and diagnostics using a contract such as:
-
-```typescript
-interface IHealthResponse {
-  status: 'healthy' | 'degraded' | 'unhealthy';
-  version: string;
-  uptime: number;
-  timestamp: string;
-  checks: {
-    name: string;
-    status: 'pass' | 'fail' | 'warn';
-    details?: string;
-  }[];
-}
-
-async function getHealthStatus(): Promise<IHealthResponse> {
-  const loadedModules = registry.getLoadedModules();
-  const failedModules = registry.getFailedModules();
-
-  const criticalOk = loadedModules
-    .filter(m => !m.optional)
-    .length === expectedCriticalModules;
-
-  return {
-    status: criticalOk ? 'healthy' : 'unhealthy',
-    version: sdkVersion,
-    uptime: process.uptime(),
-    timestamp: new Date().toISOString(),
-    checks: [
-      {
-        name: 'critical_modules',
-        status: criticalOk ? 'pass' : 'fail',
-        details: `${loadedModules.filter(m => !m.optional).length}/${expectedCriticalModules} critical modules loaded`
-      },
-      {
-        name: 'optional_modules',
-        status: failedModules.length > 0 ? 'warn' : 'pass',
-        details: `${failedModules.length} optional modules failed to load`
-      }
-    ]
-  };
-}
-```
-
-### Readiness Probe
-
-```typescript
-interface IReadinessResponse {
-  ready: boolean;
-  reasons: string[];
-  modules: {
-    registered: number;
-    initialized: number;
-    started: number;
-  };
-}
-
-function getReadinessStatus(): IReadinessResponse {
-  const reasons: string[] = [];
-  
-  if (!startupComplete) {
-    reasons.push('Startup not complete');
-  }
-  
-  if (failedCriticalModules.length > 0) {
-    reasons.push(`${failedCriticalModules.length} critical modules failed`);
-  }
-
-  return {
-    ready: reasons.length === 0,
-    reasons,
-    modules: {
-      registered: moduleRegistry.registeredCount,
-      initialized: moduleRegistry.initializedCount,
-      started: moduleRegistry.startedCount
-    }
-  };
-}
-```
+`/health` and `/ready` are always-public, minimal infrastructure probes. They
+must not return configuration, failures, stacks, paths, or secrets, and are not
+the admin shell's `/api/admin/platform/health`. A degraded started runtime is
+ready with `degraded: true`; an application that is not listening, whose runtime
+is not started, or is stopping returns typed non-ready reasons. The current
+adapter has no metrics export.
 
 ---
 

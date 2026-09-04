@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IEventBus } from '@/platform/events/index.js';
+import type { IHttpModuleContext } from '@/platform/http/index.js';
 import type { IPersistenceModuleContext } from '@/platform/persistence/index.js';
 import type { IServiceRegistry } from '@/platform/services/index.js';
 import type { STARTUP_POLICIES } from '../constants/index.js';
@@ -24,6 +25,8 @@ export interface IPlatformModuleContext {
   readonly services: IServiceRegistry;
   /** Persistence registration is available only during init(). */
   readonly persistence?: IPersistenceModuleContext;
+  /** HTTP endpoint registration is available only during init() with an HTTP host. */
+  readonly http?: IHttpModuleContext;
   readonly logger: IPlatformModuleLogger;
   readonly config: Readonly<Record<string, any>>;
   getConfigValue<T>(key: string, defaultValue?: T): Readonly<T>;

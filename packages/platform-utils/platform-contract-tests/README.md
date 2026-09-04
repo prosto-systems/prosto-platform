@@ -39,12 +39,33 @@ The helper registers mandatory checks for:
 
 - Manifest schema and semantic validation through `PlatformModuleManifestValidator`.
 - The presence and successful execution of the `init`, `start`, and `stop` lifecycle methods.
+- Lifecycle-scoped capabilities: the default context provides a no-op HTTP
+  endpoint registrar in `init()` only and withholds it from `start()` and `stop()`.
 
 Lifecycle methods run with a default test context: `environment` is `test`,
 `config` is empty, `startupPolicy` is `best-effort`, logging is a no-op, and
 `getConfigValue('contract.testing.enabled')` returns `true`. Supply a custom
 `moduleLifecycleContextFactory` when the module requires different test
-dependencies.
+dependencies. The default context exposes a no-op HTTP endpoint registrar only
+during `init`; `http` is unavailable during `start` and `stop`.
+
+## Lifecycle Context Factories
+
+Custom lifecycle context factories receive the current lifecycle stage and must
+create a context for that stage. This alpha signature requires the `stage`
+argument; factories written before lifecycle-aware contexts must be updated.
+
+```ts
+const moduleLifecycleContextFactory = {
+  create(manifest, stage) {
+    const context = createTestContext(manifest);
+
+    return stage === 'init'
+      ? { ...context, http: { endpoints: endpointRegistrar } }
+      : context;
+  },
+};
+```
 
 ## Programmatic Reports
 

@@ -32,6 +32,15 @@ console.log(runtime.reports.startup);
 await runtime.stop();
 ```
 
+An application host may synchronously extend the core service registry through
+`configureServices`. The callback runs once after registry creation and before
+module contexts are created; asynchronous callbacks are rejected. This is the
+generic composition seam used by HTTP hosts to provide the SDK endpoint
+registrar. The core does not import Fastify or own listening, route activation,
+request mapping, probes, or any other HTTP framework detail. Compose
+[`@prosto/platform-adapter-fastify`](../platform-adapters/platform-adapter-fastify/README.md)
+at the executable boundary instead.
+
 The builder reads package defaults, then optional deployment files from
 `configDir` (`app_settings.json`, environment-specific settings, and
 `app_settings.local.json`). Environment variables with the `PROSTO_` prefix
@@ -110,6 +119,9 @@ For a persistence-enabled composition, see
   diagnostics. Configured secret redaction is applied to diagnostic output.
 - Call `stop()` during application shutdown to stop started modules in reverse
   lifecycle order and dispose core services.
+- An HTTP host may expose `context.http` only for `init()`. The core commits
+  endpoint registrations after successful initialization and rolls them back
+  after `init()` or `start()` failures, without knowing an HTTP framework.
 
 Public core APIs are `@alpha` and may change in minor releases. Public module
 and adapter contracts belong to `@prosto/platform-sdk`.

@@ -27,6 +27,7 @@ All detailed rules are in `.agents/rules/` directory:
 - **Contract-first**: define types in `platform-sdk` BEFORE implementing in `platform-core`
 - **Package boundaries**: `platform-core` MUST NOT import from adapters or modules; modules MUST NOT import from other modules
 - **Repository authority**: source code and package manifests define current behavior; architecture documentation defines constraints for future changes
+- **HTTP boundary**: SDK owns neutral HTTP contracts; `platform-adapter-fastify` owns HTTP lifecycle and Fastify; core owns neither framework types nor server bootstrap
 
 ### Code Style
 - **TypeScript strict mode** with ESM (`"type": "module"`, `.js` extensions in relative imports)
@@ -44,6 +45,7 @@ All detailed rules are in `.agents/rules/` directory:
 - **Secret redaction** from core module logs through `SecretsRedactor` and `ConsoleModuleLogger`
 - **MSW 2** is available in `platform-admin-shell` for opt-in browser development mocks and Vitest integration mocks; it is not a production backend
 - **Admin plugins** are trusted first-party ESM code. The admin runtime is an API boundary, not a sandbox.
+- **HTTP streams** are untrusted and one-shot. Modules must validate request data and consume or cancel raw/multipart file streams before returning a response.
 
 ### Admin Integration
 - The `@alpha` admin plugin registration context provides auth, translation, workspace, main-menu, blade, and blade-toolbar services.
@@ -59,6 +61,7 @@ All detailed rules are in `.agents/rules/` directory:
 - **Vitest** as test runner (`npm run test`, `npm run test:contracts`)
 - **Contract tests** mandatory for all modules before integration
 - **AAA pattern**: Arrange, Act, Assert
+- **HTTP adapters**: cover endpoint collection, lifecycle cleanup, sanitized errors, request limits, cancellation, and probe behavior with focused adapter tests.
 
 ### Git & Workflow
 - Feature branches, conventional commits, PR review required
@@ -135,6 +138,9 @@ npm run format         # Check formatting with Prettier
 npm run test --workspace=@prosto/platform-admin-vite      # Test admin runtime Vite integration
 npm run build --workspace=@prosto/platform-admin-vite     # Build admin runtime Vite integration
 npm run typecheck --workspace=@prosto/platform-admin-vite # Type-check admin runtime Vite integration
+npm run test --workspace=@prosto/platform-adapter-fastify # Test Fastify HTTP adapter
+npm run build --workspace=@prosto/platform-adapter-fastify # Build Fastify HTTP adapter
+npm run typecheck --workspace=@prosto/platform-adapter-fastify # Type-check Fastify HTTP adapter
 ```
 
 ## Additional Resources

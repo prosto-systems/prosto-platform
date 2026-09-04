@@ -48,6 +48,10 @@ class module_order_create_order1710000001001 implements MigrationInterface {
  */
 export class OrdersModule implements IPlatformModule {
   init(context: IPlatformModuleContext): void {
+    if (!context.http) {
+      throw new Error('The orders module requires an HTTP application host.');
+    }
+
     context.persistence?.descriptors?.register(context.moduleId, {
       owner: 'module',
       ownerId: context.moduleId,
@@ -55,6 +59,19 @@ export class OrdersModule implements IPlatformModule {
         entities: [OrdersOrder],
         migrations: [module_order_create_order1710000001001],
       }),
+    });
+
+    context.http.endpoints.register({
+      method: 'GET',
+      path: '/api/orders',
+      handler: async (): Promise<Response> => {
+        const dataSource = context.services.resolveRequired(
+          TYPEORM_DATA_SOURCE_SERVICE_TOKEN,
+        );
+        const orders = await dataSource.getRepository(OrdersOrder).find();
+
+        return Response.json(orders);
+      },
     });
   }
 

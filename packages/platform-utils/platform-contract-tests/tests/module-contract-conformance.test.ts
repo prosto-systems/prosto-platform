@@ -42,6 +42,32 @@ class BrokenModuleLifecycleFailure extends ValidModule {
   }
 }
 
+class HttpLifecycleModule implements IPlatformModule {
+  init(ctx: IPlatformModuleContext): void {
+    if (ctx.http === undefined) {
+      throw new Error('HTTP capability must be available during init.');
+    }
+
+    ctx.http.endpoints.register({
+      method: 'GET',
+      path: '/contract-http',
+      handler: () => new Response(null, { status: 204 }),
+    });
+  }
+
+  start(ctx: IPlatformModuleContext): void {
+    if (ctx.http !== undefined) {
+      throw new Error('HTTP capability must be unavailable during start.');
+    }
+  }
+
+  stop(ctx: IPlatformModuleContext): void {
+    if (ctx.http !== undefined) {
+      throw new Error('HTTP capability must be unavailable during stop.');
+    }
+  }
+}
+
 describe('module contract conformance', () => {
   it('returns pass summary for a valid module', async () => {
     const report = await runModuleContractConformance({
@@ -93,6 +119,20 @@ describe('module contract conformance', () => {
       ContractFailureCodes.LifecycleMethodFailed,
     );
     expect(report.summary.result).toBe('fail');
+  });
+
+  it('provides the HTTP capability only during init', async () => {
+    const report = await runModuleContractConformance({
+      manifest: validManifest,
+      module: new HttpLifecycleModule(),
+    });
+
+    const lifecycleCheck = report.checks.find(
+      (check) => check.id === LIFECYCLE_CHECK_RESULT_ID,
+    );
+
+    expect(lifecycleCheck?.passed).toBe(true);
+    expect(report.summary.result).toBe('pass');
   });
 
   it('marks the duplication of groups', async () => {

@@ -5,6 +5,7 @@ import {
   type IEventBus,
   type ISecretsRedactor,
   type IServiceRegistry,
+  HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN,
   SecretsRedactor,
 } from '@prosto/platform-sdk';
 import type {
@@ -43,6 +44,7 @@ import {
   StartupPolicyEvaluator,
 } from '@/modularity/index.js';
 import { InMemoryServiceRegistry } from '@/services/index.js';
+import { RuntimeServiceConfigurationError } from './errors/index.js';
 import { PlatformRuntime } from './platform-runtime.js';
 import {
   platformConfigSchema,
@@ -79,6 +81,21 @@ export class RuntimeBuilder implements IRuntimeBuilder {
     const eventBus = new InMemoryEventBus();
     const serviceRegistry = new InMemoryServiceRegistry();
 
+    try {
+      const configurationResult: unknown =
+        options.configureServices?.(serviceRegistry);
+
+      if (this._isThenable(configurationResult)) {
+        throw new RuntimeServiceConfigurationError(
+          'ASYNC_SERVICE_CONFIGURATION_NOT_SUPPORTED',
+          'Runtime service configuration must complete synchronously.',
+        );
+      }
+    } catch (error) {
+      serviceRegistry.dispose();
+      throw error;
+    }
+
     const diagnosticsReporter = new DiagnosticsReporter(
       new DiagnosticReportBuilder(secretsRedactor),
     );
@@ -93,6 +110,7 @@ export class RuntimeBuilder implements IRuntimeBuilder {
 
     const moduleLifecycleOrchestrator = new ModuleLifecycleOrchestrator(
       moduleContextFactory,
+      serviceRegistry.resolve(HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN),
     );
 
     const bootstrapCoordinator = this._createBootstrapCoordinator(
@@ -214,6 +232,17 @@ export class RuntimeBuilder implements IRuntimeBuilder {
 
   protected _createSecretsRedactor(config: IPlatformConfig): ISecretsRedactor {
     return new SecretsRedactor(config.security.secretRedaction);
+  }
+
+  private _isThenable(value: unknown): value is PromiseLike<unknown> {
+    if (
+      (typeof value !== 'object' || value === null) &&
+      typeof value !== 'function'
+    ) {
+      return false;
+    }
+
+    return typeof (value as { then?: unknown }).then === 'function';
   }
 
   protected _createModuleContextFactory(
