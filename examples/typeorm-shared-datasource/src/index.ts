@@ -1,11 +1,11 @@
-import type { IPersistenceDescriptor } from '@prosto/platform-sdk';
 import { fileURLToPath } from 'node:url';
 import {
   createTypeOrmPersistenceDescriptor,
   TypeOrmPersistenceProvider,
 } from '@prosto/platform-adapter-typeorm';
-import { RuntimeBuilder } from '@prosto/platform-core';
-import Fastify from 'fastify';
+import { FastifyHttpApplication } from '@prosto/platform-adapter-fastify';
+import { ConsoleModuleLogger, RuntimeBuilder } from '@prosto/platform-core';
+import type { IPersistenceDescriptor } from '@prosto/platform-sdk';
 import {
   Entity,
   type MigrationInterface,
@@ -51,43 +51,39 @@ const platformPersistenceDescriptor: IPersistenceDescriptor = {
 
 // Main entry point
 async function main(): Promise<void> {
-  const runtime = new RuntimeBuilder().build({
-    configDir: fileURLToPath(new URL('../config', import.meta.url)),
-    persistenceProvider: new TypeOrmPersistenceProvider(),
-    platformPersistenceDescriptor,
+  const application = new FastifyHttpApplication({
+    host: '127.0.0.1',
+    port: 3001,
+    runtimeFactory: (configureHttpServices) =>
+      new RuntimeBuilder().build({
+        configDir: fileURLToPath(new URL('../config', import.meta.url)),
+        configureServices: configureHttpServices,
+        persistenceProvider: new TypeOrmPersistenceProvider(),
+        platformPersistenceDescriptor,
+      }),
+    logger: new ConsoleModuleLogger('http'),
   });
 
-  await runtime.start();
-
-  console.log(JSON.stringify(runtime.reports.startup, null, 2));
+  await application.start();
+  console.info(`HTTP application is listening at ${application.url?.href}`);
 
   const shutdown = async (): Promise<void> => {
-    console.log('Shutting down...');
-    await runtime.stop();
-    console.log(JSON.stringify(runtime.reports.shutdown, null, 2));
-    process.exit(0);
+    console.info('Shutting down...');
+    await application.stop();
   };
 
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
-
-  const fastify = Fastify({
-    logger: true,
+  process.once('SIGINT', async (): Promise<void> => {
+    await shutdown();
   });
-
-  fastify.get('/', async function handler(_request, _reply) {
-    return runtime.reports.startup;
-  });
-
-  await fastify.listen({ port: 3001 }).catch((error) => {
-    fastify.log.error(error);
-
-    throw new Error(error instanceof Error ? error.message : String(error), {
-      cause: error,
-    });
+  process.once('SIGTERM', async (): Promise<void> => {
+    await shutdown();
   });
 }
 
-main().catch(() => {
-  process.exit(1);
+main().catch((error: unknown) => {
+  console.error(
+    'The TypeORM shared DataSource example failed to start.',
+    error,
+  );
+  process.exitCode = 1;
 });

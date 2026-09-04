@@ -35,10 +35,12 @@ export async function runLifecycleConformanceCheck(params: {
     }
   }
 
-  const context = params.moduleLifecycleContextFactory.create(params.manifest);
-
   for (const methodName of PLATFORM_MODULE_LIFECYCLE_STAGES) {
     try {
+      const context = params.moduleLifecycleContextFactory.create(
+        params.manifest,
+        methodName,
+      );
       await params.module[methodName](context);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

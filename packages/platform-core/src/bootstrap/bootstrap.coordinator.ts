@@ -1,3 +1,4 @@
+import type { IRuntimeFailureDiagnostic } from '@/diagnostics/index.js';
 import type {
   IBootstrapContext,
   IBootstrapCoordinator,
@@ -5,6 +6,7 @@ import type {
   IBootstrapPipeline,
   IBootstrapStageContext,
 } from './interfaces/index.js';
+import { RuntimeErrorCodes, RuntimeStage } from '@/common/index.js';
 
 /**
  * @alpha
@@ -40,12 +42,41 @@ export class BootstrapCoordinator implements IBootstrapCoordinator {
     };
 
     const result = await this._pipeline.execute(initialStageContext);
+    const failedDiagnostics = [...result.failedDiagnostics];
+
+    if (result.abort) {
+      let abortingStage: IRuntimeFailureDiagnostic['phase'] =
+        RuntimeStage.Lifecycle;
+
+      for (let index = result.stageOutcomes.length - 1; index >= 0; index--) {
+        const outcome = result.stageOutcomes[index];
+
+        if (outcome && !outcome.ok) {
+          abortingStage = outcome.stage;
+          break;
+        }
+      }
+
+      const hasStageFailure = failedDiagnostics.some(
+        (diagnostic) => diagnostic.phase === abortingStage,
+      );
+
+      if (!hasStageFailure) {
+        failedDiagnostics.push({
+          moduleId: 'platform',
+          phase: abortingStage,
+          errorCode: RuntimeErrorCodes.BootstrapAborted,
+          message: 'Platform bootstrap aborted before completion.',
+          remediationHint: 'Inspect the failed bootstrap stage outcome.',
+        });
+      }
+    }
 
     return {
       policyMode: input.policyMode,
-      loadedModules: result.loadedModules,
+      loadedModules: result.abort ? [] : result.loadedModules,
       stageOutcomes: result.stageOutcomes,
-      failedDiagnostics: result.failedDiagnostics,
+      failedDiagnostics,
       skippedModuleIds: [...result.skippedModuleIds].sort((left, right) =>
         left.localeCompare(right),
       ),

@@ -4,13 +4,22 @@ import type {
   IEventBus,
   IEventEnvelope,
   IEventMetadata,
+  IHttpEndpoint,
+  IHttpEndpointRegistrar,
   IPlatformModuleContext,
   IPlatformModuleLogger,
   IPlatformModuleManifest,
   IServiceRegistry,
+  PlatformModuleLifecycleStageType,
   ServiceTokenType,
 } from '@prosto/platform-sdk';
 import type { IModuleLifecycleContextFactory } from '@/interfaces/index.js';
+
+class NoopHttpEndpointRegistrar implements IHttpEndpointRegistrar {
+  register(_endpoint: IHttpEndpoint): void {
+    /* Contract tests validate lifecycle access, not endpoint routing. */
+  }
+}
 
 class MockEventBus implements IEventBus {
   private readonly _handlers = new Map<
@@ -139,7 +148,15 @@ class MockLogger implements IPlatformModuleLogger {
  * Default lifecycle context factory for contract execution.
  */
 export class DefaultModuleLifecycleContextFactory implements IModuleLifecycleContextFactory {
-  create(moduleManifest: IPlatformModuleManifest): IPlatformModuleContext {
+  create(
+    moduleManifest: IPlatformModuleManifest,
+    stage: PlatformModuleLifecycleStageType,
+  ): IPlatformModuleContext {
+    const http =
+      stage === 'init'
+        ? { endpoints: new NoopHttpEndpointRegistrar() }
+        : undefined;
+
     return {
       environment: 'test',
       config: {},
@@ -149,6 +166,7 @@ export class DefaultModuleLifecycleContextFactory implements IModuleLifecycleCon
       eventBus: new MockEventBus(),
       services: new MockServiceRegistry(),
       logger: new MockLogger(),
+      ...(http === undefined ? {} : { http }),
       getConfigValue: <T>(key: string): Readonly<T> => {
         if (key === 'contract.testing.enabled') {
           return true as T;

@@ -17,8 +17,10 @@
 - Own vendor integrations
 - Own feature domain logic
 
-The current core source exposes no HTTP application bootstrap. HTTP composition
-belongs to an application or adapter, not `platform-core`.
+HTTP composition belongs to an application or adapter, not `platform-core`.
+The Fastify application host is
+`packages/platform-adapters/platform-adapter-fastify`; it depends on the SDK
+and Fastify without exposing Fastify types in its public API.
 
 **`platform-sdk` MUST:**
 - Keep external runtime dependencies minimal and justified
@@ -129,6 +131,10 @@ package manifests and imports when changing a package boundary.
 2. Keep in adapter package scope only
 3. Document framework version requirements
 
+`@prosto/platform-adapter-fastify` owns `fastify@^5.12.1`,
+`@fastify/multipart@^10.1.1`, and `zod`; these dependencies must not migrate to
+`platform-core`.
+
 ---
 
 ## Workspace Configuration
@@ -159,6 +165,8 @@ npm run test                                  # Run tests across workspaces
 npm run typecheck                             # Type-check workspaces
 npm run dev                                   # Start available workspace development tasks
 npm run build --workspace=@prosto/platform-sdk # Build the SDK package
+npm run test --workspace=@prosto/platform-adapter-fastify # Test Fastify adapter
+npm run typecheck --workspace=@prosto/platform-adapter-fastify # Type-check Fastify adapter
 ```
 
 ---

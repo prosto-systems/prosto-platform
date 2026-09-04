@@ -1,5 +1,6 @@
 export * from './errors/index.js';
 export * from './events/index.js';
+export * from './http/index.js';
 export * from './modularity/index.js';
 export * from './persistence/index.js';
 export * from './security/index.js';

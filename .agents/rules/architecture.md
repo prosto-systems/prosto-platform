@@ -41,9 +41,10 @@
 - Own vendor integrations
 - Own feature domain logic
 
-The current core source exposes no HTTP application bootstrap. HTTP composition
-belongs to an application or adapter; the shared TypeORM example owns its
-Fastify development server outside `platform-core`.
+HTTP composition belongs to an application or adapter, never `platform-core`.
+`@prosto/platform-sdk` owns framework-neutral HTTP contracts and
+`@prosto/platform-adapter-fastify` owns the Fastify application lifecycle. The
+shared TypeORM example composes that adapter outside the core.
 
 ### `platform-sdk` MUST:
 - Keep external runtime dependencies minimal and justified
@@ -62,6 +63,16 @@ Fastify development server outside `platform-core`.
 - Depend on other adapters' internals
 - Depend on feature modules
 - Export framework-specific types in public API
+
+### HTTP application boundary
+
+- Modules declare SDK endpoints only through `context.http.endpoints` during
+  `init()`; they do not receive adapter instances or framework hooks.
+- The application host starts the runtime, activates endpoints for successfully
+  started modules, then listens; it closes HTTP before stopping the runtime.
+- `/health` and `/ready` are public infrastructure probes, not the admin shell's
+  `/api/admin/platform/health`. Production admin, auth, and static-asset HTTP
+  APIs remain unimplemented.
 
 ### Modules MUST:
 - Only import from `platform-sdk` in their public API

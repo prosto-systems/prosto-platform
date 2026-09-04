@@ -7,13 +7,15 @@ on those contracts.
 
 ## Current status
 
-The repository contains an alpha runtime kernel, a TypeORM persistence adapter,
+The repository contains an alpha runtime kernel, TypeORM and Fastify adapters,
 and an alpha administration module runtime. The runtime discovers local module
 packages, validates their manifests and SDK/Node.js compatibility, resolves
 their dependencies, copies their builds into a probing directory, executes
 their lifecycle, and exposes startup and shutdown diagnostics. It does not yet
-provide remote module acquisition, a production HTTP application, admin module
-asset serving, or Content Security Policy configuration. See the
+provide remote module acquisition, a production admin HTTP application, admin
+module asset serving, or Content Security Policy configuration. The Fastify HTTP
+application is available for infrastructure probes and module endpoints; it does
+not implement admin, authentication, or static-asset APIs. See the
 [`@prosto/platform-admin-shell` README](packages/platform-admin-shell/README.md)
 for the implemented admin contract and its limits.
 
@@ -25,6 +27,7 @@ for the implemented admin contract and its limits.
 | `packages/platform-core` | [Runtime kernel, module loading, lifecycle orchestration, diagnostics, events, and services.](packages/platform-core/README.md) |
 | `packages/platform-admin-shell` | [Vue, Vuetify, Pinia, and Vue I18n administration shell.](packages/platform-admin-shell/README.md) |
 | `packages/platform-adapters/platform-adapter-typeorm` | [TypeORM persistence adapter.](packages/platform-adapters/platform-adapter-typeorm/README.md) |
+| `packages/platform-adapters/platform-adapter-fastify` | [Framework-neutral platform HTTP application backed by Fastify.](packages/platform-adapters/platform-adapter-fastify/README.md) |
 | `packages/platform-utils/platform-admin-vite` | [Vite transform for the shared admin Vue runtime.](packages/platform-utils/platform-admin-vite/README.md) |
 | `packages/platform-utils/platform-cli` | [CLI package scaffold.](packages/platform-utils/platform-cli/README.md) |
 | `packages/platform-utils/platform-contract-tests` | [Reusable module contract-conformance package.](packages/platform-utils/platform-contract-tests/README.md) |
@@ -72,6 +75,8 @@ npm run build --workspace=@examples/module-test
   implementations.
 - `platform-core` must not depend on adapters, feature modules, or frontend
   runtimes.
+- HTTP contracts belong to the SDK; Fastify application lifecycle and transport
+  mapping belong to `platform-adapter-fastify`, never to `platform-core`.
 - Adapters and feature modules depend on SDK contracts, not on core internals
   or one another.
 - Admin modules integrate with the separate admin shell through SDK contracts;
@@ -110,3 +115,13 @@ The preferred package export is `./platform`. See the
 [`@prosto/platform-core` README](packages/platform-core/README.md) for the
 artifact layout, configuration options, probing refresh behavior, and complete
 bootstrap order.
+
+## HTTP applications
+
+Applications compose `FastifyHttpApplication` with a `RuntimeBuilder` factory.
+Modules declare SDK `IHttpEndpoint` values through `context.http.endpoints` in
+`init()` only; the adapter exposes endpoints only after their owners start.
+`GET /health` and `GET /ready` are public infrastructure probes, not the admin
+shell's `/api/admin/platform/health`. See the
+[`@prosto/platform-adapter-fastify` README](packages/platform-adapters/platform-adapter-fastify/README.md)
+and the [TypeORM example](examples/typeorm-shared-datasource/README.md).

@@ -101,6 +101,22 @@ describe('HealthModule contract', () => {
 npm run test:contracts
 ```
 
+## HTTP Adapter Testing
+
+Test the Fastify adapter through its public composition boundary. Cover endpoint
+registration and rollback, successful-module route filtering, start/stop
+ordering, sanitized 4xx/5xx responses, correlation IDs, parsed/raw/multipart
+limits, one-shot stream cleanup, cancellation, and `/health`/`/ready` response
+contracts. Do not couple module tests to Fastify request or plugin types; module
+contract contexts expose HTTP registration only during `init()`.
+
+Run focused checks from the repository root:
+
+```bash
+npm run test --workspace=@prosto/platform-adapter-fastify
+npm run typecheck --workspace=@prosto/platform-adapter-fastify
+```
+
 ## Test Data
 
 - Use realistic but anonymized test data
