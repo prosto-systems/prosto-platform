@@ -48,21 +48,21 @@ prevents modules from observing an incomplete service registry.
 
 ## Module endpoints
 
-Modules declare framework-neutral endpoints only during `init()`. `context.http`
-is absent in `start()` and `stop()`, and is also absent in a headless runtime.
-Modules whose API requires HTTP should fail `init()` explicitly when it is not
-available.
+Modules declare framework-neutral endpoints only during `init()`.
+`context.capabilities.http` is absent in `start()` and `stop()`, and is also
+absent in a headless runtime. Modules whose API requires HTTP should fail
+`init()` explicitly when it is not available.
 
 ```ts
 import type { IPlatformModule, IPlatformModuleContext } from '@prosto/platform-sdk';
 
 export class OrdersModule implements IPlatformModule {
   init(context: IPlatformModuleContext): void {
-    if (!context.http) {
+    if (!context.capabilities.http) {
       throw new Error('OrdersModule requires an HTTP host.');
     }
 
-    context.http.endpoints.register({
+    context.capabilities.http.endpoints.register({
       method: 'GET',
       path: '/api/orders/:id',
       handler: async ({ params, correlationId }): Promise<Response> =>

@@ -166,7 +166,7 @@ export class DefaultModuleLifecycleContextFactory implements IModuleLifecycleCon
       eventBus: new MockEventBus(),
       services: new MockServiceRegistry(),
       logger: new MockLogger(),
-      ...(http === undefined ? {} : { http }),
+      capabilities: { http },
       getConfigValue: <T>(key: string): Readonly<T> => {
         if (key === 'contract.testing.enabled') {
           return true as T;

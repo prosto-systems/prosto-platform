@@ -47,25 +47,33 @@ class module_order_create_order1710000001001 implements MigrationInterface {
  * and consumes the ready shared data source during `start()`.
  */
 export class OrdersModule implements IPlatformModule {
-  init(context: IPlatformModuleContext): void {
-    if (!context.http) {
+  init({
+    moduleId,
+    services,
+    capabilities: { persistence, http },
+  }: IPlatformModuleContext): void {
+    if (!http) {
       throw new Error('The orders module requires an HTTP application host.');
     }
 
-    context.persistence?.descriptors?.register(context.moduleId, {
+    if (!persistence?.descriptors) {
+      throw new Error('The orders module requires persistence descriptors.');
+    }
+
+    persistence.descriptors.register(moduleId, {
       owner: 'module',
-      ownerId: context.moduleId,
+      ownerId: moduleId,
       payload: createTypeOrmPersistenceDescriptor({
         entities: [OrdersOrder],
         migrations: [module_order_create_order1710000001001],
       }),
     });
 
-    context.http.endpoints.register({
+    http.endpoints.register({
       method: 'GET',
       path: '/api/orders',
       handler: async (): Promise<Response> => {
-        const dataSource = context.services.resolveRequired(
+        const dataSource = services.resolveRequired(
           TYPEORM_DATA_SOURCE_SERVICE_TOKEN,
         );
         const orders = await dataSource.getRepository(OrdersOrder).find();
@@ -75,8 +83,8 @@ export class OrdersModule implements IPlatformModule {
     });
   }
 
-  async start(context: IPlatformModuleContext): Promise<void> {
-    const dataSource = context.services.resolveRequired(
+  async start({ services }: IPlatformModuleContext): Promise<void> {
+    const dataSource = services.resolveRequired(
       TYPEORM_DATA_SOURCE_SERVICE_TOKEN,
     );
 

@@ -20,9 +20,9 @@ method.
 - Keep Fastify and all server implementation details out of `platform-core`.
 - Let `FastifyHttpApplication` own `runtime.start() -> route activation ->
   listen()` and `stop accepting HTTP -> runtime.stop()`.
-- Let modules register endpoint declarations only through `context.http` during
-  `init()`; `context.http` is absent in `start()` and `stop()` and when no HTTP
-  host is composed.
+- Let modules register endpoint declarations only through
+  `context.capabilities.http` during `init()`; it is absent in `start()` and
+  `stop()` and when no HTTP host is composed.
 - Use a framework-neutral readonly request context containing `method`, `url`,
   `headers`, `params`, `query`, a discriminated streaming-capable body, `signal`,
   and `correlationId`. Handlers return the standard Web `Response` supported by
@@ -132,8 +132,8 @@ Define and document these `@alpha` APIs:
   admin shell client's
   optional `code`/`correlationId` parsing without claiming its domain API.
 
-Extend `IPlatformModuleContext` with optional `http?: IHttpModuleContext` and
-document that it is present only during `init()` when an HTTP host capability
+Extend `IPlatformModuleContext` with `capabilities.http?: IHttpModuleContext`
+and document that it is present only during `init()` when an HTTP host capability
 was composed. Modules that require HTTP may throw when it is absent; modules
 with optional HTTP behavior may use optional chaining and remain headless.
 
@@ -182,10 +182,10 @@ with optional HTTP behavior may use optional chaining and remain headless.
    - In `ModuleContextFactory`, resolve
      `HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN` from the shared service
      registry only for lifecycle stage `init`.
-   - If present, call the provider with the manifest module ID and attach the
-     returned scoped registrar as `context.http.endpoints`; never ask the module
-     to submit an owner ID.
-   - Leave `context.http` undefined for `start`, `stop`, and headless
+    - If present, call the provider with the manifest module ID and attach the
+      returned scoped registrar as `context.capabilities.http.endpoints`; never
+      ask the module to submit an owner ID.
+    - Leave `context.capabilities.http` undefined for `start`, `stop`, and headless
      compositions.
    - Resolve the same provider into `ModuleLifecycleOrchestrator`. If module
      `init()` succeeds, call `commit(moduleId)` before advancing. If module
@@ -375,8 +375,9 @@ with optional HTTP behavior may use optional chaining and remain headless.
    - Pass a redacting `ConsoleModuleLogger('http')` from core to demonstrate
      safe optional adapter logging; adapter library code remains silent when no
      SDK logger is supplied.
-   - In the discovered `module-order` `init()`, require `context.http` explicitly
-     (so this API module fails according to startup policy in a headless host),
+    - In the discovered `module-order` `init()`, require
+      `context.capabilities.http` explicitly (so this API module fails according
+      to startup policy in a headless host),
      keep persistence descriptor registration, and add `GET /api/orders`. The
      handler resolves the ready TypeORM data source when a request arrives and
      returns `Response.json(...)`, demonstrating that declarations happen before
@@ -408,11 +409,12 @@ with optional HTTP behavior may use optional chaining and remain headless.
 
 ## Compatibility And Migration
 
-- No manifest or persisted-data migration is required. Existing modules that do
-  not read `context.http` continue to run unchanged in HTTP and headless hosts.
-- HTTP-capable modules use the additive optional SDK context. A module whose API
-  is mandatory must fail `init()` explicitly when `context.http` is absent so
-  the existing module `optional`/startup-policy semantics remain authoritative.
+- No manifest or persisted-data migration is required. Modules must migrate HTTP
+  access from `context.http` to `context.capabilities.http`.
+- HTTP-capable modules use the optional HTTP capability. A module whose API is
+  mandatory must fail `init()` explicitly when `context.capabilities.http` is
+  absent so the existing module `optional`/startup-policy semantics remain
+  authoritative.
 - The lifecycle-aware context-factory argument is an alpha breaking change only
   for custom `@prosto/platform-contract-tests` factories; update its README with
   the required stage parameter and migration example.

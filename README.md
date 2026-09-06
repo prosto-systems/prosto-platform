@@ -119,8 +119,9 @@ bootstrap order.
 ## HTTP applications
 
 Applications compose `FastifyHttpApplication` with a `RuntimeBuilder` factory.
-Modules declare SDK `IHttpEndpoint` values through `context.http.endpoints` in
-`init()` only; the adapter exposes endpoints only after their owners start.
+Modules declare SDK `IHttpEndpoint` values through
+`context.capabilities.http.endpoints` in `init()` only; the adapter exposes
+endpoints only after their owners start.
 `GET /health` and `GET /ready` are public infrastructure probes, not the admin
 shell's `/api/admin/platform/health`. See the
 [`@prosto/platform-adapter-fastify` README](packages/platform-adapters/platform-adapter-fastify/README.md)

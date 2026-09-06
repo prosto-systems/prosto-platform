@@ -98,9 +98,9 @@ For the plugin manifest, registration lifecycle, and runtime restrictions, see
 ## HTTP Contracts
 
 The SDK defines framework-neutral alpha HTTP contracts for application hosts and
-modules. An HTTP host adds optional `context.http.endpoints` only while a module
-is executing `init()`. It is absent in later lifecycle phases and in headless
-hosts. Endpoints use `IHttpEndpoint`, receive immutable
+modules. An HTTP host adds optional `context.capabilities.http.endpoints` only
+while a module is executing `init()`. It is absent in later lifecycle phases and
+in headless hosts. Endpoints use `IHttpEndpoint`, receive immutable
 `IHttpRequestContext`, and return the standard Web `Response`; they never
 receive Fastify, Busboy, or Node stream types.
 

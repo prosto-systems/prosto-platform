@@ -119,9 +119,10 @@ For a persistence-enabled composition, see
   diagnostics. Configured secret redaction is applied to diagnostic output.
 - Call `stop()` during application shutdown to stop started modules in reverse
   lifecycle order and dispose core services.
-- An HTTP host may expose `context.http` only for `init()`. The core commits
-  endpoint registrations after successful initialization and rolls them back
-  after `init()` or `start()` failures, without knowing an HTTP framework.
+- An HTTP host may expose `context.capabilities.http` only for `init()`. The
+  core commits endpoint registrations after successful initialization and rolls
+  them back after `init()` or `start()` failures, without knowing an HTTP
+  framework.
 
 Public core APIs are `@alpha` and may change in minor releases. Public module
 and adapter contracts belong to `@prosto/platform-sdk`.

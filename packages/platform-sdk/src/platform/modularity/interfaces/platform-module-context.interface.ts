@@ -14,6 +14,17 @@ export type PlatformStartupPolicyType = (typeof STARTUP_POLICIES)[number];
 
 /**
  * @alpha
+ * Lifecycle-scoped host capabilities available to a platform module.
+ */
+export interface IPlatformModuleCapabilities {
+  /** Persistence registration is available only during init(). */
+  readonly persistence?: IPersistenceModuleContext;
+  /** HTTP endpoint registration is available only during init() with an HTTP host. */
+  readonly http?: IHttpModuleContext;
+}
+
+/**
+ * @alpha
  * Shared runtime context passed to module lifecycle handlers.
  */
 export interface IPlatformModuleContext {
@@ -23,10 +34,7 @@ export interface IPlatformModuleContext {
   readonly sdkVersion: string;
   readonly eventBus: IEventBus;
   readonly services: IServiceRegistry;
-  /** Persistence registration is available only during init(). */
-  readonly persistence?: IPersistenceModuleContext;
-  /** HTTP endpoint registration is available only during init() with an HTTP host. */
-  readonly http?: IHttpModuleContext;
+  readonly capabilities: IPlatformModuleCapabilities;
   readonly logger: IPlatformModuleLogger;
   readonly config: Readonly<Record<string, any>>;
   getConfigValue<T>(key: string, defaultValue?: T): Readonly<T>;

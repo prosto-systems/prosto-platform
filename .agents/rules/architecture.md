@@ -66,8 +66,9 @@ shared TypeORM example composes that adapter outside the core.
 
 ### HTTP application boundary
 
-- Modules declare SDK endpoints only through `context.http.endpoints` during
-  `init()`; they do not receive adapter instances or framework hooks.
+- Modules declare SDK endpoints only through
+  `context.capabilities.http.endpoints` during `init()`; they do not receive
+  adapter instances or framework hooks.
 - The application host starts the runtime, activates endpoints for successfully
   started modules, then listens; it closes HTTP before stopping the runtime.
 - `/health` and `/ready` are public infrastructure probes, not the admin shell's

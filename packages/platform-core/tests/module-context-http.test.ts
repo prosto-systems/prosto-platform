@@ -89,7 +89,7 @@ describe('ModuleContextFactory HTTP capability', () => {
     const context = factory.create(createOptions('init'));
 
     // Assert
-    expect(context.http?.endpoints).toBe(registrar);
+    expect(context.capabilities.http?.endpoints).toBe(registrar);
     expect(createRegistrar).toHaveBeenCalledOnce();
     expect(createRegistrar).toHaveBeenCalledWith(MODULE_MANIFEST.id);
   });
@@ -113,7 +113,7 @@ describe('ModuleContextFactory HTTP capability', () => {
       const context = factory.create(createOptions(lifecycleStage));
 
       // Assert
-      expect(context.http).toBeUndefined();
+      expect(context.capabilities.http).toBeUndefined();
       expect(createRegistrar).not.toHaveBeenCalled();
     },
   );
@@ -126,7 +126,7 @@ describe('ModuleContextFactory HTTP capability', () => {
     const context = factory.create(createOptions('init'));
 
     // Assert
-    expect(context.http).toBeUndefined();
+    expect(context.capabilities.http).toBeUndefined();
   });
 });
 

@@ -44,11 +44,11 @@ class BrokenModuleLifecycleFailure extends ValidModule {
 
 class HttpLifecycleModule implements IPlatformModule {
   init(ctx: IPlatformModuleContext): void {
-    if (ctx.http === undefined) {
+    if (ctx.capabilities.http === undefined) {
       throw new Error('HTTP capability must be available during init.');
     }
 
-    ctx.http.endpoints.register({
+    ctx.capabilities.http.endpoints.register({
       method: 'GET',
       path: '/contract-http',
       handler: () => new Response(null, { status: 204 }),
@@ -56,13 +56,13 @@ class HttpLifecycleModule implements IPlatformModule {
   }
 
   start(ctx: IPlatformModuleContext): void {
-    if (ctx.http !== undefined) {
+    if (ctx.capabilities.http !== undefined) {
       throw new Error('HTTP capability must be unavailable during start.');
     }
   }
 
   stop(ctx: IPlatformModuleContext): void {
-    if (ctx.http !== undefined) {
+    if (ctx.capabilities.http !== undefined) {
       throw new Error('HTTP capability must be unavailable during stop.');
     }
   }

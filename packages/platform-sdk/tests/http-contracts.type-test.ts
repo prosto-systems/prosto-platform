@@ -62,7 +62,7 @@ const application: IHttpApplication = {
 };
 
 const state: HttpApplicationStateType = HTTP_APPLICATION_STATES[0];
-const http: IHttpModuleContext | undefined = moduleContext.http;
+const http: IHttpModuleContext | undefined = moduleContext.capabilities.http;
 const configureServices: ServiceRegistryConfiguratorType = (services): void => {
   const provider: IHttpEndpointRegistrarProvider = services.resolveRequired(
     HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN,

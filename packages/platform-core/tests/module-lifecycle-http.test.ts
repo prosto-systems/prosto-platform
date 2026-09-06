@@ -41,7 +41,7 @@ describe('ModuleLifecycleOrchestrator HTTP scopes', () => {
     const moduleEnvelope = createModuleEnvelope({
       init(context) {
         events.push('module:init');
-        retainedRegistrar = context.http?.endpoints;
+        retainedRegistrar = context.capabilities.http?.endpoints;
         retainedRegistrar?.register(ENDPOINT);
       },
       start: (): void => undefined,
@@ -71,7 +71,7 @@ describe('ModuleLifecycleOrchestrator HTTP scopes', () => {
     const provider = new RecordingHttpRegistrarProvider();
     const moduleEnvelope = createModuleEnvelope({
       init(context) {
-        context.http?.endpoints.register(ENDPOINT);
+        context.capabilities.http?.endpoints.register(ENDPOINT);
         throw new Error('init failed');
       },
       start: (): void => undefined,
@@ -109,7 +109,7 @@ describe('ModuleLifecycleOrchestrator HTTP scopes', () => {
     );
     const moduleEnvelope = createModuleEnvelope({
       init(context) {
-        context.http?.endpoints.register(ENDPOINT);
+        context.capabilities.http?.endpoints.register(ENDPOINT);
       },
       start: (): void => undefined,
       stop: (): void => undefined,
@@ -145,7 +145,7 @@ describe('ModuleLifecycleOrchestrator HTTP scopes', () => {
     const provider = new RecordingHttpRegistrarProvider();
     const moduleEnvelope = createModuleEnvelope({
       init(context) {
-        context.http?.endpoints.register(ENDPOINT);
+        context.capabilities.http?.endpoints.register(ENDPOINT);
       },
       start() {
         throw new Error('start failed');
@@ -181,10 +181,10 @@ describe('ModuleLifecycleOrchestrator HTTP scopes', () => {
     // Arrange
     const moduleEnvelope = createModuleEnvelope({
       init(context) {
-        expect(context.http).toBeUndefined();
+        expect(context.capabilities.http).toBeUndefined();
       },
       start(context) {
-        expect(context.http).toBeUndefined();
+        expect(context.capabilities.http).toBeUndefined();
       },
       stop: (): void => undefined,
     });
@@ -311,7 +311,7 @@ function createContextFactory(
         sdkVersion: options.sdkVersion,
         eventBus,
         services,
-        http,
+        capabilities: { http },
         logger: LOGGER,
         config: {},
         getConfigValue<T>(_key: string, defaultValue?: T): Readonly<T> {

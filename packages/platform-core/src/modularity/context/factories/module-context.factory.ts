@@ -66,14 +66,16 @@ export class ModuleContextFactory implements IModuleContextFactory {
 
     return {
       logger,
-      http,
       moduleId,
-      persistence,
       startupPolicy: options.startupPolicy,
       sdkVersion: options.sdkVersion,
       environment: this._environment,
       eventBus: this._eventBus,
       services: this._services,
+      capabilities: {
+        http,
+        persistence,
+      },
       config: scopedConfig,
       getConfigValue<T>(key: string, defaultValue?: T): Readonly<T> {
         return resolveNestedValue(scopedConfig, key) ?? (defaultValue as T);
