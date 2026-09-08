@@ -1,4 +1,4 @@
-import type { IPlatformRuntimeVersionContext } from '@prosto/platform-sdk';
+import type { IPlatformRuntimeVersionContext } from '@prosto/platform-sdk/platform';
 import type { IRuntimeFailureDiagnostic } from '@/diagnostics/index.js';
 import type { IModuleCandidateArtifact } from '../../loader/index.js';
 

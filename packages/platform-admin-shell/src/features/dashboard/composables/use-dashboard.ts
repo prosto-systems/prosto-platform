@@ -2,7 +2,7 @@ import type {
   ActivityItemType,
   DashboardSummaryType,
   PlatformModuleType,
-} from '../models';
+} from '@prosto/platform-sdk/admin';
 import type { ShallowRef } from 'vue';
 import { shallowRef } from 'vue';
 import { ApiError } from '@/shared/api';

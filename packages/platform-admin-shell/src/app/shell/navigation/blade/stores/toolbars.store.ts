@@ -1,7 +1,7 @@
 import type {
   IAdminShellBlade,
   IAdminShellBladeToolbarItem,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/admin';
 import { defineStore } from 'pinia';
 import { useAuthStore } from '@/features/auth';
 

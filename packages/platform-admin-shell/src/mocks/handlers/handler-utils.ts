@@ -1,4 +1,4 @@
-import type { AdminShellPermissionType } from '@prosto/platform-sdk';
+import type { AdminShellPermissionType } from '@prosto/platform-sdk/admin';
 import type { JsonBodyType } from 'msw';
 import { delay, HttpResponse } from 'msw';
 import {

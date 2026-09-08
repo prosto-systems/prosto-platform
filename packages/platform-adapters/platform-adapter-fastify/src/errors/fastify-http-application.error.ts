@@ -1,4 +1,4 @@
-import type { HttpApplicationStateType } from '@prosto/platform-sdk';
+import type { HttpApplicationStateType } from '@prosto/platform-sdk/platform';
 
 /** @alpha Error codes emitted by the Fastify HTTP application lifecycle. */
 export const FASTIFY_HTTP_APPLICATION_ERROR_CODES = [

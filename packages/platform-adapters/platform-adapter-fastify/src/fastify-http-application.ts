@@ -1,3 +1,5 @@
+import { readFile, realpath, stat } from 'node:fs/promises';
+import { relative, resolve, sep } from 'node:path';
 import Fastify, {
   type FastifyBodyParser,
   type FastifyInstance,
@@ -6,20 +8,25 @@ import Fastify, {
   type RouteHandlerMethod,
 } from 'fastify';
 import fastifyMultipart from '@fastify/multipart';
+import fastifyStatic from '@fastify/static';
 import {
+  HTTP_METHODS,
   HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN,
+  HTTP_REQUEST_GATE_SERVICE_TOKEN,
   type HttpApplicationStateType,
+  type HttpMethodType,
   HttpRequestBodyError,
   type IHttpApplication,
   type IHttpApplicationRuntime,
   type IHttpEndpoint,
   type IHttpErrorResponse,
+  type IHttpRequestGate,
   type IHttpHealthResponse,
   type IHttpReadinessResponse,
   type IPlatformModuleLogger,
   type IServiceRegistry,
   type ServiceRegistryConfiguratorType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import { FastifyHttpApplicationError } from '@/errors/index.js';
 import type { IFastifyHttpApplicationOptions } from '@/interfaces/index.js';
 import { FastifyEndpointRegistry } from '@/registries/fastify-endpoint.registry.js';
@@ -35,6 +42,7 @@ import {
   applicationOptionsSchema,
   type FastifyHttpApplicationConfigurationType,
 } from '@/schemas/index.js';
+import { createTrustedProxyMatcher } from '@/trusted-proxy/trusted-proxy.matcher.js';
 import {
   isHttpApplicationRuntime,
   isPayloadTooLargeError,
@@ -58,6 +66,16 @@ export class FastifyHttpApplication implements IHttpApplication {
 
   private fastify: FastifyInstance | undefined;
   private runtime: IHttpApplicationRuntime | undefined;
+  private services: IServiceRegistry | undefined;
+  private requestGate: IHttpRequestGate | undefined;
+  private staticSite:
+    | {
+        readonly rootPath: string;
+        readonly indexFileName: string;
+        readonly spaFallback: boolean;
+        readonly contentSecurityPolicy: string | false;
+      }
+    | undefined;
   private startPromise: Promise<void> | undefined;
   private stopPromise: Promise<void> | undefined;
   private startedAt: number | undefined;
@@ -154,16 +172,26 @@ export class FastifyHttpApplication implements IHttpApplication {
 
       await this._startRuntime(this.runtime);
 
+      this.requestGate = this.services?.resolve(
+        HTTP_REQUEST_GATE_SERVICE_TOKEN,
+      );
+
+      const tls = await this._loadTlsOptions();
+
       this.fastify = Fastify({
         bodyLimit: this.configuration.parsedBodyLimitBytes,
         exposeHeadRoutes: false,
+        ...(tls === undefined ? {} : { https: tls }),
         keepAliveTimeout: this.configuration.keepAliveTimeoutMs,
         logger: false,
         requestTimeout: this.configuration.requestTimeoutMs,
-        trustProxy: this.configuration.trustProxy,
+        trustProxy: createTrustedProxyMatcher(
+          this.configuration.trustedProxies,
+        ),
       });
 
       this._configureRequestHandling(this.fastify);
+      await this._configureStaticSite(this.fastify);
       this._activateRoutes(this.fastify, this.runtime);
       await this._waitForFastifyReadiness(this.fastify);
 
@@ -198,6 +226,7 @@ export class FastifyHttpApplication implements IHttpApplication {
       configurationCount += 1;
 
       try {
+        this.services = services;
         services.register(
           HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN,
           this.endpointRegistry,
@@ -272,7 +301,11 @@ export class FastifyHttpApplication implements IHttpApplication {
 
       fastify.get('/health', () => this._createHealthResponse());
       fastify.get('/ready', () => this._createReadinessResponse());
-      fastify.setNotFoundHandler((request, reply) => {
+      fastify.setNotFoundHandler(async (request, reply) => {
+        if (await this._sendStaticSiteResponse(request, reply)) {
+          return;
+        }
+
         this._sendSanitizedError(reply, 404, 'not_found', request);
       });
       fastify.setErrorHandler((error, request, reply) => {
@@ -343,6 +376,80 @@ export class FastifyHttpApplication implements IHttpApplication {
   };
 
   private _configureRequestHandling(fastify: FastifyInstance): void {
+    fastify.addHook('onRequest', async (request, reply) => {
+      const requestGate = this.requestGate;
+      const method = asHttpMethod(request.method);
+
+      if (requestGate === undefined || method === undefined) {
+        return;
+      }
+
+      const mapper = new FastifyRequestContextMapper(
+        this.configuration,
+        this.shutdownController.signal,
+      );
+      const metadata = mapper.createMetadata(request);
+
+      try {
+        const decision = await requestGate.evaluate({
+          method,
+          pathname: metadata.url.pathname,
+          remoteAddress: metadata.remoteAddress,
+        });
+
+        if (decision.allowed) {
+          return;
+        }
+
+        // No body parser has run yet; resume the rejected payload before replying.
+        request.raw.resume();
+        this._sendSanitizedError(
+          reply,
+          decision.status,
+          decision.code,
+          request,
+        );
+        return reply;
+      } catch {
+        if (!isBusinessPath(metadata.url.pathname)) {
+          return;
+        }
+
+        request.raw.resume();
+        this.logger?.error('HTTP request gate evaluation failed.', {
+          route: metadata.url.pathname,
+          method,
+          errorCode: 'request_gate_unavailable',
+          correlationId: this._getCorrelationId(request),
+        });
+        this._sendSanitizedError(
+          reply,
+          503,
+          'request_gate_unavailable',
+          request,
+        );
+        return reply;
+      }
+    });
+    fastify.addHook('onSend', (request, reply, payload, done): void => {
+      reply.header('x-content-type-options', 'nosniff');
+      reply.header('referrer-policy', 'strict-origin-when-cross-origin');
+      reply.header('x-frame-options', 'SAMEORIGIN');
+
+      if (this.staticSite?.contentSecurityPolicy !== false) {
+        reply.header(
+          'content-security-policy',
+          this.staticSite?.contentSecurityPolicy ??
+            "default-src 'self'; base-uri 'self'; frame-ancestors 'self'",
+        );
+      }
+
+      if (!reply.hasHeader('x-correlation-id')) {
+        reply.header('x-correlation-id', this._getCorrelationId(request));
+      }
+
+      done(null, payload);
+    });
     const jsonParser: FastifyBodyParser<string> = (
       _request,
       body,
@@ -412,6 +519,145 @@ export class FastifyHttpApplication implements IHttpApplication {
         headerPairs: this.configuration.multipartLimits.headerPairs,
       },
     });
+  }
+
+  private async _configureStaticSite(fastify: FastifyInstance): Promise<void> {
+    const staticSite = this.configuration.staticSite;
+
+    if (staticSite === undefined) {
+      return;
+    }
+
+    const rootPath = await realpath(staticSite.rootPath);
+    const rootStats = await stat(rootPath);
+
+    if (!rootStats.isDirectory()) {
+      throw new Error('The static-site root path must resolve to a directory.');
+    }
+
+    this.staticSite = { ...staticSite, rootPath };
+    // Keep static response handling inside Fastify without leaking its API.
+    fastify.register(fastifyStatic, {
+      root: rootPath,
+      serve: false,
+      cacheControl: false,
+    });
+  }
+
+  private async _loadTlsOptions(): Promise<
+    { readonly cert: Buffer; readonly key: Buffer } | undefined
+  > {
+    const tls = this.configuration.tls;
+
+    if (tls === undefined) {
+      return undefined;
+    }
+
+    const [cert, key] = await Promise.all([
+      readFile(tls.certificatePath),
+      readFile(tls.privateKeyPath),
+    ]);
+
+    return { cert, key };
+  }
+
+  private async _sendStaticSiteResponse(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<boolean> {
+    const staticSite = this.staticSite;
+
+    if (
+      staticSite === undefined ||
+      (request.method !== 'GET' && request.method !== 'HEAD')
+    ) {
+      return false;
+    }
+
+    const pathname = getRequestPathname(request);
+
+    if (pathname === undefined || isStaticFallbackExcluded(pathname)) {
+      return false;
+    }
+
+    const requestedFile =
+      pathname === '/' ? staticSite.indexFileName : pathname.slice(1);
+
+    if (await this._sendStaticFile(reply, requestedFile, pathname)) {
+      return true;
+    }
+
+    if (
+      staticSite.spaFallback &&
+      acceptsHtml(request) &&
+      (await this._sendStaticFile(reply, staticSite.indexFileName, '/'))
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private async _sendStaticFile(
+    reply: FastifyReply,
+    relativePath: string,
+    requestPathname: string,
+  ): Promise<boolean> {
+    const staticSite = this.staticSite;
+
+    if (staticSite === undefined || !isSafeStaticRelativePath(relativePath)) {
+      return false;
+    }
+
+    const candidatePath = resolve(
+      staticSite.rootPath,
+      ...relativePath.split('/'),
+    );
+
+    try {
+      const realPath = await realpath(candidatePath);
+      const fileStats = await stat(realPath);
+
+      if (
+        !fileStats.isFile() ||
+        !isWithinDirectory(staticSite.rootPath, realPath)
+      ) {
+        return false;
+      }
+    } catch {
+      return false;
+    }
+
+    this._setStaticCachePolicy(reply, relativePath, requestPathname);
+    await reply.sendFile(relativePath);
+    return true;
+  }
+
+  private _setStaticCachePolicy(
+    reply: FastifyReply,
+    relativePath: string,
+    requestPathname: string,
+  ): void {
+    const staticSite = this.staticSite;
+
+    if (staticSite === undefined) {
+      return;
+    }
+
+    if (relativePath === staticSite.indexFileName || requestPathname === '/') {
+      reply.header('cache-control', 'no-cache');
+      return;
+    }
+
+    const isHashedAsset =
+      requestPathname.startsWith('/assets/') &&
+      /-[A-Za-z0-9_-]{8,}\.[A-Za-z0-9]+$/u.test(relativePath);
+    reply.header(
+      'cache-control',
+      isHashedAsset
+        ? 'public, max-age=31536000, immutable'
+        : 'public, max-age=0, must-revalidate',
+    );
   }
 
   private async _runHandler(
@@ -504,11 +750,15 @@ export class FastifyHttpApplication implements IHttpApplication {
   private _sendSanitizedError(
     reply: FastifyReply,
     statusCode: number,
-    code: IHttpErrorResponse['code'],
+    code: IHttpErrorResponse['code'] | string,
     request: FastifyRequest,
   ): void {
     const correlationId = this._getCorrelationId(request);
-    const response: IHttpErrorResponse = { code, correlationId };
+    const response: { readonly code: string; readonly correlationId: string } =
+      {
+        code,
+        correlationId,
+      };
 
     reply
       .header('x-correlation-id', correlationId)
@@ -730,4 +980,83 @@ export class FastifyHttpApplication implements IHttpApplication {
       { cause: error },
     );
   }
+}
+
+function asHttpMethod(method: string): HttpMethodType | undefined {
+  return HTTP_METHODS.includes(method as HttpMethodType)
+    ? (method as HttpMethodType)
+    : undefined;
+}
+
+function isBusinessPath(pathname: string): boolean {
+  return (
+    pathname === '/api' ||
+    pathname.startsWith('/api/') ||
+    pathname === '/modules' ||
+    pathname.startsWith('/modules/')
+  );
+}
+
+function getRequestPathname(request: FastifyRequest): string | undefined {
+  const rawUrl = request.raw.url;
+
+  if (rawUrl === undefined) {
+    return undefined;
+  }
+
+  const rawPathname = rawUrl.split('?', 1)[0] ?? '';
+
+  try {
+    const pathname = decodeURIComponent(rawPathname);
+
+    return pathname.startsWith('/') ? pathname : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function isStaticFallbackExcluded(pathname: string): boolean {
+  return (
+    pathname === '/api' ||
+    pathname.startsWith('/api/') ||
+    pathname === '/modules' ||
+    pathname.startsWith('/modules/') ||
+    pathname === '/health' ||
+    pathname.startsWith('/health/') ||
+    pathname === '/ready' ||
+    pathname.startsWith('/ready/')
+  );
+}
+
+function acceptsHtml(request: FastifyRequest): boolean {
+  const accept = request.headers.accept;
+
+  return (
+    typeof accept === 'string' &&
+    /(?:^|,)\s*text\/html(?:\s*;|,|$)/iu.test(accept)
+  );
+}
+
+function isSafeStaticRelativePath(relativePath: string): boolean {
+  return (
+    relativePath.length > 0 &&
+    !relativePath.includes('\\') &&
+    !relativePath.includes('\0') &&
+    relativePath
+      .split('/')
+      .every(
+        (segment) => segment.length > 0 && segment !== '.' && segment !== '..',
+      )
+  );
+}
+
+function isWithinDirectory(rootPath: string, candidatePath: string): boolean {
+  const pathFromRoot = relative(rootPath, candidatePath);
+
+  return (
+    pathFromRoot !== '' &&
+    !pathFromRoot.startsWith(`..${sep}`) &&
+    pathFromRoot !== '..' &&
+    !resolve(rootPath, pathFromRoot).startsWith(`..${sep}`)
+  );
 }

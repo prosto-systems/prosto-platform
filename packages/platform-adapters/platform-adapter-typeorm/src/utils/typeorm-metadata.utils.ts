@@ -1,4 +1,4 @@
-import type { IPersistenceDescriptor } from '@prosto/platform-sdk';
+import type { IPersistenceDescriptor } from '@prosto/platform-sdk/platform';
 import type {
   ITypeOrmPersistenceDescriptorPayload,
   TypeOrmDialectType,
@@ -223,7 +223,7 @@ function collectDescriptorMigrations(
       );
     }
 
-    const migrationName = migration.name;
+    const migrationName = getMigrationName(migration);
 
     if (
       !migrationName.startsWith(validated.prefix) ||
@@ -246,6 +246,12 @@ function collectDescriptorMigrations(
     state.migrations.push(migration);
     migrationNames.push(migrationName);
   }
+}
+
+function getMigrationName(migration: new () => MigrationInterface): string {
+  const instanceName = (new migration() as { readonly name?: unknown }).name;
+
+  return typeof instanceName === 'string' ? instanceName : migration.name;
 }
 
 function validateRelationOwnership(

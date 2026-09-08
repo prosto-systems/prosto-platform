@@ -8,7 +8,7 @@ import {
   type HttpRequestBodyType,
   type HttpRequestValueType,
   type IHttpRequestContext,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import type { FastifyHttpApplicationConfigurationType } from '@/schemas/index.js';
 
 interface IParsedJsonBody {
@@ -92,7 +92,7 @@ export class FastifyRequestContextMapper {
     return {
       context: Object.freeze({
         method,
-        url: createRequestUrl(request),
+        ...this.createMetadata(request),
         headers: copyRequestValues(request.headers),
         params: copyParams(request.params),
         query: copyRequestValues(asRecord(request.query)),
@@ -103,6 +103,20 @@ export class FastifyRequestContextMapper {
       cleanup: bodyMapping.cleanup,
       handlerTimeoutSignal,
     };
+  }
+
+  createMetadata(
+    request: FastifyRequest,
+  ): Pick<IHttpRequestContext, 'url' | 'protocol' | 'host' | 'remoteAddress'> {
+    const protocol = request.protocol === 'https' ? 'https' : 'http';
+    const host = request.host;
+
+    return Object.freeze({
+      url: createRequestUrl(request, protocol, host),
+      protocol,
+      host,
+      remoteAddress: request.ip || undefined,
+    });
   }
 
   private createBody(
@@ -391,11 +405,13 @@ function asRecord(value: unknown): Record<string, unknown> {
     : {};
 }
 
-function createRequestUrl(request: FastifyRequest): URL {
-  const protocol = request.protocol === 'https' ? 'https' : 'http';
-
+function createRequestUrl(
+  request: FastifyRequest,
+  protocol: 'http' | 'https',
+  host: string,
+): URL {
   try {
-    return new URL(request.url, `${protocol}://${request.host}`);
+    return new URL(request.url, `${protocol}://${host}`);
   } catch {
     return new URL(request.url, `${protocol}://localhost`);
   }

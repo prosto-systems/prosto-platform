@@ -2,7 +2,7 @@ import type {
   IPersistenceDescriptor,
   IServiceRegistry,
   ServiceTokenType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -121,6 +121,18 @@ class platform_create_migration_probe1710000000002 implements MigrationInterface
 class platform_failing_migration1710000000003 implements MigrationInterface {
   async up(): Promise<void> {
     throw new Error('database password=not-for-logs');
+  }
+
+  async down(): Promise<void> {
+    return;
+  }
+}
+
+class BundledOrdersMigration implements MigrationInterface {
+  readonly name = 'orders_create_bundled1710000000004';
+
+  async up(): Promise<void> {
+    return;
   }
 
   async down(): Promise<void> {
@@ -537,7 +549,11 @@ describe('TypeOrmPersistenceProvider', () => {
           catalog_create_second_product1710000000001,
         ],
       ),
-      descriptor('orders', [OrdersOrder], [orders_create_order1710000000000]),
+      descriptor(
+        'orders',
+        [OrdersOrder],
+        [orders_create_order1710000000000, BundledOrdersMigration],
+      ),
     ];
 
     // Act
@@ -554,6 +570,7 @@ describe('TypeOrmPersistenceProvider', () => {
       catalog_create_product1710000000000,
       catalog_create_second_product1710000000001,
       orders_create_order1710000000000,
+      BundledOrdersMigration,
     ]);
 
     expect(metadata.ownership).toEqual([
@@ -570,7 +587,10 @@ describe('TypeOrmPersistenceProvider', () => {
         ownerId: 'orders',
         entityNames: ['OrdersOrder'],
         tableNames: ['orders_order'],
-        migrationNames: ['orders_create_order1710000000000'],
+        migrationNames: [
+          'orders_create_order1710000000000',
+          'orders_create_bundled1710000000004',
+        ],
       },
     ]);
   });

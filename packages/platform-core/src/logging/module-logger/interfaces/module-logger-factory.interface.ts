@@ -1,4 +1,4 @@
-import type { IPlatformModuleLogger } from '@prosto/platform-sdk';
+import type { IPlatformModuleLogger } from '@prosto/platform-sdk/platform';
 
 /**
  * @alpha

@@ -44,9 +44,13 @@ export default defineConfig({
     emptyOutDir: true,
     copyPublicDir: true,
     lib: {
-      entry: resolve(import.meta.dirname, 'src/index.ts'),
+      entry: {
+        admin: resolve(import.meta.dirname, 'src/admin/index.ts'),
+        platform: resolve(import.meta.dirname, 'src/platform/index.ts'),
+        utils: resolve(import.meta.dirname, 'src/utils/index.ts'),
+      },
       formats: ['es'],
-      fileName: () => 'index.js',
+      fileName: (_format, entryName) => `${entryName}.js`,
     },
     rolldownOptions: {
       external: (id) =>

@@ -1,4 +1,4 @@
-import type { AuthSessionType } from '@/features/auth';
+import type { AuthSessionType } from '@prosto/platform-sdk/admin';
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/shared/api';

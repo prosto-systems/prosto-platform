@@ -4,7 +4,7 @@ import {
   HTTP_METHODS,
   HttpEndpointRegistrationError,
   HttpRequestBodyError,
-} from '@/index.js';
+} from '@/platform/index.js';
 import { describe, expect, it } from 'vitest';
 
 describe('HTTP contracts', () => {

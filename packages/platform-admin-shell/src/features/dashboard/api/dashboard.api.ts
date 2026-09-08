@@ -6,7 +6,7 @@ import {
   type DashboardSummaryType,
   platformModuleSchema,
   type PlatformModuleType,
-} from '../models';
+} from '@prosto/platform-sdk/admin';
 import { csrfHeaders, httpClient } from '@/shared/api';
 
 class DashboardApi {

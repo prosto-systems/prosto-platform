@@ -1,0 +1,18 @@
+{
+  "platform": {
+    "name": "Prosto Platform Administration Example",
+    "discoveryPath": "./modules",
+    "probingPath": "./app_data/modules",
+    "refreshProbingFolderOnStart": true
+  },
+  "persistence": {
+    "typeorm": {
+      "enabled": true,
+      "type": "postgres",
+      "migrationsRun": true,
+      "migrationTransactionMode": "each",
+      "migrationLockTimeoutMs": 60000,
+      "synchronize": false
+    }
+  }
+}

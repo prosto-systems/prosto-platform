@@ -1,7 +1,7 @@
 import type {
   IPersistenceProvider,
   PlatformStartupPolicyType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 
 /**
  * @alpha

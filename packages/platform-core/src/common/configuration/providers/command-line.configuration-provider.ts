@@ -1,5 +1,5 @@
 import type { IConfigurationProvider } from '../interfaces/index.js';
-import { isPlainObject, setNestedValue } from '@prosto/platform-sdk';
+import { isPlainObject, setNestedValue } from '@prosto/platform-sdk/utils';
 
 type PrimitiveType = string | number | boolean | null;
 type ConfigValueType =

@@ -1,8 +1,9 @@
-import type { IAdminShellPluginContentFile } from '@prosto/platform-sdk';
+import type { IAdminShellPluginContentFile } from '@prosto/platform-sdk/admin';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   loadPluginStyle,
   PluginAssetUrlError,
+  removePluginStyles,
   resolvePluginAssetUrl,
 } from './plugins.utils';
 
@@ -120,5 +121,18 @@ describe('loadPluginStyle', () => {
 
     await rejection;
     expect(remove).toHaveBeenCalledOnce();
+  });
+});
+
+describe('removePluginStyles', () => {
+  it('removes all loaded styles after a later plugin failure', (): void => {
+    const first = document.createElement('link');
+    const second = document.createElement('link');
+    document.head.append(first, second);
+
+    removePluginStyles([first, second]);
+
+    expect(first.isConnected).toBe(false);
+    expect(second.isConnected).toBe(false);
   });
 });

@@ -6,7 +6,7 @@ import type {
   ModuleIdentifierType,
   SemverRangeType,
   SemverVersionType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import { ModuleState } from '../constants/index.js';
 
 /**

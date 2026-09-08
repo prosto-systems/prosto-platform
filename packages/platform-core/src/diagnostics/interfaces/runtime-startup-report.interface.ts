@@ -1,4 +1,4 @@
-import type { PlatformStartupPolicyType } from '@prosto/platform-sdk';
+import type { PlatformStartupPolicyType } from '@prosto/platform-sdk/platform';
 import type { RuntimeStartupStatus } from '../constants/index.js';
 import type { IRuntimeFailureDiagnostic } from './runtime-failure-diagnostic.interface.js';
 import type { IRuntimeLoadedModuleDiagnostic } from './runtime-loaded-module-diagnostic.interface.js';

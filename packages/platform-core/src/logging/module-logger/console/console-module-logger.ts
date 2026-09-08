@@ -2,7 +2,7 @@ import {
   type IPlatformModuleLogger,
   type ISecretsRedactor,
   SecretsRedactor,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 
 /**
  * @alpha

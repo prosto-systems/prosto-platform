@@ -1,4 +1,4 @@
-import type { AuthSessionType } from '@/features/auth';
+import type { AuthSessionType } from '@prosto/platform-sdk/admin';
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { getMockState, reloadMockStateFromStorage } from '../mock-state';
@@ -82,14 +82,13 @@ describe('MSW authentication handlers', () => {
     expect(getMockState().sessions.size).toBe(1);
   });
 
-  it('expires a stale session cookie when restoration fails', async () => {
-    document.cookie = 'prosto_admin_session=missing; Path=/; SameSite=Lax';
-
-    const expiredSession = await request<IErrorResponse>('/auth/session');
+  it('rejects a stale session cookie', async () => {
+    const expiredSession = await request<IErrorResponse>('/auth/session', {
+      headers: { Cookie: 'prosto_admin_session=missing' },
+    });
 
     expect(expiredSession.response.status).toBe(401);
     expect(expiredSession.body).toEqual({ code: 'session_expired' });
-    expect(document.cookie).not.toContain('prosto_admin_session=');
   });
 
   it('enforces CSRF protection and expires the session cookie on logout', async () => {

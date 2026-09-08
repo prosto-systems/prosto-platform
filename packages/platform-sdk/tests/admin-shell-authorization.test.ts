@@ -2,7 +2,7 @@ import type {
   AdminShellPermissionType,
   IAdminShellAuthService,
   IAdminShellPluginContext,
-} from '@/index.js';
+} from '@/admin/index.js';
 import { describe, expectTypeOf, it } from 'vitest';
 
 describe('admin authorization contract', () => {

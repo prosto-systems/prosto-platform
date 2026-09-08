@@ -1,4 +1,4 @@
-import type { IAdminShellBlade } from '@prosto/platform-sdk';
+import type { IAdminShellBlade } from '@prosto/platform-sdk/admin';
 
 export function getParentBlades(blade: IAdminShellBlade): IAdminShellBlade[] {
   return blade.parentBlade

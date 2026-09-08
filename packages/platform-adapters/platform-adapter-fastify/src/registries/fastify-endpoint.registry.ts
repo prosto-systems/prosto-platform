@@ -6,7 +6,7 @@ import {
   type IHttpEndpoint,
   type IHttpEndpointRegistrar,
   type IHttpEndpointRegistrarProvider,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import { FastifyHttpApplicationError } from '../errors/index.js';
 
 type EndpointRegistryStateType = 'collecting' | 'sealed';

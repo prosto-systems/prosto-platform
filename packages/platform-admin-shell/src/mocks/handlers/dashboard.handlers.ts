@@ -1,12 +1,11 @@
 import { http } from 'msw';
-import { addActivity, getMockState, type IMockModule } from '../mock-state';
+import { getMockState } from '../mock-state';
 import {
   ADMIN_API_PATH,
   applyMockLatency,
   errorResponse,
   getAuthenticatedRequest,
   hasPermission,
-  hasValidCsrfToken,
   jsonResponse,
 } from './handler-utils';
 
@@ -55,38 +54,6 @@ export const dashboardHandlers = [
 
     return jsonResponse(getMockState().modules);
   }),
-
-  http.post(
-    `${ADMIN_API_PATH}/modules/:moduleId/restart`,
-    async ({ cookies, params, request }) => {
-      await applyMockLatency();
-
-      const authenticatedRequest = getAuthenticatedRequest(cookies);
-
-      if (authenticatedRequest === undefined) {
-        return errorResponse(401, 'session_expired');
-      }
-
-      if (!hasPermission(authenticatedRequest, 'modules:restart')) {
-        return errorResponse(403, 'permission_denied');
-      }
-
-      if (!hasValidCsrfToken(request, authenticatedRequest)) {
-        return errorResponse(403, 'csrf_invalid');
-      }
-
-      const module = findModule(params.moduleId);
-
-      if (module === undefined) {
-        return errorResponse(404, 'module_not_found');
-      }
-
-      module.status = 'healthy';
-      addActivity(`Restarted ${module.name}.`);
-
-      return jsonResponse({ accepted: true });
-    },
-  ),
 ];
 
 function requirePermission(
@@ -102,14 +69,4 @@ function requirePermission(
   return hasPermission(authenticatedRequest, permission)
     ? undefined
     : errorResponse(403, 'permission_denied');
-}
-
-function findModule(
-  moduleId: string | readonly string[] | undefined,
-): IMockModule | undefined {
-  if (typeof moduleId !== 'string') {
-    return undefined;
-  }
-
-  return getMockState().modules.find((module) => module.id === moduleId);
 }

@@ -1,4 +1,4 @@
-import type { IAdminShellPluginContext } from '@prosto/platform-sdk';
+import type { IAdminShellPluginContext } from '@prosto/platform-sdk/admin';
 import { id } from '../../manifest.json';
 import { messages } from './locales';
 import MainBlade from './main-blade.vue';

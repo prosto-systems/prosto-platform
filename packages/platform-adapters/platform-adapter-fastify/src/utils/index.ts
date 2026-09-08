@@ -1,7 +1,7 @@
 import type {
   IHttpApplicationRuntime,
   IPlatformModuleLogger,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 
 export function isHttpApplicationRuntime(
   value: unknown,

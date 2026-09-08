@@ -10,7 +10,7 @@ import {
   PersistenceDescriptorRegistry,
   PersistenceError,
   type PersistenceProviderStateType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import {
   DataSource,
   type DataSourceOptions,

@@ -5,7 +5,7 @@ import {
   type IHttpEndpointRegistrarProvider,
   type IPlatformModuleLogger,
   type IPlatformModuleManifest,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import { InMemoryEventBus } from '@/events/index.js';
 import type { IModuleLoggerFactory } from '@/logging/index.js';
 import { ModuleContextFactory } from '@/modularity/index.js';

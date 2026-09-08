@@ -5,7 +5,7 @@ import type {
 import {
   type IPlatformModuleManifestValidator,
   PlatformModuleManifestValidator,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import { RuntimeErrorCodes } from '@/common/index.js';
 import { ModuleValidationBaseStrategy } from './module-validation.base-strategy.js';
 

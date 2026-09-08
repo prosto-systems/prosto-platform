@@ -1,5 +1,5 @@
 import { http } from 'msw';
-import { z } from 'zod';
+import { maintenanceRequestSchema } from '@prosto/platform-sdk/admin';
 import { addActivity, getMockState } from '../mock-state';
 import {
   ADMIN_API_PATH,
@@ -11,31 +11,22 @@ import {
   jsonResponse,
 } from './handler-utils';
 
-const maintenanceRequestSchema = z.object({ enabled: z.boolean() });
-
 export const platformHandlers = [
-  http.get(
-    `${ADMIN_API_PATH}/platform/manifest`,
-    async ({ cookies, request }) => {
-      await applyMockLatency();
+  http.get(`${ADMIN_API_PATH}/platform/manifest`, async ({ cookies }) => {
+    await applyMockLatency();
 
-      const authenticatedRequest = getAuthenticatedRequest(cookies);
+    const authenticatedRequest = getAuthenticatedRequest(cookies);
 
-      if (authenticatedRequest === undefined) {
-        return errorResponse(401, 'session_expired');
-      }
+    if (authenticatedRequest === undefined) {
+      return errorResponse(401, 'session_expired');
+    }
 
-      // if (!hasPermission(authenticatedRequest, 'modules:view')) {
-      //   return errorResponse(403, 'permission_denied');
-      // }
+    if (!hasPermission(authenticatedRequest, 'modules:view')) {
+      return errorResponse(403, 'permission_denied');
+    }
 
-      if (!hasValidCsrfToken(request, authenticatedRequest)) {
-        return errorResponse(403, 'csrf_invalid');
-      }
-
-      return jsonResponse(getMockState().manifest);
-    },
-  ),
+    return jsonResponse(getMockState().manifest);
+  }),
 
   http.get(`${ADMIN_API_PATH}/platform/health`, async ({ cookies }) => {
     await applyMockLatency();

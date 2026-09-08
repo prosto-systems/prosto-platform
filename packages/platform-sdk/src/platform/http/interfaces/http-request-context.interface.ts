@@ -78,6 +78,12 @@ export interface IHttpRequestContext {
   readonly method: HttpMethodType;
   /** Request-local URL parsed by the adapter from untrusted request data. */
   readonly url: URL;
+  /** Effective HTTP protocol after processing only configured trusted proxies. */
+  readonly protocol: 'http' | 'https';
+  /** Effective request host after processing only configured trusted proxies. */
+  readonly host: string;
+  /** Effective client network address after trusted-proxy processing, if available. */
+  readonly remoteAddress: string | undefined;
   /** Copied headers preserving repeated, untrusted values. */
   readonly headers: Readonly<Record<string, HttpRequestValueType>>;
   /** Copied path parameters containing untrusted values. */

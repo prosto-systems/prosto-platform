@@ -70,4 +70,23 @@ describe('platformConfigSchema TypeORM persistence', () => {
     // Assert
     expect(result.success).toBe(true);
   });
+
+  it('preserves configuration for a kebab-case module identifier', () => {
+    // Arrange
+    const configuration = {
+      modules: {
+        'platform-admin': {
+          allowedPublicOrigin: 'https://admin.example.invalid',
+        },
+      },
+    };
+
+    // Act
+    const result = platformConfigSchema.parse(configuration);
+
+    // Assert
+    expect(result.modules['platform-admin']).toEqual({
+      allowedPublicOrigin: 'https://admin.example.invalid',
+    });
+  });
 });

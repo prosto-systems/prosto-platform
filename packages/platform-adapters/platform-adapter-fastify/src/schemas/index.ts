@@ -1,9 +1,11 @@
+import { isAbsolute } from 'node:path';
 import { z } from 'zod';
 import {
   DEFAULT_MULTIPART_LIMITS,
   MEBIBYTE,
   NODE_TIMER_MAXIMUM_MS,
 } from '@/constants/index.js';
+import { isTrustedProxyDefinition } from '@/trusted-proxy/trusted-proxy.matcher.js';
 
 export const positiveSafeIntegerSchema = z.number().int().safe().positive();
 export const timeoutSchema = positiveSafeIntegerSchema.max(
@@ -44,7 +46,61 @@ export const applicationOptionsSchema = z.object({
   handlerTimeoutMs: timeoutSchema.default(30_000),
   keepAliveTimeoutMs: timeoutSchema.default(5_000),
   shutdownTimeoutMs: timeoutSchema.default(30_000),
-  trustProxy: z.boolean().default(false),
+  trustedProxies: z
+    .array(
+      z
+        .string()
+        .trim()
+        .min(1)
+        .max(255)
+        .refine(
+          isTrustedProxyDefinition,
+          'Expected an IP address or CIDR range.',
+        ),
+    )
+    .max(32)
+    .default([]),
+  tls: z
+    .object({
+      certificatePath: z
+        .string()
+        .trim()
+        .min(1)
+        .refine(isAbsolute, 'Expected an absolute certificate path.'),
+      privateKeyPath: z
+        .string()
+        .trim()
+        .min(1)
+        .refine(isAbsolute, 'Expected an absolute private-key path.'),
+    })
+    .strict()
+    .optional(),
+  staticSite: z
+    .object({
+      rootPath: z
+        .string()
+        .trim()
+        .min(1)
+        .refine(isAbsolute, 'Expected an absolute path.'),
+      indexFileName: z
+        .string()
+        .trim()
+        .min(1)
+        .max(255)
+        .regex(/^[A-Za-z0-9][A-Za-z0-9._-]*\.html$/u)
+        .default('index.html'),
+      spaFallback: z.boolean().default(true),
+      contentSecurityPolicy: z
+        .string()
+        .trim()
+        .min(1)
+        .max(4096)
+        .or(z.literal(false))
+        .default(
+          "default-src 'self'; script-src 'self' 'unsafe-eval'; connect-src 'self'; font-src 'self'; img-src 'self'; style-src 'self' 'unsafe-inline'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'",
+        ),
+    })
+    .optional(),
   logger: z.unknown().optional(),
 });
 

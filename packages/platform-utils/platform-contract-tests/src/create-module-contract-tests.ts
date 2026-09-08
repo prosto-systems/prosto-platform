@@ -3,7 +3,7 @@ import type {
   IModuleContractConformanceReport,
   IModuleContractTestInput,
 } from '@/interfaces/index.js';
-import { PlatformModuleManifestValidator } from '@prosto/platform-sdk';
+import { PlatformModuleManifestValidator } from '@prosto/platform-sdk/platform';
 import {
   LIFECYCLE_CHECK_RESULT_ID,
   MANIFEST_CHECK_RESULT_ID,

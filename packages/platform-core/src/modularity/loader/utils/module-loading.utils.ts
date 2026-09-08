@@ -1,7 +1,7 @@
 import type {
   IPlatformModule,
   IPlatformModuleManifest,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import { pathToFileURL } from 'node:url';
 import { join } from 'node:path';
 import { readFile, stat } from 'node:fs/promises';
@@ -70,7 +70,11 @@ export class DynamicModuleLoader {
       const pkg = JSON.parse(await readFile(pkgPath, 'utf8'));
 
       if (pkg.exports) {
-        let entry = pkg.exports['./platform'];
+        const platformExport = pkg.exports['./platform'];
+        let entry =
+          typeof platformExport === 'string'
+            ? platformExport
+            : (platformExport?.import ?? platformExport?.default);
 
         if (!entry) {
           entry =
@@ -103,58 +107,6 @@ export class DynamicModuleLoader {
     }
 
     throw new Error('No platform module entry point found in package');
-  }
-
-  /**
-   * Resolves an admin plugin entry declared by a package.
-   *
-   * Resolution prefers the `./admin` export, then the root export's import or
-   * default condition, `main`, and finally conventional admin entry paths.
-   *
-   * @param packageDir - Module package root.
-   * @returns The resolved admin plugin entry path.
-   * @throws When no supported entry point can be resolved.
-   */
-  static async resolveAdminShellPluginEntryPath(
-    packageDir: string,
-  ): Promise<string> {
-    const pkgPath = join(packageDir, 'package.json');
-
-    if (await fileExists(pkgPath)) {
-      const pkg = JSON.parse(await readFile(pkgPath, 'utf8'));
-
-      if (pkg.exports) {
-        let entry = pkg.exports['./admin'];
-
-        if (!entry) {
-          entry =
-            typeof pkg.exports === 'string'
-              ? pkg.exports
-              : (pkg.exports['.']?.import ?? pkg.exports['.']?.default);
-        }
-
-        if (entry) {
-          return join(packageDir, entry);
-        }
-      }
-
-      if (pkg.main) {
-        return join(packageDir, pkg.main);
-      }
-    }
-
-    for (const candidate of [
-      'dist/admin/admin.module.js',
-      'dist/admin/index.js',
-    ]) {
-      const candidatePath = join(packageDir, candidate);
-
-      if (await fileExists(candidatePath)) {
-        return candidatePath;
-      }
-    }
-
-    throw new Error('No admin shell plugin entry point found in package');
   }
 
   /**

@@ -4,7 +4,7 @@ import type {
   IPlatformModuleManifest,
   PlatformModuleLifecycleStageType,
   PlatformStartupPolicyType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 
 /**
  * @alpha

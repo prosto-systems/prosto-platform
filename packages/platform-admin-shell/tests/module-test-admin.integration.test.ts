@@ -1,8 +1,11 @@
-import type { IAdminShellBlade, IAdminShellPlugin } from '@prosto/platform-sdk';
+import type {
+  IAdminShellBlade,
+  IAdminShellPlugin,
+} from '@prosto/platform-sdk/admin';
 import {
   ADMIN_SHELL_RUNTIME_GLOBAL,
   bladeScopeToken,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/admin';
 import { mount } from '@vue/test-utils';
 import { createPinia } from 'pinia';
 import { build } from 'vite';

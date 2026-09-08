@@ -1,4 +1,4 @@
-import type { AuthSessionType } from '@/features/auth';
+import type { AuthSessionType } from '@prosto/platform-sdk/admin';
 import { describe, expect, it } from 'vitest';
 
 const API_URL = 'http://127.0.0.1:3001/api/admin';
@@ -17,16 +17,14 @@ async function login(
 }
 
 describe('MSW dashboard handlers', () => {
-  it('enforces permissions independently of the UI', async () => {
+  it('serves the manifest to an authorized session without a CSRF header', async () => {
     const viewer = await login('viewer@prosto.test', 'Viewer123!');
-    const response = await fetch(`${API_URL}/modules/platform-core/restart`, {
-      method: 'POST',
-      headers: { 'X-CSRF-Token': viewer.csrfToken },
-    });
+    const response = await fetch(`${API_URL}/platform/manifest`);
 
-    expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toEqual({
-      code: 'permission_denied',
+    expect(viewer.permissions).toContain('modules:view');
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      plugins: [{ moduleId: 'module-test' }],
     });
   });
 

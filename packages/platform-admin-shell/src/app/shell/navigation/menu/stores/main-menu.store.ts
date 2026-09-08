@@ -1,4 +1,4 @@
-import type { IAdminShellMainMenuItem } from '@prosto/platform-sdk';
+import type { IAdminShellMainMenuItem } from '@prosto/platform-sdk/admin';
 import { defineStore } from 'pinia';
 import { useAuthStore } from '@/features/auth';
 

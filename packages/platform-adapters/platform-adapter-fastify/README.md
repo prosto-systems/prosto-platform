@@ -46,6 +46,12 @@ The runtime factory must be synchronous. The adapter rejects a factory that
 does not invoke the configurator exactly once before runtime startup; this
 prevents modules from observing an incomplete service registry.
 
+After runtime startup, the adapter optionally resolves the SDK request gate and
+evaluates it before body consumption. Gate denials use their stable sanitized
+status/code; a gate failure returns `503 request_gate_unavailable` only for
+business paths. This lets `platform-module-admin` enforce shared maintenance
+without a Fastify dependency.
+
 ## Module endpoints
 
 Modules declare framework-neutral endpoints only during `init()`.
@@ -132,6 +138,28 @@ code; query strings, headers, bodies, filenames, and fields are not logged.
 All size and timeout options are validated at the application boundary. Timeout
 values must be positive safe integers not larger than Node.js's timer ceiling.
 
+## Trusted ingress and shell hosting
+
+`trustedProxies` is an explicit array of trusted proxy addresses or CIDR ranges.
+Only a matching direct peer may supply forwarded protocol, host, and client IP
+metadata to the SDK request context. The default trusts no proxy. Do not bind a
+public deployment directly with a broad proxy-trust setting; terminate HTTPS at
+a configured ingress or supply the optional local TLS certificate/key paths.
+
+Set `staticSite.rootPath` to the absolute built admin-shell directory to serve a
+same-origin SPA. Only regular files physically contained by that root are
+served. Fingerprinted `/assets/*` files receive immutable public caching,
+`index.html` receives `no-cache`, and other shell files revalidate. HTML `GET`
+and `HEAD` navigation can fall back to the index only outside `/api`, `/modules`,
+`/health`, and `/ready`; traversal and symlink escapes are rejected.
+
+Every response receives `X-Content-Type-Options: nosniff`, strict referrer and
+same-origin frame protections, and a correlation ID. Static hosting uses the
+default CSP `default-src 'self'; base-uri 'self'; frame-ancestors 'self'` unless
+a compatible explicit policy is configured. Validate a production shell and its
+plugins before changing that policy; do not weaken it with `unsafe-eval` or
+cross-origin sources. The adapter does not add CORS.
+
 ## Probes and non-goals
 
 `GET /health` is a minimal liveness probe with `healthy`, timestamp, and uptime.
@@ -139,10 +167,12 @@ values must be positive safe integers not larger than Node.js's timer ceiling.
 IDs, and typed non-ready reasons. Both probes are public infrastructure routes;
 they are not the admin shell endpoint `/api/admin/platform/health`.
 
-Authentication, authorization, CORS, TLS, rate limiting, static assets, OpenAPI,
-module middleware, WebSocket upgrades, and a production admin backend are not
-implemented. In particular, production admin/auth/static-asset APIs remain out
-of scope for this adapter.
+The adapter supplies transport and shell-hosting mechanics, not administration
+policy. Authentication, authorization, rate limiting, audit, SMTP delivery,
+maintenance state, and restart coordination are provided by
+`@prosto/platform-module-admin`; TLS termination remains a deployment concern.
+OpenAPI, module middleware, WebSocket upgrades, remote module acquisition,
+module install/update, and CORS remain out of scope.
 
 ## Scripts
 

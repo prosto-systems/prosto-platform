@@ -238,6 +238,8 @@ export const platformConfigSchema: ZodType<IPlatformConfig> = z.object({
           productionStrictMode: true,
         }),
     })
+    // Module identifiers are deployment-owned keys, including kebab-case IDs.
+    .catchall(z.unknown())
     .default({
       configAccessPolicy: {
         productionStrictMode: true,

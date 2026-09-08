@@ -3,7 +3,10 @@
 </template>
 
 <script setup lang="ts">
-import { type IAdminShellBlade, useBladeScope } from '@prosto/platform-sdk';
+import {
+  type IAdminShellBlade,
+  useBladeScope,
+} from '@prosto/platform-sdk/admin';
 import { shallowReactive, shallowRef } from 'vue';
 
 interface IEmits {

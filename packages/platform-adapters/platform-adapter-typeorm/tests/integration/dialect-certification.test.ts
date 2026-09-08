@@ -3,7 +3,7 @@ import type {
   IPersistenceDescriptor,
   ServiceTokenType,
   IPersistenceInitializationInput,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';

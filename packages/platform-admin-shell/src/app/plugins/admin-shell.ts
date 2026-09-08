@@ -1,4 +1,7 @@
-import { ADMIN_SHELL_GLOBAL, type IAdminShell } from '@prosto/platform-sdk';
+import {
+  ADMIN_SHELL_GLOBAL,
+  type IAdminShell,
+} from '@prosto/platform-sdk/admin';
 import type { App } from 'vue';
 import type { Pinia } from 'pinia';
 import { AdminShell } from '@/app/shell';

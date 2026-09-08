@@ -4,7 +4,7 @@ import type {
   IPlatformModule,
   IPlatformModuleManifest,
   PlatformModuleLifecycleStageType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import type { ContractFailureCodes } from '@/constants/index.js';
 
 /**

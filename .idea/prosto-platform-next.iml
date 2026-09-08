@@ -20,6 +20,9 @@
       <excludeFolder url="file://$MODULE_DIR$/examples/typeorm-shared-datasource/app_data" />
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-core/app_data" />
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-core/modules" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/admin-production/app_data" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/admin-production/modules" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-modules/platform-module-admin/.turbo" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

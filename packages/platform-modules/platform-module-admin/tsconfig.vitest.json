@@ -1,0 +1,12 @@
+{
+  "extends": "@prosto/platform-tsconfig/base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "experimentalDecorators": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["node"]
+  },
+  "include": ["tests/**/*.test.ts"]
+}

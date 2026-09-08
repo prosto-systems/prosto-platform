@@ -1,10 +1,10 @@
-import type { AdminShellPermissionType } from '@prosto/platform-sdk';
 import type {
+  AdminShellPermissionType,
   AuthSessionType,
   LoginRequestType,
   PasswordResetRequestType,
   PasswordResetType,
-} from '../models';
+} from '@prosto/platform-sdk/admin';
 import { defineStore } from 'pinia';
 import { ApiError } from '@/shared/api';
 import { authApi } from '../api';

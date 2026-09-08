@@ -3,7 +3,7 @@ import type {
   IAdminShell,
   IAdminShellTranslationService,
   RegisterPluginCallbackType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/admin';
 import { registerLocaleMessages } from '@/app/plugins';
 import {
   createAuthService,
@@ -55,8 +55,9 @@ export class AdminShell implements IAdminShell {
         bladeService: createBladeService(this.#pinia),
         bladeToolbarService: createBladeToolbarService(this.#pinia),
       });
-    } catch {
+    } catch (error) {
       this.#plugins.delete(platformModuleId);
+      throw error;
     }
 
     return this;

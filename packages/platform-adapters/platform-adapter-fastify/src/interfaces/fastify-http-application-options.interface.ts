@@ -2,7 +2,7 @@ import type {
   IHttpApplicationRuntime,
   IPlatformModuleLogger,
   ServiceRegistryConfiguratorType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 
 /** @alpha Host-wide limits for streaming multipart requests. */
 export interface IFastifyHttpMultipartLimits {
@@ -14,6 +14,26 @@ export interface IFastifyHttpMultipartLimits {
   readonly fieldNameSizeBytes?: number;
   readonly headerPairs?: number;
   readonly totalSizeBytes?: number;
+}
+
+/** @alpha Framework-neutral options for hosting the built admin shell. */
+export interface IFastifyHttpStaticSiteOptions {
+  /** Absolute path to the directory containing the built shell. */
+  readonly rootPath: string;
+  /** Shell document used for the root route and history fallback. */
+  readonly indexFileName?: string;
+  /** Whether HTML navigation requests may fall back to the shell document. */
+  readonly spaFallback?: boolean;
+  /** CSP sent with shell responses. Set to `false` only for local development. */
+  readonly contentSecurityPolicy?: string | false;
+}
+
+/** @alpha TLS certificate material used when the platform host terminates HTTPS. */
+export interface IFastifyHttpTlsOptions {
+  /** Absolute path to the PEM-encoded TLS certificate chain. */
+  readonly certificatePath: string;
+  /** Absolute path to the PEM-encoded private key for the certificate chain. */
+  readonly privateKeyPath: string;
 }
 
 /** @alpha Framework-neutral composition options for the Fastify HTTP host. */
@@ -31,6 +51,11 @@ export interface IFastifyHttpApplicationOptions {
   readonly handlerTimeoutMs?: number;
   readonly keepAliveTimeoutMs?: number;
   readonly shutdownTimeoutMs?: number;
-  readonly trustProxy?: boolean;
+  /** Proxy addresses or CIDR ranges allowed to supply forwarded request metadata. */
+  readonly trustedProxies?: readonly string[];
+  /** Optional local TLS termination for deployments without a separate ingress. */
+  readonly tls?: IFastifyHttpTlsOptions;
+  /** Optional built admin-shell static site hosted from the platform origin. */
+  readonly staticSite?: IFastifyHttpStaticSiteOptions;
   readonly logger?: IPlatformModuleLogger;
 }

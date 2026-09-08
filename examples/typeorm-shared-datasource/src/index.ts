@@ -5,7 +5,7 @@ import {
 } from '@prosto/platform-adapter-typeorm';
 import { FastifyHttpApplication } from '@prosto/platform-adapter-fastify';
 import { ConsoleModuleLogger, RuntimeBuilder } from '@prosto/platform-core';
-import type { IPersistenceDescriptor } from '@prosto/platform-sdk';
+import type { IPersistenceDescriptor } from '@prosto/platform-sdk/platform';
 import {
   Entity,
   type MigrationInterface,

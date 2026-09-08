@@ -4,7 +4,7 @@ import type {
   IAdminShellBladeToolbarService,
   IAdminShellMainMenuService,
   IAdminShellWorkspaceService,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/admin';
 import {
   useBladesStore,
   useMainMenuStore,

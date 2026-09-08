@@ -1,4 +1,4 @@
-import type { IAdminShellWorkspace } from '@prosto/platform-sdk';
+import type { IAdminShellWorkspace } from '@prosto/platform-sdk/admin';
 import { defineStore } from 'pinia';
 import { type NavigationFailure } from 'vue-router';
 import { router } from '@/app/router';

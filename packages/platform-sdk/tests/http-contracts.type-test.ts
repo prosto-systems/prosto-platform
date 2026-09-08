@@ -8,12 +8,12 @@ import type {
   IHttpModuleContext,
   IPlatformModuleContext,
   ServiceRegistryConfiguratorType,
-} from '@/index.js';
+} from '@/platform/index.js';
 import {
   HTTP_APPLICATION_STATES,
   HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN,
   HttpRequestBodyError,
-} from '@/index.js';
+} from '@/platform/index.js';
 
 declare const moduleContext: IPlatformModuleContext;
 declare const unknownError: unknown;
@@ -37,8 +37,9 @@ const endpointHandler: HttpEndpointHandlerType = async (context) => {
   }
 
   if (context.body.kind === 'multipart') {
-    const parts: AsyncIterable<import('@/index.js').HttpMultipartPartType> =
-      context.body.parts;
+    const parts: AsyncIterable<
+      import('@/platform/index.js').HttpMultipartPartType
+    > = context.body.parts;
     void parts;
   }
 

@@ -2,12 +2,18 @@ import pkg from '../../package.json' with { type: 'json' };
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import {
+  ADMIN_ASSET_CATALOG_SERVICE_TOKEN,
   type IEventBus,
   type ISecretsRedactor,
   type IServiceRegistry,
   HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN,
+  PLATFORM_RUNTIME_CATALOG_SERVICE_TOKEN,
   SecretsRedactor,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
+import {
+  AdminAssetCatalog,
+  PlatformRuntimeCatalog,
+} from '@/administration/index.js';
 import type {
   IPlatformConfig,
   IPlatformRuntime,
@@ -80,6 +86,20 @@ export class RuntimeBuilder implements IRuntimeBuilder {
 
     const eventBus = new InMemoryEventBus();
     const serviceRegistry = new InMemoryServiceRegistry();
+    const adminAssetCatalog = new AdminAssetCatalog();
+    const platformRuntimeCatalog = new PlatformRuntimeCatalog(
+      config.platform.name,
+      config.platform.version,
+    );
+
+    serviceRegistry.register(
+      ADMIN_ASSET_CATALOG_SERVICE_TOKEN,
+      adminAssetCatalog,
+    );
+    serviceRegistry.register(
+      PLATFORM_RUNTIME_CATALOG_SERVICE_TOKEN,
+      platformRuntimeCatalog,
+    );
 
     try {
       const configurationResult: unknown =
@@ -124,6 +144,8 @@ export class RuntimeBuilder implements IRuntimeBuilder {
       bootstrapCoordinator,
       moduleLifecycleOrchestrator,
       serviceRegistry,
+      platformRuntimeCatalog,
+      adminAssetCatalog,
       {
         correlationId: options.correlationId,
         persistenceProvider: options.persistenceProvider,

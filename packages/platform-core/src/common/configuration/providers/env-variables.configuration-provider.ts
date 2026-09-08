@@ -6,7 +6,7 @@ import {
   isPlainObject,
   setNestedValue,
   snakeToCamel,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/utils';
 
 type PrimitiveType = string | number | boolean | null;
 type ConfigValueType =

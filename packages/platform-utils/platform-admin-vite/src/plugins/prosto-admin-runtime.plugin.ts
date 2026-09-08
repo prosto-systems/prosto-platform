@@ -1,7 +1,7 @@
 import {
   ADMIN_SHELL_RUNTIME_API_VERSION,
   ADMIN_SHELL_RUNTIME_GLOBAL,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/admin';
 import type { Plugin } from 'vite';
 
 const SUPPORTED_SPECIFIERS = [

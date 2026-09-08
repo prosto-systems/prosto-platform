@@ -12,7 +12,7 @@ import type {
   IServiceRegistry,
   PlatformModuleLifecycleStageType,
   ServiceTokenType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import type { IModuleLifecycleContextFactory } from '@/interfaces/index.js';
 
 class NoopHttpEndpointRegistrar implements IHttpEndpointRegistrar {
