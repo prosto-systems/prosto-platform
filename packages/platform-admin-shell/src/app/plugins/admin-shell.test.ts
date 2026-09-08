@@ -1,4 +1,4 @@
-import type { AdminShellPermissionType } from '@prosto/platform-sdk';
+import type { AdminShellPermissionType } from '@prosto/platform-sdk/admin';
 import type { App } from 'vue';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useAuthStore } from '@/features/auth';
@@ -83,5 +83,20 @@ describe('AdminShellRuntime', () => {
     await expect(
       adminShell.registerPlugin('duplicate-module', () => undefined),
     ).rejects.toThrow("Admin plugin already registered: 'duplicate-module'.");
+  });
+
+  it('rethrows callback failures and permits a later retry', async (): Promise<void> => {
+    const adminShell = installAdminShell({} as App, pinia);
+
+    await expect(
+      adminShell.registerPlugin('failing-module', () => {
+        throw new Error('Plugin registration failed.');
+      }),
+    ).rejects.toThrow('Plugin registration failed.');
+    expect(adminShell.plugins).not.toContain('failing-module');
+
+    await adminShell.registerPlugin('failing-module', () => undefined);
+
+    expect(adminShell.plugins).toContain('failing-module');
   });
 });

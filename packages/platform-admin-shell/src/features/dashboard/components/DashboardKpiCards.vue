@@ -80,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DashboardSummaryType } from '../models';
+import type { DashboardSummaryType } from '@prosto/platform-sdk/admin';
 import { useI18n } from 'vue-i18n';
 
 interface IProps {

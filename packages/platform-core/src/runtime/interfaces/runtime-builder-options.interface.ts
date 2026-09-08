@@ -2,7 +2,7 @@ import type {
   IPersistenceProvider,
   IPersistenceDescriptor,
   ServiceRegistryConfiguratorType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 
 /**
  * @alpha

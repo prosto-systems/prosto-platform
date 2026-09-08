@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     "./admin": "./dist/admin/admin.plugin.js",
+    "./admin/styles/main": "./dist/admin/admin.plugin.css",
     "./platform": "./dist/platform/platform.module.js"
   },
   "files": [

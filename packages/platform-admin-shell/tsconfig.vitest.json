@@ -8,7 +8,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["node", "vite/client", "@prosto/platform-sdk"]
+    "types": ["node", "vite/client", "@prosto/platform-sdk/admin"]
   },
   "include": [
     "env.d.ts",

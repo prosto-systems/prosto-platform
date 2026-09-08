@@ -1,7 +1,7 @@
 import type {
   IPlatformModuleLogger,
   ISecretsRedactor,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import type {
   ICreateModuleLoggerOptions,
   IModuleLoggerFactory,

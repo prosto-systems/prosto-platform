@@ -5,13 +5,12 @@ import {
   type PlatformHealthType,
   platformManifestSchema,
   type PlatformManifestType,
-} from '../models';
+} from '@prosto/platform-sdk/admin';
 import { csrfHeaders, httpClient } from '@/shared/api';
 
 class PlatformApi {
-  async getManifest(csrfToken: string): Promise<PlatformManifestType> {
+  async getManifest(): Promise<PlatformManifestType> {
     return httpClient.request(`/api/admin/platform/manifest`, {
-      headers: csrfHeaders(csrfToken),
       responseSchema: platformManifestSchema,
     });
   }

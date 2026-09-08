@@ -22,7 +22,7 @@
     "paths": {
       "@/admin*": ["./src/admin*"]
     },
-    "types": ["vite/client", "@prosto/platform-sdk"]
+    "types": ["vite/client", "@prosto/platform-sdk/admin"]
   },
   "include": ["src/admin/**/*.ts", "src/admin/**/*.vue"]
 }

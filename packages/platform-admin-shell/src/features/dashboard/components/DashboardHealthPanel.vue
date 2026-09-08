@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PlatformHealthType } from '@/features/platform';
+import type { PlatformHealthType } from '@prosto/platform-sdk/admin';
 import { useI18n } from 'vue-i18n';
 
 interface IProps {

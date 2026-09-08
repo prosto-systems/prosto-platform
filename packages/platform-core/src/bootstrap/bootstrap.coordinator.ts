@@ -75,6 +75,7 @@ export class BootstrapCoordinator implements IBootstrapCoordinator {
     return {
       policyMode: input.policyMode,
       loadedModules: result.abort ? [] : result.loadedModules,
+      moduleEnvelopes: result.validatedModules,
       stageOutcomes: result.stageOutcomes,
       failedDiagnostics,
       skippedModuleIds: [...result.skippedModuleIds].sort((left, right) =>

@@ -2,7 +2,7 @@ import {
   ADMIN_SHELL_RUNTIME_API_VERSION,
   type AdminShellPermissionType,
   type IAdminShellPluginInfo,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/admin';
 import {
   DETERMINISTIC_RESET_TOKEN,
   MOCK_USERS,
@@ -76,7 +76,6 @@ const ROLE_PERMISSIONS: Readonly<
     'health:view',
     'modules:view',
     'activity:view',
-    'modules:restart',
     'platform:restart',
     'maintenance:manage',
   ],
@@ -85,7 +84,6 @@ const ROLE_PERMISSIONS: Readonly<
     'health:view',
     'modules:view',
     'activity:view',
-    'modules:restart',
     'platform:restart',
   ],
   viewer: ['dashboard:view', 'health:view', 'modules:view', 'activity:view'],
@@ -126,6 +124,7 @@ export function createMockState(): IMockState {
             {
               type: 'style',
               path: '/modules/module-test/dist/admin/admin.plugin.css',
+              hash: '1.0.0',
             },
           ],
         },

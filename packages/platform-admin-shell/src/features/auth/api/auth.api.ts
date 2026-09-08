@@ -3,14 +3,14 @@ import type {
   LoginRequestType,
   PasswordResetRequestType,
   PasswordResetType,
-} from '../models';
+} from '@prosto/platform-sdk/admin';
 import {
   authSessionSchema,
   loginRequestSchema,
   passwordResetRequestSchema,
   passwordResetSchema,
   resetRequestAcceptedSchema,
-} from '../models';
+} from '@prosto/platform-sdk/admin';
 import { csrfHeaders, httpClient } from '@/shared/api';
 
 class AuthApi {

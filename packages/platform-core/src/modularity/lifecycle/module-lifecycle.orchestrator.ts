@@ -1,8 +1,8 @@
 import type {
   IHttpEndpointRegistrarProvider,
   PlatformModuleLifecycleStageType,
-} from '@prosto/platform-sdk';
-import { HttpEndpointRegistrationError } from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
+import { HttpEndpointRegistrationError } from '@prosto/platform-sdk/platform';
 import type { PlatformModuleEnvelope } from '@/modularity/index.js';
 import { type IModuleContextFactory, ModuleState } from '@/modularity/index.js';
 import type {

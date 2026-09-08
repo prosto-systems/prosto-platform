@@ -8,16 +8,15 @@ on those contracts.
 ## Current status
 
 The repository contains an alpha runtime kernel, TypeORM and Fastify adapters,
-and an alpha administration module runtime. The runtime discovers local module
-packages, validates their manifests and SDK/Node.js compatibility, resolves
-their dependencies, copies their builds into a probing directory, executes
-their lifecycle, and exposes startup and shutdown diagnostics. It does not yet
-provide remote module acquisition, a production admin HTTP application, admin
-module asset serving, or Content Security Policy configuration. The Fastify HTTP
-application is available for infrastructure probes and module endpoints; it does
-not implement admin, authentication, or static-asset APIs. See the
-[`@prosto/platform-admin-shell` README](packages/platform-admin-shell/README.md)
-for the implemented admin contract and its limits.
+the `@prosto/platform-module-admin` production administration module, and the
+administration shell. The runtime discovers local module packages, validates
+their manifests and SDK/Node.js compatibility, resolves their dependencies,
+copies their builds into a probing directory, executes their lifecycle, and
+exposes startup and shutdown diagnostics. The production composition serves the
+shell SPA, public fingerprinted shell assets, authenticated plugin assets, and
+the `/api/admin` API from one origin. Remote module acquisition, module
+installation/update, MFA, OIDC, user CRUD, and cryptographic package provenance
+remain outside the current implementation.
 
 ## Workspace layout
 
@@ -25,6 +24,7 @@ for the implemented admin contract and its limits.
 | --- | --- |
 | `packages/platform-sdk` | [Public contracts, validation schemas, and admin runtime types.](packages/platform-sdk/README.md) |
 | `packages/platform-core` | [Runtime kernel, module loading, lifecycle orchestration, diagnostics, events, and services.](packages/platform-core/README.md) |
+| `packages/platform-modules/platform-module-admin` | [Production authentication, administration API, and shared-state policy module.](packages/platform-modules/platform-module-admin/README.md) |
 | `packages/platform-admin-shell` | [Vue, Vuetify, Pinia, and Vue I18n administration shell.](packages/platform-admin-shell/README.md) |
 | `packages/platform-adapters/platform-adapter-typeorm` | [TypeORM persistence adapter.](packages/platform-adapters/platform-adapter-typeorm/README.md) |
 | `packages/platform-adapters/platform-adapter-fastify` | [Framework-neutral platform HTTP application backed by Fastify.](packages/platform-adapters/platform-adapter-fastify/README.md) |
@@ -34,6 +34,7 @@ for the implemented admin contract and its limits.
 | `packages/platform-utils/tsconfig` | [Private shared strict TypeScript configuration.](packages/platform-utils/tsconfig/README.md) |
 | `examples/module-test` | [Example platform module and admin-plugin artifact.](examples/module-test/README.md) |
 | `examples/typeorm-shared-datasource` | [Runtime composition with a shared TypeORM DataSource.](examples/typeorm-shared-datasource/README.md) |
+| `examples/admin-production` | [Production-oriented shell, Fastify, TypeORM, and admin-module composition.](examples/admin-production/README.md) |
 
 ## Requirements
 
@@ -76,11 +77,17 @@ npm run build --workspace=@examples/module-test
 - `platform-core` must not depend on adapters, feature modules, or frontend
   runtimes.
 - HTTP contracts belong to the SDK; Fastify application lifecycle and transport
-  mapping belong to `platform-adapter-fastify`, never to `platform-core`.
+  mapping, trusted-proxy policy, static-site hosting, and security headers belong
+  to `platform-adapter-fastify`, never to `platform-core`.
 - Adapters and feature modules depend on SDK contracts, not on core internals
   or one another.
 - Admin modules integrate with the separate admin shell through SDK contracts;
   they do not access configured shell service instances directly.
+- The core provides sanitized runtime and declared-asset catalogs through SDK
+  tokens; it never exposes physical package paths or serves HTTP content.
+- `platform-module-admin` owns authentication, authorization, audit, shared
+  maintenance/restart policy, and TypeORM persistence. A host supplies only the
+  idempotent local graceful-restart capability.
 - Admin-plugin artifacts are trusted first-party code, not a security sandbox.
 
 The repository's source code and package manifests are the authority for the
@@ -100,6 +107,15 @@ runtime rather than bundled again.
 [`examples/module-test`](examples/module-test/README.md) demonstrates a module
 package, contract checks, artifact packaging, an admin plugin, localized
 messages, workspaces, menu entries, and blades.
+
+Production asset discovery is deliberately strict. A module package declares a
+concrete `./admin` ESM export, zero or more concrete `./admin/styles/<name>` CSS
+exports, and optional concrete `./admin/assets/<name>` support-file exports.
+Targets must be regular files below `dist/admin`; wildcard, directory,
+conditional, fallback-array, duplicate, and inferred exports are rejected. The
+runtime preserves each declared target below `/modules/<moduleId>/`, hashes its
+bytes, and serves only the exact active URL with its required `v` cache identity.
+The hash is not a package-authenticity signature.
 
 ## Platform modules
 
@@ -125,4 +141,5 @@ endpoints only after their owners start.
 `GET /health` and `GET /ready` are public infrastructure probes, not the admin
 shell's `/api/admin/platform/health`. See the
 [`@prosto/platform-adapter-fastify` README](packages/platform-adapters/platform-adapter-fastify/README.md)
-and the [TypeORM example](examples/typeorm-shared-datasource/README.md).
+and the [production composition example](examples/admin-production/README.md)
+describe the complete deployment boundary.

@@ -54,6 +54,9 @@ fields.
 The complete consumer flow, safe local configuration template, platform
 descriptor, discovered module package, and module descriptor are available in
 [`examples/typeorm-shared-datasource`](../../../examples/typeorm-shared-datasource).
+For the shared-database production administration composition, including the
+discoverable `platform-module-admin` migrations and replica-safe state, see
+[`examples/admin-production`](../../../examples/admin-production/README.md).
 
 ## Public API
 

@@ -2,7 +2,7 @@ import type {
   IPersistenceDescriptor,
   IPersistenceProvider,
   IPlatformRuntimeVersionContext,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 
 /**
  * @alpha

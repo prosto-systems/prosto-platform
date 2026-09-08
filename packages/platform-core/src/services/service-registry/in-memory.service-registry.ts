@@ -1,4 +1,7 @@
-import type { IServiceRegistry, ServiceTokenType } from '@prosto/platform-sdk';
+import type {
+  IServiceRegistry,
+  ServiceTokenType,
+} from '@prosto/platform-sdk/platform';
 import {
   ServiceAlreadyRegisteredError,
   ServiceNotFoundError,

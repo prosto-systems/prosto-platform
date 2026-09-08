@@ -2,13 +2,13 @@ import type {
   IAdminShell,
   IAdminShellPlugin,
   IAdminShellRuntime,
-} from '@/index.js';
+} from '@/admin/index.js';
 import {
   ADMIN_SHELL_RUNTIME_API_VERSION,
   adminShellPluginInfoSchema,
   adminShellPluginInfosSchema,
   isAdminShellPluginModule,
-} from '@/index.js';
+} from '@/admin/index.js';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
 const validPlugin = {

@@ -3,7 +3,7 @@ import type {
   IPlatformModule,
   IPlatformModuleContext,
   IPlatformModuleManifest,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import {
   ContractFailureCodes,
   LIFECYCLE_CHECK_RESULT_ID,

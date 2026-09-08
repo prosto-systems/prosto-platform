@@ -1,4 +1,4 @@
-import type { LocalizedMessageType } from '@prosto/platform-sdk';
+import type { LocalizedMessageType } from '@prosto/platform-sdk/admin';
 import type { enMessages } from './en';
 import { ru as vuetifyRu } from 'vuetify/locale';
 

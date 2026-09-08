@@ -41,6 +41,14 @@ request mapping, probes, or any other HTTP framework detail. Compose
 [`@prosto/platform-adapter-fastify`](../platform-adapters/platform-adapter-fastify/README.md)
 at the executable boundary instead.
 
+The core also registers SDK-owned, sanitized administration catalogs before
+module contexts are created. `IPlatformRuntimeCatalog` exposes immutable
+platform/module identity and `healthy` or `degraded` status only;
+`IAdminAssetCatalog` resolves an exact declared plugin asset to a one-shot Web
+stream. Neither catalog exposes probing paths, configuration, or exception text.
+The administration module consumes these contracts; core does not implement
+authentication, HTTP handlers, persistence, or static delivery.
+
 The builder reads package defaults, then optional deployment files from
 `configDir` (`app_settings.json`, environment-specific settings, and
 `app_settings.local.json`). Environment variables with the `PROSTO_` prefix
@@ -72,6 +80,15 @@ The preferred `package.json` entry is:
   }
 }
 ```
+
+Modules that provide an admin plugin must additionally use explicit package
+exports. `./admin` must name one `.js` or `.mjs` entry; styles use concrete
+`./admin/styles/<name>` keys targeting `.css`; emitted chunks, images, and fonts
+use concrete `./admin/assets/<name>` keys. Every target must be a regular,
+non-symlink file below `dist/admin`. Wildcards, directories, condition objects,
+fallback arrays, duplicate targets, dotfiles, maps, declarations, and inferred
+admin filenames are rejected. The platform entry retains its documented loading
+compatibility rules; these strict rules apply only to administration assets.
 
 The loader checks `exports["./platform"]` first, then the root `exports` import
 or default condition, then `main`. If none is declared, it probes

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   HttpEndpointRegistrationError,
   type IHttpEndpoint,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import { FastifyHttpApplicationError } from '../src/errors/index.js';
 import { FastifyEndpointRegistry } from '../src/registries/fastify-endpoint.registry.js';
 

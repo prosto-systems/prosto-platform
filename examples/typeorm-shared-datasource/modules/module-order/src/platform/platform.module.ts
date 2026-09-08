@@ -5,7 +5,7 @@ import {
 import type {
   IPlatformModule,
   IPlatformModuleContext,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import {
   Entity,
   type MigrationInterface,

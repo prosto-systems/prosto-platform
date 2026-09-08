@@ -1,4 +1,4 @@
-import type { AdminShellPermissionType } from '@prosto/platform-sdk';
+import type { AdminShellPermissionType } from '@prosto/platform-sdk/admin';
 import {
   createRouter,
   createWebHistory,
@@ -149,18 +149,14 @@ router.beforeEach(async (to) => {
 router.beforeEach(async (to) => {
   const authStore = useAuthStore(pinia);
   const { manifest, loadManifest, loadPlugins } = usePlatform();
-  const loadPlatformPlugins = async () => {
-    if (!authStore.csrfToken) {
-      throw new Error('The current session has no CSRF token.');
-    }
-
-    await loadManifest(authStore.csrfToken);
-    await loadPlugins(manifest.data.value?.plugins || []);
-  };
 
   if (!manifest.data.value && authStore.isAuthenticated) {
-    await loadPlatformPlugins();
+    const loadedManifest = await loadManifest();
 
-    return to.fullPath;
+    if (loadedManifest) {
+      await loadPlugins(loadedManifest.plugins);
+
+      return to.fullPath;
+    }
   }
 });

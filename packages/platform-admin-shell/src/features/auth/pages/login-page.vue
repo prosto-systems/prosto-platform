@@ -73,12 +73,13 @@
 
 <script lang="ts" setup>
 import type { Component } from 'vue';
+import { loginRequestSchema } from '@prosto/platform-sdk/admin';
 import { defineAsyncComponent, reactive, shallowRef } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { ApiError } from '@/shared/api';
 import { getSafeReturnUrl } from '@/app/router/safe-return-url';
-import { getFieldErrors, loginRequestSchema } from '../models';
+import { getFieldErrors } from '../models';
 import { useAuthStore } from '../stores';
 
 const authStore = useAuthStore();

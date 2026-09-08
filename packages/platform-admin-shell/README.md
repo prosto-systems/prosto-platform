@@ -49,20 +49,19 @@ cookie and is never written to Web Storage.
 | `POST` | `/auth/logout` | Session cookie and `X-CSRF-Token`. |
 | `POST` | `/auth/password-reset-requests` | Public; always returns the same accepted response. |
 | `POST` | `/auth/password-resets` | Public; accepts a one-time reset token and new password. |
-| `GET` | `/platform/manifest` | Production backend: `modules:view`, session cookie, and `X-CSRF-Token`; returns platform metadata and ordered admin plugin entries. |
+| `GET` | `/platform/manifest` | `modules:view` and session cookie; returns platform metadata and ordered admin plugin entries. No CSRF header is required for this read request. |
 | `GET` | `/dashboard` | `dashboard:view`. |
 | `GET` | `/platform/health` | `health:view`. |
 | `GET` | `/modules` | `modules:view`. |
 | `GET` | `/activity` | `activity:view`. |
-| `POST` | `/modules/:moduleId/restart` | `modules:restart` and `X-CSRF-Token`. |
+| `POST` | `/modules/:moduleId/restart` | Unsupported in production; the route is not registered and production roles do not receive `modules:restart`. |
 | `POST` | `/platform/restart` | `platform:restart` and `X-CSRF-Token`. |
 | `PATCH` | `/platform/maintenance` | `maintenance:manage` and `X-CSRF-Token`; body: `{ "enabled": boolean }`. |
 
 The `/api/admin` prefix is omitted from the table paths. In development, Vite
 proxies this namespace to `http://127.0.0.1:3001` unless MSW intercepts it.
-Production backends must enforce `modules:view` for the manifest. The current
-MSW manifest handler validates the mock session and CSRF token but does not
-enforce that permission.
+Production backends and MSW enforce `modules:view` for the manifest. The
+manifest is a read endpoint, so it requires no CSRF header.
 
 ## Admin module runtime
 
@@ -241,12 +240,16 @@ one plugin does not prevent later plugins from loading: the shell displays a
 dismissible alert naming the affected module and writes the detailed cause to
 `console.error`.
 
-### Current limitations
+### Production plugin delivery
 
-This frontend slice does not implement production module discovery, static asset
-serving, cryptographic artifact integrity, or Content Security Policy headers.
-Those server-side controls are required before production deployment and are not
-provided by MSW or the runtime loader.
+`@prosto/platform-core` discovers only explicit package exports and publishes
+assets only from successfully started modules in lifecycle dependency order.
+`@prosto/platform-module-admin` authenticates each `/modules/` request, requires
+the manifest version query, and streams only the exact declared target. Plugin
+assets are private immutable responses; shell assets and CSP are hosted by
+`@prosto/platform-adapter-fastify`. Plugin hashes are cache identities, not
+cryptographic package provenance. MSW does not provide any of these server-side
+controls.
 
 ## Permissions
 
@@ -259,7 +262,7 @@ and controls, but the API remains the final authorization authority.
 | `health:view` | yes | yes | yes |
 | `modules:view` | yes | yes | yes |
 | `activity:view` | yes | yes | yes |
-| `modules:restart` | yes | yes | no |
+| `modules:restart` | no | no | no (unsupported in production) |
 | `platform:restart` | yes | yes | no |
 | `maintenance:manage` | yes | no | no |
 
@@ -292,9 +295,10 @@ any environment.
 
 ## Production backend and security limits
 
-Without MSW, the shell requires a backend implementing the contract above at
-`/api/admin`. Until one is available, network failures are rendered as recoverable
-section or form errors; MSW is not a backend substitute.
+Without MSW, the shell requires the same-origin backend at `/api/admin`.
+`@prosto/platform-module-admin`, composed with the Fastify and TypeORM adapters,
+implements that contract; `examples/admin-production` is the reference host.
+MSW remains a development/test substitute only.
 
 MSW models session cookies, CSRF checks, permission checks, and reset-token
 semantics, but it cannot validate production browser-cookie protections or server
@@ -302,3 +306,9 @@ security controls. The real backend must set `HttpOnly`, `Secure` where applicab
 and an appropriate `SameSite` policy. It must also validate `Origin`, rate-limit and
 audit authentication/password-reset requests, enforce authorization independently,
 and protect session and reset-token storage.
+
+The production module uses opaque database-backed session cookies with
+`HttpOnly`, `SameSite=Strict`, `Path=/`, no `Domain`, and a one-hour default
+absolute lifetime. It validates `Origin` for state-changing public requests and
+validates both Origin and `X-CSRF-Token` for authenticated mutations. It does
+not require CSRF for authenticated manifest reads or plugin-asset reads.

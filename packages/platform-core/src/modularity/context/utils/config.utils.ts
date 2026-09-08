@@ -1,5 +1,5 @@
 import type { IPlatformConfig } from '@/runtime/index.js';
-import { resolveNestedValue, setNestedValue } from '@prosto/platform-sdk';
+import { resolveNestedValue, setNestedValue } from '@prosto/platform-sdk/utils';
 
 /**
  * @alpha

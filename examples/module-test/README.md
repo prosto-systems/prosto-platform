@@ -21,6 +21,14 @@ The core's local discovery ignores `artifacts/` and uses the package root
 `manifest.json`, `package.json`, and built `dist/` directory. The preferred
 platform entry is declared by the package's `./platform` export.
 
+The admin artifact is declared rather than inferred: `./admin` names the ESM
+entry and `./admin/styles/main` names its CSS. Production discovery accepts only
+concrete `./admin`, `./admin/styles/<name>`, and optional
+`./admin/assets/<name>` exports targeting regular files below `dist/admin`.
+Add an explicit support export for every emitted chunk, image, or font that the
+entry references. The production manifest keeps each target's relative path
+below `/modules/module-test/` and requires its generated `v` query parameter.
+
 ## Structure
 
 - `manifest.json` declares the module's SDK identity and dependencies.

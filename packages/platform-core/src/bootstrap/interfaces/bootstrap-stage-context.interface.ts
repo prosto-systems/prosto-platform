@@ -4,7 +4,7 @@ import type {
   IPlatformRuntimeVersionContext,
   IServiceRegistry,
   PlatformStartupPolicyType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import type { IRuntimeFailureDiagnostic } from '@/diagnostics/index.js';
 import type {
   IModuleCandidateArtifact,

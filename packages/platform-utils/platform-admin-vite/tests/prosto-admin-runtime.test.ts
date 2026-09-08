@@ -1,7 +1,7 @@
 import {
   ADMIN_SHELL_RUNTIME_API_VERSION,
   ADMIN_SHELL_RUNTIME_GLOBAL,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/admin';
 import Vue from '@vitejs/plugin-vue';
 import { build } from 'vite';
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';

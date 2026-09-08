@@ -1,4 +1,4 @@
-import type { IPlatformModuleManifest } from '@prosto/platform-sdk';
+import type { IPlatformModuleManifest } from '@prosto/platform-sdk/platform';
 import { RuntimeErrorCodes } from '@/common/index.js';
 import {
   type IModuleLifecycleOrchestrator,

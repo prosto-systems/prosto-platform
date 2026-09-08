@@ -127,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PlatformModuleType } from '../models';
+import type { PlatformModuleType } from '@prosto/platform-sdk/admin';
 import { useI18n } from 'vue-i18n';
 
 interface IProps {

@@ -6,7 +6,7 @@ import {
   type IPlatformModule,
   type IPlatformModuleManifest,
   PLATFORM_MODULE_LIFECYCLE_STAGES,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import { ContractFailureCodes } from '@/constants/index.js';
 
 export const LIFECYCLE_CHECK_RESULT_ID = 'lifecycle-conformance';

@@ -1,10 +1,15 @@
+import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import {
   HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN,
+  HTTP_REQUEST_GATE_SERVICE_TOKEN,
   type IHttpApplicationRuntime,
   type IHttpEndpointRegistrarProvider,
+  type IHttpRequestGate,
   type IServiceRegistry,
   type ServiceTokenType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import { describe, expect, it, vi } from 'vitest';
 import {
   FastifyHttpApplication,
@@ -453,6 +458,209 @@ describe('FastifyHttpApplication lifecycle', () => {
 
     await application.stop();
   });
+
+  it('maps forwarded metadata only from configured trusted proxies', async () => {
+    // Arrange
+    let registrarProvider: IHttpEndpointRegistrarProvider | undefined;
+    const runtime = new TestRuntime(['http-module']);
+    runtime.onStart = (): void => {
+      const registrar = registrarProvider?.createRegistrar('http-module');
+
+      if (registrar === undefined) {
+        throw new Error('HTTP endpoint registrar was not composed.');
+      }
+
+      registrar.register({
+        method: 'GET',
+        path: '/api/metadata',
+        handler: (context) =>
+          Response.json({
+            protocol: context.protocol,
+            host: context.host,
+            remoteAddress: context.remoteAddress,
+          }),
+      });
+      registrarProvider?.commit('http-module');
+    };
+    const application = createApplicationWithProvider(
+      runtime,
+      (provider) => {
+        registrarProvider = provider;
+      },
+      { trustedProxies: ['127.0.0.0/8'] },
+    );
+
+    // Act
+    await application.start();
+    const response = await fetch(new URL('/api/metadata', application.url), {
+      headers: {
+        'x-forwarded-for': '203.0.113.9',
+        'x-forwarded-host': 'admin.example.test',
+        'x-forwarded-proto': 'https',
+      },
+    });
+
+    // Assert
+    expect(await response.json()).toEqual({
+      protocol: 'https',
+      host: 'admin.example.test',
+      remoteAddress: '203.0.113.9',
+    });
+
+    await application.stop();
+  });
+
+  it('rejects a gated request before its body reaches an endpoint handler', async () => {
+    // Arrange
+    let registrarProvider: IHttpEndpointRegistrarProvider | undefined;
+    const handler = vi.fn(() => Response.json({ unreachable: true }));
+    const requestGate: IHttpRequestGate = {
+      evaluate: vi.fn(async () => ({
+        allowed: false as const,
+        status: 503 as const,
+        code: 'maintenance',
+      })),
+    };
+    const runtime = new TestRuntime(['http-module']);
+    runtime.onStart = (): void => {
+      const registrar = registrarProvider?.createRegistrar('http-module');
+
+      if (registrar === undefined) {
+        throw new Error('HTTP endpoint registrar was not composed.');
+      }
+
+      registrar.register({
+        method: 'POST',
+        path: '/api/orders',
+        handler,
+      });
+      registrarProvider?.commit('http-module');
+    };
+    const application = createApplicationWithProvider(
+      runtime,
+      (provider) => {
+        registrarProvider = provider;
+      },
+      {},
+      requestGate,
+    );
+
+    // Act
+    await application.start();
+    const response = await fetch(new URL('/api/orders', application.url), {
+      method: 'POST',
+      headers: { 'content-type': 'application/octet-stream' },
+      body: 'unread body',
+    });
+
+    // Assert
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ code: 'maintenance' });
+    expect(handler).not.toHaveBeenCalled();
+    expect(requestGate.evaluate).toHaveBeenCalledWith({
+      method: 'POST',
+      pathname: '/api/orders',
+      remoteAddress: '127.0.0.1',
+    });
+
+    await application.stop();
+  });
+
+  it('fails closed for gate errors on business paths without masking probes', async () => {
+    // Arrange
+    const requestGate: IHttpRequestGate = {
+      evaluate: vi.fn(async () => {
+        throw new Error('Database unavailable.');
+      }),
+    };
+    const application = createApplicationWithProvider(
+      new TestRuntime(),
+      () => undefined,
+      {},
+      requestGate,
+    );
+
+    // Act
+    await application.start();
+    const businessResponse = await fetch(
+      new URL('/api/unavailable', application.url),
+    );
+    const healthResponse = await fetch(new URL('/health', application.url));
+
+    // Assert
+    expect(businessResponse.status).toBe(503);
+    expect(await businessResponse.json()).toMatchObject({
+      code: 'request_gate_unavailable',
+    });
+    expect(healthResponse.status).toBe(200);
+
+    await application.stop();
+  });
+
+  it('serves shell files with cache, security, and SPA fallback policies', async () => {
+    // Arrange
+    const shellRoot = join(
+      tmpdir(),
+      `prosto-platform-shell-${crypto.randomUUID()}`,
+    );
+    await mkdir(join(shellRoot, 'assets'), { recursive: true });
+    await writeFile(
+      join(shellRoot, 'index.html'),
+      '<!doctype html><title>Admin</title>',
+    );
+    await writeFile(join(shellRoot, 'assets', 'app-ABCD1234.js'), 'export {};');
+    const application = new FastifyHttpApplication({
+      port: 0,
+      runtimeFactory: (configureHttpServices) => {
+        configureHttpServices(createServiceRegistry(() => undefined));
+        return new TestRuntime();
+      },
+      staticSite: { rootPath: shellRoot },
+    });
+
+    try {
+      // Act
+      await application.start();
+      const assetResponse = await fetch(
+        new URL('/assets/app-ABCD1234.js', application.url),
+      );
+      const indexResponse = await fetch(new URL('/', application.url));
+      const fallbackResponse = await fetch(
+        new URL('/workspace/orders', application.url),
+        { headers: { accept: 'text/html' } },
+      );
+      const apiResponse = await fetch(
+        new URL('/api/missing', application.url),
+        {
+          headers: { accept: 'text/html' },
+        },
+      );
+      const headResponse = await fetch(
+        new URL('/assets/app-ABCD1234.js', application.url),
+        { method: 'HEAD' },
+      );
+
+      // Assert
+      expect(await assetResponse.text()).toBe('export {};');
+      expect(assetResponse.headers.get('cache-control')).toBe(
+        'public, max-age=31536000, immutable',
+      );
+      expect(assetResponse.headers.get('x-content-type-options')).toBe(
+        'nosniff',
+      );
+      expect(assetResponse.headers.get('content-security-policy')).toContain(
+        "default-src 'self'",
+      );
+      expect(indexResponse.headers.get('cache-control')).toBe('no-cache');
+      expect(await fallbackResponse.text()).toContain('<title>Admin</title>');
+      expect(apiResponse.status).toBe(404);
+      expect(headResponse.status).toBe(200);
+      expect(await headResponse.text()).toBe('');
+    } finally {
+      await application.stop();
+      await rm(shellRoot, { recursive: true, force: true });
+    }
+  });
 });
 
 class TestRuntime implements IHttpApplicationRuntime {
@@ -491,12 +699,15 @@ function createApplicationWithProvider(
     ConstructorParameters<typeof FastifyHttpApplication>[0],
     'runtimeFactory'
   > = {},
+  requestGate?: IHttpRequestGate,
 ): FastifyHttpApplication {
   return new FastifyHttpApplication({
     port: 0,
     ...options,
     runtimeFactory: (configureHttpServices) => {
-      configureHttpServices(createServiceRegistry(onProviderRegistered));
+      configureHttpServices(
+        createServiceRegistry(onProviderRegistered, requestGate),
+      );
 
       return runtime;
     },
@@ -505,6 +716,7 @@ function createApplicationWithProvider(
 
 function createServiceRegistry(
   onProviderRegistered: (provider: IHttpEndpointRegistrarProvider) => void,
+  requestGate?: IHttpRequestGate,
 ): IServiceRegistry {
   return {
     register: <TService>(
@@ -520,8 +732,11 @@ function createServiceRegistry(
       _service: NoInfer<TService>,
     ): void => undefined,
     resolve: <TService>(
-      _token: ServiceTokenType<TService>,
-    ): TService | undefined => undefined,
+      token: ServiceTokenType<TService>,
+    ): TService | undefined =>
+      token === HTTP_REQUEST_GATE_SERVICE_TOKEN
+        ? (requestGate as TService | undefined)
+        : undefined,
     resolveRequired: <TService>(
       _token: ServiceTokenType<TService>,
     ): TService => {

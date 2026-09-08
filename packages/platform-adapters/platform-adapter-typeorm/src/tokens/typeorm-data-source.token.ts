@@ -1,4 +1,4 @@
-import { createServiceToken } from '@prosto/platform-sdk';
+import { createServiceToken } from '@prosto/platform-sdk/platform';
 import type { DataSource } from 'typeorm';
 
 /**

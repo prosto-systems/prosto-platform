@@ -7,7 +7,7 @@ import {
   type IPlatformModule,
   type IPlatformModuleContext,
   type IPlatformModuleLogger,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import { RuntimeErrorCodes } from '@/common/index.js';
 import { InMemoryEventBus } from '@/events/index.js';
 import {

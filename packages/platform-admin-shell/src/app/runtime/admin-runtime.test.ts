@@ -1,4 +1,4 @@
-import { ADMIN_SHELL_RUNTIME_GLOBAL } from '@prosto/platform-sdk';
+import { ADMIN_SHELL_RUNTIME_GLOBAL } from '@prosto/platform-sdk/admin';
 import { describe, expect, it } from 'vitest';
 import { adminRuntimeNamespaces } from './admin-runtime-namespaces';
 import { adminShellRuntime, installAdminRuntime } from './admin-runtime';

@@ -1,0 +1,30 @@
+{
+  "name": "@examples/admin-production",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "npm run build:dependencies && npm run prepare:modules && tsc -p tsconfig.json",
+    "build:dependencies": "npm run build --workspace=@prosto/platform-sdk && npm run build --workspace=@prosto/platform-core && npm run build --workspace=@prosto/platform-adapter-typeorm && npm run build --workspace=@prosto/platform-adapter-fastify && npm run build --workspace=@prosto/platform-module-admin && npm run build --workspace=@examples/module-test && npm run build --workspace=@prosto/platform-admin-shell",
+    "prepare:modules": "node scripts/prepare-modules.mjs",
+    "prestart": "npm run build",
+    "start": "node dist/index.js",
+    "start:localhost": "npm run build && node scripts/generate-localhost-certificate.mjs && node --env-file=config/localhost.env dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@prosto/platform-adapter-fastify": "^0.0.0",
+    "@prosto/platform-adapter-typeorm": "^0.0.0",
+    "@prosto/platform-core": "^0.0.0",
+    "@prosto/platform-sdk": "^0.0.0",
+    "pg": "^8.16.0",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@prosto/platform-tsconfig": "^0.0.0",
+    "@types/node": "^22.20.1",
+    "selfsigned": "^5.5.0",
+    "tsx": "^4.23.1",
+    "typescript": "^6.0.3"
+  }
+}

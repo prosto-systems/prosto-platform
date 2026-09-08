@@ -13,7 +13,10 @@
 </template>
 
 <script setup lang="ts">
-import { type IAdminShellBlade, useBladeScope } from '@prosto/platform-sdk';
+import {
+  type IAdminShellBlade,
+  useBladeScope,
+} from '@prosto/platform-sdk/admin';
 import { defineStore } from 'pinia';
 import { computed, shallowReactive, shallowRef } from 'vue';
 import { useI18n } from 'vue-i18n';

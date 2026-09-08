@@ -54,10 +54,11 @@
 </template>
 
 <script lang="ts" setup>
+import { passwordResetRequestSchema } from '@prosto/platform-sdk/admin';
 import { reactive, shallowRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ApiError } from '@/shared/api';
-import { getFieldErrors, passwordResetRequestSchema } from '../models';
+import { getFieldErrors } from '../models';
 import { useAuthStore } from '../stores';
 
 const authStore = useAuthStore();

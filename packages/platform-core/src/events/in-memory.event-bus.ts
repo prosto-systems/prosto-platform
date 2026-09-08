@@ -4,7 +4,7 @@ import type {
   IEventBus,
   IEventEnvelope,
   IEventMetadata,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 
 export class InMemoryEventBus implements IEventBus {
   readonly #handlersByToken = new Map<

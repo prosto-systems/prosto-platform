@@ -1,4 +1,7 @@
-import { type ISecretsRedactor, SecretsRedactor } from '@prosto/platform-sdk';
+import {
+  type ISecretsRedactor,
+  SecretsRedactor,
+} from '@prosto/platform-sdk/platform';
 import type { IModuleLifecycleShutdownIssue } from '@/modularity/index.js';
 import type {
   IReportBuilder,

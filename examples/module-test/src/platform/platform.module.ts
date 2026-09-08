@@ -1,7 +1,7 @@
 import type {
   IPlatformModule,
   IPlatformModuleContext,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 
 export class PlatformModule implements IPlatformModule {
   init(_ctx: IPlatformModuleContext): void {

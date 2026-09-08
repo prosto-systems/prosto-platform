@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ActivityItemType } from '../models';
+import type { ActivityItemType } from '@prosto/platform-sdk/admin';
 import { useI18n } from 'vue-i18n';
 
 interface IProps {

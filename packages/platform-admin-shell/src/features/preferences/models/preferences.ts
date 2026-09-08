@@ -2,7 +2,7 @@ import { z } from 'zod';
 import {
   supportedLocales,
   type SupportedLocaleType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/admin';
 
 export const THEME_PREFERENCES = ['light', 'dark', 'system'] as const;
 

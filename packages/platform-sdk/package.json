@@ -4,12 +4,18 @@
   "description": "Contract authority for Prosto platform modules and adapters",
   "type": "module",
   "private": false,
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+    "./admin": {
+      "types": "./dist/admin/index.d.ts",
+      "import": "./dist/admin.js"
+    },
+    "./platform": {
+      "types": "./dist/platform/index.d.ts",
+      "import": "./dist/platform.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils.js"
     }
   },
   "files": [

@@ -6,6 +6,10 @@ import { type PlatformModuleEnvelope } from '@/modularity/index.js';
 import type { IBootstrapStageContext } from '../interfaces/index.js';
 import { BootstrapStage } from '../constants/index.js';
 import { BootstrapBaseStage } from './bootstrap.base-stage.js';
+import {
+  AdminAssetExportsParser,
+  setAdminModuleAssets,
+} from '@/administration/index.js';
 
 /**
  * @alpha
@@ -18,6 +22,8 @@ import { BootstrapBaseStage } from './bootstrap.base-stage.js';
  */
 export class CopyStage extends BootstrapBaseStage {
   readonly stageType = BootstrapStage.Copy;
+
+  private readonly _adminAssetExportsParser = new AdminAssetExportsParser();
 
   constructor(
     private readonly _probingPath: string,
@@ -61,6 +67,7 @@ export class CopyStage extends BootstrapBaseStage {
 
         try {
           await this._copyModule(moduleEnvelope, targetPath);
+          await this._loadAdminAssets(moduleEnvelope, targetPath);
         } catch (error) {
           const moduleId = moduleEnvelope.id;
 
@@ -70,6 +77,27 @@ export class CopyStage extends BootstrapBaseStage {
             errorCode: RuntimeErrorCodes.CopyModuleFailed,
             message: error instanceof Error ? error.message : String(error),
             remediationHint: 'Rebuild the module.',
+          });
+        }
+      }
+    } else {
+      for (const moduleEnvelope of validatedModules) {
+        if (context.skippedModuleIds.has(moduleEnvelope.id)) {
+          continue;
+        }
+
+        try {
+          await this._loadAdminAssets(
+            moduleEnvelope,
+            join(normalizedProbingPath, moduleEnvelope.id),
+          );
+        } catch (error) {
+          this.skipModule(context, moduleEnvelope.id);
+          this.addFailure(context, {
+            moduleId: moduleEnvelope.id,
+            errorCode: RuntimeErrorCodes.CopyModuleFailed,
+            message: error instanceof Error ? error.message : String(error),
+            remediationHint: 'Correct the module administration exports.',
           });
         }
       }
@@ -113,5 +141,19 @@ export class CopyStage extends BootstrapBaseStage {
 
     await cp(sourcePath, targetSourcePath, { recursive: true, force: true });
     await cp(packagePath, targetPackagePath, { force: true });
+  }
+
+  private async _loadAdminAssets(
+    moduleEnvelope: PlatformModuleEnvelope,
+    packageRoot: string,
+  ): Promise<void> {
+    setAdminModuleAssets(
+      moduleEnvelope,
+      await this._adminAssetExportsParser.parse(
+        packageRoot,
+        moduleEnvelope.id,
+        moduleEnvelope.version,
+      ),
+    );
   }
 }

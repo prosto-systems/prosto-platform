@@ -1,4 +1,4 @@
-import type { IPlatformModuleManifest } from '@prosto/platform-sdk';
+import type { IPlatformModuleManifest } from '@prosto/platform-sdk/platform';
 import type { PlatformModuleEnvelope } from '../entities/index.js';
 import type { IDependencyGraph, IGraphNode } from './interfaces/index.js';
 

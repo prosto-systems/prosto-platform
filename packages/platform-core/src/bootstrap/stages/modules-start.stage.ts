@@ -1,4 +1,4 @@
-import type { IPlatformModuleManifest } from '@prosto/platform-sdk';
+import type { IPlatformModuleManifest } from '@prosto/platform-sdk/platform';
 import {
   type IModuleLifecycleOrchestrator,
   isModuleCritical,

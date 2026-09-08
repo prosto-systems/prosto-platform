@@ -1,4 +1,4 @@
-import type { IPersistenceDescriptor } from '@prosto/platform-sdk';
+import type { IPersistenceDescriptor } from '@prosto/platform-sdk/platform';
 
 /**
  * @internal

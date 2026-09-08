@@ -1,6 +1,6 @@
 import type { QueryRunner } from 'typeorm';
 import { describe, expect, it, vi } from 'vitest';
-import { PersistenceError } from '@prosto/platform-sdk';
+import { PersistenceError } from '@prosto/platform-sdk/platform';
 import {
   MySqlMigrationLock,
   PostgresMigrationLock,

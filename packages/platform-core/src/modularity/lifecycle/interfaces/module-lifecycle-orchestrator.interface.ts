@@ -2,7 +2,7 @@ import type {
   IPersistenceProvider,
   IPlatformModuleManifest,
   PlatformStartupPolicyType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import type { PlatformModuleEnvelope } from '../../entities/index.js';
 import type { IModuleLifecycleExecutionIssue } from './module-lifecycle-execution-issue.interface.js';
 import type { IModuleLifecycleShutdownIssue } from './module-lifecycle-shutdown-issue.interface.js';

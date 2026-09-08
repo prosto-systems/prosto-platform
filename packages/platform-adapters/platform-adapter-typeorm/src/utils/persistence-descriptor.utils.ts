@@ -1,7 +1,7 @@
 import type {
   IPersistenceDescriptor,
   PersistenceDescriptorPayloadType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import type { EntityTarget, MigrationInterface } from 'typeorm';
 import type { ITypeOrmPersistenceDescriptorPayload } from '@/interfaces/index.js';
 

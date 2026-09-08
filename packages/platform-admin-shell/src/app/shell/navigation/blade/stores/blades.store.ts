@@ -1,4 +1,4 @@
-import type { IAdminShellBlade } from '@prosto/platform-sdk';
+import type { IAdminShellBlade } from '@prosto/platform-sdk/admin';
 import { defineStore } from 'pinia';
 import { markRaw } from 'vue';
 import { sleep } from '@/shared/utils';

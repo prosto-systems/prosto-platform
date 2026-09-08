@@ -1,7 +1,7 @@
 import type {
   IPlatformModuleManifestValidator,
   IPlatformModuleManifest,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import type { IContractCheckResult } from '@/interfaces/index.js';
 import { ContractFailureCodes } from '@/constants/index.js';
 

@@ -6,7 +6,7 @@ import {
   type IAdminShellPluginContentFile,
   type IAdminShellPluginInfo,
   isAdminShellPluginModule,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/admin';
 import {
   type IPluginLoadResult,
   type PluginLoadFailureCodeType,
@@ -51,6 +51,10 @@ export function resolvePluginAssetUrl(file: IAdminShellPluginContentFile): URL {
 
 export function removeLink(link: HTMLLinkElement): void {
   link.remove();
+}
+
+export function removePluginStyles(links: readonly HTMLLinkElement[]): void {
+  links.forEach(removeLink);
 }
 
 export function loadPluginStyle(
@@ -206,7 +210,7 @@ export async function loadPlugin(
       loadedStyles.push(await loadPluginStyle(url, plugin.moduleId));
     }
   } catch (error) {
-    loadedStyles.forEach((link) => link.remove());
+    removePluginStyles(loadedStyles);
     logPluginLoadFailure(plugin, 'style_load_failed', error);
 
     return createPluginLoadResult(plugin, 'failed', 'style_load_failed');
@@ -219,6 +223,7 @@ export async function loadPlugin(
   } catch (error) {
     const code = getFailureCode(error);
 
+    removePluginStyles(loadedStyles);
     logPluginLoadFailure(plugin, code, error);
 
     return createPluginLoadResult(plugin, 'failed', code);
@@ -229,6 +234,7 @@ export async function loadPlugin(
       'Admin plugin entry has an invalid ESM export shape.',
     );
 
+    removePluginStyles(loadedStyles);
     logPluginLoadFailure(plugin, 'invalid_entry', error);
 
     return createPluginLoadResult(plugin, 'failed', 'invalid_entry');
@@ -244,6 +250,7 @@ export async function loadPlugin(
       ? 'duplicate_plugin'
       : 'registration_failed';
 
+    removePluginStyles(loadedStyles);
     logPluginLoadFailure(plugin, code, error);
 
     return createPluginLoadResult(plugin, 'failed', code);

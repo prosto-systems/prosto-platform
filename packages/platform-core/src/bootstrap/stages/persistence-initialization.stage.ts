@@ -1,4 +1,4 @@
-import type { PersistenceError } from '@prosto/platform-sdk';
+import type { PersistenceError } from '@prosto/platform-sdk/platform';
 import type { IBootstrapStageContext } from '../interfaces/index.js';
 import { RuntimeErrorCodes } from '@/common/index.js';
 import { BootstrapStage } from '../constants/index.js';

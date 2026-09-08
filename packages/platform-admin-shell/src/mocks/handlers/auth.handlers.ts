@@ -3,7 +3,7 @@ import {
   loginRequestSchema,
   passwordResetRequestSchema,
   passwordResetSchema,
-} from '@/features/auth';
+} from '@prosto/platform-sdk/admin';
 import {
   createResetToken,
   createSession,

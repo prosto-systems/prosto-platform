@@ -6,4 +6,5 @@ export * from './http-error-response.interface.js';
 export * from './http-module-context.interface.js';
 export * from './http-probe-response.interface.js';
 export * from './http-request-context.interface.js';
+export * from './http-request-gate.interface.js';
 export * from './service-registry-configurator.type.js';

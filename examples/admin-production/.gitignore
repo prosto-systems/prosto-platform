@@ -1,0 +1,4 @@
+app_data/
+modules/
+config/app_settings.production.json
+certificates/

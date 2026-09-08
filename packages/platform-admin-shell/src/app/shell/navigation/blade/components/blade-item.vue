@@ -115,7 +115,7 @@ import {
   bladeScopeToken,
   type IAdminShellBlade,
   type IAdminShellBladeToolbarItem,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/admin';
 import {
   computed,
   normalizeClass,

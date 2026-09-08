@@ -3,6 +3,11 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join, normalize } from 'node:path';
 import type { IBootstrapCoordinator } from '@/bootstrap/index.js';
 import type {
+  AdminAssetCatalog,
+  PlatformRuntimeCatalog,
+} from '@/administration/index.js';
+import { getAdminModuleAssets } from '@/administration/index.js';
+import type {
   IDiagnosticsReporter,
   IRuntimeFailureDiagnostic,
   IRuntimeOperationalReports,
@@ -22,7 +27,7 @@ import {
   type IServiceRegistry,
   type PlatformStartupPolicyType,
   SDK_CONTRACT_VERSION,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import {
   assert,
   dateNowIso,
@@ -38,6 +43,7 @@ import {
  */
 export class PlatformRuntime implements IPlatformRuntime {
   private _startedModules: readonly PlatformModuleEnvelope[] = [];
+  private _moduleEnvelopes: readonly PlatformModuleEnvelope[] = [];
   private _stoppingPromise: Promise<void> | null = null;
 
   private readonly _startupPolicy: PlatformStartupPolicyType;
@@ -49,6 +55,8 @@ export class PlatformRuntime implements IPlatformRuntime {
     private readonly _bootstrapCoordinator: IBootstrapCoordinator,
     private readonly _moduleLifecycleOrchestrator: IModuleLifecycleOrchestrator,
     private readonly _services: IServiceRegistry,
+    private readonly _platformRuntimeCatalog: PlatformRuntimeCatalog,
+    private readonly _adminAssetCatalog: AdminAssetCatalog,
     private readonly _options: IRuntimeOptions = {},
   ) {
     this._startupPolicy = this._config.platform.startupPolicy;
@@ -139,6 +147,16 @@ export class PlatformRuntime implements IPlatformRuntime {
     this._started = startupReport.status !== RuntimeStartupStatus.Failed;
     this._degraded = startupReport.degraded;
     this._startedModules = bootstrapContext.loadedModules;
+    this._moduleEnvelopes = bootstrapContext.moduleEnvelopes;
+    this._platformRuntimeCatalog.replace(
+      this._moduleEnvelopes,
+      this._startedModules,
+    );
+    this._adminAssetCatalog.replace(
+      this._startedModules.flatMap(
+        (moduleEnvelope) => getAdminModuleAssets(moduleEnvelope)?.assets ?? [],
+      ),
+    );
 
     if (!this._started && this._isPersistenceEnabled()) {
       await this._options.persistenceProvider?.dispose();
@@ -211,6 +229,8 @@ export class PlatformRuntime implements IPlatformRuntime {
     });
 
     this._reports = { ...this._reports, shutdown: shutdownReport };
+    this._platformRuntimeCatalog.replace(this._moduleEnvelopes, []);
+    this._adminAssetCatalog.replace([]);
     this._stopped = true;
     this._started = false;
 

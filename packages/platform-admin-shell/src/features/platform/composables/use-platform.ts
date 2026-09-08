@@ -1,13 +1,13 @@
 import type {
-  IPluginLoadResult,
+  IAdminShellPluginInfo,
   PlatformHealthType,
   PlatformManifestType,
-} from '../models';
+} from '@prosto/platform-sdk/admin';
 import type { ShallowRef } from 'vue';
+import type { IPluginLoadResult } from '../models';
 import { shallowRef } from 'vue';
 import { ApiError } from '@/shared/api';
 import { platformApi } from '../api';
-import { type IAdminShellPluginInfo } from '@prosto/platform-sdk';
 import { createPluginLoadResult, loadPlugin } from '../utils';
 
 interface IResourceState<TValue> {
@@ -81,6 +81,7 @@ export function usePlatform() {
       return results;
     })().finally(() => {
       isLoadingPlugins.value = false;
+      pluginsLoadingPromise = null;
     });
 
     return pluginsLoadingPromise;
@@ -102,14 +103,17 @@ export function usePlatform() {
     }
   }
 
-  async function loadManifest(csrfToken: string): Promise<void> {
+  async function loadManifest(): Promise<PlatformManifestType | null> {
     manifest.isLoading.value = true;
     manifest.error.value = null;
 
     try {
-      manifest.data.value = await platformApi.getManifest(csrfToken);
+      manifest.data.value = await platformApi.getManifest();
+      return manifest.data.value;
     } catch (error) {
+      manifest.data.value = null;
       manifest.error.value = toApiError(error);
+      return null;
     } finally {
       manifest.isLoading.value = false;
     }

@@ -1,7 +1,7 @@
 import {
   supportedLocales,
   type SupportedLocaleType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/admin';
 import { createI18n } from 'vue-i18n';
 import { readPersistedLocale } from '@/features/preferences';
 import { messages as localeMessages } from '../locales';

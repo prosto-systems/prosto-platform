@@ -72,8 +72,11 @@ shared TypeORM example composes that adapter outside the core.
 - The application host starts the runtime, activates endpoints for successfully
   started modules, then listens; it closes HTTP before stopping the runtime.
 - `/health` and `/ready` are public infrastructure probes, not the admin shell's
-  `/api/admin/platform/health`. Production admin, auth, and static-asset HTTP
-  APIs remain unimplemented.
+  `/api/admin/platform/health`. `platform-adapter-fastify` hosts the shell SPA,
+  shell assets, and framework-neutral module endpoints; the discoverable
+  `platform-module-admin` owns production admin/auth/plugin-asset endpoint
+  policy through SDK contracts. Core owns neither Fastify types nor HTTP
+  lifecycle.
 
 ### Modules MUST:
 - Only import from `platform-sdk` in their public API

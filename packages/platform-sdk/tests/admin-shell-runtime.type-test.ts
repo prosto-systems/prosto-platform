@@ -2,7 +2,7 @@ import type {
   IAdminShell,
   IAdminShellPlugin,
   IAdminShellRuntime,
-} from '@/index.js';
+} from '@/admin/index.js';
 
 declare const adminShell: IAdminShell;
 declare const runtime: IAdminShellRuntime;

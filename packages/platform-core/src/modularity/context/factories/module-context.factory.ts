@@ -5,11 +5,9 @@ import type {
   IPlatformModuleContext,
   IPlatformModuleManifest,
   IServiceRegistry,
-} from '@prosto/platform-sdk';
-import {
-  HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN,
-  resolveNestedValue,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
+import { HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN } from '@prosto/platform-sdk/platform';
+import { resolveNestedValue } from '@prosto/platform-sdk/utils';
 import type { IModuleLoggerFactory } from '@/logging/index.js';
 import type { IPlatformConfig } from '@/runtime/index.js';
 import {

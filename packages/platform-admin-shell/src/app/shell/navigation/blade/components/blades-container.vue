@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import type { IAdminShellBlade } from '@prosto/platform-sdk';
+import type { IAdminShellBlade } from '@prosto/platform-sdk/admin';
 import { computed } from 'vue';
 import { useBladesStore } from '@/app/shell';
 import BladeItem from './blade-item.vue';

@@ -116,6 +116,28 @@ sanitized transport errors, but do not provide an HTTP server. Use
 [`@prosto/platform-adapter-fastify`](../platform-adapters/platform-adapter-fastify/README.md)
 to compose a Fastify-backed application.
 
+`IHttpRequestContext` also carries the effective protocol, host, and client
+address chosen by the host after its trusted-proxy policy. An optional
+`IHttpRequestGate`, resolved using `HTTP_REQUEST_GATE_SERVICE_TOKEN`, can deny a
+request before an endpoint consumes its body. Gates return only a stable status
+and sanitized code.
+
+## Administration Contracts
+
+The `admin/http` surface contains strict Zod schemas and inferred DTO types for
+credential authentication, password resets, sessions, dashboard data, platform
+health and manifests, maintenance operations, accepted responses, and sanitized
+administration errors. Use these contracts at the shell and administration API
+boundary rather than duplicating DTO validation.
+
+`IPlatformRuntimeCatalog` exposes a sanitized immutable runtime snapshot.
+`IAdminAssetCatalog` resolves only declared plugin assets to an
+`IAdminAssetReader`, which opens one-shot Web streams with trusted metadata.
+`IHostRestartCapability` requests only idempotent local graceful shutdown;
+distributed restart coordination remains outside the host contract. Their typed
+tokens are `PLATFORM_RUNTIME_CATALOG_SERVICE_TOKEN`,
+`ADMIN_ASSET_CATALOG_SERVICE_TOKEN`, and `HOST_RESTART_CAPABILITY_SERVICE_TOKEN`.
+
 ## Public API
 
 - **Modularity**: `IPlatformModule`, module lifecycle context and logger,
@@ -126,7 +148,10 @@ to compose a Fastify-backed application.
 - **Events and services**: event-bus and service-registry interfaces with typed
   token helpers and platform service-token constants.
 - **HTTP**: endpoint, request-body, registrar, host lifecycle, probe, and
-  sanitized-error contracts, plus the HTTP registrar-provider service token.
+  sanitized-error contracts, effective request metadata, request-gate contract,
+  and HTTP registrar-provider/request-gate service tokens.
+- **Administration**: strict admin HTTP DTO schemas, sanitized runtime and asset
+  catalogs, and an idempotent local-restart host capability with typed tokens.
 - **Security**: integrity verification and secret-redaction utilities.
 - **Admin**: plugin manifest schemas and guards, registration-context interfaces,
   admin-shell constants and tokens, plus `useAdminShell()` and `useBladeScope()`.

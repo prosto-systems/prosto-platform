@@ -1,4 +1,4 @@
-import type { PlatformModuleLifecycleStageType } from '@prosto/platform-sdk';
+import type { PlatformModuleLifecycleStageType } from '@prosto/platform-sdk/platform';
 import type { RuntimeErrorCodes, RuntimeStage } from '@/common/index.js';
 
 /**

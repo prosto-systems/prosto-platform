@@ -1,4 +1,4 @@
-import type { PlatformStartupPolicyType } from '@prosto/platform-sdk';
+import type { PlatformStartupPolicyType } from '@prosto/platform-sdk/platform';
 import type {
   IPolicyEvaluationInput,
   IPolicyEvaluationResult,

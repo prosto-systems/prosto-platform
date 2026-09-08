@@ -1,8 +1,8 @@
-import type { IAdminShellRuntime } from '@prosto/platform-sdk';
+import type { IAdminShellRuntime } from '@prosto/platform-sdk/admin';
 import {
   ADMIN_SHELL_RUNTIME_API_VERSION,
   ADMIN_SHELL_RUNTIME_GLOBAL,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/admin';
 import { adminRuntimeNamespaces } from './admin-runtime-namespaces';
 
 export const adminShellRuntime: IAdminShellRuntime = Object.freeze({

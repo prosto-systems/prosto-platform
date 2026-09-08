@@ -1,4 +1,4 @@
-import type { SupportedLocaleType } from '@prosto/platform-sdk';
+import type { SupportedLocaleType } from '@prosto/platform-sdk/admin';
 import { enMessages } from './en';
 import { ruMessages } from './ru';
 

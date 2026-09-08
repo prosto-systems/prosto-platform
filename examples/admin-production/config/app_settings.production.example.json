@@ -1,0 +1,46 @@
+{
+  "persistence": {
+    "typeorm": {
+      "host": "database.example.invalid",
+      "port": 5432,
+      "database": "replace-with-database-name",
+      "username": "replace-with-database-user",
+      "password": "replace-with-database-password",
+      "poolSize": 10
+    }
+  },
+  "modules": {
+    "platform-admin": {
+      "allowedPublicOrigin": "https://admin.example.invalid",
+      "cookie": {
+        "name": "__Host-prosto-admin",
+        "lifetimeSeconds": 3600,
+        "secure": true
+      },
+      "outbox": {
+        "leaseSeconds": 60,
+        "maxAttempts": 5,
+        "retryBaseSeconds": 30
+      },
+      "rateLimit": {
+        "login": {
+          "maxAttempts": 10,
+          "windowSeconds": 900
+        },
+        "passwordReset": {
+          "maxAttempts": 5,
+          "windowSeconds": 3600
+        }
+      },
+      "resetUrlBase": "https://admin.example.invalid/reset-password",
+      "restartPollingIntervalSeconds": 5,
+      "smtp": {
+        "host": "smtp.example.invalid",
+        "port": 465,
+        "secure": true,
+        "from": "admin@example.invalid"
+      },
+      "trustedIngressConfigured": true
+    }
+  }
+}

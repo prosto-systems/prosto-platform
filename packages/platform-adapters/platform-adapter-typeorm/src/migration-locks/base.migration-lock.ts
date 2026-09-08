@@ -1,6 +1,6 @@
 import type { QueryRunner } from 'typeorm';
 import type { IMigrationLock } from '@/interfaces/index.js';
-import { PersistenceError } from '@prosto/platform-sdk';
+import { PersistenceError } from '@prosto/platform-sdk/platform';
 
 export abstract class QueryRunnerBaseMigrationLock implements IMigrationLock {
   protected _acquired = false;

@@ -3,11 +3,15 @@ import { mkdtemp, mkdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
+  ADMIN_ASSET_CATALOG_SERVICE_TOKEN,
+  PLATFORM_RUNTIME_CATALOG_SERVICE_TOKEN,
   createServiceToken,
+  type IAdminAssetCatalog,
   type IEventBus,
+  type IPlatformRuntimeCatalog,
   type ISecretsRedactor,
   type IServiceRegistry,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 import {
   BootstrapCoordinator,
   BootstrapStage,
@@ -31,7 +35,9 @@ const temporaryDirectories: string[] = [];
 
 class InspectableRuntimeBuilder extends RuntimeBuilder {
   readonly phases: string[] = [];
+  adminAssetCatalog: IAdminAssetCatalog | undefined;
   configuredService: string | undefined;
+  platformRuntimeCatalog: IPlatformRuntimeCatalog | undefined;
 
   protected override _createModuleContextFactory(
     environment: string,
@@ -42,6 +48,12 @@ class InspectableRuntimeBuilder extends RuntimeBuilder {
   ): IModuleContextFactory {
     this.phases.push('module-context-factory');
     this.configuredService = serviceRegistry.resolve(TEST_SERVICE_TOKEN);
+    this.adminAssetCatalog = serviceRegistry.resolve(
+      ADMIN_ASSET_CATALOG_SERVICE_TOKEN,
+    );
+    this.platformRuntimeCatalog = serviceRegistry.resolve(
+      PLATFORM_RUNTIME_CATALOG_SERVICE_TOKEN,
+    );
 
     return super._createModuleContextFactory(
       environment,
@@ -85,6 +97,22 @@ describe('RuntimeBuilder service composition', () => {
     // Assert
     expect(builder.phases).toEqual(['module-context-factory']);
     expect(builder.configuredService).toBeUndefined();
+  });
+
+  it('registers administration catalogs before module contexts are created', () => {
+    // Arrange
+    const builder = new InspectableRuntimeBuilder();
+
+    // Act
+    builder.build({});
+
+    // Assert
+    expect(builder.adminAssetCatalog).toBeDefined();
+    expect(builder.platformRuntimeCatalog?.getSnapshot()).toEqual({
+      modules: [],
+      name: 'Prosto Platform',
+      version: '0.0.0',
+    });
   });
 
   it('propagates duplicate registrations and clears the partial registry', () => {
