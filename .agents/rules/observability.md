@@ -1,286 +1,120 @@
 # Observability Rules
 
-## Current implementation
+## Implemented Behavior
 
-`platform-core` provides `ConsoleModuleLogger` for module contexts. It redacts
-messages and context with `SecretsRedactor` before writing to the console; Pino
-is not a repository dependency. The core also produces structured startup and
-shutdown diagnostics. The Fastify adapter, not the core, implements `GET
-/health` and `GET /ready` from SDK probe contracts.
+Core supplies `ConsoleModuleLogger` to module and runtime-adapter contexts. It
+redacts messages and context through `SecretsRedactor`, then writes to the console
+with a component prefix. It is not a Pino logger or a JSON log pipeline.
 
-## Structured Logging
+Core produces startup and shutdown diagnostics; adapter records remain separate
+from module records. The Fastify adapter implements infrastructure probes and
+endpoint request logs. There is no built-in metrics exporter or distributed
+tracing integration. Requirements below must not be read as additional shipped
+capabilities.
 
-### Core module logger
+## Logging Contract
 
-Use the logger supplied by `IPlatformModuleContext`; do not bypass its redaction
-by logging unredacted module configuration directly.
+Both module and runtime-adapter loggers expose `debug`, `info`, `warn`, and `error`
+with `(message: string, context?: Record<string, unknown>)`. Object-first Pino
+calls and object-only calls do not match these contracts.
 
 ```typescript
-import type { IPlatformModuleContext } from '@prosto/platform-sdk';
+import type { IPlatformModuleContext } from '@prosto/platform-sdk/platform';
 
 function logModuleStart(context: IPlatformModuleContext): void {
   context.logger.info('Module lifecycle phase starting', {
+    moduleId: context.moduleId,
     phase: 'start',
   });
 }
 ```
 
-### Required Log Fields
+Use `error` for failures, `warn` for handled abnormal conditions, `info` for normal
+operational milestones, and `debug` for safe diagnostic detail. Never log complete
+configuration or raw request/exception objects. Redaction is pattern-based and
+configurable, not permission to emit secrets.
 
-Add these fields where the calling context has them. The console logger adds a
-module prefix but does not synthesize all fields.
+Include fields when the caller actually has them:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `moduleId` | string | Module identifier |
-| `phase` | string | Lifecycle phase (init/start/stop) |
-| `correlationId` | string | Request/correlation ID for tracing |
-| `errorCode` | string | Standardized error code (for errors) |
+- `moduleId`: real feature-module identity; distinguish adapter component identity in diagnostics.
+- `phase`: actual phase; module phases are `init`, `start`, `stop`, while adapters use `initialize`, `start`, `stop`.
+- `correlationId`: use the request or operation identifier; module lifecycle context has no such property.
+- `errorCode`: use the owning contract's code, not a new universal code list.
+- `durationMs`: measured elapsed time, not an assumed logger-generated metric.
 
-### Log Level Discipline
+The console logger adds `[Module:<id>]` even when used for an adapter. It does not
+automatically add timestamps, correlation IDs, phase fields, or structured error
+serialization. Fastify endpoint completion logs include route, method, status,
+duration, owner ID, and correlation ID; failure logs include a transport error code
+without the original exception details.
 
-```typescript
-// ERROR: Application cannot continue, requires immediate attention
-logger.error({ err, moduleId }, 'Module failed to start');
+## Runtime Reports
 
-// WARN: Unexpected but handled, may indicate future problem
-logger.warn({ moduleId, version }, 'Module using deprecated API');
+Use `IPlatformRuntime.reports.startup` and `.shutdown` from the core runtime API
+rather than re-declaring report interfaces. Reports may be absent before their
+operation completes.
 
-// INFO: Normal operational messages
-logger.info({ moduleId, phase }, 'Module lifecycle phase completed');
+- Startup reports contain status, policy mode, correlation ID, start/completion timestamps, degraded state, and loaded/skipped/failed module diagnostics.
+- Shutdown reports contain correlation ID, start/completion timestamps, module stop order, and shutdown issues.
+- Both carry adapter diagnostics via SDK `IPlatformRuntimeAdapterDiagnostics`; adapter records identify component, role, lifecycle stage, and outcome.
+- Failure and shutdown diagnostic message/remediation fields are redacted by report builders. Reports are operational data, not public probe payloads or a guarantee that arbitrary supplied text contains no secrets.
+- `platform-admin` is an adapter component, never a loaded module, readiness module ID, or module count. This separation follows [ADR-0001](../../docs/adr/0001-required-runtime-adapters.md).
 
-// DEBUG: Detailed diagnostic information
-logger.debug({ config, moduleId }, 'Module configuration loaded');
-```
+Report interfaces live in `packages/platform-core/src/diagnostics/interfaces/`.
+Adapters depend on SDK diagnostic contracts, not core imports.
 
-### Example: Lifecycle Logging
+## Error Contracts
 
-```typescript
-class ModuleLifecycleOrchestrator {
-  async executePhase(
-    moduleEnvelope: PlatformModuleEnvelope,
-    phase: PlatformModuleLifecycleStageType,
-    ctx: IPlatformModuleContext
-  ): Promise<void> {
-    const start = Date.now();
-    
-    logger.info({
-      moduleId: moduleEnvelope.id,
-      phase,
-      correlationId: ctx.correlationId
-    }, 'Module lifecycle phase starting');
+There is no single SDK `IPlatformError` or universal error-code table covering
+every subsystem. Use the actual exported error class or diagnostic type for the
+boundary being handled. Core failure diagnostics have `moduleId`, `phase`,
+`errorCode`, `message`, and `remediationHint`; their phases can include bootstrap
+and runtime stages, not just module lifecycle stages.
 
-    try {
-      if (!moduleEnvelope.moduleInstance) {
-        throw new Error('Module instance not found');
-      }
+Do not invent `MODULE_INTEGRITY_FAILED` or `LIFECYCLE_ORDER_VIOLATION` as platform
+codes. A standalone SDK integrity-verifier result is not a core loader diagnostic.
+Likewise, `register` is not a module lifecycle phase.
 
-      await moduleEnvelope.moduleInstance[phase](ctx);
-      
-      logger.info({
-        moduleId: moduleEnvelope.id,
-        phase,
-        duration: Date.now() - start,
-        correlationId: ctx.correlationId
-      }, 'Module lifecycle phase completed');
-      
-    } catch (error) {
-      logger.error({
-        err: error,
-        moduleId: moduleEnvelope.id,
-        phase,
-        errorCode: 'LIFECYCLE_PHASE_FAILURE',
-        correlationId: ctx.correlationId
-      }, 'Module lifecycle phase failed');
-      
-      throw error;
-    }
-  }
-}
-```
+Fastify's adapter-generated HTTP errors use `IHttpErrorResponse` from
+`@prosto/platform-sdk/platform`, for example `internal_error` or
+`payload_too_large`, and expose a correlation ID instead of internal error detail.
+Application endpoints own their domain error mapping and must return safe
+responses; throwing an arbitrary error does not declare a new transport status.
 
----
+## Health and Readiness
 
-## Startup Report
+`GET /health` and `GET /ready` are always-public, minimal infrastructure probes,
+not the administration API's `/api/admin/platform/health`.
 
-### Implemented startup diagnostics
+- `/health` reports `healthy`, timestamp, and uptime seconds. It is not a dependency health scan.
+- `/ready` returns 200 only when the HTTP application is listening and the runtime is started and not stopping; otherwise it returns 503 when reachable.
+- Readiness includes `ready`, `degraded`, `startedModuleIds`, timestamp, and typed reasons: `application_not_listening`, `runtime_not_started`, or `application_stopping`.
+- A degraded started runtime remains ready. Administration maintenance does not change infrastructure readiness; these probes are exempt from its request gate.
+- Do not expose configuration, failure details, stacks, filesystem paths, or secrets in probes.
 
-`IPlatformRuntime.reports.startup` is an `IRuntimeStartupReport`:
+## Correlation and Timing
 
-```typescript
-interface IRuntimeStartupReport {
-  type: 'startup';
-  status: RuntimeStartupStatus;
-  policyMode: PlatformStartupPolicyType;
-  correlationId: string;
-  startedAt: string;
-  completedAt: string;
-  degraded: boolean;
-  loadedModules: readonly IRuntimeLoadedModuleDiagnostic[];
-  skippedModules: readonly IRuntimeSkippedModuleDiagnostic[];
-  failedModules: readonly IRuntimeFailureDiagnostic[];
-}
-```
+`IHttpRequestContext.correlationId` is assigned by the Fastify adapter. It accepts
+a single `x-correlation-id` value matching `^[A-Za-z0-9._:-]{1,128}$`; otherwise it
+generates a UUID. Endpoint responses and sanitized transport errors carry
+`x-correlation-id`. Use the supplied ID for request logs instead of copying an
+unvalidated header or manufacturing a module lifecycle context with extra fields.
 
----
+Runtime report correlation IDs identify runtime operations, not automatically
+propagated HTTP traces. There is no automatic cross-service trace propagation.
 
-## Error Model
+Implemented timing includes report timestamps and Fastify endpoint `durationMs`
+logs. Per-phase histograms, module load counters, dependency-resolution metrics,
+OpenTelemetry exporters, and a `/metrics` endpoint are not implemented platform
+features. If adding them, define ownership, contracts, safe labels, tests, and an
+export mechanism explicitly. Do not present illustrative collector classes as
+current APIs or use unbounded request/module data as metric labels.
 
-### Structured Error Codes
+## Source References
 
-```typescript
-const ErrorCodes = {
-  // Module loading
-  MODULE_NOT_FOUND: 'MODULE_NOT_FOUND',
-  MODULE_LOAD_FAILED: 'MODULE_LOAD_FAILED',
-  MODULE_VALIDATION_FAILED: 'MODULE_VALIDATION_FAILED',
-  MODULE_INTEGRITY_FAILED: 'MODULE_INTEGRITY_FAILED',
-  
-  // Lifecycle
-  LIFECYCLE_PHASE_FAILED: 'LIFECYCLE_PHASE_FAILED',
-  LIFECYCLE_TIMEOUT: 'LIFECYCLE_TIMEOUT',
-  LIFECYCLE_ORDER_VIOLATION: 'LIFECYCLE_ORDER_VIOLATION',
-  
-  // Compatibility
-  INCOMPATIBLE_VERSION: 'INCOMPATIBLE_VERSION',
-  MISSING_DEPENDENCY: 'MISSING_DEPENDENCY',
-  CIRCULAR_DEPENDENCY: 'CIRCULAR_DEPENDENCY',
-} as const;
-```
-
-### Error Mapping
-
-```typescript
-interface IPlatformError {
-  code: string;
-  message: string;
-  moduleId?: string;
-  phase?: PlatformModuleLifecycleStageType;
-  remediationHint?: string;
-  cause?: Error;
-}
-
-class ModuleLoadError extends Error implements IPlatformError {
-  constructor(
-    public readonly code: string,
-    public readonly moduleId: string,
-    public readonly phase?: PlatformModuleLifecycleStageType,
-    public readonly remediationHint?: string,
-    cause?: Error
-  ) {
-    super(`Module ${moduleId} failed during ${phase}: ${cause?.message}`);
-    this.name = 'ModuleLoadError';
-    this.cause = cause;
-  }
-}
-
-// Usage
-throw new ModuleLoadError(
-  ErrorCodes.MODULE_INTEGRITY_FAILED,
-  'prosto-module-health',
-  'register',
-  'Verify checksum matches published artifact'
-);
-```
-
----
-
-## Health & Readiness
-
-`/health` and `/ready` are always-public, minimal infrastructure probes. They
-must not return configuration, failures, stacks, paths, or secrets, and are not
-the admin shell's `/api/admin/platform/health`. A degraded started runtime is
-ready with `degraded: true`; an application that is not listening, whose runtime
-is not started, or is stopping returns typed non-ready reasons. The current
-adapter has no metrics export.
-
----
-
-## Trace Propagation
-
-### Correlation ID
-
-```typescript
-// Generate correlation ID for each request
-function generateCorrelationId(): string {
-  return crypto.randomUUID();
-}
-
-// Propagate through lifecycle
-class PlatformModuleContext {
-  constructor(
-    public readonly correlationId: string,
-    public readonly moduleId: string,
-    public readonly logger: Logger
-  ) {}
-}
-
-// Usage in request handler
-async function handleRequest(req: Request): Promise<Response> {
-  const correlationId = req.headers['x-correlation-id'] || generateCorrelationId();
-  const ctx = new PlatformModuleContext(correlationId, moduleId, logger);
-  
-  logger.info({ correlationId, moduleId }, 'Processing request');
-  
-  try {
-    return await module.handle(req, ctx);
-  } catch (error) {
-    logger.error({ err: error, correlationId, moduleId }, 'Request failed');
-    throw error;
-  }
-}
-```
-
----
-
-## Metrics
-
-### Startup Timing Metrics
-
-```typescript
-interface IStartupMetrics {
-  totalDuration: number;
-  phaseDurations: Record<PlatformModuleLifecycleStageType, number>;
-  moduleDurations: Record<string, number>;
-  dependencyResolutionTime: number;
-}
-
-class MetricsCollector {
-  private phaseTimings = new Map<string, number>();
-  private moduleTimings = new Map<string, number>();
-
-  startPhase(phase: PlatformModuleLifecycleStageType): void {
-    this.phaseTimings.set(phase, Date.now());
-  }
-
-  endPhase(phase: PlatformModuleLifecycleStageType): number {
-    const start = this.phaseTimings.get(phase);
-    const duration = Date.now() - start!;
-    this.metrics.phaseDurations[phase] = duration;
-    return duration;
-  }
-
-  trackModuleLoad(moduleId: string, duration: number): void {
-    this.moduleTimings.set(moduleId, duration);
-    this.metrics.moduleDurations[moduleId] = duration;
-  }
-}
-```
-
-### Module-Level Metrics
-
-```typescript
-interface IPlatformModuleMetrics {
-  moduleId: string;
-  loadCount: number;
-  unloadCount: number;
-  failureCount: number;
-  avgLoadDuration: number;
-  lastLoadTime: string;
-  lastError?: {
-    code: string;
-    phase: PlatformModuleLifecycleStageType;
-    timestamp: string;
-  };
-}
-```
+- `packages/platform-sdk/src/platform/modularity/interfaces/platform-module-logger.interface.ts`: message-first logger API.
+- `packages/platform-core/src/logging/module-logger/console/console-module-logger.ts`: console formatting and redaction.
+- `packages/platform-core/src/diagnostics/`: reports and sanitization.
+- `packages/platform-core/src/common/constants/runtime.ts`: core runtime codes and stages.
+- `packages/platform-sdk/src/platform/http/interfaces/`: HTTP error and probe contracts.
+- `packages/platform-adapters/platform-adapter-fastify/src/fastify-http-adapter.ts`: request logs, correlation validation, transport errors, and probes.

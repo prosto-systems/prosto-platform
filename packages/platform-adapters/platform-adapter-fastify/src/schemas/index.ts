@@ -12,8 +12,7 @@ export const timeoutSchema = positiveSafeIntegerSchema.max(
   NODE_TIMER_MAXIMUM_MS,
 );
 
-export const applicationOptionsSchema = z.object({
-  runtimeFactory: z.unknown(),
+export const httpAdapterOptionsSchema = z.object({
   host: z.string().trim().min(1).max(255).default('127.0.0.1'),
   port: z.number().int().safe().min(0).max(65_535).default(0),
   parsedBodyLimitBytes: positiveSafeIntegerSchema.default(MEBIBYTE),
@@ -101,9 +100,8 @@ export const applicationOptionsSchema = z.object({
         ),
     })
     .optional(),
-  logger: z.unknown().optional(),
 });
 
-export type FastifyHttpApplicationConfigurationType = z.output<
-  typeof applicationOptionsSchema
+export type FastifyHttpAdapterConfigurationType = z.output<
+  typeof httpAdapterOptionsSchema
 >;

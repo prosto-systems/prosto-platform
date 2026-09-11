@@ -45,22 +45,25 @@ export class ModuleContextFactory implements IModuleContextFactory {
 
     const http = httpEndpointRegistrarProvider
       ? {
-          endpoints: httpEndpointRegistrarProvider.createRegistrar(moduleId),
+          endpoints: httpEndpointRegistrarProvider.createRegistrar({
+            type: 'module',
+            id: moduleId,
+          }),
         }
       : undefined;
 
-    const persistence: IPersistenceModuleContext | undefined =
-      options.persistenceEnabled
-        ? {
-            state: options.persistenceProvider?.state ?? 'unavailable',
-            // Descriptors become immutable after init; later phases can only
-            // observe provider state and resolve services published by it.
-            descriptors:
-              options.lifecycleStage === 'init'
-                ? options.persistenceProvider?.descriptors
-                : undefined,
-          }
-        : undefined;
+    const persistence: IPersistenceModuleContext | undefined = {
+      state: options.persistenceState,
+      // Descriptors become immutable after init; later phases can only
+      // observe provider state and resolve services published by it.
+      descriptors:
+        options.lifecycleStage === 'init'
+          ? options.persistenceAdapter.descriptors.createRegistrar({
+              type: 'module',
+              id: moduleId,
+            })
+          : undefined,
+    };
 
     return {
       logger,

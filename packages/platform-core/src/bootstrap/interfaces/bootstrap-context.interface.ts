@@ -9,7 +9,11 @@ import type { IBootstrapStageOutcome } from './bootstrap-stage-context.interface
  */
 export interface IBootstrapContext {
   readonly policyMode: PlatformStartupPolicyType;
+  /** @internal Whether the bootstrap pipeline stopped at a fatal barrier. */
+  readonly aborted: boolean;
   readonly loadedModules: readonly PlatformModuleEnvelope[];
+  /** @internal Modules whose `start()` hooks completed successfully. */
+  readonly startedModules: readonly PlatformModuleEnvelope[];
   readonly skippedModuleIds: readonly string[];
   readonly failedDiagnostics: readonly IRuntimeFailureDiagnostic[];
   /** @internal All discovered module metadata retained for sanitized catalogs. */

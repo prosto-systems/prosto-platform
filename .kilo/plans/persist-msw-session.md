@@ -1,5 +1,21 @@
 # Persist MSW Session Across Reloads
 
+## Status
+
+As of **2026-09-11**, mock session persistence is implemented.
+`src/mocks/mock-session-storage.ts` in the shell validates the versioned
+`prosto.admin.msw.sessions.v1` snapshot with Zod, filters expired/unknown-user
+sessions, restores the sequence, and contains storage failures. `mock-state.ts`
+hydrates and saves that snapshot; storage unit tests and auth-handler tests
+include restoration after recreating the mock runtime.
+
+The [admin shell README](../../packages/platform-admin-shell/README.md) is the
+current authority for opt-in MSW and production authentication boundaries.
+This is simulated backend persistence only, not persistence of the production
+Pinia auth store. The original design and acceptance scenarios below are
+retained; their presence is not proof of browser-restart or multi-tab behavior.
+Tests and real-browser acceptance checks were not rerun for this documentation review.
+
 ## Goal
 
 Keep an authenticated `platform-admin-shell` MSW session valid across page reloads, new tabs, and browser restarts for the existing one-hour cookie lifetime. Preserve the current opaque cookie flow: Pinia starts empty and restores the principal, permissions, and CSRF token through `GET /api/admin/auth/session`.

@@ -1,6 +1,6 @@
 import type {
   IPersistenceDescriptor,
-  IPersistenceProvider,
+  IPersistenceRuntimeAdapter,
   IPlatformRuntimeVersionContext,
   IServiceRegistry,
   PlatformStartupPolicyType,
@@ -11,7 +11,6 @@ import type {
   PlatformModuleEnvelope,
 } from '@/modularity/index.js';
 import type { BootstrapStage } from '../constants/index.js';
-import type { IPersistencePlatformConfig } from '@/runtime/index.js';
 
 /**
  * @alpha
@@ -35,12 +34,13 @@ export interface IBootstrapStageContext {
   readonly stageOutcomes: IBootstrapStageOutcome[];
   readonly validatedModules: PlatformModuleEnvelope[];
   readonly loadedModules: PlatformModuleEnvelope[];
+  /** @internal Modules whose `start()` hooks completed successfully. */
+  readonly startedModules: PlatformModuleEnvelope[];
   readonly failedDiagnostics: IRuntimeFailureDiagnostic[];
   readonly candidates: readonly IModuleCandidateArtifact[];
   readonly skippedModuleIds: Set<string>;
-  readonly persistenceProvider?: IPersistenceProvider;
+  readonly persistenceAdapter: IPersistenceRuntimeAdapter;
   readonly platformPersistenceDescriptor?: IPersistenceDescriptor;
-  readonly persistenceConfiguration: IPersistencePlatformConfig;
   readonly services: IServiceRegistry;
   abort: boolean;
 }

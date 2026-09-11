@@ -1,15 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { platformConfigSchema } from '@/runtime/schemas/index.js';
+import {
+  platformConfigSchema,
+  platformLocalAdapterConfigSchema,
+} from '@/runtime/schemas/index.js';
 
-describe('platformConfigSchema TypeORM persistence', () => {
-  it('accepts SQLite database configuration', () => {
+describe('platformConfigSchema adapter configuration', () => {
+  it('preserves TypeORM configuration as opaque adapter-scoped data', () => {
     // Arrange
     const configuration = {
-      persistence: {
+      adapters: {
         typeorm: {
           enabled: true,
           type: 'sqlite',
           database: ':memory:',
+          unsupportedAdapterOption: true,
         },
       },
     };
@@ -19,9 +23,17 @@ describe('platformConfigSchema TypeORM persistence', () => {
 
     // Assert
     expect(result.success).toBe(true);
+
+    if (!result.success) {
+      throw new Error('Expected adapter configuration to be accepted by core.');
+    }
+
+    expect(result.data.adapters.typeorm).toEqual(
+      configuration.adapters.typeorm,
+    );
   });
 
-  it('rejects SQLite URL configuration', () => {
+  it('removes the legacy persistence configuration path', () => {
     // Arrange
     const configuration = {
       persistence: {
@@ -37,38 +49,28 @@ describe('platformConfigSchema TypeORM persistence', () => {
     const result = platformConfigSchema.safeParse(configuration);
 
     // Assert
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
 
-    if (result.success) {
-      throw new Error('Expected SQLite URL configuration to be rejected.');
+    if (!result.success) {
+      throw new Error('Expected the legacy configuration to be ignored.');
     }
 
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ['persistence', 'typeorm', 'url'],
-        }),
-      ]),
-    );
+    expect(result.data).not.toHaveProperty('persistence');
   });
 
-  it('accepts server dialect URL configuration', () => {
+  it('rejects legacy persistence settings in a local override', () => {
     // Arrange
     const configuration = {
       persistence: {
-        typeorm: {
-          enabled: true,
-          type: 'postgres',
-          url: 'postgres://user:password@localhost/platform',
-        },
+        typeorm: { password: 'not-a-local-adapter-override' },
       },
     };
 
     // Act
-    const result = platformConfigSchema.safeParse(configuration);
+    const result = platformLocalAdapterConfigSchema.safeParse(configuration);
 
     // Assert
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
   });
 
   it('preserves configuration for a kebab-case module identifier', () => {

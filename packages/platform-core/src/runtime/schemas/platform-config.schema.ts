@@ -3,169 +3,11 @@ import type { ZodType } from 'zod';
 import type { IPlatformConfig } from '../interfaces/index.js';
 import { z } from 'zod';
 
-const TYPEORM_DIALECTS = [
-  'postgres',
-  'mysql',
-  'mariadb',
-  'sqlite',
-  'mssql',
-] as const;
-
-const typeOrmPersistenceSchema = z
+const adapterLocalOverrideSchema = z
   .object({
-    enabled: z.boolean().default(false),
-    type: z.enum(TYPEORM_DIALECTS).optional(),
-    host: z.string().min(1).optional(),
-    port: z.number().int().min(1).max(65535).optional(),
-    database: z.string().min(1).optional(),
-    username: z.string().min(1).optional(),
-    password: z.string().min(1).optional(),
-    url: z.string().url().optional(),
-    schema: z.string().min(1).optional(),
-    poolSize: z.number().int().positive().finite().optional(),
-    connectTimeoutMs: z.number().int().positive().finite().optional(),
-    migrationLockTimeoutMs: z
-      .number()
-      .int()
-      .positive()
-      .max(600000)
-      .default(60000),
-    migrationTransactionMode: z.enum(['all', 'each', 'none']).default('each'),
-    synchronize: z.literal(false).default(false),
-    migrationsRun: z.boolean().default(true),
-  })
-  .superRefine((config, context) => {
-    if (!config.enabled) {
-      return;
-    }
-
-    if (!config.type) {
-      context.addIssue({
-        code: 'custom',
-        path: ['type'],
-        message:
-          'A supported TypeORM dialect is required when persistence is enabled.',
-      });
-      return;
-    }
-
-    if (config.type === 'sqlite') {
-      if (config.url !== undefined) {
-        context.addIssue({
-          code: 'custom',
-          path: ['url'],
-          message: 'TypeORM sqlite does not support url.',
-        });
-      }
-
-      if (config.database === undefined) {
-        context.addIssue({
-          code: 'custom',
-          path: ['database'],
-          message: 'TypeORM sqlite requires database connection settings.',
-        });
-      }
-
-      for (const field of [
-        'host',
-        'port',
-        'username',
-        'password',
-        'schema',
-        'poolSize',
-      ] as const) {
-        if (config[field] !== undefined) {
-          context.addIssue({
-            code: 'custom',
-            path: [field],
-            message: `TypeORM sqlite does not support ${field}.`,
-          });
-        }
-      }
-    } else {
-      const structuredFields = [
-        config.host,
-        config.port,
-        config.database,
-        config.username,
-        config.password,
-        config.schema,
-        config.poolSize,
-      ];
-
-      if (config.url && structuredFields.some((value) => value !== undefined)) {
-        context.addIssue({
-          code: 'custom',
-          path: ['url'],
-          message:
-            'TypeORM url cannot be combined with structured connection fields.',
-        });
-      }
-
-      if (!config.url && !config.database) {
-        context.addIssue({
-          code: 'custom',
-          path: ['database'],
-          message:
-            'TypeORM requires either url or database connection settings.',
-        });
-      }
-
-      if (!config.url && (!config.host || !config.username)) {
-        context.addIssue({
-          code: 'custom',
-          path: ['host'],
-          message:
-            'TypeORM server dialects require host and username when url is absent.',
-        });
-      }
-    }
-
-    if (config.schema && config.type !== 'postgres') {
-      context.addIssue({
-        code: 'custom',
-        path: ['schema'],
-        message: 'TypeORM schema is supported only for the postgres dialect.',
-      });
-    }
-  });
-
-const typeOrmLocalOverrideSchema = z
-  .object({
-    persistence: z
-      .object({
-        // Validation of cross-field requirements happens after this narrow
-        // secret override is merged with the package/deployment configuration.
-        typeorm: z
-          .object({
-            enabled: z.boolean().optional(),
-            type: z.enum(TYPEORM_DIALECTS).optional(),
-            host: z.string().min(1).optional(),
-            port: z.number().int().min(1).max(65535).optional(),
-            database: z.string().min(1).optional(),
-            username: z.string().min(1).optional(),
-            password: z.string().min(1).optional(),
-            url: z.string().url().optional(),
-            schema: z.string().min(1).optional(),
-            poolSize: z.number().int().positive().finite().optional(),
-            connectTimeoutMs: z.number().int().positive().finite().optional(),
-            migrationLockTimeoutMs: z
-              .number()
-              .int()
-              .positive()
-              .max(600000)
-              .optional(),
-            migrationTransactionMode: z
-              .enum(['all', 'each', 'none'])
-              .optional(),
-            synchronize: z.literal(false).optional(),
-            migrationsRun: z.boolean().optional(),
-          })
-          .strict()
-          .optional(),
-      })
-      .strict()
-      .optional(),
+    // Adapter implementations validate their own scoped configuration. Local
+    // overrides may therefore provide secrets without exposing them to modules.
+    adapters: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
 
@@ -174,12 +16,12 @@ const typeOrmLocalOverrideSchema = z
  * Validates the deployment-local secret override without allowing it to alter
  * unrelated runtime settings.
  */
-export const platformLocalPersistenceConfigSchema = typeOrmLocalOverrideSchema;
+export const platformLocalAdapterConfigSchema = adapterLocalOverrideSchema;
 
 /**
  * @alpha
  * Validates and supplies defaults for the complete platform configuration,
- * including module discovery, probing refresh, and persistence settings.
+ * including module discovery, probing refresh, and adapter-scoped settings.
  */
 export const platformConfigSchema: ZodType<IPlatformConfig> = z.object({
   platform: z
@@ -209,25 +51,7 @@ export const platformConfigSchema: ZodType<IPlatformConfig> = z.object({
     .default({
       shutdownTimeoutMs: 30000,
     }),
-  persistence: z
-    .object({
-      typeorm: typeOrmPersistenceSchema.default({
-        enabled: false,
-        migrationLockTimeoutMs: 60000,
-        migrationTransactionMode: 'each',
-        synchronize: false,
-        migrationsRun: true,
-      }),
-    })
-    .default({
-      typeorm: {
-        enabled: false,
-        migrationLockTimeoutMs: 60000,
-        migrationTransactionMode: 'each',
-        synchronize: false,
-        migrationsRun: true,
-      },
-    }),
+  adapters: z.record(z.string(), z.unknown()).default({}),
   modules: z
     .object({
       configAccessPolicy: z

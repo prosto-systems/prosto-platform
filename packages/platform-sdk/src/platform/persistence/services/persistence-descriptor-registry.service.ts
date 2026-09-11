@@ -1,5 +1,7 @@
+import type { IPlatformRuntimeComponentIdentity } from '@/platform/adapters/index.js';
 import type {
   IPersistenceDescriptor,
+  IPersistenceDescriptorRegistrar,
   IPersistenceDescriptorRegistry,
 } from '../interfaces/index.js';
 import { PersistenceError } from '../errors/index.js';
@@ -12,66 +14,94 @@ export class PersistenceDescriptorRegistry implements IPersistenceDescriptorRegi
   readonly #descriptors = new Map<string, IPersistenceDescriptor>();
   #sealed = false;
 
-  register(moduleId: string, descriptor: IPersistenceDescriptor): void {
-    if (this.#sealed) {
-      throw new PersistenceError(
-        'PersistenceRegistryNotCollecting',
-        'Persistence descriptors can only be registered while collection is open.',
-        {
-          moduleId,
-          phase: 'sealed',
-          remediationHint:
-            'Register the descriptor from the module init() lifecycle method.',
-        },
-      );
-    }
+  registerPlatform(descriptor: IPersistenceDescriptor): void {
+    this.#assertCollecting('platform');
 
-    const expectedOwner =
-      descriptor.owner === 'platform' ? 'platform' : moduleId;
-
-    if (
-      descriptor.ownerId !== expectedOwner ||
-      (descriptor.owner === 'platform' && moduleId !== 'platform')
-    ) {
+    if (descriptor.owner !== 'platform' || descriptor.ownerId !== 'platform') {
       throw new PersistenceError(
         'PersistenceDescriptorOwnerMismatch',
-        `Persistence descriptor owner "${descriptor.ownerId}" does not match registering owner "${expectedOwner}".`,
+        'The platform descriptor must be owned by "platform".',
         {
-          moduleId,
+          moduleId: 'platform',
           ownerId: descriptor.ownerId,
           phase: 'collecting',
           remediationHint:
-            'A module descriptor must use its context moduleId; only platform composition can register the platform descriptor.',
+            'Use an owner-scoped registrar for module and adapter descriptors.',
         },
       );
     }
 
-    if (this.#descriptors.has(moduleId)) {
-      throw new PersistenceError(
-        'PersistenceDuplicateDescriptor',
-        `A persistence descriptor is already registered for "${moduleId}".`,
-        { moduleId, ownerId: descriptor.ownerId, phase: 'collecting' },
-      );
-    }
-
-    this.#descriptors.set(moduleId, descriptor);
+    this.#register('platform', descriptor);
   }
 
-  rollback(moduleId: string): void {
-    if (this.#sealed) {
-      throw new PersistenceError(
-        'PersistenceRegistryNotCollecting',
-        'Persistence descriptors cannot be rolled back after collection is sealed.',
-        { moduleId, phase: 'sealed' },
-      );
-    }
+  createRegistrar(
+    owner: IPlatformRuntimeComponentIdentity,
+  ): IPersistenceDescriptorRegistrar {
+    return {
+      register: (descriptor: IPersistenceDescriptor): void => {
+        this.#assertCollecting(owner.id);
 
-    this.#descriptors.delete(moduleId);
+        if (
+          descriptor.owner !== owner.type ||
+          descriptor.ownerId !== owner.id
+        ) {
+          throw new PersistenceError(
+            'PersistenceDescriptorOwnerMismatch',
+            `Persistence descriptor owner "${descriptor.ownerId}" does not match registering ${owner.type} "${owner.id}".`,
+            {
+              moduleId: owner.id,
+              ownerId: descriptor.ownerId,
+              phase: 'collecting',
+              remediationHint:
+                'Use the owner identity supplied by the runtime adapter or module context.',
+            },
+          );
+        }
+
+        this.#register(this.#ownerKey(owner), descriptor);
+      },
+    };
+  }
+
+  rollback(owner: IPlatformRuntimeComponentIdentity): void {
+    this.#assertCollecting(owner.id);
+    this.#descriptors.delete(this.#ownerKey(owner));
   }
 
   seal(): readonly IPersistenceDescriptor[] {
     this.#sealed = true;
 
     return Object.freeze([...this.#descriptors.values()]);
+  }
+
+  #register(key: string, descriptor: IPersistenceDescriptor): void {
+    if (this.#descriptors.has(key)) {
+      throw new PersistenceError(
+        'PersistenceDuplicateDescriptor',
+        `A persistence descriptor is already registered for "${key}".`,
+        { moduleId: key, ownerId: descriptor.ownerId, phase: 'collecting' },
+      );
+    }
+
+    this.#descriptors.set(key, descriptor);
+  }
+
+  #assertCollecting(ownerId: string): void {
+    if (this.#sealed) {
+      throw new PersistenceError(
+        'PersistenceRegistryNotCollecting',
+        'Persistence descriptors can only be registered while collection is open.',
+        {
+          moduleId: ownerId,
+          phase: 'sealed',
+          remediationHint:
+            'Register the descriptor during component initialization.',
+        },
+      );
+    }
+  }
+
+  #ownerKey(owner: IPlatformRuntimeComponentIdentity): string {
+    return `${owner.type}:${owner.id}`;
   }
 }

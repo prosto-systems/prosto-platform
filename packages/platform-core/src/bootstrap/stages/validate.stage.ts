@@ -1,4 +1,6 @@
 import type { IModuleValidationStrategy } from '@/modularity/index.js';
+import { PLATFORM_ADMIN_COMPONENT_ID } from '@prosto/platform-sdk/platform';
+import { RuntimeErrorCodes } from '@/common/index.js';
 import { type IBootstrapStageContext } from '../interfaces/index.js';
 import { BootstrapStage } from '../constants/index.js';
 import { BootstrapBaseStage } from './bootstrap.base-stage.js';
@@ -27,6 +29,27 @@ export class ValidateStage extends BootstrapBaseStage {
 
     if (!candidateArtifacts.length) {
       this.addOutcome(context, { ok: false, details: 'No candidates' });
+      return context;
+    }
+
+    const reservedAdminArtifact = candidateArtifacts.find(
+      (artifact) => artifact.moduleId === PLATFORM_ADMIN_COMPONENT_ID,
+    );
+
+    if (reservedAdminArtifact) {
+      this.skipModule(context, reservedAdminArtifact.moduleId);
+      this.addFailure(context, {
+        moduleId: reservedAdminArtifact.moduleId,
+        errorCode: RuntimeErrorCodes.ManifestInvalid,
+        message: `Module ID "${PLATFORM_ADMIN_COMPONENT_ID}" is reserved for the required admin adapter.`,
+        remediationHint:
+          'Remove the discoverable admin module and compose the admin adapter in RuntimeBuilder.',
+      });
+      this.addOutcome(context, {
+        ok: false,
+        details: `Reserved runtime component ID "${PLATFORM_ADMIN_COMPONENT_ID}" was discovered.`,
+      });
+      this.stopPipeline(context);
       return context;
     }
 

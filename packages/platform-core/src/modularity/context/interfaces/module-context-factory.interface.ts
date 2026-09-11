@@ -1,5 +1,5 @@
 import type {
-  IPersistenceProvider,
+  IPersistenceRuntimeAdapter,
   IPlatformModuleContext,
   IPlatformModuleManifest,
   PlatformModuleLifecycleStageType,
@@ -15,8 +15,8 @@ export interface ICreateModuleContextOptions {
   readonly sdkVersion: string;
   readonly moduleManifest: IPlatformModuleManifest;
   readonly lifecycleStage: PlatformModuleLifecycleStageType;
-  readonly persistenceEnabled: boolean;
-  readonly persistenceProvider?: IPersistenceProvider;
+  readonly persistenceAdapter: IPersistenceRuntimeAdapter;
+  readonly persistenceState: 'collecting' | 'ready';
 }
 
 /**

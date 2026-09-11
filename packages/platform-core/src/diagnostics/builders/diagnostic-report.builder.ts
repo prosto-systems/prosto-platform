@@ -25,11 +25,13 @@ export class DiagnosticReportBuilder extends ReportBaseBuilder {
       startedAt: context.startedAt,
       completedAt: dateNowIso(),
       status: this.determineStartupStatus(
-        context.loadedModules,
         context.skippedModules,
         context.failedModules,
+        context.hasFatalFailure,
+        context.adapters,
       ),
       degraded: context.skippedModules.length > 0,
+      adapters: [...context.adapters],
       loadedModules: [...context.loadedModules],
       skippedModules: context.skippedModules.map((skippedModule) => ({
         ...skippedModule,
@@ -54,6 +56,7 @@ export class DiagnosticReportBuilder extends ReportBaseBuilder {
       completedAt: dateNowIso(),
       stopOrder: [...context.stopOrder],
       issues: context.issues.map((issue) => this.sanitizeIssue(issue)),
+      adapters: [...context.adapters],
     };
   }
 }

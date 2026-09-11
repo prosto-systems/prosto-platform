@@ -1,304 +1,143 @@
 # Security-First Development Rules
 
-## Module Loading Security
+## Trust and Module Loading
 
-### Production Module Loading
+**Implemented:** core discovers local module packages below
+`platform.discoveryPath`, validates them through bootstrap, and loads their ESM
+entry from `platform.probingPath` in-process. Discoverable packages need
+`manifest.json`, `package.json`, and built `dist/` artifacts; prefer the `./platform`
+package export. This is not a sandbox.
 
-**MANDATORY for production:**
+The SDK exports `IntegrityVerifier` from `@prosto/platform-sdk/platform` with
+checksum and signature utilities. The core loading pipeline does not integrate
+that verifier. URL/registry acquisition, archive verification, and enforced
+artifact signatures or checksums are not implemented loading guarantees.
 
-1. **Manifest validation** - Schema validation against versioned contract
-2. **Controlled discovery directory** - Only trusted deployment tooling may write module packages below `platform.discoveryPath`
-3. **Controlled probing directory** - Only the runtime identity may rebuild `platform.probingPath`
+**Deployment requirements:** establish package provenance before startup; restrict
+discovery-directory writes to trusted deployment tooling and probing-directory
+rebuilds to the runtime identity. Treat loaded modules and admin plugins as trusted
+code. Admin plugins are first-party ESM; their API boundary is not isolation.
+Do not describe configuration access controls as a module-package allowlist.
 
-The current core loader discovers local packages and executes their ESM entry
-from the probing directory in-process. It is not a sandbox. URL/registry
-acquisition, archive verification, checksums, and signatures are not
-implemented, so production deployments must establish package provenance and
-filesystem access controls before startup.
+## Validate Boundaries
 
-### Module Manifest Requirements
+**Development requirement:** validate external input with appropriate schemas at
+HTTP handlers, configuration loading, manifests, and any new CLI, queue, or webhook
+boundary. The latter are requirements when introduced, not claims that core ships
+those transports. TypeScript types alone do not validate runtime data.
 
-```typescript
-interface IPlatformModuleManifest {
-  id: string;
-  version: string;
-  sdkVersion: string;
-  title: string;
-  optional?: boolean;
-  dependencies: Array<{
-    id: string;
-    version: string;
-    optional?: boolean;
-  }>;
-}
-```
+Use `PlatformModuleManifestSchema` or the SDK manifest validator from
+`@prosto/platform-sdk/platform`; do not copy an abbreviated manifest interface or
+replace semver validation with a simple regular expression. Schema validation is
+not package integrity verification or authorization.
 
----
+The Fastify adapter maps transport input into `IHttpRequestContext`. Modules own
+domain validation and must explicitly map invalid input to safe responses. An
+uncaught Zod error is not automatically a domain-level HTTP 400 response.
 
-## Input Validation
-
-### Boundary Validation with Zod
-
-**ALL external inputs MUST be validated:**
+For example, a JSON-only handler can validate before processing:
 
 ```typescript
+import type { IHttpRequestContext } from '@prosto/platform-sdk/platform';
 import { z } from 'zod';
 
-// HTTP request validation
-const CreateModuleSchema = z.object({
-  id: z.string().regex(/^[a-z][a-z0-9-]*$/),
-  version: z.string().regex(/^\d+\.\d+\.\d+$/),
-  config: z.record(z.unknown()).optional()
-});
+const LabelSchema = z
+  .object({ label: z.string().trim().min(1).max(100) })
+  .strict();
 
-// Validate at boundary
-function handleCreateModule(req: Request): Module {
-  const validated = CreateModuleSchema.parse(req.body);
-  // Now type-safe to use
-  return moduleService.create(validated);
-}
-```
-
-### Validation Points
-
-**Validate at:**
-- HTTP request boundaries (adapters)
-- Queue message handlers
-- CLI input parsing
-- Webhook receivers
-- Configuration loading
-- Module manifest loading
-
-### HTTP streaming boundary
-
-`@prosto/platform-adapter-fastify` exposes framework-neutral request contexts.
-All headers, parameters, query values, URLs, bodies, multipart fields, and file
-metadata are untrusted. Modules must validate them at their boundary, including
-file metadata and streamed content.
-
-Raw request and multipart file streams are one-shot and handler-owned only
-until the handler returns. Consume or cancel every stream before returning; do
-not implement duplex request-to-response piping. The adapter bounds parsed,
-raw, and multipart input, does not persist upload files to disk, and returns
-sanitized transport errors with correlation IDs rather than exception details.
-
-**Never trust:**
-- Module-provided data without validation
-- User input from any source
-- Environment variables without schema validation
-- Data from external systems
-
----
-
-## Secret Management
-
-### Secret Redaction
-
-```typescript
-// ✅ Good: redact strings and structured context before logging
-import { SecretsRedactor } from '@prosto/platform-sdk';
-
-const redactor = new SecretsRedactor();
-const context = redactor.redactObject({ password, moduleId });
-console.info(redactor.redact('Module configuration loaded'), context);
-
-// ❌ Bad: Log sensitive data
-console.info({ config }, 'Loading configuration'); // May expose secrets
-```
-
-### Environment Variables
-
-```typescript
-// Validate environment variables with schema
-const EnvSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']),
-  DATABASE_URL: z.string().url(),
-  API_KEY: z.string().min(1),
-  PORT: z.string().transform(Number)
-});
-
-const env = EnvSchema.parse(process.env);
-```
-
-### Secret Storage
-
-**NEVER:**
-- Commit secrets to version control
-- Hardcode API keys in source code
-- Log sensitive configuration values
-- Pass secrets in query parameters
-
-**ALWAYS:**
-- Use environment variables or secret manager
-- Redact secrets from logs and diagnostics
-- Rotate secrets regularly
-- Use separate secrets per environment
-
----
-
-## Dependency Security
-
-### Lockfile Discipline
-
-```bash
-# ALWAYS commit lockfile
-git add package-lock.json
-
-# NEVER bypass lockfile
-npm ci  # Use in CI, not npm install
-```
-
-### Vulnerability Scanning
-
-```bash
-# Regular security audits
-npm audit
-
-# Fail CI on critical vulnerabilities
-npm audit --audit-level=critical
-```
-
-### Minimal Dependency Footprint
-
-**For `platform-sdk`:**
-- Justify every dependency
-- Prefer native Node.js APIs
-- Consider if dependency can be in consumer packages
-
-**For `platform-core`:**
-- Keep framework-specific APIs out of the public core contract
-- Vet all dependencies for security
-- Track dependency licenses
-
----
-
-## API Security
-
-### Authentication & Authorization
-
-```typescript
-// Token-based access control
-interface IAuthContext {
-  userId: string;
-  roles: string[];
-  permissions: Set<string>;
-}
-
-// Check permissions before operation
-async function deleteModule(moduleId: string, ctx: IAuthContext): Promise<void> {
-  if (!ctx.permissions.has('module:delete')) {
-    throw new ForbiddenError('Missing permission: module:delete');
+async function validateLabel(request: IHttpRequestContext): Promise<Response> {
+  if (request.body.kind !== 'json') {
+    if (request.body.kind === 'stream') {
+      await request.body.stream.cancel();
+    } else if (request.body.kind === 'multipart') {
+      for await (const part of request.body.parts) {
+        if (part.kind === 'file') await part.stream.cancel();
+      }
+    }
+    return Response.json({ code: 'expected_json' }, { status: 415 });
   }
-  
-  await moduleRepository.delete(moduleId);
-}
-```
 
-### Rate Limiting
-
-```typescript
-// Implement rate limiting for external APIs
-const rateLimiter = {
-  windowMs: 60 * 1000, // 1 minute
-  max: 100, // 100 requests per minute
-  message: 'Too many requests'
-};
-```
-
-### Input Sanitization
-
-```typescript
-// Sanitize user input to prevent injection
-import DOMPurify from 'isomorphic-dompurify';
-
-function sanitizeInput(input: string): string {
-  return DOMPurify.sanitize(input, {
-    ALLOWED_TAGS: [], // Strip all HTML
-    ALLOWED_ATTR: []
-  });
-}
-```
-
----
-
-## Security Error Handling
-
-### Structured Security Errors
-
-```typescript
-class SecurityError extends Error {
-  constructor(
-    message: string,
-    public readonly code: string,
-    public readonly details: Record<string, unknown>
-  ) {
-    super(message);
-    this.name = 'SecurityError';
+  const result = LabelSchema.safeParse(request.body.value);
+  if (!result.success) {
+    return Response.json({ code: 'invalid_label' }, { status: 400 });
   }
-}
 
-// Usage
-throw new SecurityError(
-  'Module integrity check failed',
-  'MODULE_INTEGRITY_FAILURE',
-  { moduleId, expectedChecksum, actualChecksum }
-);
+  return Response.json({ label: result.data.label });
+}
 ```
 
-### Information Leakage Prevention
+`expected_json` and `invalid_label` above are example endpoint-owned codes, not SDK
+error codes. Adapt schemas, responses, and authorization to the actual domain.
+
+## Adapter Configuration
+
+Core requires exactly one administration, persistence, and HTTP adapter and
+validates composition before module discovery. Adapter configuration is immutable
+and scoped to `adapters.<adapterId>`, not exposed through module contexts.
+Adapters must validate their own options before contributing descriptors,
+endpoints, or services.
+
+`platform-admin` belongs to the required administration adapter. Discovered
+modules cannot use that identity, and `modules.platform-admin` is not a supported
+configuration alias. Current core validation rejects the legacy location only
+when `adapters.platform-admin` is absent, so deployments must remove the legacy
+key rather than rely on simultaneous old/new entries. Follow
+[ADR-0001](../../docs/adr/0001-required-runtime-adapters.md).
+
+## HTTP Streams and Responses
+
+- Treat headers, parameters, query values, URLs, bodies, multipart fields, filenames, and media types as untrusted.
+- Raw and multipart file streams are one-shot and handler-owned only until return. Consume or cancel them before returning; finish or cancel each multipart file before advancing the iterator.
+- Do not implement duplex request-to-response piping. Observe the request abort signal for disconnects, handler timeouts, and shutdown.
+- The Fastify adapter bounds parsed, raw, and multipart input and does not persist uploads to disk. Modules own safe storage paths, content checks, and domain-specific limits.
+- Adapter-generated transport errors contain a safe code and correlation ID, not exception messages or stacks. Endpoint-generated responses still need explicit sanitization.
+- `/health` and `/ready` are public infrastructure probes, exempt from the administration request gate. Never put secrets or detailed failures into probe responses.
+
+## Secrets and Logging
+
+Use the supplied module or adapter logger with message-first calls. Core's
+`ConsoleModuleLogger` applies `SecretsRedactor` to messages and context objects.
+The redactor is pattern-based, configurable, and can be disabled; it is not a
+guarantee that arbitrary sensitive content is safe to log.
 
 ```typescript
-// ❌ Bad: Expose internal details
-catch (error) {
-  res.status(500).json({
-    error: error.message, // May expose sensitive info
-    stack: error.stack
-  });
-}
+import type { IPlatformModuleContext } from '@prosto/platform-sdk/platform';
 
-// ✅ Good: Sanitized error response
-catch (error) {
-  logger.error({ error }, 'Module load failed');
-  
-  res.status(500).json({
-    error: 'Internal server error',
-    correlationId: generateCorrelationId()
+function logConfigurationLoaded(context: IPlatformModuleContext): void {
+  context.logger.info('Module configuration loaded', {
+    moduleId: context.moduleId,
   });
 }
 ```
 
----
+- Never log full configuration, credentials, tokens, request bodies, or raw exception objects. Prefer small, explicitly selected diagnostic fields.
+- Keep secrets out of source control and query parameters. Use deployment-managed environment variables or secret stores, validate values, and rotate credentials.
+- Pass adapter secrets only through the owning adapter's scoped configuration, not module contexts or diagnostics.
+- Redact messages and structured data at any additional output boundary. Do not assume direct console calls or third-party loggers inherit core redaction.
+- Avoid recursive or arbitrary object graphs in log context; the redactor is not a general-purpose safe serializer.
 
-## Security Logging
+## Application Security Requirements
 
-### Audit Logging
+Authentication, authorization, rate limits, and audit records must be implemented
+at the responsible application/adapter boundary. The administration adapter has
+its own security behavior; arbitrary module endpoints do not acquire an auth
+policy merely by using the HTTP adapter. Do not invent SDK `ForbiddenError`, a
+global rate limiter, or a universal permission context.
 
-```typescript
-// Log security-relevant events
-logger.info({
-  event: 'MODULE_LOADED',
-  moduleId: module.id,
-  moduleVersion: module.version,
-  optional: module.optional,
-  timestamp: new Date().toISOString()
-});
+Use parameterized persistence operations and context-appropriate output escaping.
+Do not add an HTML sanitization dependency as a generic substitute for validation
+or authorization. Security-relevant failures should produce safe operational or
+audit records in the component that handles them; core does not promise a global
+audit event taxonomy for integrity checks or package allowlist rejections.
 
-logger.warn({
-  event: 'MODULE_LOAD_FAILED',
-  moduleId: attemptedModuleId,
-  reason: 'ALLOWLIST_REJECTED',
-  timestamp: new Date().toISOString()
-});
-```
+Commit the dependency lockfile, use reproducible installation in CI, review new
+dependencies and vulnerability findings, and keep framework dependencies out of
+core. These are maintenance requirements, not evidence of an installed scanning
+service or a particular CI vulnerability gate.
 
-### Security Event Types
+## Source References
 
-**MANDATORY to log:**
-- Module load/unload events
-- Authentication failures
-- Authorization denials
-- Integrity check failures
-- Allowlist rejections
-- Configuration validation failures
-
----
+- `packages/platform-sdk/src/platform/security/`: redactor and standalone integrity verifier.
+- `packages/platform-sdk/src/platform/http/interfaces/http-request-context.interface.ts`: input and stream ownership contract.
+- `packages/platform-core/src/runtime/`: composition and adapter configuration handling.
+- `packages/platform-adapters/platform-adapter-fastify/src/`: transport mapping, limits, cancellation, error responses, and probes.

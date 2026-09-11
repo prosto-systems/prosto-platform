@@ -27,8 +27,8 @@ export class ModulesStartStage extends BootstrapBaseStage {
       {
         startupPolicy: context.policyMode,
         sdkVersion: context.runtimeVersion.sdkVersion,
-        persistenceProvider: context.persistenceProvider,
-        persistenceEnabled: this.isPersistenceEnabled(context),
+        persistenceAdapter: context.persistenceAdapter,
+        persistenceState: 'ready',
       },
     );
     const manifests = new Map<string, IPlatformModuleManifest>(
@@ -53,22 +53,20 @@ export class ModulesStartStage extends BootstrapBaseStage {
         this.addOutcome(context, { ok: false, details: policy.reason });
         this.stopPipeline(context);
 
-        // Shutdown all started modules
-        await this._moduleLifecycleOrchestrator.stopModules(
-          result.startedModules,
-          {
-            startupPolicy: context.policyMode,
-            sdkVersion: context.runtimeVersion.sdkVersion,
-            timeoutMs: 1000 * 60, // 1 minute
-          },
-        );
-
-        return { ...context, loadedModules: [] };
+        return {
+          ...context,
+          loadedModules: [],
+          startedModules: [...result.startedModules],
+        };
       }
     }
 
     this.addOutcome(context, { ok: true, details: 'Module start completed.' });
 
-    return { ...context, loadedModules: [...result.startedModules] };
+    return {
+      ...context,
+      loadedModules: [...result.startedModules],
+      startedModules: [...result.startedModules],
+    };
   }
 }

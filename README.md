@@ -7,34 +7,37 @@ on those contracts.
 
 ## Current status
 
-The repository contains an alpha runtime kernel, TypeORM and Fastify adapters,
-the `@prosto/platform-module-admin` production administration module, and the
-administration shell. The runtime discovers local module packages, validates
-their manifests and SDK/Node.js compatibility, resolves their dependencies,
-copies their builds into a probing directory, executes their lifecycle, and
-exposes startup and shutdown diagnostics. The production composition serves the
-shell SPA, public fingerprinted shell assets, authenticated plugin assets, and
-the `/api/admin` API from one origin. Remote module acquisition, module
-installation/update, MFA, OIDC, user CRUD, and cryptographic package provenance
-remain outside the current implementation.
+The repository contains an alpha runtime kernel and required TypeORM
+persistence, Fastify HTTP, and TypeORM-backed administration adapters, plus the
+administration shell. Every runtime directly composes exactly one adapter for
+each role through `RuntimeBuilder`; application code selects the concrete
+implementations while core depends only on SDK contracts. The runtime discovers
+feature-module packages, validates their manifests and SDK/Node.js
+compatibility, resolves their dependencies, copies their builds into a probing
+directory, executes their lifecycle, and exposes module and adapter diagnostics.
+The production composition serves the optional shell SPA, public fingerprinted
+shell assets, authenticated plugin assets, and the mandatory `/api/admin` API
+from one origin. Remote module acquisition, module installation/update, MFA,
+OIDC, user CRUD, and cryptographic package provenance remain outside the current
+implementation.
 
 ## Workspace layout
 
-| Path | Purpose |
-| --- | --- |
-| `packages/platform-sdk` | [Public contracts, validation schemas, and admin runtime types.](packages/platform-sdk/README.md) |
-| `packages/platform-core` | [Runtime kernel, module loading, lifecycle orchestration, diagnostics, events, and services.](packages/platform-core/README.md) |
-| `packages/platform-modules/platform-module-admin` | [Production authentication, administration API, and shared-state policy module.](packages/platform-modules/platform-module-admin/README.md) |
-| `packages/platform-admin-shell` | [Vue, Vuetify, Pinia, and Vue I18n administration shell.](packages/platform-admin-shell/README.md) |
-| `packages/platform-adapters/platform-adapter-typeorm` | [TypeORM persistence adapter.](packages/platform-adapters/platform-adapter-typeorm/README.md) |
-| `packages/platform-adapters/platform-adapter-fastify` | [Framework-neutral platform HTTP application backed by Fastify.](packages/platform-adapters/platform-adapter-fastify/README.md) |
-| `packages/platform-utils/platform-admin-vite` | [Vite transform for the shared admin Vue runtime.](packages/platform-utils/platform-admin-vite/README.md) |
-| `packages/platform-utils/platform-cli` | [CLI package scaffold.](packages/platform-utils/platform-cli/README.md) |
-| `packages/platform-utils/platform-contract-tests` | [Reusable module contract-conformance package.](packages/platform-utils/platform-contract-tests/README.md) |
-| `packages/platform-utils/tsconfig` | [Private shared strict TypeScript configuration.](packages/platform-utils/tsconfig/README.md) |
-| `examples/module-test` | [Example platform module and admin-plugin artifact.](examples/module-test/README.md) |
-| `examples/typeorm-shared-datasource` | [Runtime composition with a shared TypeORM DataSource.](examples/typeorm-shared-datasource/README.md) |
-| `examples/admin-production` | [Production-oriented shell, Fastify, TypeORM, and admin-module composition.](examples/admin-production/README.md) |
+| Path                                                        | Purpose                                                                                                                                |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/platform-sdk`                                     | [Public contracts, validation schemas, and admin runtime types.](packages/platform-sdk/README.md)                                      |
+| `packages/platform-core`                                    | [Runtime kernel, module loading, lifecycle orchestration, diagnostics, events, and services.](packages/platform-core/README.md)        |
+| `packages/platform-admin-shell`                             | [Vue, Vuetify, Pinia, and Vue I18n administration shell.](packages/platform-admin-shell/README.md)                                     |
+| `packages/platform-adapters/platform-adapter-admin-typeorm` | [Required TypeORM-backed production administration adapter.](packages/platform-adapters/platform-adapter-admin-typeorm/README.md)      |
+| `packages/platform-adapters/platform-adapter-typeorm`       | [TypeORM persistence adapter.](packages/platform-adapters/platform-adapter-typeorm/README.md)                                          |
+| `packages/platform-adapters/platform-adapter-fastify`       | [Framework-neutral required HTTP transport adapter backed by Fastify.](packages/platform-adapters/platform-adapter-fastify/README.md)  |
+| `packages/platform-utils/platform-admin-vite`               | [Vite transform for the shared admin Vue runtime.](packages/platform-utils/platform-admin-vite/README.md)                              |
+| `packages/platform-utils/platform-cli`                      | [CLI package scaffold.](packages/platform-utils/platform-cli/README.md)                                                                |
+| `packages/platform-utils/platform-contract-tests`           | [Reusable module contract-conformance package.](packages/platform-utils/platform-contract-tests/README.md)                             |
+| `packages/platform-utils/tsconfig`                          | [Private shared strict TypeScript configuration.](packages/platform-utils/tsconfig/README.md)                                          |
+| `examples/module-test`                                      | [Example platform module and admin-plugin artifact.](examples/module-test/README.md)                                                   |
+| `examples/typeorm-shared-datasource`                        | [Runtime composition with a shared TypeORM DataSource.](examples/typeorm-shared-datasource/README.md)                                  |
+| `examples/admin-production`                                 | [Production-oriented composition of the required administration, persistence, and HTTP adapters.](examples/admin-production/README.md) |
 
 ## Requirements
 
@@ -51,17 +54,17 @@ npm install
 
 Run these commands from the repository root:
 
-| Command | Purpose |
-| --- | --- |
-| `npm run build` | Build workspaces through Turborepo in dependency order. |
-| `npm run dev` | Start available workspace development tasks. |
-| `npm run typecheck` | Type-check workspaces. |
-| `npm run test` | Run workspace test suites. |
-| `npm run test:contracts` | Run workspaces that expose contract tests. |
-| `npm run lint` | Run ESLint. |
-| `npm run lint:fix` | Run ESLint with fixes. |
-| `npm run format` | Check formatting with Prettier. |
-| `npm run format:fix` | Format files with Prettier. |
+| Command                  | Purpose                                                 |
+| ------------------------ | ------------------------------------------------------- |
+| `npm run build`          | Build workspaces through Turborepo in dependency order. |
+| `npm run dev`            | Start available workspace development tasks.            |
+| `npm run typecheck`      | Type-check workspaces.                                  |
+| `npm run test`           | Run workspace test suites.                              |
+| `npm run test:contracts` | Run workspaces that expose contract tests.              |
+| `npm run lint`           | Run ESLint.                                             |
+| `npm run lint:fix`       | Run ESLint with fixes.                                  |
+| `npm run format`         | Check formatting with Prettier.                         |
+| `npm run format:fix`     | Format files with Prettier.                             |
 
 To run a package script directly, use npm workspaces. For example:
 
@@ -70,29 +73,63 @@ npm run test --workspace=@prosto/platform-admin-shell
 npm run build --workspace=@examples/module-test
 ```
 
+Root test and type-check tasks build workspace dependencies through Turborepo;
+direct workspace commands do not perform that orchestration. Build dependencies
+first when running a package in isolation from a clean checkout.
+
+The repository has no checked-in `.github/workflows/` CI configuration or
+dedicated architecture-boundary validation script. ESLint and TypeScript checks
+are available locally, but do not replace package-boundary review. Markdown is
+excluded by `.prettierignore`, so `npm run format` does not validate these docs.
+
 ## Architecture boundaries
 
 - Define and evolve public contracts in `@prosto/platform-sdk` before their
   implementations.
 - `platform-core` must not depend on adapters, feature modules, or frontend
   runtimes.
-- HTTP contracts belong to the SDK; Fastify application lifecycle and transport
-  mapping, trusted-proxy policy, static-site hosting, and security headers belong
+- `RuntimeBuilder` requires one administration, persistence, and HTTP adapter;
+  HTTP-less, persistence-less, and worker-only runtime modes are unsupported.
+  Application code, not core, chooses the concrete implementations.
+- HTTP contracts belong to the SDK; Fastify transport mapping, listening,
+  trusted-proxy policy, optional static-site hosting, and security headers belong
   to `platform-adapter-fastify`, never to `platform-core`.
-- Adapters and feature modules depend on SDK contracts, not on core internals
-  or one another.
+- Adapters and feature modules depend on SDK contracts, not on core internals.
+  `platform-adapter-admin-typeorm` may depend on the TypeORM adapter's public
+  SPI, but never on its internals.
 - Admin modules integrate with the separate admin shell through SDK contracts;
   they do not access configured shell service instances directly.
 - The core provides sanitized runtime and declared-asset catalogs through SDK
   tokens; it never exposes physical package paths or serves HTTP content.
-- `platform-module-admin` owns authentication, authorization, audit, shared
-  maintenance/restart policy, and TypeORM persistence. A host supplies only the
-  idempotent local graceful-restart capability.
+- `platform-adapter-admin-typeorm` owns authentication, authorization, audit,
+  shared maintenance/restart policy, and its TypeORM-specific administration
+  persistence. A host supplies only the idempotent local graceful-restart
+  capability.
 - Admin-plugin artifacts are trusted first-party code, not a security sandbox.
 
 The repository's source code and package manifests are the authority for the
 currently implemented behavior. Architectural rules describe the boundaries to
 preserve as the platform evolves.
+
+See [ADR 0001](docs/adr/0001-required-runtime-adapters.md) for the required-adapter
+decision and [AGENTS.md](AGENTS.md) for contributor and agent guidelines.
+
+## SDK imports
+
+The SDK no longer exposes a root package entry. Select the public subpath for
+the consuming layer:
+
+| Import                            | Purpose                                                                           |
+| --------------------------------- | --------------------------------------------------------------------------------- |
+| `@prosto/platform-sdk/platform`   | Backend module, runtime-adapter, HTTP, persistence, and administration contracts. |
+| `@prosto/platform-sdk/admin`      | Shell plugin registration and shared frontend runtime contracts.                  |
+| `@prosto/platform-sdk/admin/http` | Shared admin API schemas and DTO types used by backend and shell.                 |
+| `@prosto/platform-sdk/utils`      | Shared validation, semver, and secret-redaction utilities.                        |
+
+Existing integrations must also supply all three required runtime adapters and
+use module capabilities rather than the former direct persistence/HTTP context
+fields. See the [SDK README](packages/platform-sdk/README.md) for the current
+contracts and the [core README](packages/platform-core/README.md) for composition.
 
 ## Administration modules
 
@@ -132,14 +169,42 @@ The preferred package export is `./platform`. See the
 artifact layout, configuration options, probing refresh behavior, and complete
 bootstrap order.
 
-## HTTP applications
+## Required runtime adapters
 
-Applications compose `FastifyHttpApplication` with a `RuntimeBuilder` factory.
+An application constructs and supplies an `IPlatformAdminAdapter`, an
+`IPersistenceRuntimeAdapter`, and an `IHttpRuntimeAdapter` to `RuntimeBuilder`.
+The runtime initializes persistence, HTTP, and administration declarations;
+starts persistence before feature modules; publishes final catalogs; starts
+administration; then starts HTTP listening. Any required-adapter initialization
+or start failure prevents successful startup. Normal shutdown stops HTTP,
+administration, feature modules, then persistence; failed startup uses the same
+best-effort reverse order and also disposes application-owned runtime services.
+Every adapter initialization or start failure rejects `start()` only after
+publishing final failed startup and shutdown reports. A bootstrap-policy abort
+without an adapter failure instead resolves with a failed, non-started report.
+Administration is the reserved adapter
+component `platform-admin`, not a discovered module, and never appears in module
+catalogs, counts, dependencies, readiness module IDs, or `/api/admin/modules`.
+
+Adapters receive only their deep-readonly `adapters.<adapterId>` configuration;
+`modules.platform-admin` is not a supported alias and is rejected even when the
+matching adapter-scoped entry exists. The admin API is mandatory, while
+`FastifyHttpAdapter` shell static hosting is optional.
+
 Modules declare SDK `IHttpEndpoint` values through
-`context.capabilities.http.endpoints` in `init()` only; the adapter exposes
-endpoints only after their owners start.
+`context.capabilities.http.endpoints` in `init()` only. Module declarations
+commit after successful initialization; adapter declarations commit after
+successful adapter start. Transport starts listening after administration starts.
 `GET /health` and `GET /ready` are public infrastructure probes, not the admin
-shell's `/api/admin/platform/health`. See the
+shell's `/api/admin/platform/health`. Maintenance never changes `/ready` into an
+application-maintenance signal. See the
 [`@prosto/platform-adapter-fastify` README](packages/platform-adapters/platform-adapter-fastify/README.md)
-and the [production composition example](examples/admin-production/README.md)
-describe the complete deployment boundary.
+and [production composition example](examples/admin-production/README.md) for
+the complete deployment boundary.
+
+Composition validation rejects duplicate adapter IDs and reused instances before
+service composition, adapter hooks, or module discovery. Adapter diagnostics
+remain separate from module arrays and `startedModuleIds`. See the
+[core lifecycle guarantees](packages/platform-core/README.md#contribution-cleanup-and-lifecycle-guarantees),
+[ADR implementation status](docs/adr/0001-required-runtime-adapters.md#implementation-status),
+and [completed lifecycle hardening plan](.kilo/plans/runtime-adapter-lifecycle-hardening.md).

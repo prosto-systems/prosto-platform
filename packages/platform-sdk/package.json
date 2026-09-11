@@ -9,6 +9,10 @@
       "types": "./dist/admin/index.d.ts",
       "import": "./dist/admin.js"
     },
+    "./admin/http": {
+      "types": "./dist/admin/http/index.d.ts",
+      "import": "./dist/admin/http.js"
+    },
     "./platform": {
       "types": "./dist/platform/index.d.ts",
       "import": "./dist/platform.js"

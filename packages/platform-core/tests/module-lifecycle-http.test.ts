@@ -7,6 +7,8 @@ import {
   type IPlatformModule,
   type IPlatformModuleContext,
   type IPlatformModuleLogger,
+  type IPersistenceRuntimeAdapter,
+  type IPlatformRuntimeComponentIdentity,
 } from '@prosto/platform-sdk/platform';
 import { RuntimeErrorCodes } from '@/common/index.js';
 import { InMemoryEventBus } from '@/events/index.js';
@@ -207,10 +209,27 @@ describe('ModuleLifecycleOrchestrator HTTP scopes', () => {
   });
 });
 
+const PERSISTENCE_ADAPTER: IPersistenceRuntimeAdapter = {
+  id: 'test-persistence',
+  role: 'persistence',
+  descriptors: {
+    registerPlatform: (): void => undefined,
+    createRegistrar: (): { register(): void } => ({
+      register: (): void => undefined,
+    }),
+    rollback: (): void => undefined,
+    seal: (): readonly [] => [],
+  },
+  initialize: (): void => undefined,
+  start: (): void => undefined,
+  stop: (): void => undefined,
+};
+
 const STARTUP_OPTIONS = {
   startupPolicy: 'strict' as const,
   sdkVersion: '0.0.0',
-  persistenceEnabled: false,
+  persistenceAdapter: PERSISTENCE_ADAPTER,
+  persistenceState: 'collecting' as const,
 };
 
 type ScopeStateType = 'open' | 'committed' | 'rolled-back';
@@ -229,7 +248,10 @@ class RecordingHttpRegistrarProvider implements IHttpEndpointRegistrarProvider {
 
   constructor(private readonly _events: string[] = []) {}
 
-  createRegistrar(moduleId: string): IHttpEndpointRegistrar {
+  createRegistrar(
+    owner: IPlatformRuntimeComponentIdentity,
+  ): IHttpEndpointRegistrar {
+    const moduleId = owner.id;
     const scope: ITestScope = {
       state: 'open',
       endpoints: [],
@@ -251,7 +273,8 @@ class RecordingHttpRegistrarProvider implements IHttpEndpointRegistrarProvider {
     };
   }
 
-  commit(moduleId: string): void {
+  commit(owner: IPlatformRuntimeComponentIdentity): void {
+    const moduleId = owner.id;
     this.commitCalls.push(moduleId);
     this._events.push('provider:commit');
 
@@ -265,7 +288,8 @@ class RecordingHttpRegistrarProvider implements IHttpEndpointRegistrarProvider {
     }
   }
 
-  rollback(moduleId: string): void {
+  rollback(owner: IPlatformRuntimeComponentIdentity): void {
+    const moduleId = owner.id;
     this.rollbackCalls.push(moduleId);
     const scope = this.#scopes.get(moduleId);
 
@@ -300,7 +324,10 @@ function createContextFactory(
       const http =
         options.lifecycleStage === 'init' && provider
           ? {
-              endpoints: provider.createRegistrar(options.moduleManifest.id),
+              endpoints: provider.createRegistrar({
+                type: 'module',
+                id: options.moduleManifest.id,
+              }),
             }
           : undefined;
 

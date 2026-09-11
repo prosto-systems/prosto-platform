@@ -59,16 +59,23 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
           lifecycleContext,
         );
 
-        this._httpEndpointRegistrarProvider?.commit(moduleEnvelope.id);
+        this._httpEndpointRegistrarProvider?.commit({
+          type: 'module',
+          id: moduleEnvelope.id,
+        });
 
         moduleEnvelope.state = ModuleState.Initialized;
       } catch (error) {
         moduleEnvelope.state = ModuleState.NotInitialized;
 
-        lifecycleContext.persistenceProvider?.descriptors.rollback(
-          moduleEnvelope.id,
-        );
-        this._httpEndpointRegistrarProvider?.rollback(moduleEnvelope.id);
+        lifecycleContext.persistenceAdapter.descriptors.rollback({
+          type: 'module',
+          id: moduleEnvelope.id,
+        });
+        this._httpEndpointRegistrarProvider?.rollback({
+          type: 'module',
+          id: moduleEnvelope.id,
+        });
 
         issues.push(this._createStartupIssue(moduleEnvelope.id, 'init', error));
 
@@ -106,7 +113,10 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
       } catch (error) {
         moduleEnvelope.state = ModuleState.NotStarted;
 
-        this._httpEndpointRegistrarProvider?.rollback(moduleEnvelope.id);
+        this._httpEndpointRegistrarProvider?.rollback({
+          type: 'module',
+          id: moduleEnvelope.id,
+        });
 
         issues.push(
           this._createStartupIssue(moduleEnvelope.id, 'start', error),
@@ -132,7 +142,8 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
     const lifecycleContext: IModuleLifecycleContext = {
       startupPolicy: options.startupPolicy,
       sdkVersion: options.sdkVersion,
-      persistenceEnabled: false,
+      persistenceAdapter: options.persistenceAdapter,
+      persistenceState: 'ready',
     };
     const stopModules = [...startedModules].reverse();
     const issues: IModuleLifecycleShutdownIssue[] = [];
@@ -176,8 +187,8 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
     return {
       startupPolicy: options.startupPolicy,
       sdkVersion: options.sdkVersion,
-      persistenceProvider: options.persistenceProvider,
-      persistenceEnabled: options.persistenceEnabled ?? false,
+      persistenceAdapter: options.persistenceAdapter,
+      persistenceState: options.persistenceState,
     };
   }
 
@@ -195,8 +206,8 @@ export class ModuleLifecycleOrchestrator implements IModuleLifecycleOrchestrator
       moduleManifest: moduleEnvelope.toManifest(),
       startupPolicy: lifecycleContext.startupPolicy,
       sdkVersion: lifecycleContext.sdkVersion,
-      persistenceProvider: lifecycleContext.persistenceProvider,
-      persistenceEnabled: lifecycleContext.persistenceEnabled,
+      persistenceAdapter: lifecycleContext.persistenceAdapter,
+      persistenceState: lifecycleContext.persistenceState,
     });
 
     await moduleEnvelope.moduleInstance[stage](context);

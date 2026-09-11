@@ -9,7 +9,7 @@ import {
   type HttpRequestValueType,
   type IHttpRequestContext,
 } from '@prosto/platform-sdk/platform';
-import type { FastifyHttpApplicationConfigurationType } from '@/schemas/index.js';
+import type { FastifyHttpAdapterConfigurationType } from '@/schemas/index.js';
 
 interface IParsedJsonBody {
   readonly kind: 'json';
@@ -66,7 +66,7 @@ export interface IRequestBodyCleanup {
 /** @internal Maps framework request data to the SDK HTTP request context. */
 export class FastifyRequestContextMapper {
   constructor(
-    private readonly configuration: FastifyHttpApplicationConfigurationType,
+    private readonly configuration: FastifyHttpAdapterConfigurationType,
     private readonly shutdownSignal: AbortSignal,
   ) {}
 

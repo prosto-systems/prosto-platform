@@ -2,15 +2,51 @@
   "platform": {
     "refreshProbingFolderOnStart": true
   },
-  "persistence": {
+  "adapters": {
     "typeorm": {
       "enabled": true,
       "type": "sqlite",
-      "database": "typeorm-shared-datasource.sqlite",
+      "database": "./app_data/typeorm-shared-datasource.sqlite",
       "synchronize": false,
-      "migrationsRun": true,
       "migrationTransactionMode": "each",
       "migrationLockTimeoutMs": 60000
+    },
+    "platform-admin": {
+      "allowedPublicOrigin": "https://127.0.0.1:3001",
+      "bootstrap": {
+        "displayName": "Development Administrator",
+        "email": "admin@localhost.test",
+        "password": "DevelopmentAdminPassword!2026"
+      },
+      "cookie": {
+        "name": "prosto-development-admin",
+        "lifetimeSeconds": 3600,
+        "secure": false
+      },
+      "outbox": {
+        "leaseSeconds": 60,
+        "maxAttempts": 5,
+        "retryBaseSeconds": 30
+      },
+      "rateLimit": {
+        "login": {
+          "maxAttempts": 10,
+          "windowSeconds": 900
+        },
+        "passwordReset": {
+          "maxAttempts": 5,
+          "windowSeconds": 3600
+        }
+      },
+      "resetTokenEncryptionKey": "ZGV2ZWxvcG1lbnQtb25seS1yZXNldC10b2tlbi1rZXk",
+      "resetUrlBase": "https://127.0.0.1:3001/reset-password",
+      "restartPollingIntervalSeconds": 5,
+      "smtp": {
+        "host": "localhost",
+        "port": 1025,
+        "secure": false,
+        "from": "admin@localhost.test"
+      }
     }
   }
 }

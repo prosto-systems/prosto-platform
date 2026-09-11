@@ -1,8 +1,9 @@
 /**
  * @alpha
- * Identifies whether a descriptor belongs to the platform or a module.
+ * Identifies whether a descriptor belongs to the platform, a feature module,
+ * or a directly composed runtime adapter.
  */
-export type PersistenceOwnerType = 'platform' | 'module';
+export type PersistenceOwnerType = 'platform' | 'module' | 'adapter';
 
 /**
  * @alpha
@@ -12,7 +13,7 @@ export type PersistenceDescriptorPayloadType = unknown;
 
 /**
  * @alpha
- * Generic persistence declaration collected during module init.
+ * Generic persistence declaration collected during component initialization.
  */
 export interface IPersistenceDescriptor {
   readonly owner: PersistenceOwnerType;

@@ -3,6 +3,7 @@ import {
   HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN,
   type IHttpEndpointRegistrar,
   type IHttpEndpointRegistrarProvider,
+  type IPersistenceRuntimeAdapter,
   type IPlatformModuleLogger,
   type IPlatformModuleManifest,
 } from '@prosto/platform-sdk/platform';
@@ -33,11 +34,7 @@ const PLATFORM_CONFIG: IPlatformConfig = {
   runtime: {
     shutdownTimeoutMs: 1_000,
   },
-  persistence: {
-    typeorm: {
-      enabled: false,
-    },
-  },
+  adapters: {},
   modules: {
     configAccessPolicy: {
       productionStrictMode: true,
@@ -74,9 +71,7 @@ describe('ModuleContextFactory HTTP capability', () => {
     const registrar: IHttpEndpointRegistrar = {
       register: (): void => undefined,
     };
-    const createRegistrar = vi.fn(
-      (_moduleId: string): IHttpEndpointRegistrar => registrar,
-    );
+    const createRegistrar = vi.fn((): IHttpEndpointRegistrar => registrar);
     const provider: IHttpEndpointRegistrarProvider = {
       createRegistrar,
       commit: (): void => undefined,
@@ -91,7 +86,10 @@ describe('ModuleContextFactory HTTP capability', () => {
     // Assert
     expect(context.capabilities.http?.endpoints).toBe(registrar);
     expect(createRegistrar).toHaveBeenCalledOnce();
-    expect(createRegistrar).toHaveBeenCalledWith(MODULE_MANIFEST.id);
+    expect(createRegistrar).toHaveBeenCalledWith({
+      type: 'module',
+      id: MODULE_MANIFEST.id,
+    });
   });
 
   it.each(['start', 'stop'] as const)(
@@ -148,6 +146,22 @@ function createOptions(lifecycleStage: 'init' | 'start' | 'stop') {
     moduleManifest: MODULE_MANIFEST,
     startupPolicy: 'strict' as const,
     sdkVersion: '0.0.0',
-    persistenceEnabled: false,
+    persistenceAdapter: PERSISTENCE_ADAPTER,
+    persistenceState:
+      lifecycleStage === 'init' ? ('collecting' as const) : ('ready' as const),
   };
 }
+
+const PERSISTENCE_ADAPTER: IPersistenceRuntimeAdapter = {
+  id: 'test-persistence',
+  role: 'persistence',
+  descriptors: {
+    registerPlatform: (): void => undefined,
+    createRegistrar: () => ({ register: (): void => undefined }),
+    rollback: (): void => undefined,
+    seal: (): readonly [] => [],
+  },
+  initialize: (): void => undefined,
+  start: (): void => undefined,
+  stop: (): void => undefined,
+};

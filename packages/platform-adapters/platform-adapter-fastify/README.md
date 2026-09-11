@@ -1,6 +1,6 @@
 # @prosto/platform-adapter-fastify
 
-`@prosto/platform-adapter-fastify` is the alpha HTTP application host for
+`@prosto/platform-adapter-fastify` is the alpha HTTP transport adapter for
 Prosto Platform. It owns Fastify and exposes only framework-neutral SDK
 contracts to modules. Its public API does not expose Fastify, Busboy, or Node
 stream types.
@@ -13,54 +13,60 @@ stream types.
 
 ## Composition and lifecycle
 
-Create the application at the executable boundary. Its `runtimeFactory` must
-build an `IHttpApplicationRuntime` and invoke the supplied service configurator
-exactly once through `RuntimeBuilder.configureServices`.
+Construct the adapter at the executable boundary and supply it to
+`RuntimeBuilder` as the required HTTP adapter. The runtime owns the complete
+startup and shutdown lifecycle.
 
 ```ts
-import { FastifyHttpApplication } from '@prosto/platform-adapter-fastify';
+import { FastifyHttpAdapter } from '@prosto/platform-adapter-fastify';
 import { RuntimeBuilder } from '@prosto/platform-core';
 
-const application = new FastifyHttpApplication({
+const http = new FastifyHttpAdapter({
   host: '127.0.0.1',
   port: 3001,
-  runtimeFactory: (configureHttpServices) =>
-    new RuntimeBuilder().build({
-      configDir: './config',
-      configureServices: configureHttpServices,
-    }),
+});
+const runtime = new RuntimeBuilder().build({
+  configDir: './config',
+  adapters: { admin, persistence, http },
 });
 
-await application.start();
-console.info(application.url?.href);
+await runtime.start();
+console.info(http.url?.href);
 ```
 
-`start()` creates the runtime, starts it, selects declarations owned by
-successfully started modules, activates routes, and then begins listening.
-`stop()` first stops accepting HTTP requests, aborts active handler contexts,
-waits for Fastify to close (force-closing connections after the configured
-timeout), and always stops the runtime afterwards. Repeated and concurrent
-calls are deterministic. An application is single-use after it stops or fails.
+Here `admin` and `persistence` are host-created SDK adapters, not discovered
+modules. For complete configuration and restart-capability registration, see
+[the production example](../../../examples/admin-production/README.md) and
+[ADR 0001](../../../docs/adr/0001-required-runtime-adapters.md).
+Fastify options are supplied to the constructor; this implementation does not
+read them from `adapters.fastify` in the runtime configuration.
 
-The runtime factory must be synchronous. The adapter rejects a factory that
-does not invoke the configurator exactly once before runtime startup; this
-prevents modules from observing an incomplete service registry.
+`initialize()` creates Fastify without listening. On the transport barrier,
+`start()` resolves the request gate after the admin barrier, activates every
+committed endpoint scope, and begins listening. `stop()` first stops accepting
+HTTP requests, aborts active handler contexts, and waits for Fastify to close
+(force-closing connections after the configured timeout). It never invokes a
+runtime lifecycle method.
 
-After runtime startup, the adapter optionally resolves the SDK request gate and
+After the admin barrier, the adapter optionally resolves the SDK request gate and
 evaluates it before body consumption. Gate denials use their stable sanitized
 status/code; a gate failure returns `503 request_gate_unavailable` only for
-business paths. This lets `platform-module-admin` enforce shared maintenance
-without a Fastify dependency.
+business paths. This lets `platform-adapter-admin-typeorm` enforce shared
+maintenance without a Fastify dependency.
 
 ## Module endpoints
 
 Modules declare framework-neutral endpoints only during `init()`.
 `context.capabilities.http` is absent in `start()` and `stop()`, and is also
-absent in a headless runtime. Modules whose API requires HTTP should fail
-`init()` explicitly when it is not available.
+absent outside initialization. Every runtime has an HTTP adapter, so modules
+whose API requires HTTP should treat an absent capability during `init()` as a
+configuration/lifecycle failure.
 
 ```ts
-import type { IPlatformModule, IPlatformModuleContext } from '@prosto/platform-sdk';
+import type {
+  IPlatformModule,
+  IPlatformModuleContext,
+} from '@prosto/platform-sdk/platform';
 
 export class OrdersModule implements IPlatformModule {
   init(context: IPlatformModuleContext): void {
@@ -89,8 +95,8 @@ and optional parameters are not public contracts. `GET /health`,
 application.
 
 The collector commits declarations only after successful `init()` and removes
-them when `init()` or `start()` fails. At activation it uses only
-`runtime.startedModuleIds`, so endpoints from failed modules are unreachable.
+them when `init()` or `start()` fails. At activation it uses every committed
+module and adapter scope, so endpoints from failed components are unreachable.
 Invalid or conflicting declarations fail module initialization through the
 runtime's configured strict or best-effort startup policy. A remaining Fastify
 route-activation conflict is fatal to application startup.
@@ -118,24 +124,28 @@ the handler context, module-handler response headers, and sanitized errors.
 
 The adapter returns sanitized `{ code, correlationId }` envelopes for missing
 routes, malformed input, limits, timeouts, and unexpected failures. It does not
-return exception messages or stacks. Optional SDK logging contains only route
+return exception messages or stacks. Optional endpoint SDK logging contains route
 templates, methods, status, duration, module ID, correlation ID, and error
-code; query strings, headers, bodies, filenames, and fields are not logged.
+code. Request-gate failures instead log the request pathname, which can contain
+user-supplied path segments. Query strings, headers, bodies, filenames, and
+fields are not included in these transport log records.
 
 ## Defaults
 
-| Option | Default |
-| --- | --- |
-| `host` / `port` | `127.0.0.1` / `0` |
-| Parsed JSON/text and raw stream limit | 1 MiB each |
-| Multipart file / total request limit | 10 MiB / 110 MiB |
-| Multipart files / fields / parts | 10 / 100 / 110 |
-| Multipart field / name / header-pair limit | 64 KiB / 100 bytes / 200 |
-| Request / handler timeout | 120 s / 30 s |
-| Keep-alive / shutdown timeout | 5 s / 30 s |
-| `trustProxy` | `false` |
+| Option                                                | Default                                                  |
+| ----------------------------------------------------- | -------------------------------------------------------- |
+| `host` / `port`                                       | `127.0.0.1` / `0`                                        |
+| Parsed JSON/text and raw stream limit                 | 1 MiB each                                               |
+| Multipart file / total request limit                  | 10 MiB / 110 MiB                                         |
+| Multipart files / fields / parts                      | 10 / 100 / 110                                           |
+| Multipart field / name / header-pair limit            | 64 KiB / 100 bytes / 200                                 |
+| Request / handler timeout                             | 120 s / 30 s                                             |
+| Keep-alive / shutdown timeout                         | 5 s / 30 s                                               |
+| `trustedProxies`                                      | `[]` (no trusted proxy)                                  |
+| `tls` / `staticSite`                                  | Unset (HTTP only, no shell hosting)                      |
+| `staticSite.indexFileName` / `staticSite.spaFallback` | `index.html` / `true`, when static hosting is configured |
 
-All size and timeout options are validated at the application boundary. Timeout
+All size and timeout options are validated at the adapter boundary. Timeout
 values must be positive safe integers not larger than Node.js's timer ceiling.
 
 ## Trusted ingress and shell hosting
@@ -154,23 +164,34 @@ and `HEAD` navigation can fall back to the index only outside `/api`, `/modules`
 `/health`, and `/ready`; traversal and symlink escapes are rejected.
 
 Every response receives `X-Content-Type-Options: nosniff`, strict referrer and
-same-origin frame protections, and a correlation ID. Static hosting uses the
-default CSP `default-src 'self'; base-uri 'self'; frame-ancestors 'self'` unless
-a compatible explicit policy is configured. Validate a production shell and its
-plugins before changing that policy; do not weaken it with `unsafe-eval` or
-cross-origin sources. The adapter does not add CORS.
+same-origin frame protections, and a correlation ID. Without static hosting the
+default CSP is `default-src 'self'; base-uri 'self'; frame-ancestors 'self'`.
+With `staticSite` configured, the current default is:
+
+```text
+default-src 'self'; script-src 'self' 'unsafe-eval'; connect-src 'self'; font-src 'self'; img-src 'self'; style-src 'self' 'unsafe-inline'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'
+```
+
+This policy is applied to all responses, not just shell files. It is not an
+eval-free or inline-style-free policy. A string at
+`staticSite.contentSecurityPolicy` replaces it; `false` disables CSP entirely
+and is intended only for local development (the schema does not enforce that
+environment restriction). Validate the built shell and plugins with any stricter
+deployment policy. The adapter does not add CORS.
 
 ## Probes and non-goals
 
 `GET /health` is a minimal liveness probe with `healthy`, timestamp, and uptime.
 `GET /ready` reports runtime readiness, degradation, successfully started module
-IDs, and typed non-ready reasons. Both probes are public infrastructure routes;
+IDs, and typed non-ready reasons. During the short interval between binding and
+the runtime's final started marker, committed application routes return
+sanitized `503 runtime_not_ready` and `/ready` remains not-ready. Both probes are public infrastructure routes;
 they are not the admin shell endpoint `/api/admin/platform/health`.
 
 The adapter supplies transport and shell-hosting mechanics, not administration
 policy. Authentication, authorization, rate limiting, audit, SMTP delivery,
 maintenance state, and restart coordination are provided by
-`@prosto/platform-module-admin`; TLS termination remains a deployment concern.
+`@prosto/platform-adapter-admin-typeorm`; TLS termination remains a deployment concern.
 OpenAPI, module middleware, WebSocket upgrades, remote module acquisition,
 module install/update, and CORS remain out of scope.
 
@@ -178,8 +199,11 @@ module install/update, and CORS remain out of scope.
 
 Run from the repository root:
 
-| Command | Purpose |
-| --- | --- |
-| `npm run build --workspace=@prosto/platform-adapter-fastify` | Build package and declarations. |
-| `npm run typecheck --workspace=@prosto/platform-adapter-fastify` | Type-check the adapter. |
-| `npm run test --workspace=@prosto/platform-adapter-fastify` | Run the adapter tests. |
+Build the SDK first with `npm run build --workspace=@prosto/platform-sdk` on a
+clean checkout; these direct workspace commands do not build dependencies.
+
+| Command                                                          | Purpose                         |
+| ---------------------------------------------------------------- | ------------------------------- |
+| `npm run build --workspace=@prosto/platform-adapter-fastify`     | Build package and declarations. |
+| `npm run typecheck --workspace=@prosto/platform-adapter-fastify` | Type-check the adapter.         |
+| `npm run test --workspace=@prosto/platform-adapter-fastify`      | Run the adapter tests.          |

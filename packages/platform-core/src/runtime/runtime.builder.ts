@@ -51,10 +51,11 @@ import {
 } from '@/modularity/index.js';
 import { InMemoryServiceRegistry } from '@/services/index.js';
 import { RuntimeServiceConfigurationError } from './errors/index.js';
+import { AdapterLifecycleOrchestrator } from './adapters/index.js';
 import { PlatformRuntime } from './platform-runtime.js';
 import {
   platformConfigSchema,
-  platformLocalPersistenceConfigSchema,
+  platformLocalAdapterConfigSchema,
 } from './schemas/index.js';
 
 /**
@@ -73,6 +74,8 @@ export class RuntimeBuilder implements IRuntimeBuilder {
    * @returns A configured runtime that has not been started.
    */
   build(options: IRuntimeBuilderOptions): IPlatformRuntime {
+    AdapterLifecycleOrchestrator.validate(options.adapters);
+
     const environment =
       options.environment || process.env.NODE_ENV || 'production';
 
@@ -99,6 +102,10 @@ export class RuntimeBuilder implements IRuntimeBuilder {
     serviceRegistry.register(
       PLATFORM_RUNTIME_CATALOG_SERVICE_TOKEN,
       platformRuntimeCatalog,
+    );
+    serviceRegistry.register(
+      HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN,
+      options.adapters.http.endpoints,
     );
 
     try {
@@ -133,12 +140,22 @@ export class RuntimeBuilder implements IRuntimeBuilder {
       serviceRegistry.resolve(HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN),
     );
 
+    let runtime: PlatformRuntime; // eslint-disable-line prefer-const
+    const adapterLifecycleOrchestrator = new AdapterLifecycleOrchestrator(
+      options.adapters,
+      config,
+      environment,
+      serviceRegistry,
+      () => runtime,
+    );
+
     const bootstrapCoordinator = this._createBootstrapCoordinator(
       config,
       moduleLifecycleOrchestrator,
+      adapterLifecycleOrchestrator,
     );
 
-    return new PlatformRuntime(
+    runtime = new PlatformRuntime(
       config,
       diagnosticsReporter,
       bootstrapCoordinator,
@@ -148,14 +165,17 @@ export class RuntimeBuilder implements IRuntimeBuilder {
       adminAssetCatalog,
       {
         correlationId: options.correlationId,
-        persistenceProvider: options.persistenceProvider,
+        adapters: options.adapters,
         platformPersistenceDescriptor: options.platformPersistenceDescriptor,
         onStopped: () => {
           serviceRegistry.dispose();
           eventBus.dispose();
         },
       },
+      adapterLifecycleOrchestrator,
     );
+
+    return runtime;
   }
 
   protected _buildPlatformConfig(
@@ -182,6 +202,7 @@ export class RuntimeBuilder implements IRuntimeBuilder {
           productionStrictMode: true,
         },
       },
+      adapters: {},
       security: {
         secretRedaction: {
           enabled: true,
@@ -238,7 +259,7 @@ export class RuntimeBuilder implements IRuntimeBuilder {
 
       if (!packagePaths.has(localConfigPath)) {
         configBuilder.addInMemoryCollection(
-          platformLocalPersistenceConfigSchema.parse(
+          platformLocalAdapterConfigSchema.parse(
             loadJsonFileSync(localConfigPath, true),
           ),
         );
@@ -286,6 +307,7 @@ export class RuntimeBuilder implements IRuntimeBuilder {
   protected _createBootstrapCoordinator(
     config: IPlatformConfig,
     moduleLifecycleOrchestrator: IModuleLifecycleOrchestrator,
+    adapterLifecycleOrchestrator: AdapterLifecycleOrchestrator,
   ): IBootstrapCoordinator {
     const startupPolicyEvaluator = new StartupPolicyEvaluator();
 
@@ -306,7 +328,7 @@ export class RuntimeBuilder implements IRuntimeBuilder {
           startupPolicyEvaluator,
           moduleLifecycleOrchestrator,
         ),
-        new PersistenceInitializationStage(),
+        new PersistenceInitializationStage(adapterLifecycleOrchestrator),
         new ModulesStartStage(
           startupPolicyEvaluator,
           moduleLifecycleOrchestrator,

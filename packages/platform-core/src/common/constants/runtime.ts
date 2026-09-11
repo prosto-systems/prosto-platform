@@ -23,6 +23,7 @@ export enum RuntimeStage {
  * Canonical error codes for runtime diagnostic reporting.
  */
 export enum RuntimeErrorCodes {
+  StartupFailed = 'STARTUP_FAILED',
   BootstrapAborted = 'BOOTSTRAP_ABORTED',
   LoadManifestFiled = 'LOAD_MANIFEST_FILED',
   ManifestInvalid = 'MANIFEST_INVALID',

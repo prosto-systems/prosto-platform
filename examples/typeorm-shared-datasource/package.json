@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "build": "npm run build:dependencies && tsc -p tsconfig.json",
-    "build:dependencies": "npm run build:module && npm run build --workspace=@prosto/platform-adapter-typeorm && npm run build --workspace=@prosto/platform-adapter-fastify",
+    "build:dependencies": "npm run build:module && npm run build --workspace=@prosto/platform-adapter-typeorm && npm run build --workspace=@prosto/platform-adapter-fastify && npm run build --workspace=@prosto/platform-adapter-admin-typeorm",
     "build:module": "npm --prefix modules/module-order run build",
     "prestart": "npm run build:dependencies",
     "start": "tsx src/index.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@prosto/platform-adapter-admin-typeorm": "^0.0.0",
     "@prosto/platform-adapter-fastify": "^0.0.0",
     "@prosto/platform-adapter-typeorm": "^0.0.0",
     "@prosto/platform-core": "^0.0.0",
