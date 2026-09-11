@@ -1,5 +1,5 @@
 import type {
-  IPersistenceProvider,
+  IPersistenceRuntimeAdapter,
   IPlatformModuleManifest,
   PlatformStartupPolicyType,
 } from '@prosto/platform-sdk/platform';
@@ -14,8 +14,8 @@ import type { IModuleLifecycleShutdownIssue } from './module-lifecycle-shutdown-
 export interface IModuleLifecycleStartupOptions {
   startupPolicy: PlatformStartupPolicyType;
   sdkVersion: string;
-  persistenceProvider?: IPersistenceProvider;
-  persistenceEnabled?: boolean;
+  persistenceAdapter: IPersistenceRuntimeAdapter;
+  persistenceState: 'collecting' | 'ready';
 }
 
 /**
@@ -26,6 +26,8 @@ export interface IModuleLifecycleShutdownOptions {
   startupPolicy: PlatformStartupPolicyType;
   sdkVersion: string;
   timeoutMs: number;
+  persistenceAdapter: IPersistenceRuntimeAdapter;
+  persistenceState: 'ready';
 }
 
 /**

@@ -1,6 +1,7 @@
 import pkg from '../../package.json' with { type: 'json' };
 
 export * from './administration/index.js';
+export * from './adapters/index.js';
 export * from './errors/index.js';
 export * from './events/index.js';
 export * from './http/index.js';

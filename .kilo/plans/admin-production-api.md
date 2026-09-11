@@ -1,5 +1,30 @@
 # Production Admin API, Authentication, And Assets
 
+## Status
+
+As of **2026-09-11**, the original composition design is superseded by
+[`always-connected-admin-adapter.md`](always-connected-admin-adapter.md).
+This document records the earlier implementation plan. Its composition claims
+about a discoverable `platform-admin` module, `TypeOrmPersistenceProvider`,
+`FastifyHttpApplication`, and maintenance changing `/ready` are historical and
+must not be used for current implementation or deployment decisions. The
+required direct-composition model uses `PlatformAdminTypeOrmAdapter`,
+`TypeOrmPersistenceAdapter`, and `FastifyHttpAdapter`; `RuntimeBuilder` owns
+their lifecycle, while application code selects the concrete adapters.
+
+Production auth, admin endpoints, protected plugin assets, and optional shell
+hosting have implementations in the current adapters. Configuration is now
+`adapters.platform-admin`; `/ready` reports infrastructure lifecycle state
+independently of maintenance, and module restart remains unsupported.
+Current authorities: [admin adapter README](../../packages/platform-adapters/platform-adapter-admin-typeorm/README.md),
+[Fastify README](../../packages/platform-adapters/platform-adapter-fastify/README.md),
+and [required-adapter ADR](../../docs/adr/0001-required-runtime-adapters.md).
+Evidence includes `platform-admin-typeorm.adapter.ts`, its endpoint/services
+implementation, and `fastify-http-adapter.ts`. The original steps and acceptance
+scenarios below are historical, not an assertion that every security,
+multi-replica, deployment, or test criterion has been verified. No runtime tests
+were rerun for this documentation review.
+
 ## Goal
 
 Implement the production backend required by `@prosto/platform-admin-shell`: built-in credential authentication, all currently advertised administration endpoints except module restart, trusted admin-plugin discovery/static delivery, and Fastify hosting of the shell SPA. Preserve the micro-core boundaries: SDK owns neutral contracts, core owns runtime/module metadata, Fastify owns HTTP/static lifecycle, and a new discoverable admin module owns feature policy and persistence.

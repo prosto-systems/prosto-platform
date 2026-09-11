@@ -30,7 +30,6 @@ export interface ITypeOrmPersistenceConfig extends Record<string, unknown> {
   readonly schema?: string;
   readonly poolSize?: number;
   readonly connectTimeoutMs?: number;
-  readonly migrationsRun?: boolean;
   readonly migrationLockTimeoutMs?: number;
   readonly migrationTransactionMode?: MigrationTransactionModeType;
   /**

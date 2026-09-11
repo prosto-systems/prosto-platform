@@ -11,6 +11,11 @@ import {
   type IPlatformRuntimeCatalog,
   type ISecretsRedactor,
   type IServiceRegistry,
+  type IHttpRuntimeAdapter,
+  type IPlatformAdminAdapter,
+  type IPlatformRuntimeScopedServiceRegistrar,
+  type IPersistenceRuntimeAdapter,
+  type IRuntimeBuilderOptions,
 } from '@prosto/platform-sdk/platform';
 import {
   BootstrapCoordinator,
@@ -24,6 +29,7 @@ import type { IModuleContextFactory } from '@/modularity/index.js';
 import type { IPlatformConfig } from '@/runtime/interfaces/index.js';
 import {
   RuntimeBuilder,
+  RuntimeAdapterCompositionError,
   RuntimeServiceConfigurationError,
 } from '@/runtime/index.js';
 import { ServiceAlreadyRegisteredError } from '@/services/index.js';
@@ -66,12 +72,26 @@ class InspectableRuntimeBuilder extends RuntimeBuilder {
 }
 
 describe('RuntimeBuilder service composition', () => {
+  it('rejects a missing required adapter set before composition side effects', () => {
+    // Arrange
+    const builder = new RuntimeBuilder();
+
+    // Act
+    const build = (): void => {
+      builder.build({} as IRuntimeBuilderOptions);
+    };
+
+    // Assert
+    expect(build).toThrow(RuntimeAdapterCompositionError);
+  });
+
   it('runs the configurator before module context construction', () => {
     // Arrange
     const builder = new InspectableRuntimeBuilder();
 
     // Act
     const runtime = builder.build({
+      adapters: REQUIRED_ADAPTERS,
       configureServices: (services) => {
         builder.phases.push('configure-services');
         services.register(TEST_SERVICE_TOKEN, 'available');
@@ -92,7 +112,7 @@ describe('RuntimeBuilder service composition', () => {
     const builder = new InspectableRuntimeBuilder();
 
     // Act
-    builder.build({});
+    builder.build({ adapters: REQUIRED_ADAPTERS });
 
     // Assert
     expect(builder.phases).toEqual(['module-context-factory']);
@@ -104,7 +124,7 @@ describe('RuntimeBuilder service composition', () => {
     const builder = new InspectableRuntimeBuilder();
 
     // Act
-    builder.build({});
+    builder.build({ adapters: REQUIRED_ADAPTERS });
 
     // Assert
     expect(builder.adminAssetCatalog).toBeDefined();
@@ -123,6 +143,7 @@ describe('RuntimeBuilder service composition', () => {
     // Act
     const build = (): void => {
       builder.build({
+        adapters: REQUIRED_ADAPTERS,
         configureServices: (services) => {
           registry = services;
           services.register(TEST_SERVICE_TOKEN, 'first');
@@ -143,6 +164,7 @@ describe('RuntimeBuilder service composition', () => {
     // Act
     const build = (): void => {
       builder.build({
+        adapters: REQUIRED_ADAPTERS,
         configureServices: async () => undefined,
       });
     };
@@ -245,6 +267,8 @@ describe('PlatformRuntime bootstrap readiness', () => {
     // Assert
     expect(runtime.started).toBe(false);
     expect(runtime.reports.startup?.status).toBe('failed');
+    expect(runtime.stopped).toBe(true);
+    expect(runtime.reports.shutdown).toBeDefined();
     expect(runtime.reports.startup?.failedModules).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -275,6 +299,73 @@ describe('PlatformRuntime bootstrap readiness', () => {
 
     await runtime.stop();
   });
+
+  it('runs required adapters in dependency order and reverses it on stop', async () => {
+    // Arrange
+    const rootDirectory = await createTemporaryDirectory();
+    const discoveryDirectory = join(rootDirectory, 'empty');
+    await mkdir(discoveryDirectory);
+    const events: string[] = [];
+    const adapters = createRequiredAdapters(events);
+    const runtime = new RuntimeBuilder().build({
+      adapters,
+      commandLineArgs: [
+        `--platform:discoveryPath=${discoveryDirectory}`,
+        `--platform:probingPath=${join(rootDirectory, 'probing')}`,
+      ],
+    });
+
+    // Act
+    await runtime.start();
+    await runtime.stop();
+
+    // Assert
+    expect(events).toEqual([
+      'initialize:persistence',
+      'initialize:http',
+      'initialize:admin',
+      'start:persistence',
+      'start:admin',
+      'start:http',
+      'stop:http',
+      'stop:admin',
+      'stop:persistence',
+    ]);
+    expect(runtime.stopped).toBe(true);
+    expect(runtime.reports.shutdown?.stopOrder).toEqual([]);
+  });
+
+  it('removes services contributed by an adapter whose start fails', async () => {
+    // Arrange
+    const rootDirectory = await createTemporaryDirectory();
+    const discoveryDirectory = join(rootDirectory, 'empty');
+    await mkdir(discoveryDirectory);
+    let services: IPlatformRuntimeScopedServiceRegistrar | undefined;
+    const adapters = createRequiredAdapters([]);
+    const admin: IPlatformAdminAdapter = {
+      id: 'platform-admin',
+      role: 'admin',
+      initialize: (context): void => {
+        services = context.contributions.services;
+        services.register(TEST_SERVICE_TOKEN, 'admin-request-gate');
+      },
+      start: (): never => {
+        throw new Error('Admin start failed.');
+      },
+      stop: (): void => undefined,
+    };
+    const runtime = new RuntimeBuilder().build({
+      adapters: { ...adapters, admin },
+      commandLineArgs: [
+        `--platform:discoveryPath=${discoveryDirectory}`,
+        `--platform:probingPath=${join(rootDirectory, 'probing')}`,
+      ],
+    });
+
+    // Act / Assert
+    await expect(runtime.start()).rejects.toThrow('platform-admin');
+    expect(services?.has(TEST_SERVICE_TOKEN)).toBe(false);
+  });
 });
 
 function createBootstrapInput(): IBootstrapInput {
@@ -283,6 +374,7 @@ function createBootstrapInput(): IBootstrapInput {
     runtimeVersion: { sdkVersion: '0.0.0' },
     correlationId: 'test-correlation-id',
     startupStartedAt: new Date().toISOString(),
+    persistenceAdapter: REQUIRED_ADAPTERS.persistence,
     services: {
       register: (): void => undefined,
       override: (): void => undefined,
@@ -308,9 +400,70 @@ function createRuntimeForDiscoveryPath(
   probingPath: string,
 ) {
   return new RuntimeBuilder().build({
+    adapters: REQUIRED_ADAPTERS,
     commandLineArgs: [
       `--platform:discoveryPath=${discoveryPath}`,
       `--platform:probingPath=${probingPath}`,
     ],
   });
+}
+
+const REQUIRED_ADAPTERS = {
+  admin: createAdapter('platform-admin', 'admin') as IPlatformAdminAdapter,
+  persistence: {
+    ...createAdapter('test-persistence', 'persistence'),
+    descriptors: {
+      registerPlatform: (): void => undefined,
+      createRegistrar: (): { register(): void } => ({
+        register: (): void => undefined,
+      }),
+      rollback: (): void => undefined,
+      seal: (): readonly [] => [],
+    },
+  } as IPersistenceRuntimeAdapter,
+  http: {
+    ...createAdapter('test-http', 'http'),
+    endpoints: {
+      createRegistrar: (): { register(): void } => ({
+        register: (): void => undefined,
+      }),
+      commit: (): void => undefined,
+      rollback: (): void => undefined,
+    },
+  } as IHttpRuntimeAdapter,
+};
+
+function createAdapter(id: string, role: 'admin' | 'persistence' | 'http') {
+  return {
+    id,
+    role,
+    initialize: (): void => undefined,
+    start: (): void => undefined,
+    stop: (): void => undefined,
+  };
+}
+
+function createRequiredAdapters(events: string[]) {
+  const createLifecycle = (
+    id: string,
+    role: 'admin' | 'persistence' | 'http',
+  ) => ({
+    id,
+    role,
+    initialize: (): void => events.push(`initialize:${role}`),
+    start: (): void => events.push(`start:${role}`),
+    stop: (): void => events.push(`stop:${role}`),
+  });
+
+  return {
+    admin: createLifecycle('platform-admin', 'admin') as IPlatformAdminAdapter,
+    persistence: {
+      ...createLifecycle('test-persistence', 'persistence'),
+      descriptors: REQUIRED_ADAPTERS.persistence.descriptors,
+    } as IPersistenceRuntimeAdapter,
+    http: {
+      ...createLifecycle('test-http', 'http'),
+      endpoints: REQUIRED_ADAPTERS.http.endpoints,
+    } as IHttpRuntimeAdapter,
+  };
 }

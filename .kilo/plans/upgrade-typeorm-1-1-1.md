@@ -1,7 +1,19 @@
 # Upgrade TypeORM to 1.1.1
 
-> **Status: implemented.** The repository now uses TypeORM 1.1.1 and
-> `better-sqlite3` 12.11.1 with the driver-neutral public `sqlite` dialect.
+## Status
+
+As of **2026-09-11**, the dependency and SQLite-driver migration is implemented:
+current adapter/example manifests declare `typeorm ^1.1.1` and
+`better-sqlite3 ^12.11.1`. `typeorm-persistence-adapter.ts` maps public `sqlite`
+to `better-sqlite3`, requires `database`, and rejects SQLite `url` configuration.
+The original provider filenames/composition below predate the required
+`TypeOrmPersistenceAdapter` lifecycle and are historical.
+
+Current authorities: [TypeORM adapter README](../../packages/platform-adapters/platform-adapter-typeorm/README.md)
+and [required-adapter ADR](../../docs/adr/0001-required-runtime-adapters.md).
+The original migration and validation lists are preserved, not marked fully
+verified. Native-driver installation, SQLite restart/migration tests, and external
+database dialect certification were not rerun for this documentation review.
 
 ## Goal and decisions
 

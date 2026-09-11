@@ -1,14 +1,25 @@
 import type {
-  IPersistenceProvider,
   IPersistenceDescriptor,
+  IPlatformAdminAdapter,
+  IPersistenceRuntimeAdapter,
+  IHttpRuntimeAdapter,
   ServiceRegistryConfiguratorType,
 } from '@prosto/platform-sdk/platform';
+
+/** @alpha Required directly composed runtime adapters. */
+export interface IRequiredRuntimeAdapters {
+  readonly admin: IPlatformAdminAdapter;
+  readonly persistence: IPersistenceRuntimeAdapter;
+  readonly http: IHttpRuntimeAdapter;
+}
 
 /**
  * @alpha
  * Options for configuring the runtime builder.
  */
 export interface IRuntimeBuilderOptions {
+  /** Required administration, persistence, and HTTP adapters. */
+  readonly adapters: IRequiredRuntimeAdapters;
   /**
    * Environment name for loading environment-specific config
    * @default process.env.NODE_ENV || 'production'
@@ -29,12 +40,7 @@ export interface IRuntimeBuilderOptions {
   readonly commandLineArgs?: string[];
 
   /**
-   * Optional persistence provider for persisting runtime state
-   */
-  readonly persistenceProvider?: IPersistenceProvider;
-
-  /**
-   * Optional persistence descriptor for persisting runtime state
+   * Optional platform persistence descriptor for persisting runtime state.
    */
   readonly platformPersistenceDescriptor?: IPersistenceDescriptor;
 

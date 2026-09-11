@@ -18,13 +18,18 @@ Pinia, Vue Router, Vuetify, and Vuetify styles.
 ## Installation
 
 ```bash
-npm install --save-dev @prosto/platform-admin-vite vite
+npm install --save-dev @prosto/platform-admin-vite vite @vitejs/plugin-vue vite-plugin-vuetify
 ```
 
 ## Usage
 
 Configure `prostoAdminRuntime()` after the Vue and Vuetify Vite plugins. Set
-Vuetify to `styles: 'none'`, because the shell supplies Vuetify styles.
+Vuetify to `styles: 'none'`, because the shell supplies Vuetify styles. Declare
+the shared Vue ecosystem packages as peer dependencies of the admin module and
+make them available locally for compilation, as in
+[`examples/module-test`](../../../examples/module-test/package.json).
+
+Use library mode to emit a native ESM plugin rather than an HTML application:
 
 ```ts
 import { prostoAdminRuntime } from '@prosto/platform-admin-vite';
@@ -38,6 +43,15 @@ export default defineConfig({
     vuetify({ autoImport: true, styles: 'none' }),
     prostoAdminRuntime(),
   ],
+  build: {
+    outDir: 'dist/admin',
+    lib: {
+      entry: 'src/admin/admin.plugin.ts',
+      formats: ['es'],
+      fileName: () => 'admin.plugin.js',
+      cssFileName: 'admin.plugin',
+    },
+  },
 });
 ```
 
@@ -74,17 +88,26 @@ admin plugin. Plugin-specific CSS remains allowed and must be listed as a
 
 - `prostoAdminRuntime()` - returns Vite plugins that validate shared-runtime
   imports, rewrite supported imports to the shell runtime, and verify that no
-  shared runtime code or bare imports remain in the generated bundle.
+  shared runtime code or shared-runtime bare imports remain in the generated bundle.
+
+This plugin does not generate package exports or the platform manifest. Declare
+`./admin` and each emitted stylesheet as `./admin/styles/<name>` in the module's
+`package.json`; declare referenced support files as `./admin/assets/<name>`.
+The production runtime builds the delivery manifest from those explicit exports.
+Import SDK admin APIs from `@prosto/platform-sdk/admin`; the SDK has no root export.
 
 ## Scripts
 
 Run these commands from the repository root:
 
-| Command | Purpose |
-| --- | --- |
-| `npm run build --workspace=@prosto/platform-admin-vite` | Build the ESM package and type declarations. |
-| `npm run typecheck --workspace=@prosto/platform-admin-vite` | Type-check the package. |
-| `npm run test --workspace=@prosto/platform-admin-vite` | Run the Vitest suite once. |
+Direct workspace commands require built SDK dependencies. After `npm install`,
+the root `npm run build` builds workspaces in dependency order.
+
+| Command                                                     | Purpose                                      |
+| ----------------------------------------------------------- | -------------------------------------------- |
+| `npm run build --workspace=@prosto/platform-admin-vite`     | Build the ESM package and type declarations. |
+| `npm run typecheck --workspace=@prosto/platform-admin-vite` | Type-check the package.                      |
+| `npm run test --workspace=@prosto/platform-admin-vite`      | Run the Vitest suite once.                   |
 
 See [`@prosto/platform-admin-shell`](../../platform-admin-shell/README.md) for
 the admin plugin manifest and registration-context contract.

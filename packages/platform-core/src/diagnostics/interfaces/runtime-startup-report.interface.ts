@@ -1,4 +1,7 @@
-import type { PlatformStartupPolicyType } from '@prosto/platform-sdk/platform';
+import type {
+  IPlatformRuntimeAdapterDiagnostics,
+  PlatformStartupPolicyType,
+} from '@prosto/platform-sdk/platform';
 import type { RuntimeStartupStatus } from '../constants/index.js';
 import type { IRuntimeFailureDiagnostic } from './runtime-failure-diagnostic.interface.js';
 import type { IRuntimeLoadedModuleDiagnostic } from './runtime-loaded-module-diagnostic.interface.js';
@@ -8,7 +11,7 @@ import type { IRuntimeSkippedModuleDiagnostic } from './runtime-skipped-module-d
  * @alpha
  * Interface representing diagnostic information for the runtime startup process.
  */
-export interface IRuntimeStartupReport {
+export interface IRuntimeStartupReport extends IPlatformRuntimeAdapterDiagnostics {
   readonly type: 'startup';
   readonly status: RuntimeStartupStatus;
   readonly policyMode: PlatformStartupPolicyType;

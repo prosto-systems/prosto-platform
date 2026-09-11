@@ -53,14 +53,14 @@ export class OrdersModule implements IPlatformModule {
     capabilities: { persistence, http },
   }: IPlatformModuleContext): void {
     if (!http) {
-      throw new Error('The orders module requires an HTTP application host.');
+      throw new Error('The orders module requires an HTTP runtime adapter.');
     }
 
     if (!persistence?.descriptors) {
       throw new Error('The orders module requires persistence descriptors.');
     }
 
-    persistence.descriptors.register(moduleId, {
+    persistence.descriptors.register({
       owner: 'module',
       ownerId: moduleId,
       payload: createTypeOrmPersistenceDescriptor({

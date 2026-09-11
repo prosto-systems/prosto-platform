@@ -26,23 +26,9 @@ export class ModulesInitializationStage extends BootstrapBaseStage {
   override async execute(
     context: IBootstrapStageContext,
   ): Promise<IBootstrapStageContext> {
-    const persistenceEnabled = this.isPersistenceEnabled(context);
-
-    if (persistenceEnabled && !context.persistenceProvider) {
-      this._addPersistenceFailure(
-        context,
-        'Persistence provider is required when TypeORM persistence is enabled.',
-        'Configure an SDK-compatible persistence provider in RuntimeBuilder options.',
-      );
-      this.stopPipeline(context);
-
-      return context;
-    }
-
-    if (persistenceEnabled && !!context.platformPersistenceDescriptor) {
+    if (context.platformPersistenceDescriptor) {
       try {
-        context.persistenceProvider?.descriptors.register(
-          'platform',
+        context.persistenceAdapter.descriptors.registerPlatform(
           context.platformPersistenceDescriptor,
         );
       } catch (error) {
@@ -60,8 +46,8 @@ export class ModulesInitializationStage extends BootstrapBaseStage {
     const result = await this._moduleLifecycleOrchestrator.initializeModules(
       context.loadedModules,
       {
-        persistenceEnabled,
-        persistenceProvider: context.persistenceProvider,
+        persistenceAdapter: context.persistenceAdapter,
+        persistenceState: 'collecting',
         startupPolicy: context.policyMode,
         sdkVersion: context.runtimeVersion.sdkVersion,
       },

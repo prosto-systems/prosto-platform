@@ -1,9 +1,19 @@
 # Admin Plugin ESM Loading
 
-> **Status: historical.** This plan predates the current admin runtime. The
-> implemented loader uses dynamic `import()`, validates the registration export,
-> and supports style-only `contentFiles`. Consult
-> `packages/platform-admin-shell/README.md` for the current contract.
+## Status
+
+As of **2026-09-11**, ESM loading is implemented, but the original DOM-script
+proposal below is superseded. `src/features/platform/utils/plugins.utils.ts`
+in the shell uses dynamic `import()`, validates `registerAdminPlugin`, and awaits
+registration. The current manifest permits only styles in `contentFiles`;
+script content files and import-time self-registration are not the current API.
+
+Current authorities: [admin shell README](../../packages/platform-admin-shell/README.md)
+and [admin Vite README](../../packages/platform-utils/platform-admin-vite/README.md).
+See also the later [shared-runtime plan](vuetify-shared-admin-runtime.md).
+The decisions and validation list below preserve the original proposal, not
+current implementation instructions or proof that those checks passed. No
+browser smoke test or package suite was rerun for this documentation review.
 
 ## Goal
 

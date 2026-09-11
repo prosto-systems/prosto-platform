@@ -20,15 +20,19 @@ npm install
 
 Run these commands from the repository root:
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev --workspace=@prosto/platform-admin-shell` | Start the Vite development server on `127.0.0.1:3000`. |
-| `npm run build --workspace=@prosto/platform-admin-shell` | Type-check and build the production bundle. |
-| `npm run build:only --workspace=@prosto/platform-admin-shell` | Build with Vite without the package type-check step. |
-| `npm run preview --workspace=@prosto/platform-admin-shell` | Serve the production build locally. |
-| `npm run typecheck --workspace=@prosto/platform-admin-shell` | Run `vue-tsc`. |
-| `npm run test --workspace=@prosto/platform-admin-shell` | Run the Vitest suite once. |
-| `npm run test:unit --workspace=@prosto/platform-admin-shell` | Run the Vitest suite with verbose reporting. |
+Direct workspace commands require built workspace dependencies. After
+`npm install`, `npm run build` builds packages in dependency order before using
+the focused commands below.
+
+| Command                                                       | Purpose                                                |
+| ------------------------------------------------------------- | ------------------------------------------------------ |
+| `npm run dev --workspace=@prosto/platform-admin-shell`        | Start the Vite development server on `127.0.0.1:3000`. |
+| `npm run build --workspace=@prosto/platform-admin-shell`      | Type-check and build the production bundle.            |
+| `npm run build:only --workspace=@prosto/platform-admin-shell` | Build with Vite without the package type-check step.   |
+| `npm run preview --workspace=@prosto/platform-admin-shell`    | Serve the production build locally.                    |
+| `npm run typecheck --workspace=@prosto/platform-admin-shell`  | Run `vue-tsc`.                                         |
+| `npm run test --workspace=@prosto/platform-admin-shell`       | Run the Vitest suite once.                             |
+| `npm run test:unit --workspace=@prosto/platform-admin-shell`  | Run the Vitest suite with verbose reporting.           |
 
 ## API contract
 
@@ -42,26 +46,31 @@ and a CSRF token. The token remains in Pinia memory only. Authenticated mutation
 including logout, send it in `X-CSRF-Token`. The session itself is represented by a
 cookie and is never written to Web Storage.
 
-| Method | Path | Authorization |
-| --- | --- | --- |
-| `POST` | `/auth/login` | Public; accepts email and password. |
-| `GET` | `/auth/session` | Session cookie; returns `401` for no or expired session. |
-| `POST` | `/auth/logout` | Session cookie and `X-CSRF-Token`. |
-| `POST` | `/auth/password-reset-requests` | Public; always returns the same accepted response. |
-| `POST` | `/auth/password-resets` | Public; accepts a one-time reset token and new password. |
-| `GET` | `/platform/manifest` | `modules:view` and session cookie; returns platform metadata and ordered admin plugin entries. No CSRF header is required for this read request. |
-| `GET` | `/dashboard` | `dashboard:view`. |
-| `GET` | `/platform/health` | `health:view`. |
-| `GET` | `/modules` | `modules:view`. |
-| `GET` | `/activity` | `activity:view`. |
-| `POST` | `/modules/:moduleId/restart` | Unsupported in production; the route is not registered and production roles do not receive `modules:restart`. |
-| `POST` | `/platform/restart` | `platform:restart` and `X-CSRF-Token`. |
-| `PATCH` | `/platform/maintenance` | `maintenance:manage` and `X-CSRF-Token`; body: `{ "enabled": boolean }`. |
+| Method  | Path                            | Authorization                                                                                                                                    |
+| ------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `POST`  | `/auth/login`                   | Public; accepts email and password.                                                                                                              |
+| `GET`   | `/auth/session`                 | Session cookie; returns `401` for no or expired session.                                                                                         |
+| `POST`  | `/auth/logout`                  | Session cookie and `X-CSRF-Token`.                                                                                                               |
+| `POST`  | `/auth/password-reset-requests` | Public; always returns the same accepted response.                                                                                               |
+| `POST`  | `/auth/password-resets`         | Public; accepts a one-time reset token and new password.                                                                                         |
+| `GET`   | `/platform/manifest`            | `modules:view` and session cookie; returns platform metadata and ordered admin plugin entries. No CSRF header is required for this read request. |
+| `GET`   | `/dashboard`                    | `dashboard:view`.                                                                                                                                |
+| `GET`   | `/platform/health`              | `health:view`.                                                                                                                                   |
+| `GET`   | `/modules`                      | `modules:view`.                                                                                                                                  |
+| `GET`   | `/activity`                     | `activity:view`.                                                                                                                                 |
+| `POST`  | `/modules/:moduleId/restart`    | Unsupported in production; the route is not registered and production roles do not receive `modules:restart`.                                    |
+| `POST`  | `/platform/restart`             | `platform:restart` and `X-CSRF-Token`.                                                                                                           |
+| `PATCH` | `/platform/maintenance`         | `maintenance:manage` and `X-CSRF-Token`; body: `{ "enabled": boolean }`.                                                                         |
 
 The `/api/admin` prefix is omitted from the table paths. In development, Vite
 proxies this namespace to `http://127.0.0.1:3001` unless MSW intercepts it.
 Production backends and MSW enforce `modules:view` for the manifest. The
 manifest is a read endpoint, so it requires no CSRF header.
+
+The development proxy covers `/api/admin` only, not `/modules/`. Loading real
+plugin assets therefore requires same-origin asset delivery in addition to the
+API proxy. The `preview` script is a local bundle preview, not the production
+administration backend.
 
 ## Admin module runtime
 
@@ -83,7 +92,7 @@ manifest's `contentFiles`; the shell loads it before the ESM entry.
 ### Build contract
 
 Build admin entries with `@prosto/platform-admin-vite`. Configure the plugins in
-this order after the standard Vue template asset transform:
+this order and emit an ESM library entry rather than an HTML application:
 
 ```ts
 import { prostoAdminRuntime } from '@prosto/platform-admin-vite';
@@ -97,6 +106,15 @@ export default defineConfig({
     vuetify({ autoImport: true, styles: 'none' }),
     prostoAdminRuntime(),
   ],
+  build: {
+    outDir: 'dist/admin',
+    lib: {
+      entry: 'src/admin/admin.plugin.ts',
+      formats: ['es'],
+      fileName: () => 'admin.plugin.js',
+      cssFileName: 'admin.plugin',
+    },
+  },
 });
 ```
 
@@ -125,7 +143,7 @@ discovering shell globals when imported. This is a required plugin convention,
 not a loader-side security sandbox:
 
 ```ts
-import type { IAdminShellPluginContext } from '@prosto/platform-sdk';
+import type { IAdminShellPluginContext } from '@prosto/platform-sdk/admin';
 import ExampleBlade from './example-blade.vue';
 
 const WORKSPACE = 'example.workspace';
@@ -226,7 +244,7 @@ The default workspace page is a blade container. Blades are scoped to the
 active workspace and are cleared when it is left. `bladeService.showBlade()`
 applies defaults, replaces a matching blade, and accepts an optional parent
 blade for nested navigation. A blade component can call `useBladeScope()` from
-`@prosto/platform-sdk` to access its reactive blade and the service facades.
+`@prosto/platform-sdk/admin` to access its reactive blade and the service facades.
 
 `bladeToolbarService.register()`, `tryRegister()`, and `override()` add commands
 for a blade ID. Toolbar commands are permission-filtered and sorted by priority;
@@ -242,29 +260,30 @@ dismissible alert naming the affected module and writes the detailed cause to
 
 ### Production plugin delivery
 
-`@prosto/platform-core` discovers only explicit package exports and publishes
+For admin artifacts, `@prosto/platform-core` discovers only explicit package exports and publishes
 assets only from successfully started modules in lifecycle dependency order.
-`@prosto/platform-module-admin` authenticates each `/modules/` request, requires
-the manifest version query, and streams only the exact declared target. Plugin
-assets are private immutable responses; shell assets and CSP are hosted by
-`@prosto/platform-adapter-fastify`. Plugin hashes are cache identities, not
-cryptographic package provenance. MSW does not provide any of these server-side
-controls.
+`@prosto/platform-adapter-admin-typeorm` authenticates each `/modules/` request,
+requires the manifest version query, and streams only the exact declared target.
+Plugin assets are private immutable responses; shell assets and CSP are
+optionally hosted by `@prosto/platform-adapter-fastify`. Plugin hashes are cache
+identities, not cryptographic package provenance. MSW does not provide any of
+these server-side controls.
 
 ## Permissions
 
 Permissions, not role names, are authoritative. The shell hides unavailable routes
-and controls, but the API remains the final authorization authority.
+and controls, but the API remains the final authorization authority. The table
+below describes the production adapter's built-in roles and the MSW fixtures.
 
-| Permission | Admin | Operator | Viewer |
-| --- | --- | --- | --- |
-| `dashboard:view` | yes | yes | yes |
-| `health:view` | yes | yes | yes |
-| `modules:view` | yes | yes | yes |
-| `activity:view` | yes | yes | yes |
-| `modules:restart` | no | no | no (unsupported in production) |
-| `platform:restart` | yes | yes | no |
-| `maintenance:manage` | yes | no | no |
+| Permission           | Admin | Operator | Viewer                         |
+| -------------------- | ----- | -------- | ------------------------------ |
+| `dashboard:view`     | yes   | yes      | yes                            |
+| `health:view`        | yes   | yes      | yes                            |
+| `modules:view`       | yes   | yes      | yes                            |
+| `activity:view`      | yes   | yes      | yes                            |
+| `modules:restart`    | no    | no       | no (unsupported in production) |
+| `platform:restart`   | yes   | yes      | no                             |
+| `maintenance:manage` | yes   | no       | no                             |
 
 ## MSW development mocks
 
@@ -296,9 +315,11 @@ any environment.
 ## Production backend and security limits
 
 Without MSW, the shell requires the same-origin backend at `/api/admin`.
-`@prosto/platform-module-admin`, composed with the Fastify and TypeORM adapters,
-implements that contract; `examples/admin-production` is the reference host.
-MSW remains a development/test substitute only.
+`@prosto/platform-adapter-admin-typeorm`, directly composed with the required
+Fastify and TypeORM adapters, implements that contract;
+`examples/admin-production` is the reference host. Shell static hosting remains
+optional, although the administration API transport is mandatory. MSW remains a
+development/test substitute only.
 
 MSW models session cookies, CSRF checks, permission checks, and reset-token
 semantics, but it cannot validate production browser-cookie protections or server
@@ -307,7 +328,7 @@ and an appropriate `SameSite` policy. It must also validate `Origin`, rate-limit
 audit authentication/password-reset requests, enforce authorization independently,
 and protect session and reset-token storage.
 
-The production module uses opaque database-backed session cookies with
+The production administration adapter uses opaque database-backed session cookies with
 `HttpOnly`, `SameSite=Strict`, `Path=/`, no `Domain`, and a one-hour default
 absolute lifetime. It validates `Origin` for state-changing public requests and
 validates both Origin and `X-CSRF-Token` for authenticated mutations. It does

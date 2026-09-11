@@ -1,5 +1,28 @@
 # Fastify HTTP Application Plan
 
+## Status
+
+As of **2026-09-11**, the HTTP capability is implemented, but the original
+outer-`FastifyHttpApplication` design below is superseded by the unified required
+adapter lifecycle. `FastifyHttpAdapter` implements the SDK HTTP adapter contract;
+`RuntimeBuilder` requires admin, persistence, and HTTP adapters and owns their
+startup, rollback, and reverse shutdown. Fastify initializes without listening,
+starts transport after admin succeeds, and never calls runtime lifecycle methods.
+Route activation uses committed module and adapter scopes, not only
+`startedModuleIds`; `/api/admin` and `/modules` are reserved for the admin adapter.
+
+Current authorities: [Fastify README](../../packages/platform-adapters/platform-adapter-fastify/README.md),
+[core README](../../packages/platform-core/README.md), and
+[required-adapter ADR](../../docs/adr/0001-required-runtime-adapters.md).
+See the later [required-admin plan](always-connected-admin-adapter.md).
+Evidence includes `fastify-http-adapter.ts`, required builder adapter options,
+and core lifecycle-order tests. Neutral endpoint contracts, bounded request
+streams, response streaming, cancellation, and probes exist; request gating,
+trusted ingress, and optional SPA hosting were added beyond this plan's scope.
+The original proposals, non-goals, and acceptance/validation lists remain
+historical, not a current capability inventory or an all-passing checklist.
+No package tests or live HTTP smoke checks were rerun in this documentation review.
+
 ## Goal
 
 Add an architecture-compliant HTTP application lifecycle that lets discovered
@@ -19,7 +42,7 @@ method.
 - Add `@prosto/platform-adapter-fastify` under `packages/platform-adapters/`.
 - Keep Fastify and all server implementation details out of `platform-core`.
 - Let `FastifyHttpApplication` own `runtime.start() -> route activation ->
-  listen()` and `stop accepting HTTP -> runtime.stop()`.
+listen()` and `stop accepting HTTP -> runtime.stop()`.
 - Let modules register endpoint declarations only through
   `context.capabilities.http` during `init()`; it is absent in `start()` and
   `stop()` and when no HTTP host is composed.
@@ -120,8 +143,8 @@ Define and document these `@alpha` APIs:
   `HTTP_ENDPOINT_REGISTRY_SEALED`. This SDK error lets core report safe route
   failures without importing the adapter.
 - Stable response shapes: health is `{ status: 'healthy', timestamp,
-  uptimeSeconds }`; readiness is `{ status: 'ready' | 'not-ready', ready,
-  degraded, startedModuleIds, reasons, timestamp }`. A started best-effort
+uptimeSeconds }`; readiness is `{ status: 'ready' | 'not-ready', ready,
+degraded, startedModuleIds, reasons, timestamp }`. A started best-effort
   runtime returns HTTP 200 with `ready: true` and `degraded: true`; non-ready
   state returns 503 with typed reasons `application_not_listening`,
   `runtime_not_started`, and/or `application_stopping`.
@@ -182,10 +205,10 @@ with optional HTTP behavior may use optional chaining and remain headless.
    - In `ModuleContextFactory`, resolve
      `HTTP_ENDPOINT_REGISTRAR_PROVIDER_SERVICE_TOKEN` from the shared service
      registry only for lifecycle stage `init`.
-    - If present, call the provider with the manifest module ID and attach the
-      returned scoped registrar as `context.capabilities.http.endpoints`; never
-      ask the module to submit an owner ID.
-    - Leave `context.capabilities.http` undefined for `start`, `stop`, and headless
+   - If present, call the provider with the manifest module ID and attach the
+     returned scoped registrar as `context.capabilities.http.endpoints`; never
+     ask the module to submit an owner ID.
+   - Leave `context.capabilities.http` undefined for `start`, `stop`, and headless
      compositions.
    - Resolve the same provider into `ModuleLifecycleOrchestrator`. If module
      `init()` succeeds, call `commit(moduleId)` before advancing. If module
@@ -375,9 +398,9 @@ with optional HTTP behavior may use optional chaining and remain headless.
    - Pass a redacting `ConsoleModuleLogger('http')` from core to demonstrate
      safe optional adapter logging; adapter library code remains silent when no
      SDK logger is supplied.
-    - In the discovered `module-order` `init()`, require
-      `context.capabilities.http` explicitly (so this API module fails according
-      to startup policy in a headless host),
+   - In the discovered `module-order` `init()`, require
+     `context.capabilities.http` explicitly (so this API module fails according
+     to startup policy in a headless host),
      keep persistence descriptor registration, and add `GET /api/orders`. The
      handler resolves the ready TypeORM data source when a request arrives and
      returns `Response.json(...)`, demonstrating that declarations happen before

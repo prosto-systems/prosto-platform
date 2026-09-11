@@ -1,5 +1,25 @@
 # Shared Vue ecosystem runtime for admin modules
 
+## Status
+
+As of **2026-09-11**, the shared-runtime mechanism is implemented: the shell
+provides runtime ABI v1, `@prosto/platform-admin-vite` rewrites supported imports
+to the shell global, and the loader dynamically imports entries and awaits the
+validated `registerAdminPlugin` callback. Style-only `contentFiles`, same-origin
+plugin URL restrictions, and shared-runtime import restrictions are current
+contracts, rather than the earlier DOM-script loading proposal.
+
+Current authorities: [admin shell README](../../packages/platform-admin-shell/README.md)
+and [admin Vite README](../../packages/platform-utils/platform-admin-vite/README.md).
+Evidence includes the Vite plugin implementation and shell plugin loader.
+The original frontend-only scope below is historical: production discovery and
+asset serving now exist separately in core and the required adapters, described
+in the [admin adapter README](../../packages/platform-adapters/platform-adapter-admin-typeorm/README.md)
+and [required-adapter ADR](../../docs/adr/0001-required-runtime-adapters.md).
+The original proposal and acceptance criteria are retained; this review does
+not certify every integration, bundle-size, or browser scenario. Builds, tests,
+and native browser import/CSS checks were not rerun.
+
 ## Goal
 
 Allow trusted same-origin admin modules such as `examples/module-test` to use normal source imports from `vue`, `vue-i18n`, `pinia`, `vue-router`, `vuetify`, `vuetify/components`, and `vuetify/directives`, while the browser uses the same Vue ecosystem packages configured by `platform-admin-shell`.
@@ -53,8 +73,8 @@ Changes:
 - Add an `@alpha` `IAdminShellRuntime` contract containing:
   - literal `apiVersion`;
   - diagnostic `vueVersion` and `vuetifyVersion` strings;
-   - opaque/read-only Vue, Vue I18n, Pinia, and Vue Router namespaces;
-   - Vuetify framework, components, and directives namespaces.
+  - opaque/read-only Vue, Vue I18n, Pinia, and Vue Router namespaces;
+  - Vuetify framework, components, and directives namespaces.
 - Add the optional global declaration for `globalThis.__PROSTO_ADMIN_RUNTIME__`.
 - Add an `@alpha` plugin ESM contract/type guard for a module namespace with exactly one required callable export: `registerAdminPlugin` compatible with `RegisterPluginCallbackType`.
 - Add `runtimeApiVersion` to `IAdminShellPluginInfo`.

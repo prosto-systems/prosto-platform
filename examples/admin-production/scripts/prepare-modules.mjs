@@ -7,13 +7,6 @@ const repositoryRoot = resolve(exampleRoot, '..', '..');
 const modulesRoot = resolve(exampleRoot, 'modules');
 const artifacts = [
   {
-    sourcePath: resolve(
-      repositoryRoot,
-      'packages/platform-modules/platform-module-admin',
-    ),
-    targetName: 'platform-admin',
-  },
-  {
     sourcePath: resolve(repositoryRoot, 'examples/module-test'),
     targetName: 'module-test',
   },

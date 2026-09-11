@@ -1,5 +1,5 @@
 import type {
-  IPersistenceProvider,
+  IPersistenceRuntimeAdapter,
   PlatformStartupPolicyType,
 } from '@prosto/platform-sdk/platform';
 
@@ -10,6 +10,6 @@ import type {
 export interface IModuleLifecycleContext {
   readonly startupPolicy: PlatformStartupPolicyType;
   readonly sdkVersion: string;
-  readonly persistenceEnabled: boolean;
-  readonly persistenceProvider?: IPersistenceProvider;
+  readonly persistenceAdapter: IPersistenceRuntimeAdapter;
+  readonly persistenceState: 'collecting' | 'ready';
 }

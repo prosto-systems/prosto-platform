@@ -1,11 +1,10 @@
 import type {
   IPersistenceDescriptor,
-  IPersistenceProvider,
+  IPersistenceRuntimeAdapter,
   IPlatformRuntimeVersionContext,
   IServiceRegistry,
   PlatformStartupPolicyType,
 } from '@prosto/platform-sdk/platform';
-import type { IPersistencePlatformConfig } from '@/runtime/index.js';
 
 /**
  * @alpha
@@ -16,8 +15,7 @@ export interface IBootstrapInput {
   readonly runtimeVersion: IPlatformRuntimeVersionContext;
   readonly correlationId: string;
   readonly startupStartedAt: string;
-  readonly persistenceProvider?: IPersistenceProvider;
-  readonly persistenceConfiguration?: IPersistencePlatformConfig;
+  readonly persistenceAdapter: IPersistenceRuntimeAdapter;
   readonly platformPersistenceDescriptor?: IPersistenceDescriptor;
   readonly services: IServiceRegistry;
 }

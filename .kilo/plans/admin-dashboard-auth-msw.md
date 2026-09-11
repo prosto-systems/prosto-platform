@@ -1,9 +1,21 @@
 # Admin dashboard with authentication
 
-> **Status: historical.** This planning document predates the implemented SDK
-> context and platform manifest endpoint. Consult
-> `packages/platform-admin-shell/README.md` and the SDK admin interfaces for
-> the current runtime contract.
+## Status
+
+As of **2026-09-11**, the dashboard/authentication foundation and opt-in MSW
+backend are implemented. The original design below is historical: the current
+plugin context uses `authService`, discovery uses `/api/admin/platform/manifest`,
+and a production backend now exists as a required adapter, not a module.
+Production module restart remains unsupported. Mock-only session persistence
+was added separately; production auth state is not persisted in Web Storage.
+
+Current authorities: [admin shell README](../../packages/platform-admin-shell/README.md),
+[admin adapter README](../../packages/platform-adapters/platform-adapter-admin-typeorm/README.md),
+and [required-adapter ADR](../../docs/adr/0001-required-runtime-adapters.md).
+Evidence includes the shell's auth/dashboard features and MSW handlers/tests.
+The steps and acceptance criteria below are retained as the original proposal,
+not a completed verification checklist; browser, accessibility, and production
+bundle checks were not rerun for this documentation review.
 
 ## Goal and fixed decisions
 
@@ -29,35 +41,35 @@
 
 Keep these schemas/types inside `platform-admin-shell`; they are not plugin SDK APIs. Validate request forms and every external JSON response with Zod and normalize failures into a sanitized `ApiError` (`status`, stable `code`, optional field errors/correlation ID).
 
-| Method | Path                                      | Behavior / permission                                                                                                                                 |
-| --- |-------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `POST` | `/api/admin/auth/login`                   | Email/password login; returns principal, permissions, and in-memory CSRF token; sets session cookie                                                   |
-| `GET` | `/api/admin/auth/session`                 | Restores principal, permissions, and CSRF token; `401` when absent/expired                                                                            |
-| `POST` | `/api/admin/auth/logout`                  | Requires session-bound `X-CSRF-Token`; expires cookie                                                                                                 |
-| `POST` | `/api/admin/auth/password-reset-requests` | Always returns the same neutral accepted response to prevent account enumeration                                                                      |
-| `POST` | `/api/admin/auth/password-resets`         | Accepts one-time reset token, new password, and confirmation; handles invalid/expired/used tokens                                                     |
-| `GET` | `/api/admin/plugins`                      | Retrieves the plugins for running platform modules. Returns an array of `IAdminShellPluginInfo` models from the SDK; requires `modules:view` and CSRF |
-| `GET` | `/api/admin/dashboard`                    | Summary KPIs; requires `dashboard:view`                                                                                                               |
-| `GET` | `/api/admin/platform/health`              | Service/platform health; requires `health:view`                                                                                                       |
-| `GET` | `/api/admin/modules`                      | Module status/version rows; requires `modules:view`                                                                                                   |
-| `GET` | `/api/admin/activity`                     | Recent audit-style activity; requires `activity:view`                                                                                                 |
-| `POST` | `/api/admin/modules/:moduleId/restart`    | Updates mock state/activity; requires `modules:restart` and CSRF                                                                                      |
-| `POST` | `/api/admin/platform/restart`             | Restarts the platform; requires `platform:restart` and CSRF                                                                                      |
+| Method  | Path                                      | Behavior / permission                                                                                                                                 |
+| ------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST`  | `/api/admin/auth/login`                   | Email/password login; returns principal, permissions, and in-memory CSRF token; sets session cookie                                                   |
+| `GET`   | `/api/admin/auth/session`                 | Restores principal, permissions, and CSRF token; `401` when absent/expired                                                                            |
+| `POST`  | `/api/admin/auth/logout`                  | Requires session-bound `X-CSRF-Token`; expires cookie                                                                                                 |
+| `POST`  | `/api/admin/auth/password-reset-requests` | Always returns the same neutral accepted response to prevent account enumeration                                                                      |
+| `POST`  | `/api/admin/auth/password-resets`         | Accepts one-time reset token, new password, and confirmation; handles invalid/expired/used tokens                                                     |
+| `GET`   | `/api/admin/plugins`                      | Retrieves the plugins for running platform modules. Returns an array of `IAdminShellPluginInfo` models from the SDK; requires `modules:view` and CSRF |
+| `GET`   | `/api/admin/dashboard`                    | Summary KPIs; requires `dashboard:view`                                                                                                               |
+| `GET`   | `/api/admin/platform/health`              | Service/platform health; requires `health:view`                                                                                                       |
+| `GET`   | `/api/admin/modules`                      | Module status/version rows; requires `modules:view`                                                                                                   |
+| `GET`   | `/api/admin/activity`                     | Recent audit-style activity; requires `activity:view`                                                                                                 |
+| `POST`  | `/api/admin/modules/:moduleId/restart`    | Updates mock state/activity; requires `modules:restart` and CSRF                                                                                      |
+| `POST`  | `/api/admin/platform/restart`             | Restarts the platform; requires `platform:restart` and CSRF                                                                                           |
 | `PATCH` | `/api/admin/platform/maintenance`         | Toggles mock maintenance mode/activity; requires `maintenance:manage` and CSRF                                                                        |
 
 Use `credentials: 'same-origin'`. Login/session responses keep the CSRF token only in Pinia memory; authenticated mutations send it in `X-CSRF-Token`. Login, reset request, and reset completion are unauthenticated endpoints and rely on server-side Origin/rate-limit controls outside this frontend scope. Validate `returnUrl` as an internal route before navigation.
 
 Permission matrix:
 
-| Permission | Admin | Operator | Viewer |
-| --- | --- | --- | --- |
-| `dashboard:view` | yes | yes | yes |
-| `health:view` | yes | yes | yes |
-| `modules:view` | yes | yes | yes |
-| `activity:view` | yes | yes | yes |
-| `modules:restart` | yes | yes | no |
-| `platform:restart` | yes | yes | no |
-| `maintenance:manage` | yes | no | no |
+| Permission           | Admin | Operator | Viewer |
+| -------------------- | ----- | -------- | ------ |
+| `dashboard:view`     | yes   | yes      | yes    |
+| `health:view`        | yes   | yes      | yes    |
+| `modules:view`       | yes   | yes      | yes    |
+| `activity:view`      | yes   | yes      | yes    |
+| `modules:restart`    | yes   | yes      | no     |
+| `platform:restart`   | yes   | yes      | no     |
+| `maintenance:manage` | yes   | no       | no     |
 
 The frontend gates routes, navigation, sections, and controls, but MSW independently enforces sessions, CSRF, and permissions and returns `401`/`403`. A centralized HTTP client unauthorized hook clears in-memory auth and redirects to login with a safe return URL.
 

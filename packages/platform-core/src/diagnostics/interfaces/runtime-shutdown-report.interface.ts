@@ -1,10 +1,11 @@
+import type { IPlatformRuntimeAdapterDiagnostics } from '@prosto/platform-sdk/platform';
 import type { IModuleLifecycleShutdownIssue } from '@/modularity/index.js';
 
 /**
  * @alpha
  * Interface representing diagnostic information for the runtime shutdown process.
  */
-export interface IRuntimeShutdownReport {
+export interface IRuntimeShutdownReport extends IPlatformRuntimeAdapterDiagnostics {
   readonly type: 'shutdown';
   readonly correlationId: string;
   readonly startedAt: string;

@@ -1,1 +1,1 @@
-export * from './fastify-http-application.error.js';
+export * from './fastify-http-adapter.error.js';

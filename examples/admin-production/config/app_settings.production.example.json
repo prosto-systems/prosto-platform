@@ -1,5 +1,5 @@
 {
-  "persistence": {
+  "adapters": {
     "typeorm": {
       "host": "database.example.invalid",
       "port": 5432,
@@ -7,9 +7,7 @@
       "username": "replace-with-database-user",
       "password": "replace-with-database-password",
       "poolSize": 10
-    }
-  },
-  "modules": {
+    },
     "platform-admin": {
       "allowedPublicOrigin": "https://admin.example.invalid",
       "cookie": {

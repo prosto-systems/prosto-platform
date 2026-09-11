@@ -1,5 +1,7 @@
-import type { IPersistenceDescriptorRegistry } from './persistence-descriptor-registry.interface.js';
-import type { PersistenceProviderStateType } from './persistence-provider.interface.js';
+import type { IPersistenceDescriptorRegistrar } from './persistence-descriptor-registrar.interface.js';
+
+/** @alpha Lifecycle state of persistence exposed to feature modules. */
+export type PersistenceModuleStateType = 'collecting' | 'ready' | 'unavailable';
 
 /**
  * @alpha
@@ -9,6 +11,6 @@ import type { PersistenceProviderStateType } from './persistence-provider.interf
  * until start(), when an adapter publishes its ready native service token.
  */
 export interface IPersistenceModuleContext {
-  readonly state: PersistenceProviderStateType | 'unavailable';
-  readonly descriptors?: IPersistenceDescriptorRegistry;
+  readonly state: PersistenceModuleStateType;
+  readonly descriptors?: IPersistenceDescriptorRegistrar;
 }

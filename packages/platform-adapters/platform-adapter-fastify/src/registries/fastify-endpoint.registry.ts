@@ -6,13 +6,15 @@ import {
   type IHttpEndpoint,
   type IHttpEndpointRegistrar,
   type IHttpEndpointRegistrarProvider,
+  type IPlatformRuntimeComponentIdentity,
 } from '@prosto/platform-sdk/platform';
-import { FastifyHttpApplicationError } from '../errors/index.js';
+import { FastifyHttpAdapterError } from '../errors/index.js';
 
 type EndpointRegistryStateType = 'collecting' | 'sealed';
 type EndpointOwnerScopeStateType = 'open' | 'committed' | 'rolled-back';
 
 interface IEndpointOwnerScope {
+  readonly owner: IPlatformRuntimeComponentIdentity;
   state: EndpointOwnerScopeStateType;
 }
 
@@ -20,16 +22,19 @@ interface IRegisteredEndpoint {
   readonly canonicalKey: string;
   readonly canonicalPath: string;
   readonly endpoint: IHttpEndpoint;
-  readonly ownerId: string;
+  readonly owner: IPlatformRuntimeComponentIdentity;
 }
 
 const PARAMETER_SEGMENT_PATTERN = /^:([A-Za-z][A-Za-z0-9_]*)$/u;
 const LITERAL_SEGMENT_PATTERN =
   /^(?:[A-Za-z0-9\-._~!$&'()+,;=@]|%[0-9A-Fa-f]{2})+$/u;
-const RESERVED_PATHS = new Set(['/health', '/health/', '/ready', '/ready/']);
+const PLATFORM_ADMIN_OWNER: IPlatformRuntimeComponentIdentity = {
+  type: 'adapter',
+  id: 'platform-admin',
+};
 const MAXIMUM_PATH_LENGTH = 2048;
 
-/** @internal Transactional endpoint collector used by FastifyHttpApplication. */
+/** @internal Transactional endpoint collector used by the Fastify transport. */
 export class FastifyEndpointRegistry implements IHttpEndpointRegistrarProvider {
   private readonly declarationsByKey = new Map<string, IRegisteredEndpoint>();
   private readonly ownerScopes = new Map<string, IEndpointOwnerScope>();
@@ -37,34 +42,42 @@ export class FastifyEndpointRegistry implements IHttpEndpointRegistrarProvider {
   private declarations: readonly IRegisteredEndpoint[] = [];
   private state: EndpointRegistryStateType = 'collecting';
 
-  createRegistrar(moduleId: string): IHttpEndpointRegistrar {
+  createRegistrar(
+    owner: IPlatformRuntimeComponentIdentity,
+  ): IHttpEndpointRegistrar {
     this.ensureCollecting();
 
-    const scope = this.ownerScopes.get(moduleId);
+    const scopedOwner = this.copyOwner(owner);
+    const key = this.ownerKey(scopedOwner);
+    const scope = this.ownerScopes.get(key);
 
     if (scope !== undefined) {
-      this.ensureOpenScope(moduleId, scope);
+      this.ensureOpenScope(scopedOwner, scope);
     } else {
-      this.ownerScopes.set(moduleId, { state: 'open' });
+      this.ownerScopes.set(key, {
+        owner: scopedOwner,
+        state: 'open',
+      });
     }
 
     return {
       register: (endpoint: IHttpEndpoint): void => {
-        this.register(moduleId, endpoint);
+        this.register(scopedOwner, endpoint);
       },
     };
   }
 
-  commit(moduleId: string): void {
-    const scope = this.getOrCreateScope(moduleId);
+  commit(owner: IPlatformRuntimeComponentIdentity): void {
+    const scope = this.getOrCreateScope(owner);
 
     if (scope.state === 'open') {
       scope.state = 'committed';
     }
   }
 
-  rollback(moduleId: string): void {
-    const scope = this.getOrCreateScope(moduleId);
+  rollback(owner: IPlatformRuntimeComponentIdentity): void {
+    const ownerKey = this.ownerKey(owner);
+    const scope = this.getOrCreateScope(owner);
 
     if (scope.state === 'rolled-back') {
       return;
@@ -73,11 +86,11 @@ export class FastifyEndpointRegistry implements IHttpEndpointRegistrarProvider {
     scope.state = 'rolled-back';
 
     this.declarations = this.declarations.filter(
-      (declaration) => declaration.ownerId !== moduleId,
+      (declaration) => this.ownerKey(declaration.owner) !== ownerKey,
     );
 
     for (const [key, declaration] of this.declarationsByKey) {
-      if (declaration.ownerId === moduleId) {
+      if (this.ownerKey(declaration.owner) === ownerKey) {
         this.declarationsByKey.delete(key);
       }
     }
@@ -85,22 +98,18 @@ export class FastifyEndpointRegistry implements IHttpEndpointRegistrarProvider {
 
   activate(
     fastify: FastifyInstance,
-    startedModuleIds: ReadonlySet<string>,
     createRouteHandler: (
       endpoint: IHttpEndpoint,
-      moduleId: string,
+      owner: IPlatformRuntimeComponentIdentity,
     ) => RouteHandlerMethod,
   ): void {
     this.state = 'sealed';
 
     const activeDeclarations = this.declarations
       .filter((declaration) => {
-        const scope = this.ownerScopes.get(declaration.ownerId);
+        const scope = this.ownerScopes.get(this.ownerKey(declaration.owner));
 
-        return (
-          scope?.state === 'committed' &&
-          startedModuleIds.has(declaration.ownerId)
-        );
+        return scope?.state === 'committed';
       })
       .sort(compareDeclarations);
 
@@ -109,15 +118,12 @@ export class FastifyEndpointRegistry implements IHttpEndpointRegistrarProvider {
         fastify.route({
           method: declaration.endpoint.method,
           url: declaration.endpoint.path,
-          handler: createRouteHandler(
-            declaration.endpoint,
-            declaration.ownerId,
-          ),
+          handler: createRouteHandler(declaration.endpoint, declaration.owner),
         });
       }
     } catch (cause: unknown) {
-      throw new FastifyHttpApplicationError(
-        'FASTIFY_HTTP_APPLICATION_ROUTE_ACTIVATION_FAILED',
+      throw new FastifyHttpAdapterError(
+        'FASTIFY_HTTP_ADAPTER_ROUTE_ACTIVATION_FAILED',
         'HTTP route activation failed.',
         { phase: 'route-activation' },
         { cause },
@@ -125,36 +131,46 @@ export class FastifyEndpointRegistry implements IHttpEndpointRegistrarProvider {
     }
   }
 
-  private getOrCreateScope(moduleId: string): IEndpointOwnerScope {
-    const scope = this.ownerScopes.get(moduleId);
+  private getOrCreateScope(
+    owner: IPlatformRuntimeComponentIdentity,
+  ): IEndpointOwnerScope {
+    const key = this.ownerKey(owner);
+    const scope = this.ownerScopes.get(key);
 
     if (scope !== undefined) {
       return scope;
     }
 
-    const newScope: IEndpointOwnerScope = { state: 'open' };
+    const newScope: IEndpointOwnerScope = {
+      owner: this.copyOwner(owner),
+      state: 'open',
+    };
 
-    this.ownerScopes.set(moduleId, newScope);
+    this.ownerScopes.set(key, newScope);
 
     return newScope;
   }
 
-  private register(moduleId: string, endpoint: IHttpEndpoint): void {
+  private register(
+    owner: IPlatformRuntimeComponentIdentity,
+    endpoint: IHttpEndpoint,
+  ): void {
     this.ensureCollecting();
 
-    const scope = this.ownerScopes.get(moduleId);
+    const scope = this.ownerScopes.get(this.ownerKey(owner));
 
     if (scope === undefined) {
       throw new HttpEndpointRegistrationError(
         'REGISTRATION_SCOPE_CLOSED',
         'The endpoint registration scope is closed.',
-        { ownerId: moduleId },
+        { ownerId: owner.id, ownerType: owner.type },
       );
     }
 
-    this.ensureOpenScope(moduleId, scope);
+    this.ensureOpenScope(owner, scope);
 
     const declaration = this.validateAndCopyEndpoint(endpoint);
+    this.assertOwnerMayDeclarePath(owner, declaration.endpoint.path);
     const existingDeclaration = this.declarationsByKey.get(
       declaration.canonicalKey,
     );
@@ -167,15 +183,17 @@ export class FastifyEndpointRegistry implements IHttpEndpointRegistrarProvider {
           method: declaration.endpoint.method,
           path: declaration.endpoint.path,
           canonicalPath: declaration.canonicalPath,
-          conflictingOwnerId: existingDeclaration.ownerId,
-          ownerId: moduleId,
+          conflictingOwnerId: existingDeclaration.owner.id,
+          conflictingOwnerType: existingDeclaration.owner.type,
+          ownerId: owner.id,
+          ownerType: owner.type,
         },
       );
     }
 
     const registeredDeclaration: IRegisteredEndpoint = {
       ...declaration,
-      ownerId: moduleId,
+      owner: this.copyOwner(owner),
     };
 
     this.declarationsByKey.set(
@@ -187,7 +205,7 @@ export class FastifyEndpointRegistry implements IHttpEndpointRegistrarProvider {
 
   private validateAndCopyEndpoint(
     endpoint: unknown,
-  ): Omit<IRegisteredEndpoint, 'ownerId'> {
+  ): Omit<IRegisteredEndpoint, 'owner'> {
     const details = getEndpointDetails(endpoint);
 
     if (!isEndpointDeclaration(endpoint)) {
@@ -237,14 +255,70 @@ export class FastifyEndpointRegistry implements IHttpEndpointRegistrarProvider {
     }
   }
 
-  private ensureOpenScope(moduleId: string, scope: IEndpointOwnerScope): void {
+  private assertOwnerMayDeclarePath(
+    owner: IPlatformRuntimeComponentIdentity,
+    path: string,
+  ): void {
+    if (this.isTransportPath(path)) {
+      throw new HttpEndpointRegistrationError(
+        'HTTP_ENDPOINT_RESERVED_PATH',
+        'The endpoint path is reserved for transport infrastructure probes.',
+        { ownerId: owner.id, ownerType: owner.type, path },
+      );
+    }
+
+    if (
+      this.isAdminNamespace(path) &&
+      (owner.type !== PLATFORM_ADMIN_OWNER.type ||
+        owner.id !== PLATFORM_ADMIN_OWNER.id)
+    ) {
+      throw new HttpEndpointRegistrationError(
+        'HTTP_ENDPOINT_RESERVED_PATH',
+        'The endpoint path is reserved for the platform admin adapter.',
+        { ownerId: owner.id, ownerType: owner.type, path },
+      );
+    }
+  }
+
+  private ensureOpenScope(
+    owner: IPlatformRuntimeComponentIdentity,
+    scope: IEndpointOwnerScope,
+  ): void {
     if (scope.state !== 'open') {
       throw new HttpEndpointRegistrationError(
         'REGISTRATION_SCOPE_CLOSED',
         'The endpoint registration scope is closed.',
-        { ownerId: moduleId },
+        { ownerId: owner.id, ownerType: owner.type },
       );
     }
+  }
+
+  private isAdminNamespace(path: string): boolean {
+    return (
+      path === '/api/admin' ||
+      path.startsWith('/api/admin/') ||
+      path === '/modules' ||
+      path.startsWith('/modules/')
+    );
+  }
+
+  private isTransportPath(path: string): boolean {
+    return (
+      path === '/health' ||
+      path.startsWith('/health/') ||
+      path === '/ready' ||
+      path.startsWith('/ready/')
+    );
+  }
+
+  private ownerKey(owner: IPlatformRuntimeComponentIdentity): string {
+    return `${owner.type}:${owner.id}`;
+  }
+
+  private copyOwner(
+    owner: IPlatformRuntimeComponentIdentity,
+  ): IPlatformRuntimeComponentIdentity {
+    return Object.freeze({ type: owner.type, id: owner.id });
   }
 }
 
@@ -287,14 +361,6 @@ function validatePath(
     path.includes('\\')
   ) {
     throwInvalidPath(details);
-  }
-
-  if (RESERVED_PATHS.has(path)) {
-    throw new HttpEndpointRegistrationError(
-      'HTTP_ENDPOINT_RESERVED_PATH',
-      'The endpoint path is reserved for platform probes.',
-      details,
-    );
   }
 
   if (path === '/') {
@@ -362,7 +428,8 @@ function compareDeclarations(
   right: IRegisteredEndpoint,
 ): number {
   return (
-    compareStrings(left.ownerId, right.ownerId) ||
+    compareStrings(left.owner.type, right.owner.type) ||
+    compareStrings(left.owner.id, right.owner.id) ||
     compareStrings(left.endpoint.path, right.endpoint.path) ||
     compareStrings(left.endpoint.method, right.endpoint.method)
   );

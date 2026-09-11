@@ -28,16 +28,14 @@ export class BootstrapCoordinator implements IBootstrapCoordinator {
       candidates: [],
       validatedModules: [],
       loadedModules: [],
+      startedModules: [],
       skippedModuleIds: new Set<string>(),
       policyMode: input.policyMode,
       correlationId: input.correlationId,
       startupStartedAt: input.startupStartedAt,
       runtimeVersion: input.runtimeVersion,
-      persistenceProvider: input.persistenceProvider,
+      persistenceAdapter: input.persistenceAdapter,
       platformPersistenceDescriptor: input.platformPersistenceDescriptor,
-      persistenceConfiguration: input.persistenceConfiguration ?? {
-        typeorm: { enabled: false },
-      },
       services: input.services,
     };
 
@@ -74,7 +72,9 @@ export class BootstrapCoordinator implements IBootstrapCoordinator {
 
     return {
       policyMode: input.policyMode,
+      aborted: result.abort,
       loadedModules: result.abort ? [] : result.loadedModules,
+      startedModules: result.startedModules,
       moduleEnvelopes: result.validatedModules,
       stageOutcomes: result.stageOutcomes,
       failedDiagnostics,

@@ -46,6 +46,7 @@ export default defineConfig({
     lib: {
       entry: {
         admin: resolve(import.meta.dirname, 'src/admin/index.ts'),
+        'admin/http': resolve(import.meta.dirname, 'src/admin/http/index.ts'),
         platform: resolve(import.meta.dirname, 'src/platform/index.ts'),
         utils: resolve(import.meta.dirname, 'src/utils/index.ts'),
       },

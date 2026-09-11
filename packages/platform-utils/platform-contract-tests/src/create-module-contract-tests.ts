@@ -66,7 +66,7 @@ export function createPlatformModuleContractTests(
 
   runner.describe('lifecycle', () => {
     runner.it(
-      'should expose register/init/start/stop and execute successfully',
+      'should expose init/start/stop and execute successfully',
       async () => {
         const check = (await checksMapPromise).get(LIFECYCLE_CHECK_RESULT_ID);
 

@@ -1,4 +1,5 @@
 import {
+  type IPlatformRuntimeAdapterDiagnostic,
   type ISecretsRedactor,
   SecretsRedactor,
 } from '@prosto/platform-sdk/platform';
@@ -6,7 +7,6 @@ import type { IModuleLifecycleShutdownIssue } from '@/modularity/index.js';
 import type {
   IReportBuilder,
   IRuntimeFailureDiagnostic,
-  IRuntimeLoadedModuleDiagnostic,
   IRuntimeShutdownReport,
   IRuntimeSkippedModuleDiagnostic,
   IRuntimeStartupReport,
@@ -65,17 +65,21 @@ export abstract class ReportBaseBuilder implements IReportBuilder {
   }
 
   /**
-   * Determines the startup status based on loaded, skipped, and failed modules.
+   * Determines the startup status from adapter and bootstrap diagnostics.
    */
   protected determineStartupStatus(
-    loadedModules: readonly IRuntimeLoadedModuleDiagnostic[],
     skippedModules: readonly IRuntimeSkippedModuleDiagnostic[],
     failedModules: readonly IRuntimeFailureDiagnostic[],
+    hasFatalFailure: boolean,
+    adapters: readonly IPlatformRuntimeAdapterDiagnostic[],
   ): RuntimeStartupStatus {
-    const hasFatalFailure =
-      failedModules.length > 0 && loadedModules.length === 0;
-
-    if (hasFatalFailure) {
+    const hasAdapterFailure = adapters.some(
+      (diagnostic) => diagnostic.status === 'failed',
+    );
+    const hasPlatformFailure = failedModules.some(
+      (diagnostic) => diagnostic.moduleId === 'platform',
+    );
+    if (hasAdapterFailure || hasPlatformFailure || hasFatalFailure) {
       return RuntimeStartupStatus.Failed;
     }
 

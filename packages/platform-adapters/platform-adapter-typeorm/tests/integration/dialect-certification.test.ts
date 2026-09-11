@@ -2,7 +2,6 @@ import type {
   IServiceRegistry,
   IPersistenceDescriptor,
   ServiceTokenType,
-  IPersistenceInitializationInput,
 } from '@prosto/platform-sdk/platform';
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -18,7 +17,7 @@ import {
   type ITypeOrmPersistenceConfig,
   TYPEORM_DATA_SOURCE_SERVICE_TOKEN,
   type TypeOrmDialectType,
-  TypeOrmPersistenceProvider,
+  TypeOrmPersistenceAdapter,
 } from '@/index.js';
 
 type IntegrationConfigurationType = Pick<
@@ -74,6 +73,76 @@ class TestServiceRegistry implements IServiceRegistry {
 
   unregister<TService>(token: ServiceTokenType<TService>): void {
     this._services.delete(token);
+  }
+}
+
+interface ITypeOrmAdapterInput {
+  readonly descriptors: readonly IPersistenceDescriptor[];
+  readonly configuration: Readonly<Record<string, unknown>>;
+  readonly services: TestServiceRegistry;
+}
+
+const adapterLogger = {
+  debug: (): void => undefined,
+  info: (): void => undefined,
+  warn: (): void => undefined,
+  error: (): void => undefined,
+};
+
+class TypeOrmPersistenceAdapterHarness {
+  readonly #adapter = new TypeOrmPersistenceAdapter();
+
+  async initialize(input: ITypeOrmAdapterInput): Promise<void> {
+    const identity = { type: 'adapter' as const, id: this.#adapter.id };
+
+    await this.#adapter.initialize({
+      identity,
+      environment: 'test',
+      config: {},
+      logger: adapterLogger,
+      contributions: { services: input.services },
+    });
+
+    for (const descriptor of input.descriptors) {
+      if (descriptor.owner === 'platform') {
+        this.#adapter.descriptors.registerPlatform(descriptor);
+        continue;
+      }
+
+      this.#adapter.descriptors
+        .createRegistrar({ type: descriptor.owner, id: descriptor.ownerId })
+        .register(descriptor);
+    }
+
+    await this.#adapter.start({
+      identity,
+      environment: 'test',
+      config: input.configuration,
+      logger: adapterLogger,
+      runtime: {
+        started: false,
+        stopping: false,
+        stopped: false,
+        degraded: false,
+        startedModuleIds: [],
+      },
+    });
+  }
+
+  async dispose(): Promise<void> {
+    await this.#adapter.stop({
+      identity: { type: 'adapter', id: this.#adapter.id },
+      environment: 'test',
+      config: {},
+      logger: adapterLogger,
+      runtime: {
+        started: false,
+        stopping: true,
+        stopped: false,
+        degraded: false,
+        startedModuleIds: [],
+      },
+    });
   }
 }
 
@@ -257,12 +326,12 @@ function descriptors(
 
 function providerInput(
   configuration: IntegrationConfigurationType,
-  services: IServiceRegistry,
+  services: TestServiceRegistry,
   includeDeferredMigration = false,
-): IPersistenceInitializationInput {
+): ITypeOrmAdapterInput {
   return {
     descriptors: descriptors(includeDeferredMigration),
-    configuration: { typeorm: { enabled: true, ...configuration } },
+    configuration: { enabled: true, ...configuration },
     services,
   };
 }
@@ -289,7 +358,7 @@ describe.runIf(integrationEnabled)(
 
     it('migrates prefixed tables once, publishes one ready DataSource, and restarts cleanly', async () => {
       // Arrange
-      const firstProvider = new TypeOrmPersistenceProvider();
+      const firstProvider = new TypeOrmPersistenceAdapterHarness();
       const firstServices = new TestServiceRegistry();
 
       // Act
@@ -326,7 +395,7 @@ describe.runIf(integrationEnabled)(
       expect(firstDataSource.isInitialized).toBe(false);
       expect(firstServices.has(TYPEORM_DATA_SOURCE_SERVICE_TOKEN)).toBe(false);
 
-      const secondProvider = new TypeOrmPersistenceProvider();
+      const secondProvider = new TypeOrmPersistenceAdapterHarness();
       const secondServices = new TestServiceRegistry();
 
       await secondProvider.initialize(
@@ -358,7 +427,7 @@ describe.runIf(integrationEnabled)(
         release = resolve;
       });
 
-      const firstProvider = new TypeOrmPersistenceProvider();
+      const firstProvider = new TypeOrmPersistenceAdapterHarness();
       const firstServices = new TestServiceRegistry();
       const firstStartup = firstProvider.initialize(
         providerInput(getConfiguration(), firstServices, true),
@@ -366,9 +435,9 @@ describe.runIf(integrationEnabled)(
 
       await migrationEntered;
 
-      const timeoutProvider = new TypeOrmPersistenceProvider();
+      const timeoutProvider = new TypeOrmPersistenceAdapterHarness();
       const timeoutServices = new TestServiceRegistry();
-      const waitingProvider = new TypeOrmPersistenceProvider();
+      const waitingProvider = new TypeOrmPersistenceAdapterHarness();
       const waitingServices = new TestServiceRegistry();
       let secondStartupCompleted = false;
       const secondStartup = waitingProvider
@@ -404,7 +473,7 @@ describe.runIf(integrationEnabled)(
       await firstProvider.dispose();
       await waitingProvider.dispose();
 
-      const retryProvider = new TypeOrmPersistenceProvider();
+      const retryProvider = new TypeOrmPersistenceAdapterHarness();
       const retryServices = new TestServiceRegistry();
       await retryProvider.initialize(
         providerInput(getConfiguration(), retryServices, true),

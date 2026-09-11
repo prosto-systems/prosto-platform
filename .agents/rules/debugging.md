@@ -7,6 +7,12 @@
 - Core lifecycle orchestration, module loading, persistence initialization, and
   runtime diagnostics are implemented; check the current source and package
   manifests before treating an architecture rule as implemented behavior.
+- Runtime startup requires admin, persistence, and HTTP adapters. Check adapter
+  diagnostics separately from module failures; required-adapter failures are
+  fatal under either startup policy.
+- The SDK has no root export. Resolve backend imports through `/platform`, UI
+  contracts through `/admin`, shared API schemas through `/admin/http`, and
+  utilities through `/utils` before investigating missing exports.
 - Treat failures due to non-existent `packages/*` paths as repository-state mismatch unless those directories are actually added.
 - If import/runtime issues appear after adding JS/TS files, first validate ESM assumptions because root package is `"type": "module"`.
 
@@ -27,3 +33,5 @@
 - Importing from `platform-core` in adapters (boundary violation)
 - Importing between modules (coupling violation)
 - Assuming commands exist without checking `package.json`
+- Running isolated workspace tests before building their workspace dependencies
+- Treating local checks as configured CI: `.github/workflows/` is absent

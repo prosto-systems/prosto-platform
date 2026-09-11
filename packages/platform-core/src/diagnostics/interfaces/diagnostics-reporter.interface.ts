@@ -1,4 +1,7 @@
-import type { PlatformStartupPolicyType } from '@prosto/platform-sdk/platform';
+import type {
+  IPlatformRuntimeAdapterDiagnostic,
+  PlatformStartupPolicyType,
+} from '@prosto/platform-sdk/platform';
 import type { IModuleLifecycleShutdownIssue } from '@/modularity/index.js';
 import type { IRuntimeFailureDiagnostic } from './runtime-failure-diagnostic.interface.js';
 import type { IRuntimeLoadedModuleDiagnostic } from './runtime-loaded-module-diagnostic.interface.js';
@@ -17,6 +20,9 @@ export interface IStartupReportInput {
   readonly loadedModules: readonly IRuntimeLoadedModuleDiagnostic[];
   readonly skippedModules: readonly IRuntimeSkippedModuleDiagnostic[];
   readonly failedModules: readonly IRuntimeFailureDiagnostic[];
+  /** @internal Indicates that the bootstrap pipeline stopped at a fatal barrier. */
+  readonly hasFatalFailure: boolean;
+  readonly adapters: readonly IPlatformRuntimeAdapterDiagnostic[];
 }
 
 /**
@@ -28,6 +34,7 @@ export interface IShutdownReportInput {
   readonly startedAt: string;
   readonly stopOrder: readonly string[];
   readonly issues: readonly IModuleLifecycleShutdownIssue[];
+  readonly adapters: readonly IPlatformRuntimeAdapterDiagnostic[];
 }
 
 /**

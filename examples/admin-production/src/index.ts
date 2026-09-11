@@ -1,12 +1,9 @@
 import 'reflect-metadata';
 import { fileURLToPath } from 'node:url';
-import { FastifyHttpApplication } from '@prosto/platform-adapter-fastify';
-import { TypeOrmPersistenceProvider } from '@prosto/platform-adapter-typeorm';
-import {
-  ConsoleModuleLogger,
-  type IPlatformRuntime,
-  RuntimeBuilder,
-} from '@prosto/platform-core';
+import { PlatformAdminTypeOrmAdapter } from '@prosto/platform-adapter-admin-typeorm';
+import { FastifyHttpAdapter } from '@prosto/platform-adapter-fastify';
+import { TypeOrmPersistenceAdapter } from '@prosto/platform-adapter-typeorm';
+import { type IPlatformRuntime, RuntimeBuilder } from '@prosto/platform-core';
 import {
   HOST_RESTART_CAPABILITY_SERVICE_TOKEN,
   type IHostRestartCapability,
@@ -32,7 +29,7 @@ class LocalRestartRequester implements IHostRestartCapability {
   private _shutdownPromise: Promise<void> | undefined;
 
   constructor(
-    private readonly _getApplication: () => FastifyHttpApplication,
+    private readonly _getRuntime: () => IPlatformRuntime,
     private readonly _exitCodeSetter: ProcessExitCodeSetter,
   ) {}
 
@@ -49,7 +46,7 @@ class LocalRestartRequester implements IHostRestartCapability {
     });
 
     try {
-      await this._getApplication().stop();
+      await this._getRuntime().stop();
     } finally {
       this._exitCodeSetter.set(SUPERVISOR_RESTART_EXIT_CODE);
     }
@@ -116,16 +113,7 @@ function getTlsOptions():
 
 async function main(): Promise<void> {
   const exitCodeSetter = new ProcessExitCodeSetter();
-  let runtime: IPlatformRuntime | undefined;
-  const restartRequester = new LocalRestartRequester(() => {
-    if (application === undefined) {
-      throw new Error('HTTP application is unavailable for graceful restart.');
-    }
-
-    return application;
-  }, exitCodeSetter);
-
-  const application = new FastifyHttpApplication({
+  const http = new FastifyHttpAdapter({
     host: '127.0.0.1',
     port: 3001,
     trustedProxies: getTrustedIngressAddresses(),
@@ -135,26 +123,32 @@ async function main(): Promise<void> {
         new URL('../../../packages/platform-admin-shell/dist', import.meta.url),
       ),
     },
-    runtimeFactory: (configureHttpServices) => {
-      runtime = new RuntimeBuilder().build({
-        configDir: fileURLToPath(new URL('../config', import.meta.url)),
-        configureServices: (services) => {
-          services.register(
-            HOST_RESTART_CAPABILITY_SERVICE_TOKEN,
-            restartRequester,
-          );
-          configureHttpServices(services);
-        },
-        persistenceProvider: new TypeOrmPersistenceProvider(),
-      });
+  });
+  const runtime: IPlatformRuntime = new RuntimeBuilder().build({
+    configDir: fileURLToPath(new URL('../config', import.meta.url)),
+    configureServices: (services) => {
+      services.register(
+        HOST_RESTART_CAPABILITY_SERVICE_TOKEN,
+        new LocalRestartRequester(() => {
+          if (runtime === undefined) {
+            throw new Error(
+              'Platform runtime is unavailable for graceful restart.',
+            );
+          }
 
-      return runtime;
+          return runtime;
+        }, exitCodeSetter),
+      );
     },
-    logger: new ConsoleModuleLogger('http'),
+    adapters: {
+      http,
+      persistence: new TypeOrmPersistenceAdapter(),
+      admin: new PlatformAdminTypeOrmAdapter(),
+    },
   });
 
   try {
-    await application.start();
+    await runtime.start();
   } catch (error: unknown) {
     if (runtime?.reports.startup) {
       console.error(
@@ -173,10 +167,10 @@ async function main(): Promise<void> {
     );
   }
 
-  console.info(`HTTP application is listening at ${application.url?.href}`);
+  console.info(`HTTP adapter is listening at ${http.url?.href}`);
 
   const shutdown = async (): Promise<void> => {
-    await application.stop();
+    await runtime.stop();
     exitCodeSetter.set(0);
   };
 

@@ -1,1 +1,1 @@
-export type * from './fastify-http-application-options.interface.js';
+export type * from './fastify-http-adapter-options.interface.js';

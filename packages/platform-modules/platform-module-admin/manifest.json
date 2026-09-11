@@ -1,8 +1,0 @@
-{
-  "id": "platform-admin",
-  "version": "0.0.0",
-  "sdkVersion": "^0.0.0",
-  "nodeVersion": ">=22.23.0",
-  "title": "Platform Administration",
-  "dependencies": []
-}

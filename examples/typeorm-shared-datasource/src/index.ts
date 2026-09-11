@@ -1,10 +1,11 @@
 import { fileURLToPath } from 'node:url';
+import { PlatformAdminTypeOrmAdapter } from '@prosto/platform-adapter-admin-typeorm';
 import {
   createTypeOrmPersistenceDescriptor,
-  TypeOrmPersistenceProvider,
+  TypeOrmPersistenceAdapter,
 } from '@prosto/platform-adapter-typeorm';
-import { FastifyHttpApplication } from '@prosto/platform-adapter-fastify';
-import { ConsoleModuleLogger, RuntimeBuilder } from '@prosto/platform-core';
+import { FastifyHttpAdapter } from '@prosto/platform-adapter-fastify';
+import { RuntimeBuilder } from '@prosto/platform-core';
 import type { IPersistenceDescriptor } from '@prosto/platform-sdk/platform';
 import {
   Entity,
@@ -51,25 +52,31 @@ const platformPersistenceDescriptor: IPersistenceDescriptor = {
 
 // Main entry point
 async function main(): Promise<void> {
-  const application = new FastifyHttpApplication({
+  const http = new FastifyHttpAdapter({
     host: '127.0.0.1',
     port: 3001,
-    runtimeFactory: (configureHttpServices) =>
-      new RuntimeBuilder().build({
-        configDir: fileURLToPath(new URL('../config', import.meta.url)),
-        configureServices: configureHttpServices,
-        persistenceProvider: new TypeOrmPersistenceProvider(),
-        platformPersistenceDescriptor,
-      }),
-    logger: new ConsoleModuleLogger('http'),
+  });
+  const runtime = new RuntimeBuilder().build({
+    configDir: fileURLToPath(new URL('../config', import.meta.url)),
+    environment: 'development',
+    adapters: {
+      http,
+      persistence: new TypeOrmPersistenceAdapter(),
+      admin: new PlatformAdminTypeOrmAdapter(),
+    },
+    platformPersistenceDescriptor,
   });
 
-  await application.start();
-  console.info(`HTTP application is listening at ${application.url?.href}`);
+  await runtime.start();
+  console.info(`HTTP adapter is listening at ${http.url?.href}`);
+  console.info(
+    'TypeORM shared DataSource startup report:',
+    runtime.reports.startup,
+  );
 
   const shutdown = async (): Promise<void> => {
     console.info('Shutting down...');
-    await application.stop();
+    await runtime.stop();
   };
 
   process.once('SIGINT', async (): Promise<void> => {

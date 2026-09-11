@@ -14,7 +14,7 @@
 
 - Always provide explicit type annotations for public APIs
 - Use interfaces for object shapes and classes for implementations
-- Prefer union types over `any` when possible
+- Do not use `any`; use `unknown`, union types, and validated type guards
 - Use generic types for reusable components
 - Implement proper type guards for runtime type checking
 - Use proper abstraction layers
@@ -23,7 +23,7 @@
 
 ```typescript
 // ✅ Good: Organized imports with ESM (.js extensions for relative paths)
-import type { IPlatformModuleContext } from '@prosto/platform-sdk';
+import type { IPlatformModuleContext } from '@prosto/platform-sdk/platform';
 import { UserService } from './services/user.service.js';
 import { Logger } from './utils/logger.js';
 import { Database } from './database.js';
@@ -44,20 +44,20 @@ import { InMemoryServiceRegistry } from '@prosto/platform-core';
 import { EventEmitter } from 'node:events';
 
 // 2. Third-party dependencies
-import { FastifyInstance } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 
 // 3. Platform SDK (contract package)
 import {
   type IPlatformModule,
   type PlatformModuleLifecycleStageType,
-} from '@prosto/platform-sdk';
+} from '@prosto/platform-sdk/platform';
 
-// 4. Platform core (runtime)
+// 4. Platform core (application composition only, never adapters or modules)
 import { InMemoryServiceRegistry } from '@prosto/platform-core';
 
 // 5. Same-package imports (relative)
-import type { User } from '../types/user.types.js';
+import type { IUser } from '../interfaces/user.interface.js';
 import { UserService } from './services/user.service.js';
 ```
 
@@ -65,13 +65,20 @@ import { UserService } from './services/user.service.js';
 
 ```typescript
 // ✅ Good: Using @prosto/* scoped imports for cross-package
-import { IPlatformModule } from '@prosto/platform-sdk';
+import type { IPlatformModule } from '@prosto/platform-sdk/platform';
 import { RuntimeBuilder } from '@prosto/platform-core';
 
 // ❌ Bad: Direct cross-package relative imports
 import { IPlatformModule } from '../../platform-sdk/src/platform/interfaces';
-
 ```
+
+The SDK exports only `/platform`, `/admin`, `/admin/http`, and `/utils`, not the
+package root. Keep backend imports on `/platform` and `/utils`; consume shared
+admin API schemas through `/admin/http` without importing the shell runtime.
+
+ESLint requires `I`-prefixed PascalCase interfaces and `Type`-suffixed PascalCase
+type aliases, with explicit exceptions for `ImportMeta`, `ImportMetaEnv`, and
+`RouteMeta` augmentations. Use `import type` for type-only dependencies.
 
 ## Error Handling
 

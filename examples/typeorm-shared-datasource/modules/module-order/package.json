@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./admin": "./dist/admin/admin.plugin.js",
     "./platform": "./dist/platform/platform.module.js"
   },
   "files": [
@@ -15,9 +14,14 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@prosto/platform-sdk": "^0.0.0"
+    "@prosto/platform-adapter-typeorm": "^0.0.0",
+    "@prosto/platform-sdk": "^0.0.0",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^1.1.1"
   },
   "devDependencies": {
-    "@prosto/platform-tsconfig": "^0.0.0"
+    "@types/node": "^22.20.1",
+    "@prosto/platform-tsconfig": "^0.0.0",
+    "typescript": "^6.0.3"
   }
 }

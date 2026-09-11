@@ -1,19 +1,26 @@
+import type { IPlatformRuntimeComponentIdentity } from '@/platform/adapters/index.js';
 import type { IPersistenceDescriptor } from './persistence-descriptor.interface.js';
+import type { IPersistenceDescriptorRegistrar } from './persistence-descriptor-registrar.interface.js';
 
 /**
  * @alpha
- * Collects persistence declarations during module initialization.
+ * Collects transactional persistence declarations during component initialization.
  */
 export interface IPersistenceDescriptorRegistry {
   /**
-   * Registers a persistence descriptor.
+   * Registers the single platform descriptor supplied by application composition.
    */
-  register(moduleId: string, descriptor: IPersistenceDescriptor): void;
+  registerPlatform(descriptor: IPersistenceDescriptor): void;
+
+  /** Creates a descriptor registrar bound to one module or adapter identity. */
+  createRegistrar(
+    owner: IPlatformRuntimeComponentIdentity,
+  ): IPersistenceDescriptorRegistrar;
 
   /**
-   * Rolls back all persistence declarations registered for the given module.
+   * Rolls back all persistence declarations registered for the given component.
    */
-  rollback(moduleId: string): void;
+  rollback(owner: IPlatformRuntimeComponentIdentity): void;
 
   /**
    * Seals the persistence descriptor registry.
