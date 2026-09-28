@@ -35,7 +35,9 @@ console.info(http.url?.href);
 ```
 
 Here `admin` and `persistence` are host-created SDK adapters, not discovered
-modules. For complete configuration and restart-capability registration, see
+modules. This is direct `RuntimeBuilder` composition; the managed
+[`@prosto/platform-app` host](../../platform-app/README.md) supplies a preset
+Fastify adapter, process shutdown, and restart capability. For deployment, see
 [the production example](../../../examples/admin-production/README.md) and
 [ADR 0001](../../../docs/adr/0001-required-runtime-adapters.md).
 Fastify options are supplied to the constructor; this implementation does not

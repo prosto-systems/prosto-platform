@@ -15,7 +15,7 @@ implementations while core depends only on SDK contracts. The runtime discovers
 feature-module packages, validates their manifests and SDK/Node.js
 compatibility, resolves their dependencies, copies their builds into a probing
 directory, executes their lifecycle, and exposes module and adapter diagnostics.
-The production composition serves the optional shell SPA, public fingerprinted
+The production composition serves the shell SPA, public fingerprinted
 shell assets, authenticated plugin assets, and the mandatory `/api/admin` API
 from one origin. Remote module acquisition, module installation/update, MFA,
 OIDC, user CRUD, and cryptographic package provenance remain outside the current
@@ -27,6 +27,7 @@ implementation.
 | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/platform-sdk`                                     | [Public contracts, validation schemas, and admin runtime types.](packages/platform-sdk/README.md)                                      |
 | `packages/platform-core`                                    | [Runtime kernel, module loading, lifecycle orchestration, diagnostics, events, and services.](packages/platform-core/README.md)        |
+| `packages/platform-app`                                     | [Application composition root, preset adapters, process lifecycle, and restart handling.](packages/platform-app/README.md)             |
 | `packages/platform-admin-shell`                             | [Vue, Vuetify, Pinia, and Vue I18n administration shell.](packages/platform-admin-shell/README.md)                                     |
 | `packages/platform-adapters/platform-adapter-admin-typeorm` | [Required TypeORM-backed production administration adapter.](packages/platform-adapters/platform-adapter-admin-typeorm/README.md)      |
 | `packages/platform-adapters/platform-adapter-typeorm`       | [TypeORM persistence adapter.](packages/platform-adapters/platform-adapter-typeorm/README.md)                                          |
@@ -49,6 +50,59 @@ Install dependencies from the repository root:
 ```bash
 npm install
 ```
+
+## Run the application
+
+To run the administration application locally, copy
+`examples/admin-production/config/app_settings.production.example.json` to the
+ignored `examples/admin-production/config/app_settings.production.json` and
+replace its placeholders with your PostgreSQL, administrator, encryption-key,
+and SMTP settings. Supply a running PostgreSQL database; the example does not
+create one or provision credentials. Keep the resulting configuration and
+secrets out of source control. See the
+[production example guide](examples/admin-production/README.md#deployment-configuration)
+for required settings and deployment constraints.
+
+From the repository root, after `npm install`, run:
+
+```bash
+npm run start:localhost --workspace=@examples/admin-production
+```
+
+The script builds the dependencies, admin shell, and example module, prepares
+the module artifact, and generates a local self-signed certificate if needed.
+Open `https://localhost:3001` and accept the local certificate warning. For a
+deployment behind trusted HTTPS ingress instead, use
+`npm run start --workspace=@examples/admin-production` with appropriate
+`PROSTO_TRUSTED_INGRESS_ADDRESSES` and production configuration.
+
+The example's executable uses `@prosto/platform-app` to start the host (paths
+below are relative to the compiled `examples/admin-production/dist/index.js`):
+
+```ts
+import { fileURLToPath } from 'node:url';
+import { startPlatformApp } from '@prosto/platform-app';
+
+const app = await startPlatformApp({
+  configDir: fileURLToPath(new URL('../config', import.meta.url)),
+  host: '127.0.0.1',
+  port: 3001,
+  localhostCertificatePath: fileURLToPath(
+    new URL('../certificates/localhost-cert.pem', import.meta.url),
+  ),
+  localhostPrivateKeyPath: fileURLToPath(
+    new URL('../certificates/localhost-key.pem', import.meta.url),
+  ),
+});
+
+console.info(app.url?.href);
+```
+
+`start:localhost` sets `PROSTO_LOCALHOST=true` and the trusted-ingress
+allowlist before running this entry point. The host handles `SIGINT` and
+`SIGTERM`; for programmatic shutdown, call `await app.stop()` rather than
+`app.runtime.stop()`. See the [app package API](packages/platform-app/README.md)
+for preset and custom-adapter options.
 
 ## Commands
 
@@ -91,6 +145,9 @@ excluded by `.prettierignore`, so `npm run format` does not validate these docs.
 - `RuntimeBuilder` requires one administration, persistence, and HTTP adapter;
   HTTP-less, persistence-less, and worker-only runtime modes are unsupported.
   Application code, not core, chooses the concrete implementations.
+- `@prosto/platform-app` is the default outer host composition root; it supplies
+  the three adapters in its preset or accepts a complete custom SDK adapter set.
+  Hosts using it must stop through the app handle, not its exposed runtime.
 - HTTP contracts belong to the SDK; Fastify transport mapping, listening,
   trusted-proxy policy, optional static-site hosting, and security headers belong
   to `platform-adapter-fastify`, never to `platform-core`.
@@ -171,8 +228,12 @@ bootstrap order.
 
 ## Required runtime adapters
 
-An application constructs and supplies an `IPlatformAdminAdapter`, an
-`IPersistenceRuntimeAdapter`, and an `IHttpRuntimeAdapter` to `RuntimeBuilder`.
+An application may compose `RuntimeBuilder` directly with an
+`IPlatformAdminAdapter`, an `IPersistenceRuntimeAdapter`, and an
+`IHttpRuntimeAdapter`. The default managed host uses
+[`startPlatformApp`](packages/platform-app/README.md) to construct the preset
+adapters or accept a complete custom adapter set, own signal handlers and
+restart, and expose a handle whose `stop()` cleans up the host reservation.
 The runtime initializes persistence, HTTP, and administration declarations;
 starts persistence before feature modules; publishes final catalogs; starts
 administration; then starts HTTP listening. Any required-adapter initialization
@@ -189,7 +250,9 @@ catalogs, counts, dependencies, readiness module IDs, or `/api/admin/modules`.
 Adapters receive only their deep-readonly `adapters.<adapterId>` configuration;
 `modules.platform-admin` is not a supported alias and is rejected even when the
 matching adapter-scoped entry exists. The admin API is mandatory, while
-`FastifyHttpAdapter` shell static hosting is optional.
+standalone `FastifyHttpAdapter` shell static hosting is optional. The
+`platform-app` preset always configures shell static hosting: without an
+explicit `staticSiteRootPath`, it uses the built admin shell `dist` directory.
 
 Modules declare SDK `IHttpEndpoint` values through
 `context.capabilities.http.endpoints` in `init()` only. Module declarations

@@ -79,9 +79,8 @@ endpoints, or services.
 
 `platform-admin` belongs to the required administration adapter. Discovered
 modules cannot use that identity, and `modules.platform-admin` is not a supported
-configuration alias. Current core validation rejects the legacy location only
-when `adapters.platform-admin` is absent, so deployments must remove the legacy
-key rather than rely on simultaneous old/new entries. Follow
+configuration alias. Core rejects that legacy location even when
+`adapters.platform-admin` is present. Remove the legacy key. Follow
 [ADR-0001](../../docs/adr/0001-required-runtime-adapters.md).
 
 ## HTTP Streams and Responses
@@ -97,8 +96,9 @@ key rather than rely on simultaneous old/new entries. Follow
 
 Use the supplied module or adapter logger with message-first calls. Core's
 `ConsoleModuleLogger` applies `SecretsRedactor` to messages and context objects.
-The redactor is pattern-based, configurable, and can be disabled; it is not a
-guarantee that arbitrary sensitive content is safe to log.
+Module loggers use the configured redactor; adapter loggers currently use default
+redaction settings. Redaction is pattern-based and is not a guarantee that
+arbitrary sensitive content is safe to log.
 
 ```typescript
 import type { IPlatformModuleContext } from '@prosto/platform-sdk/platform';

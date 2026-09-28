@@ -114,7 +114,7 @@ In the current core, module endpoint declarations commit after successful
 declarations commit after successful adapter `start()`. These are registration
 barriers, not listener activation; HTTP listening starts last.
 
-The runtime-adapter contracts include stable probe response shapes and sanitized
+The runtime-adapter contracts include typed probe response shapes and sanitized
 transport errors, but do not provide an HTTP server. Use
 [`@prosto/platform-adapter-fastify`](../platform-adapters/platform-adapter-fastify/README.md)
 as one concrete Fastify-backed HTTP adapter.
@@ -148,9 +148,10 @@ The core rolls back descriptors, endpoints, and services on failed adapter
 initialization, and endpoints/services on failed start or stop. Cleanup calls
 `stop()` only for adapters that completed `initialize()`, including those whose
 `start()` failed. See the [core README](../platform-core/README.md) for current
-rollback ordering, reporting, and composition-validation limitations, and
-[ADR-0001](../../docs/adr/0001-required-runtime-adapters.md) for the intended
-barriers.
+composition validation, rollback ordering, and reporting, and
+[ADR-0001](../../docs/adr/0001-required-runtime-adapters.md) for the required
+barriers. Contribution rollback does not clean up external resources acquired
+before initialization fails; the adapter owns that cleanup.
 
 ## Persistence Contracts
 

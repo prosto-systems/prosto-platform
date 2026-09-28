@@ -18,11 +18,12 @@ endpoints and request gate only after a successful `start()`, and removes those
 contributions during lifecycle rollback or shutdown. In production, register an
 idempotent `IHostRestartCapability` before startup.
 
-See [the production host](../../../examples/admin-production/README.md) for
-the `configureServices` registration of
-`HOST_RESTART_CAPABILITY_SERVICE_TOKEN` from `@prosto/platform-sdk/platform`,
-and [ADR 0001](../../../docs/adr/0001-required-runtime-adapters.md) for
-required adapter lifecycle ordering.
+The managed [`@prosto/platform-app` host](../../platform-app/README.md) supplies
+the default `HOST_RESTART_CAPABILITY_SERVICE_TOKEN` capability through
+`configureServices`; its caller may override that service. See
+[the production host](../../../examples/admin-production/README.md) for deployment
+and [ADR 0001](../../../docs/adr/0001-required-runtime-adapters.md) for required
+adapter lifecycle ordering.
 
 The fixed adapter ID is `platform-admin`. It is reserved against discovery and
 is excluded from feature-module dependency ordering, module catalogs, dashboard

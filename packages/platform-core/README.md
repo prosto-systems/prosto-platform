@@ -46,6 +46,11 @@ including the shared database and administration security settings; constructor
 defaults alone are not a complete production configuration. See the
 [shared-datasource example](../../examples/typeorm-shared-datasource).
 
+This is direct runtime composition. The managed
+[`@prosto/platform-app` host](../platform-app/README.md) supplies preset or
+custom adapters and process lifecycle; stop that host through `handle.stop()`,
+not `handle.runtime.stop()`.
+
 An application host may synchronously extend the core service registry through
 `configureServices`. The callback runs once after registry creation and before
 module contexts are created; asynchronous callbacks are rejected. This is the

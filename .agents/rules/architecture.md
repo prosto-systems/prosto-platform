@@ -52,6 +52,12 @@ profiles are unsupported. `@prosto/platform-sdk` owns framework-neutral HTTP
 contracts and `@prosto/platform-adapter-fastify` owns Fastify transport and
 listening. Core owns neither Fastify nor TypeORM types.
 
+`@prosto/platform-app` is the outer composition root for the default
+Fastify/TypeORM/administration preset or a complete custom SDK adapter set. It
+owns process signals, graceful restart, and host cleanup; neither core nor SDK
+imports it. A managed host must stop through its app handle rather than calling
+`handle.runtime.stop()` directly.
+
 ### `platform-sdk` MUST:
 
 - Keep external runtime dependencies minimal and justified

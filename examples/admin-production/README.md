@@ -32,8 +32,9 @@ Run the complete production composition locally with:
 npm run start:localhost --workspace=@examples/admin-production
 ```
 
-The command builds the artifacts and creates an ignored 30-day self-signed
-certificate in `certificates/`. It does not create database, administration, or
+The command builds the artifacts and generates an ignored 30-day self-signed
+certificate in `certificates/` if no PEM pair exists; it reuses an existing pair
+without checking its expiry. It does not create database, administration, or
 SMTP configuration. First create the ignored
 `config/app_settings.production.json` from the tracked example and replace its
 placeholders. With valid localhost-oriented settings, the host listens at
@@ -50,8 +51,12 @@ the trusted ingress as described below.
 ## Deployment Configuration
 
 Copy `config/app_settings.production.example.json` to
-`config/app_settings.production.json` and replace every placeholder through the deployment secret mechanism. Do not commit bootstrap credentials, SMTP credentials, database
-credentials, reset-token encryption keys, or ingress addresses.
+`config/app_settings.production.json` and replace every placeholder through the
+deployment secret mechanism. Supply a base64url-encoded 32-byte
+`adapters.platform-admin.resetTokenEncryptionKey`, and, for an empty user table,
+`adapters.platform-admin.bootstrap` (`displayName`, `email`, `password`). Do not
+commit bootstrap credentials, SMTP credentials, database credentials,
+reset-token encryption keys, or ingress addresses.
 
 Set `PROSTO_TRUSTED_INGRESS_ADDRESSES` to a non-empty JSON array of exact
 trusted ingress addresses or CIDR ranges, for example
@@ -73,9 +78,8 @@ they neither overwrite an existing account nor belong in committed files.
 
 Place TypeORM settings at `adapters.typeorm` and admin settings at
 `adapters.platform-admin`; `modules.platform-admin` is unsupported and never
-used as an alias. Current core validation rejects that legacy location only when
-the adapter-scoped entry is absent, so do not retain both entries. Environment
-overrides use the same configuration tree. Because the adapter ID contains a
+used as an alias. Core rejects it even when an adapter-scoped entry exists.
+Environment overrides use the same configuration tree. Because the adapter ID contains a
 hyphen, provide its nested values with a JSON `PROSTO_ADAPTERS` object rather
 than a split environment-variable path. Keep production secrets only in the
 deployment secret mechanism.
@@ -89,10 +93,12 @@ default CSP restricts resources to the same origin but currently permits
 the deployed shell permits it. Do not enable arbitrary CORS or trust arbitrary
 forwarded headers.
 
-The local shell is optional for other hosts: omit `staticSiteRootPath` when an
-external host serves the SPA. This example passes the absolute built shell path.
-The HTTP adapter and the admin API remain mandatory runtime adapters in either
-deployment model.
+This example passes the absolute built shell path. Other `platform-app` preset
+hosts default to the installed admin shell's built `dist` directory if
+`staticSiteRootPath` is omitted; the preset cannot disable static hosting. An
+external SPA host can instead supply custom adapters, including an HTTP adapter
+without static-site configuration. The HTTP adapter and the admin API remain
+mandatory runtime components in either deployment model.
 
 Login and password-reset attempts are database rate-limited across replicas.
 Reset requests always return an accepted response, store only a reset-token
