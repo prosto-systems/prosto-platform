@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "npm run build:dependencies && npm run prepare:modules && tsc -p tsconfig.json",
-    "build:dependencies": "npm run build --workspace=@prosto/platform-sdk && npm run build --workspace=@prosto/platform-core && npm run build --workspace=@prosto/platform-adapter-typeorm && npm run build --workspace=@prosto/platform-adapter-fastify && npm run build --workspace=@prosto/platform-adapter-admin-typeorm && npm run build --workspace=@examples/module-test && npm run build --workspace=@prosto/platform-admin-shell",
+    "build:dependencies": "npm run build --workspace=@prosto/platform-sdk && npm run build --workspace=@prosto/platform-core && npm run build --workspace=@prosto/platform-adapter-typeorm && npm run build --workspace=@prosto/platform-adapter-fastify && npm run build --workspace=@prosto/platform-adapter-admin-typeorm && npm run build --workspace=@prosto/platform-app && npm run build --workspace=@examples/module-test && npm run build --workspace=@prosto/platform-admin-shell",
     "prepare:modules": "node scripts/prepare-modules.mjs",
     "prestart": "npm run build",
     "start": "node dist/index.js",
@@ -13,13 +13,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@prosto/platform-adapter-admin-typeorm": "^0.0.0",
-    "@prosto/platform-adapter-fastify": "^0.0.0",
-    "@prosto/platform-adapter-typeorm": "^0.0.0",
-    "@prosto/platform-core": "^0.0.0",
-    "@prosto/platform-sdk": "^0.0.0",
-    "pg": "^8.16.0",
-    "reflect-metadata": "^0.2.2"
+    "@prosto/platform-app": "^0.0.0",
+    "pg": "^8.16.0"
   },
   "devDependencies": {
     "@prosto/platform-tsconfig": "^0.0.0",

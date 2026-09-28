@@ -26,6 +26,7 @@
       <excludeFolder url="file://$MODULE_DIR$/examples/admin-production/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-adapters/platform-adapter-admin-typeorm/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/packages/platform-adapters/platform-adapter-fastify/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/platform-app/.turbo" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

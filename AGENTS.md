@@ -31,6 +31,7 @@ All detailed rules are in `.agents/rules/` directory:
 - **Repository authority**: source code and package manifests define current behavior; architecture documentation defines constraints for future changes
 - **Required adapters**: `RuntimeBuilder` requires exactly one admin, persistence, and HTTP adapter; HTTP-less, persistence-less, and worker-only starts are unsupported
 - **HTTP boundary**: SDK owns neutral HTTP contracts; `platform-adapter-fastify` owns Fastify transport/listening while core orchestrates lifecycle only through SDK contracts
+- **Application boundary**: `@prosto/platform-app` is the outer composition root for the default Fastify/TypeORM/admin host or a complete set of SDK adapters; core and SDK never import it. Hosts own deployment configuration, database drivers, module artifacts, and the external supervisor; stop hosts through the app handle, not its runtime.
 
 ### Code Style
 
@@ -169,6 +170,14 @@ npm run typecheck --workspace=@prosto/platform-admin-vite # Type-check admin run
 npm run test --workspace=@prosto/platform-adapter-fastify # Test Fastify HTTP adapter
 npm run build --workspace=@prosto/platform-adapter-fastify # Build Fastify HTTP adapter
 npm run typecheck --workspace=@prosto/platform-adapter-fastify # Type-check Fastify HTTP adapter
+npm run test --workspace=@prosto/platform-app             # Test application composition root
+npm run build --workspace=@prosto/platform-app            # Build application composition root
+npm run typecheck --workspace=@prosto/platform-app        # Type-check application composition root
+npm run build:dependencies --workspace=@examples/admin-production # Build production example dependencies
+npm run typecheck --workspace=@examples/admin-production  # Type-check production admin example
+npm run build --workspace=@examples/admin-production      # Build production admin example
+npm run start --workspace=@examples/admin-production      # Run production admin example
+npm run start:localhost --workspace=@examples/admin-production # Run localhost TLS example
 ```
 
 Root Turborepo test/typecheck tasks build workspace dependencies first; direct
