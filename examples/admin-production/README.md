@@ -1,10 +1,11 @@
 # Production Admin Example
 
-`@examples/admin-production` is a production-oriented composition root for the
-admin API. It directly composes `PlatformAdminTypeOrmAdapter`,
-`TypeOrmPersistenceAdapter`, and `FastifyHttpAdapter`, discovers the built
-`module-test` artifact, hosts the built `@prosto/platform-admin-shell` SPA, and
-uses PostgreSQL through the shared TypeORM adapter.
+`@examples/admin-production` is a production-oriented host for the admin API.
+It calls `@prosto/platform-app` to compose the Fastify HTTP, TypeORM persistence,
+and TypeORM administration adapters. It discovers the built `module-test`
+artifact, hosts the built `@prosto/platform-admin-shell` SPA, and uses PostgreSQL
+through the shared TypeORM adapter. The example supplies the `pg` driver and
+deployment settings; `@prosto/platform-app` does not supply a database.
 
 Run from the repository root:
 
@@ -13,12 +14,15 @@ npm run typecheck --workspace=@examples/admin-production
 npm run start --workspace=@examples/admin-production
 ```
 
-`start` builds the SDK, core, required adapters, module-test artifact, and admin
-shell. It then copies the feature module's `manifest.json`, `package.json`, and
-built `dist/` directory to `modules/`. `RuntimeBuilder` discovers that artifact
-and refreshes its separate `app_data/modules/` probing directory; the host never
-injects module instances. It owns the complete adapter lifecycle through
-`runtime.start()` and `runtime.stop()`.
+`start` builds the SDK, core, required adapters, `@prosto/platform-app`,
+module-test artifact, and admin shell. It then copies the feature module's
+`manifest.json`, `package.json`, and built `dist/` directory to `modules/`.
+The example passes an absolute `configDir` to `startPlatformApp`. Its existing
+`config/app_settings.json` still sets discovery to `./modules`, probing to
+`./app_data/modules`, and `refreshProbingFolderOnStart: true`; modules are not
+injected as instances. `@prosto/platform-app` owns startup, signals, restart,
+and shutdown. Programmatic hosts stop through `handle.stop()`, not
+`handle.runtime.stop()`.
 
 ## Localhost Production Run
 
@@ -33,8 +37,10 @@ certificate in `certificates/`. It does not create database, administration, or
 SMTP configuration. First create the ignored
 `config/app_settings.production.json` from the tracked example and replace its
 placeholders. With valid localhost-oriented settings, the host listens at
-`https://localhost:3001`; the first browser visit requires accepting the local
-certificate warning. Local credentials and secrets must never be deployed.
+`https://localhost:3001`; the example passes absolute paths for the generated
+localhost PEM files to `startPlatformApp`. The first browser visit requires
+accepting the local certificate warning. Local credentials and secrets must
+never be deployed.
 
 For a deployed host that terminates TLS itself, set both
 `PROSTO_TLS_CERTIFICATE_PATH` and `PROSTO_TLS_PRIVATE_KEY_PATH` to absolute
@@ -83,9 +89,10 @@ default CSP restricts resources to the same origin but currently permits
 the deployed shell permits it. Do not enable arbitrary CORS or trust arbitrary
 forwarded headers.
 
-The local shell is optional: omit `staticSite.rootPath` when an external host
-serves the SPA. The HTTP adapter and the admin API remain mandatory runtime
-adapters in either deployment model.
+The local shell is optional for other hosts: omit `staticSiteRootPath` when an
+external host serves the SPA. This example passes the absolute built shell path.
+The HTTP adapter and the admin API remain mandatory runtime adapters in either
+deployment model.
 
 Login and password-reset attempts are database rate-limited across replicas.
 Reset requests always return an accepted response, store only a reset-token
@@ -104,9 +111,12 @@ administration maintenance flag.
 
 Every replica must use the same PostgreSQL database, the same module artifacts,
 and the same deployment configuration. Run each replica under an external
-supervisor. The restart capability waits briefly for the accepted `202` response
-to flush, stops the runtime once, then sets exit code `75`. Configure
-the supervisor to create a replacement process for exit code `75`; a replacement
-adopts the current restart generation and does not restart again.
+supervisor. The `@prosto/platform-app` restart capability waits 100 ms for the
+accepted `202` response to flush, stops the host once, then sets exit code
+`75`. Configure the supervisor to create a replacement process for exit code
+`75`; a replacement adopts the current restart generation and does not restart
+again.
 
-`SIGINT` and `SIGTERM` perform ordinary graceful shutdown with exit code `0`.
+`SIGINT` and `SIGTERM` perform ordinary graceful shutdown with exit code `0`;
+shutdown failure sets exit code `1`. The example's startup catch logs a fixed
+message rather than a raw exception or configuration value.
