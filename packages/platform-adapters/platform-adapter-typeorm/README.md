@@ -48,6 +48,10 @@ Production additionally requires a host restart capability. An optional
 `platformPersistenceDescriptor` may be supplied to `build()` for platform-owned
 entities and migrations; it is not required for adapter or module descriptors.
 
+This example composes the runtime directly. When using the managed
+[`@prosto/platform-app` host](../../platform-app/README.md), call
+`handle.stop()` instead of `handle.runtime.stop()` to clean up process handlers.
+
 The adapter has the fixed component ID `typeorm`. Its settings belong directly at
 `adapters.typeorm`, without a second `typeorm` wrapper:
 
@@ -84,7 +88,8 @@ mode the adapter forwards only the dialect and URL, not separate connection,
 pool, timeout, schema, or driver options. In structured mode use `host`,
 `username`, `database`, and optional `port` and `password`; `schema` is forwarded
 only for PostgreSQL and `options` only for SQL Server. SQLite requires
-`database`, rejects `url`, and ignores server connection fields.
+`database` and rejects `url` and server-only fields (`host`, `port`,
+`username`, `password`, `schema`, `poolSize`, `connectTimeoutMs`, `options`).
 
 The adapter validates its own `adapters.typeorm` configuration before opening a
 connection or collecting descriptors. Unknown fields, including the removed

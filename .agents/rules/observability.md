@@ -4,7 +4,9 @@
 
 Core supplies `ConsoleModuleLogger` to module and runtime-adapter contexts. It
 redacts messages and context through `SecretsRedactor`, then writes to the console
-with a component prefix. It is not a Pino logger or a JSON log pipeline.
+with a component prefix. Module loggers use the configured redactor; adapter
+loggers currently use default redaction settings. It is not a Pino logger or a
+JSON log pipeline.
 
 Core produces startup and shutdown diagnostics; adapter records remain separate
 from module records. The Fastify adapter implements infrastructure probes and
@@ -32,7 +34,7 @@ function logModuleStart(context: IPlatformModuleContext): void {
 Use `error` for failures, `warn` for handled abnormal conditions, `info` for normal
 operational milestones, and `debug` for safe diagnostic detail. Never log complete
 configuration or raw request/exception objects. Redaction is pattern-based and
-configurable, not permission to emit secrets.
+configurable for module loggers, not permission to emit secrets.
 
 Include fields when the caller actually has them:
 

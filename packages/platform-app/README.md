@@ -23,16 +23,19 @@ can start after the first has stopped.
 
 Without `adapters`, the preset uses `FastifyHttpAdapter`,
 `TypeOrmPersistenceAdapter`, and `PlatformAdminTypeOrmAdapter`, binding to
-`127.0.0.1:3001` by default. Set `host` and `port` to override the binding;
-`staticSiteRootPath` optionally serves a built shell. All paths passed to the
-API must be absolute. `PROSTO_TRUSTED_INGRESS_ADDRESSES` must be a non-empty JSON
+`127.0.0.1:3001` by default. Set `host` and `port` to override the binding.
+The preset always serves a built shell: `staticSiteRootPath` overrides its
+default root at the installed `@prosto/platform-admin-shell/dist` directory.
+The selected directory must exist when the HTTP adapter initializes; omitting
+the option does not disable static hosting. All paths passed to the API must be
+absolute. `PROSTO_TRUSTED_INGRESS_ADDRESSES` must be a non-empty JSON
 array of trusted IP addresses or CIDR ranges; the preset never trusts arbitrary
 forwarded headers. Explicit `PROSTO_TLS_CERTIFICATE_PATH` and
 `PROSTO_TLS_PRIVATE_KEY_PATH` must be supplied together and take priority.
 When `PROSTO_LOCALHOST=true` without explicit TLS paths, provide both absolute
 `localhostCertificatePath` and `localhostPrivateKeyPath` for local PEM files.
 Otherwise the preset does not configure TLS; terminate HTTPS at the trusted
-ingress. The package does not ship certificates or a static shell.
+ingress. The package does not ship certificates or built shell artifacts.
 
 The deployment still supplies PostgreSQL, the `pg` driver, adapter settings,
 secrets, and built module artifacts. The preset does not create any of these.
@@ -46,6 +49,9 @@ options cannot be combined with custom adapters. In this mode this package
 does not read trusted-ingress or TLS environment variables, and the custom HTTP
 adapter is responsible for transport security. `handle.url` is undefined.
 
+To serve the SPA outside this host without local static hosting, supply a
+custom HTTP adapter that does not configure a static site.
+
 ## Shutdown And Supervision
 
 `SIGINT` and `SIGTERM` share the handle's shutdown path. An ordinary successful
@@ -58,3 +64,12 @@ Configure an external supervisor to replace the process on exit `75`; the
 package does not launch a replacement process. A host that overrides or removes
 the restart service token takes responsibility for its own restart behavior.
 Startup and shutdown log only safe diagnostics, not raw errors or configuration.
+
+## Commands
+
+Run from the repository root after building workspace dependencies (direct
+workspace scripts do not build them automatically):
+
+- `npm run build --workspace=@prosto/platform-app`
+- `npm run typecheck --workspace=@prosto/platform-app`
+- `npm run test --workspace=@prosto/platform-app`

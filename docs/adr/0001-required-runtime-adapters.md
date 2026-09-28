@@ -25,7 +25,10 @@ for each runtime role:
 All adapters implement SDK-owned, framework-neutral lifecycle contracts. Core
 orchestrates their initialization, start, rollback, and stop, but imports no
 concrete administration, ORM, or HTTP implementation. Adapter initialization
-is declaration-only and transactional. Startup uses fixed barriers:
+registers owner-scoped contributions with rollback on failure, not a general
+resource transaction: services become visible immediately and adapters must
+clean up resources acquired by an initialization that fails. Startup uses fixed
+barriers:
 
 1. initialize persistence, HTTP, then administration adapters;
 2. discover, validate, resolve, copy, and load feature modules, then initialize them;
@@ -97,7 +100,8 @@ and `/utils` subpaths; there is no SDK root export.
 - Core depends only on SDK contracts, preserving dependency inversion.
 - Administration configuration is scoped to `adapters.platform-admin`; the
   former `modules.platform-admin` location is not a compatibility alias.
-- The administration API is mandatory, while local static hosting of the Vue
-  administration shell remains optional HTTP-adapter configuration.
+- The administration API is mandatory. Local static hosting of the Vue shell is
+  optional for a directly composed HTTP adapter, but the `@prosto/platform-app`
+  preset configures it by default and requires a built shell directory.
 - Existing administration routes, database tables, migration history, audit
   identities, authentication policy, and plugin ABI are preserved.
